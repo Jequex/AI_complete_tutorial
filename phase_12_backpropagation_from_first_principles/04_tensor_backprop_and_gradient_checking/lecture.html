@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 12.4: Matrix/Tensor Backprop &amp; GradCheck — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 12 Overview</a>
+
+    <h1>Topic 12.4: Matrix/Tensor Backpropagation &amp; Gradient Checking</h1>
+
+    <div class="callout">
+        <strong>The Vectorization Imperative:</strong> Production deep learning operates on batches of multidimensional tensors executed via GEMM kernels on GPUs. Mastering matrix calculus formulas for affine layers and validating them with two-sided finite difference <em>Gradient Checking</em> is mandatory for custom ML engineering.
+    </div>
+
+    <h2>1. The 12-Year-Old Analogy: Laser Beam vs. Wooden Ruler</h2>
+    <div class="callout callout-success">
+        <p><strong>The Laser Beam (Analytical Tensor Backprop):</strong> A supercomputer laser measures rocket stress across 1,000 coordinates in a microsecond. Blazing fast, but a single software sign error could quietly invert the result.</p>
+        <p><strong>The Wooden Ruler (GradCheck):</strong> You physically push the part forward by a tiny hair ($\epsilon = 0.001$), then pull it backward ($-\epsilon$), and measure with a heavy wooden ruler. It takes 100 times longer, but if the physical measurement and laser agree to 7 decimal places, your rocket won't explode!</p>
+    </div>
+
+    <h2>2. Matrix Calculus for Linear Layer: $Y = XW + b$</h2>
+    <p>Given incoming adjoint $\bar{Y} \equiv \frac{\partial L}{\partial Y} \in \mathbb{R}^{B \times D_{\text{out}}}$:</p>
+    $$\boxed{\frac{\partial L}{\partial W} = X^T \bar{Y} \in \mathbb{R}^{D_{\text{in}} \times D_{\text{out}}}}$$
+    $$\boxed{\frac{\partial L}{\partial X} = \bar{Y} W^T \in \mathbb{R}^{B \times D_{\text{in}}}}$$
+    $$\boxed{\frac{\partial L}{\partial b} = \sum_{i=1}^B \bar{Y}_{i, :} \in \mathbb{R}^{1 \times D_{\text{out}}}}$$
+
+    <h2>3. Two-Sided Central Differences</h2>
+    <p>Taylor expansion shows that one-sided differences have first-order error $\mathcal{O}(\epsilon)$, whereas central differences eliminate the second-order term, yielding quadratic truncation error $\mathcal{O}(\epsilon^2)$:</p>
+    $$g_{\text{central}} = \frac{f(\theta + \epsilon) - f(\theta - \epsilon)}{2\epsilon} = f'(\theta) + \mathcal{O}(\epsilon^2)$$
+
+    <h2>4. Relative Error Metric &amp; Tolerance Guide</h2>
+    $$\text{RelErr} = \frac{\|g_{\text{analytical}} - g_{\text{numerical}}\|_F}{\|g_{\text{analytical}}\|_F + \|g_{\text{numerical}}\|_F + \epsilon_{\text{denom}}}$$
+
+    <table>
+        <thead>
+            <tr>
+                <th>Relative Error</th>
+                <th>Status</th>
+                <th>Interpretation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\text{RelErr} < 10^{-7}$</td>
+                <td><span style="color:var(--accent); font-weight:bold;">PASS (Flawless)</span></td>
+                <td>Exact mathematical and numerical agreement.</td>
+            </tr>
+            <tr>
+                <td>$10^{-7} \le \text{RelErr} < 10^{-5}$</td>
+                <td><span style="color:orange; font-weight:bold;">ACCEPTABLE</span></td>
+                <td>Minor floating-point rounding or near activation kink.</td>
+            </tr>
+            <tr>
+                <td>$\text{RelErr} \ge 10^{-4}$</td>
+                <td><span style="color:var(--danger); font-weight:bold;">FAIL</span></td>
+                <td>Probable index swap, missing transpose, or sign error.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>5. Verified Experiment Output</h2>
+    <pre><code>Running GradCheck on Weight Matrix W (shape: 3x2):
+  Relative Error for W: 1.10e-09  => GRADCHECK PASSED (< 1e-7)!
+Running GradCheck on Bias Vector b (shape: 1x2):
+  Relative Error for b: 3.57e-10  => GRADCHECK PASSED (< 1e-7)!
+Running GradCheck on Input Tensor X (shape: 4x3):
+  Relative Error for X: 1.27e-09  => GRADCHECK PASSED (< 1e-7)!
+ALL TESTS PASSED SUCCESSFULLY! Exit code 0.</code></pre>
+
+</body>
+</html>

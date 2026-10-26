@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 15: Sequence Models: RNNs to LSTMs — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--badge-bg);
+      border-color: var(--primary);
+    }
+
+    .quickstart {
+      margin-top: 3.5rem;
+      padding: 1.75rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+    .quickstart h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    pre {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .pillar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+    }
+    .pillar-card h3 {
+      font-size: 1.05rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .pillar-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" style="color:var(--primary); text-decoration:none; font-weight:600; display:inline-block; margin-bottom:1rem;">&larr; Back to Full Course Hub</a>
+    <div>
+      <span class="badge">Phase 15</span>
+      <h1>Sequence Models: RNNs to LSTMs</h1>
+      <p class="lead">From Temporal Parameter Sharing and Backpropagation Through Time to Gated Architectures (LSTM, GRU) and Bahdanau Additive Attention.</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Topic 15.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="01_recurrent_neural_networks_and_bptt/lecture.html" class="topic-title">15.1 Recurrent Neural Networks &amp; BPTT</a>
+        <span class="badge">Topic 15.1</span>
+      </div>
+      <p class="topic-desc">Temporal sequences and parameter sharing across variable-length text. The Elman RNN cell, unrolling the computation graph over T timesteps, multivariable adjoint recursion, and mathematical derivation of the vanishing/exploding gradient dilemma via spectral radius &rho;(W_hh) and norm clipping &tau;.</p>
+      <div class="topic-links">
+        <a href="01_recurrent_neural_networks_and_bptt/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_recurrent_neural_networks_and_bptt/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="01_recurrent_neural_networks_and_bptt/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="01_recurrent_neural_networks_and_bptt/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 15.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="02_long_short_term_memory_lstm/lecture.html" class="topic-title">15.2 Long Short-Term Memory (LSTM)</a>
+        <span class="badge">Topic 15.2</span>
+      </div>
+      <p class="topic-desc">The Constant Error Carousel (CEC) and additive cell state c_t. The four gating transformations (Forget, Input, Candidate, Output), mathematical proof of gradient preservation (&part;c_t / &part;c_{t-1} &approx; f_t &approx; 1.0), and the forget-gate bias initialization rule.</p>
+      <div class="topic-links">
+        <a href="02_long_short_term_memory_lstm/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_long_short_term_memory_lstm/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="02_long_short_term_memory_lstm/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="02_long_short_term_memory_lstm/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 15.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="03_gated_recurrent_units_and_bidirectionality/lecture.html" class="topic-title">15.3 Gated Recurrent Units (GRU) &amp; Bidirectionality</a>
+        <span class="badge">Topic 15.3</span>
+      </div>
+      <p class="topic-desc">Cho et al. (2014) GRU architecture: merging cell state and hidden state, convex state interpolation via Update Gate z_t, Reset Gate r_t, and exact 25% parameter reduction over LSTM. Bidirectional RNNs (BiRNN/BiLSTM) fusing forward and backward temporal passes.</p>
+      <div class="topic-links">
+        <a href="03_gated_recurrent_units_and_bidirectionality/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_gated_recurrent_units_and_bidirectionality/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="03_gated_recurrent_units_and_bidirectionality/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="03_gated_recurrent_units_and_bidirectionality/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 15.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="04_seq2seq_and_bahdanau_attention/lecture.html" class="topic-title">15.4 Seq2Seq Architecture &amp; Bahdanau Attention</a>
+        <span class="badge">Topic 15.4</span>
+      </div>
+      <p class="topic-desc">Sutskever Seq2Seq Encoder-Decoder model and its fixed-capacity information bottleneck. Bahdanau Additive Attention: alignment energies e_{ij}, softmax attention weights &alpha;_{ij}, dynamic context vector c_i, and visualizing cross-lingual attention heatmaps.</p>
+      <div class="topic-links">
+        <a href="04_seq2seq_and_bahdanau_attention/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_seq2seq_and_bahdanau_attention/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="04_seq2seq_and_bahdanau_attention/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="04_seq2seq_and_bahdanau_attention/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Core Theoretical Pillars -->
+    <section style="margin-top: 3.5rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Core Theoretical Pillars Mastered</h2>
+      <p style="color: var(--text-muted); margin-top: 0;">Key mathematical foundations proven across Phase 15:</p>
+      
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <h3>BPTT Jacobian Chains</h3>
+          <p>Proving why repeated multiplication by transition Jacobians &prod; (D_j W_hh) causes exponential decay when &rho;(W_hh) &lt; 1.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>Constant Error Carousel</h3>
+          <p>Eliminating matrix multiplication from the cell state recurrence so gradients pass through with derivative &approx; 1.0.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>Convex State Interpolation</h3>
+          <p>How GRUs streamline recurrent computation, achieving 25% parameter savings by coupling forget and input gates.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>Content-Addressable Attention</h3>
+          <p>Replacing the fixed O(1) bottleneck with an O(T_x) dynamic spotlight that forms the direct precursor to modern Transformers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quickstart Execution -->
+    <div class="quickstart">
+      <h2>Pure Python 3 Verification Suite</h2>
+      <p style="color: var(--text-muted); margin-top: 0; font-size: 0.95rem;">All experiments are self-contained standard library scripts with zero external dependencies:</p>
+      <pre><code># 1. Test BPTT vanishing gradient decay &amp; norm clipping
+python3 phase_15_sequence_models_rnns_to_lstms/01_recurrent_neural_networks_and_bptt/experiment.py
+
+# 2. Test 50-step gradient preservation in LSTM vs Elman RNN
+python3 phase_15_sequence_models_rnns_to_lstms/02_long_short_term_memory_lstm/experiment.py
+
+# 3. Test GRU parameter tally &amp; bidirectional sequence symmetry
+python3 phase_15_sequence_models_rnns_to_lstms/03_gated_recurrent_units_and_bidirectionality/experiment.py
+
+# 4. Test Seq2Seq with Bahdanau attention weight normalization
+python3 phase_15_sequence_models_rnns_to_lstms/04_seq2seq_and_bahdanau_attention/experiment.py</code></pre>
+    </div>
+  </main>
+
+</body>
+</html>

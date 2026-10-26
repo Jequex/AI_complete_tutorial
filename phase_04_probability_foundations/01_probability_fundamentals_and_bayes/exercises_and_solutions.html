@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 4.1: Exercises & Solutions — Probability Fundamentals & Bayes' Theorem</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 4.1</a>
+    <header>
+        <h1>Topic 4.1: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Kolmogorov Axioms, Sequential Bayes &amp; Naive Bayes</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Kolmogorov Axiom Proofs &amp; 3-Set Inclusion-Exclusion</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Using only Kolmogorov's three axioms:</p>
+        <ol>
+            <li>Prove that $P(\emptyset) = 0$.</li>
+            <li>Prove that $P(A^c) = 1 - P(A)$.</li>
+            <li>Derive the 3-Set Inclusion-Exclusion formula for $P(A \cup B \cup C)$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Proof that $P(\emptyset) = 0$:</strong>
+                    $$\Omega \cup \emptyset = \Omega \quad (\text{with } \Omega \cap \emptyset = \emptyset)$$
+                    $$P(\Omega \cup \emptyset) = P(\Omega) + P(\emptyset) \implies 1 = 1 + P(\emptyset) \implies P(\emptyset) = 0$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Proof that $P(A^c) = 1 - P(A)$:</strong>
+                    $$A \cup A^c = \Omega \quad (\text{with } A \cap A^c = \emptyset)$$
+                    $$P(A) + P(A^c) = P(\Omega) = 1 \implies P(A^c) = 1 - P(A)$$
+                </div>
+                <div class="step-box">
+                    <strong>3. 3-Set Inclusion-Exclusion:</strong>
+                    $$P(A \cup B \cup C) = P(A) + P(B) + P(C) - P(A \cap B) - P(A \cap C) - P(B \cap C) + P(A \cap B \cap C)$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Bayesian Sequential Updating: The Two-Test Miracle</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>In a disease with prevalence $P(D) = 0.0001$, a test with 99% sensitivity and 1% false positive rate yielded an initial positive test: $P(D \mid \text{Test}_1 = +) \approx 0.98\%$.</p>
+        <p>Suppose the patient is retested with an independent test that also comes back positive. Compute the new updated posterior $P(D \mid \text{Test}_1 = +, \text{Test}_2 = +)$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Updated Prior:</strong>
+                    $$P(\text{Disease}) = 0.009804, \quad P(\text{Healthy}) = 0.990196$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Updated Bayesian Calculation:</strong>
+                    $$\text{Numerator} = 0.99 \times 0.009804 \approx 0.009706$$
+                    $$\text{Denominator} = (0.99 \times 0.009804) + (0.01 \times 0.990196) \approx 0.019608$$
+                    $$P(D \mid +, +) = \frac{0.009706}{0.019608} \approx \mathbf{49.5\%}$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Naive Bayes Classification &amp; Laplace Smoothing</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Calculate by hand the probability of the message <em>"buy cash prize"</em> being SPAM given $P(\text{Spam}) = 0.60$, $P(\text{Ham}) = 0.40$, $V=100$, and Laplace (+1) smoothing.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Smoothed Likelihoods:</strong>
+                    $$\text{Spam: } P(\text{buy}) = \frac{41}{600}, \quad P(\text{cash}) = \frac{26}{600}, \quad P(\text{prize}) = \frac{36}{600}$$
+                    $$\text{Ham: } P(\text{buy}) = \frac{11}{1100}, \quad P(\text{cash}) = \frac{3}{1100}, \quad P(\text{prize}) = \frac{2}{1100}$$
+                </div>
+                <div class="step-box">
+                    <strong>Posterior Scores:</strong>
+                    $$\text{Score}_{\text{spam}} \approx 0.60 \times 0.06833 \times 0.04333 \times 0.06000 \approx 1.066 \times 10^{-4}$$
+                    $$\text{Score}_{\text{ham}} \approx 0.40 \times 0.01000 \times 0.00273 \times 0.00182 \approx 1.983 \times 10^{-8}$$
+                    $$P(\text{Spam} \mid \text{message}) = \frac{1.066 \times 10^{-4}}{1.066 \times 10^{-4} + 1.983 \times 10^{-8}} \approx \mathbf{99.98\%}$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

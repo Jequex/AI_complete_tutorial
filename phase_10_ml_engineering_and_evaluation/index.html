@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 10: ML Engineering &amp; Evaluation — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .links-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: background-color 0.15s ease;
+    }
+    .btn-lecture {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-lecture:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+
+    .quickstart {
+      margin-top: 3.5rem;
+      padding: 1.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+    pre {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 10 • Production ML Engineering</div>
+    <h1>ML Engineering &amp; Evaluation</h1>
+    <p class="lead">A model isn't useful just because it works in a Jupyter notebook. Phase 10 establishes the operational science of machine learning: split-first data hygiene, mathematical feature conditioning, multidimensional evaluation beyond accuracy, and production drift monitoring.</p>
+  </header>
+
+  <main>
+    <!-- TOPIC 10.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./01_data_leakage_and_splitting/lecture.html" class="topic-title">10.1 Data Leakage &amp; Dataset Partitioning</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 10.1</span>
+      </div>
+      <p class="topic-desc">The leaked exam answer key. Why testing on train data is cheating, post-event target leakage, preprocessing contamination, Freedman's paradox proof, and Stratified K-Fold cross-validation.</p>
+      <div class="links-row">
+        <a href="./01_data_leakage_and_splitting/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./01_data_leakage_and_splitting/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 10.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./02_feature_engineering_and_scaling/lecture.html" class="topic-title">10.2 Feature Engineering, Scaling &amp; Encoding</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 10.2</span>
+      </div>
+      <p class="topic-desc">Converting inches and miles to the same scale. Z-score standardization vs MinMax normalization vs Robust IQR scaling, Hessian condition numbers $\kappa(H)$, One-Hot encoding, and empirical Bayes smoothed target encoding.</p>
+      <div class="links-row">
+        <a href="./02_feature_engineering_and_scaling/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./02_feature_engineering_and_scaling/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 10.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./03_evaluation_metrics_and_calibration/lecture.html" class="topic-title">10.3 Evaluation Metrics, Trade-offs &amp; Probability Calibration</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 10.3</span>
+      </div>
+      <p class="topic-desc">The rare disease diagnostic test. Why accuracy fails on imbalanced data, confusion matrix algebra, harmonic mean proof of F1, Matthews Correlation Coefficient, ROC vs PR curves, and Platt probability scaling.</p>
+      <div class="links-row">
+        <a href="./03_evaluation_metrics_and_calibration/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./03_evaluation_metrics_and_calibration/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 10.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./04_ml_pipelines_and_production/lecture.html" class="topic-title">10.4 ML Pipelines, Safe Serialization &amp; Distribution Drift</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 10.4</span>
+      </div>
+      <p class="topic-desc">The automated pie factory assembly line. Chaining transformers and estimators, eliminating training-serving skew, pickle arbitrary code execution vulnerabilities vs Safetensors, covariate shift vs concept drift, and PSI monitoring.</p>
+      <div class="links-row">
+        <a href="./04_ml_pipelines_and_production/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./04_ml_pipelines_and_production/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- QUICKSTART LAB -->
+    <div class="quickstart">
+      <h3 style="margin-top: 0; margin-bottom: 0.5rem;">🧪 Quickstart: Run All Phase 10 Experiments</h3>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.5rem;">All experiments are pure Python 3 with zero external dependencies. Run any experiment directly from terminal:</p>
+      <pre><code>python3 phase_10_ml_engineering_and_evaluation/01_data_leakage_and_splitting/experiment.py
+python3 phase_10_ml_engineering_and_evaluation/02_feature_engineering_and_scaling/experiment.py
+python3 phase_10_ml_engineering_and_evaluation/03_evaluation_metrics_and_calibration/experiment.py
+python3 phase_10_ml_engineering_and_evaluation/04_ml_pipelines_and_production/experiment.py</code></pre>
+    </div>
+  </main>
+
+</body>
+</html>

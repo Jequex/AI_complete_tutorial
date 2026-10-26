@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.2: Variational Autoencoders &amp; The Evidence Lower Bound (ELBO)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.2: Variational Autoencoders &amp; The Evidence Lower Bound (ELBO)</h1>
+    <p>Variational Inference, the Intractable Marginal Likelihood, and the Double Derivation of the Evidence Lower Bound.</p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: The Detective's Flashlight and the Rubber Band</h3>
+        <p><strong>The Mystery:</strong> Finding the exact hidden causes ($z$) behind thousands of observed clues ($x$) across an entire ocean is impossible to calculate by hand.</p>
+        <p><strong>The Flashlight (Encoder $q_\phi(z \mid x)$):</strong> The detective shines a bright beam centered at coordinate $\mu$ with spread $\sigma$, saying: <em>"The cause is almost certainly in this circle!"</em></p>
+        <p><strong>The Rubber Band (KL Divergence):</strong> A rubber band constantly pulls the flashlight back to the center of the ocean ($\mathcal{N}(0, \mathbf{I})$). This stops the detective from placing clues on isolated islands and guarantees that the entire ocean map remains smooth and connected.</p>
+    </div>
+
+    <h2>1. The Intractable Posterior Problem</h2>
+    <p>In latent variable models, the marginal evidence requires integrating over all possible continuous configurations of $z$:</p>
+    $$p_\theta(x) = \int p_\theta(x \mid z) p(z) \, dz$$
+    <p>Because $p_\theta(x \mid z)$ is parameterized by a non-linear deep neural network, this high-dimensional integral is computationally intractable. Consequently, the true posterior is also intractable:</p>
+    $$p_\theta(z \mid x) = \frac{p_\theta(x \mid z) p(z)}{p_\theta(x)}$$
+
+    <h2>2. Deriving the Evidence Lower Bound (ELBO)</h2>
+    <p>We introduce a variational recognition distribution $q_\phi(z \mid x)$ parameterized by an encoder neural network. By expanding the Kullback-Leibler divergence between $q_\phi(z \mid x)$ and the true posterior $p_\theta(z \mid x)$:</p>
+
+    $$D_{\text{KL}}(q_\phi(z \mid x) \parallel p_\theta(z \mid x)) = \int q_\phi(z \mid x) \log \left(\frac{q_\phi(z \mid x)}{p_\theta(z \mid x)}\right) dz$$
+    $$= \int q_\phi(z \mid x) \log \left(\frac{q_\phi(z \mid x) p_\theta(x)}{p_\theta(x, z)}\right) dz$$
+    $$= \log p_\theta(x) - \left[ \mathbb{E}_{q_\phi(z \mid x)}[\log p_\theta(x \mid z)] - D_{\text{KL}}(q_\phi(z \mid x) \parallel p(z)) \right]$$
+
+    <p>Rearranging yields the fundamental decomposition:</p>
+    $$\boxed{\log p_\theta(x) = \text{ELBO}(\theta, \phi; x) + D_{\text{KL}}(q_\phi(z \mid x) \parallel p_\theta(z \mid x))}$$
+
+    <div class="callout">
+        <h4>Key Properties of ELBO:</h4>
+        <ol>
+            <li><strong>Lower Bound:</strong> Since $D_{\text{KL}} \ge 0$, $\text{ELBO} \le \log p_\theta(x)$ always.</li>
+            <li><strong>Tightness:</strong> The gap is exactly the divergence between our variational model and the true posterior.</li>
+            <li><strong>Equivalence:</strong> Maximizing the ELBO simultaneously improves data reconstruction and minimizes posterior estimation error.</li>
+        </ol>
+    </div>
+
+    <h2>3. Closed-Form Gaussian Prior KL Divergence</h2>
+    <p>When $q_\phi(z \mid x) = \mathcal{N}(\boldsymbol{\mu}, \text{diag}(\boldsymbol{\sigma}^2))$ and prior $p(z) = \mathcal{N}(0, \mathbf{I})$, the KL divergence has an exact closed-form analytical formula:</p>
+    $$\boxed{D_{\text{KL}}(q_\phi(z \mid x) \parallel p(z)) = -\frac{1}{2} \sum_{j=1}^J \left( 1 + \log(\sigma_j^2) - \mu_j^2 - \sigma_j^2 \right)}$$
+
+    <p>In practice, the encoder outputs mean $\mu_j$ and log-variance $\gamma_j = \log(\sigma_j^2)$, giving the numerically stable implementation:</p>
+    $$\mathcal{L}_{\text{KL}} = -\frac{1}{2} \sum_{j=1}^J \left( 1 + \gamma_j - \mu_j^2 - \exp(\gamma_j) \right)$$
+
+</body>
+</html>

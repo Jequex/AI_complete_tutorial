@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 22: Retrieval-Augmented Generation (RAG) — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    .overview-box {
+      background-color: var(--badge-bg);
+      border: 1px solid var(--primary);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overview-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    .overview-box p {
+      margin-bottom: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    pre.code-block {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 22</div>
+    <h1>Retrieval-Augmented Generation (RAG)</h1>
+    <p class="lead">From Static Closed-Book Parametric Models to Dynamic Non-Parametric Dual-Memory Systems</p>
+  </header>
+
+  <div class="overview-box">
+    <h3>Architectural Paradigm</h3>
+    <p>Pre-trained autoregressive weights constitute static parametric memory: frozen floating-point matrices susceptible to hallucinations, temporal obsolescence, and complete lack of verifiable provenance. Phase 22 builds the end-to-end Retrieval-Augmented Generation (RAG) architecture from first principles in pure Python 3 with zero external dependencies: document ingestion, token chunking taxonomies, vector databases, approximate nearest neighbor (ANN) search via HNSW graphs, hybrid lexical-dense search with Reciprocal Rank Fusion (RRF), Cross-Encoder reranking, and quantitative RAGAS evaluation.</p>
+  </div>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. RAG Architecture &amp; Retrieval Foundations</h2>
+      <p>Parametric memory vs. non-parametric memory. The canonical two-stage RAG pipeline (Ingestion &rarr; Chunking &rarr; Embedding &rarr; Indexing &rarr; Retrieval &rarr; Augmentation &rarr; Generation). Elimination of hallucinations, temporal recency updates without weight backprop, and verifiable source attribution.</p>
+      <div class="topic-links">
+        <a href="01_rag_architecture_and_retrieval_foundations/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_rag_architecture_and_retrieval_foundations/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_rag_architecture_and_retrieval_foundations/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_rag_architecture_and_retrieval_foundations/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_rag_architecture_and_retrieval_foundations/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Document Chunking &amp; Embedding Strategies</h2>
+      <p>The Chunk Size Dilemma: precision vs context fragmentation. Comprehensive chunking taxonomy: fixed-size sliding window with overlap ($N$ tokens, $K$ overlap), recursive character splitting, document-structure/Markdown splitting, and semantic similarity boundary chunking via cosine thresholds.</p>
+      <div class="topic-links">
+        <a href="02_document_chunking_and_embedding_strategies/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_document_chunking_and_embedding_strategies/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_document_chunking_and_embedding_strategies/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_document_chunking_and_embedding_strategies/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_document_chunking_and_embedding_strategies/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Vector Databases &amp; Approximate Nearest Neighbors (ANN)</h2>
+      <p>The $\mathcal{O}(N \cdot d)$ brute-force bottleneck. Geometric distance metrics (Cosine similarity, Euclidean distance, Dot product) and equivalence on the unit sphere. Hierarchical Navigable Small World (HNSW) multi-layer skip-lists, greedy routing, $M$ and $ef$ parameter dials, and IVF-PQ product quantization.</p>
+      <div class="topic-links">
+        <a href="03_vector_databases_and_approximate_nearest_neighbors/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_vector_databases_and_approximate_nearest_neighbors/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_vector_databases_and_approximate_nearest_neighbors/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_vector_databases_and_approximate_nearest_neighbors/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_vector_databases_and_approximate_nearest_neighbors/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Hybrid Search &amp; Reranking</h2>
+      <p>Sparse lexical search (Okapi BM25: term frequency saturation, Robertson-Spärck Jones IDF, length normalization) vs dense semantic search. Failure modes on alphanumeric identifiers and semantic paraphrases. Reciprocal Rank Fusion (RRF, $k=60$) and two-stage Bi-Encoder to Cross-Encoder reranking.</p>
+      <div class="topic-links">
+        <a href="04_hybrid_search_and_reranking/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_hybrid_search_and_reranking/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_hybrid_search_and_reranking/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_hybrid_search_and_reranking/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_hybrid_search_and_reranking/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Context Construction &amp; RAG Evaluation</h2>
+      <p>The "Lost in the Middle" U-shaped attention curve (Liu et al., 2023) and primacy-recency context reordering. Context distillation. The RAGAS evaluation framework: Faithfulness (Groundedness), Answer Relevance, Context Precision (Mean Average Precision), and Context Recall.</p>
+      <div class="topic-links">
+        <a href="05_context_construction_and_rag_evaluation/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_context_construction_and_rag_evaluation/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_context_construction_and_rag_evaluation/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_context_construction_and_rag_evaluation/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_context_construction_and_rag_evaluation/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <footer style="margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+    <p>AI Complete Tutorial &bull; Phase 22: Retrieval-Augmented Generation &bull; Pure Python 3 First-Principles Implementations</p>
+  </footer>
+
+</body>
+</html>

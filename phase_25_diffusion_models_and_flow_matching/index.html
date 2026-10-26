@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 25: Diffusion Models &amp; Flow Matching — AI Complete Tutorial</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    [data-theme="dark"], @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      position: relative;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+    }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .theme-toggle:hover {
+      border-color: var(--primary);
+    }
+
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; color: var(--text); }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    .overview-box {
+      background-color: var(--badge-bg);
+      border: 1px solid var(--primary);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overview-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    .overview-box p {
+      margin-bottom: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    pre.code-block {
+      background-color: #0b0f19;
+      color: #f8fafc;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 1.5rem 0;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div class="badge">Phase 25</div>
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+    <h1>Diffusion Models &amp; Flow Matching</h1>
+    <p class="lead">From Score-Based SDEs and DDPM to Classifier-Free Guidance and Rectified Flow Neural ODEs</p>
+  </header>
+
+  <div class="overview-box">
+    <h3>Architectural Paradigm</h3>
+    <p>
+      Phase 25 explores the modern state-of-the-art in deep generative modeling: moving from intractable partition functions to continuous score vector fields, physical non-equilibrium thermodynamics, and deterministic optimal transport flow matching. Every experiment across this phase is engineered from first principles in standard Python 3 with <strong>zero external dependencies</strong>.
+    </p>
+  </div>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Score-Based Models &amp; Langevin Dynamics</h2>
+      <p>
+        The intractable partition function $Z_\theta = \int e^{-E_\theta(x)} dx$ and why the Stein score $s_\theta(x) = \nabla_x \log p(x) = -\nabla_x E_\theta(x)$ eliminates it identically. Hyv&auml;rinen's (2005) Implicit Score Matching derivation via integration by parts, Vincent's (2011) Denoising Score Matching, manifold hypothesis failure modes in data voids, and Song &amp; Ermon's (2019) Annealed Langevin Dynamics.
+      </p>
+      <div class="topic-links">
+        <a href="01_score_based_models_and_langevin_dynamics/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_score_based_models_and_langevin_dynamics/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_score_based_models_and_langevin_dynamics/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_score_based_models_and_langevin_dynamics/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_score_based_models_and_langevin_dynamics/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. DDPM Forward &amp; Reverse Processes</h2>
+      <p>
+        Denoising Diffusion Probabilistic Models (Sohl-Dickstein et al. 2015, Ho et al. 2020). The forward Markov chain $q(x_t \mid x_{t-1}) = \mathcal{N}(x_t; \sqrt{1 - \beta_t}x_{t-1}, \beta_t \mathbf{I})$, mathematical induction deriving the closed-form shortcut $q(x_t \mid x_0) = \mathcal{N}(x_t; \sqrt{\bar{\alpha}_t}x_0, (1 - \bar{\alpha}_t)\mathbf{I})$, and the complete Bayesian derivation of the true posterior $q(x_{t-1} \mid x_t, x_0)$ by completing the square in Gaussian exponents.
+      </p>
+      <div class="topic-links">
+        <a href="02_ddpm_forward_and_reverse_processes/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_ddpm_forward_and_reverse_processes/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_ddpm_forward_and_reverse_processes/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_ddpm_forward_and_reverse_processes/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_ddpm_forward_and_reverse_processes/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Noise Schedules &amp; Denoising U-Net Architectures</h2>
+      <p>
+        The mathematical flaw of linear variance schedules, the Cosine Noise Schedule (Nichol &amp; Dhariwal 2021) with offset $s=0.008$, complete derivation of the Variational Lower Bound (ELBO) decomposition into Gaussian KL divergences, Jonathan Ho's simplified variational objective $L_{\text{simple}}(\theta) = \mathbb{E}[\|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(x_t, t)\|^2]$, and U-Net structural motifs (sinusoidal harmonic time embeddings, residual blocks, and multi-scale skip connections).
+      </p>
+      <div class="topic-links">
+        <a href="03_noise_schedules_and_denoising_unet/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_noise_schedules_and_denoising_unet/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_noise_schedules_and_denoising_unet/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_noise_schedules_and_denoising_unet/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_noise_schedules_and_denoising_unet/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Classifier-Free Guidance &amp; Latent Diffusion (LDM)</h2>
+      <p>
+        Conditional generation $p(x \mid c)$, Classifier Guidance $\nabla \log p(x_t \mid c) = \nabla \log p(x_t) + \nabla \log p(c \mid x_t)$, Classifier-Free Guidance (CFG; Ho &amp; Salimans 2021) joint training with condition dropout ($p_{\text{uncond}} \approx 0.2$), guidance extrapolation $\tilde{\boldsymbol{\epsilon}} = \boldsymbol{\epsilon}_\emptyset + s(\boldsymbol{\epsilon}_c - \boldsymbol{\epsilon}_\emptyset)$, mode sharpening versus diversity trade-offs, and Latent Diffusion Models (Stable Diffusion; Rombach et al. 2022) shifting diffusion into the perceptual latent space of a pretrained VAE for a $48\times$ dimensionality reduction and a $4096\times$ self-attention acceleration.
+      </p>
+      <div class="topic-links">
+        <a href="04_classifier_free_guidance_and_latent_diffusion/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_classifier_free_guidance_and_latent_diffusion/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_classifier_free_guidance_and_latent_diffusion/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_classifier_free_guidance_and_latent_diffusion/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_classifier_free_guidance_and_latent_diffusion/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Flow Matching &amp; Rectified Flows</h2>
+      <p>
+        Continuous Normalizing Flows (CNFs) and Neural ODEs $\frac{dx_t}{dt} = v_\theta(x_t, t)$, probability mass conservation via the Continuity Equation $\frac{\partial p_t}{\partial t} + \nabla \cdot (p_t v) = 0$, the Flow Matching objective (Lipman et al. 2022), Conditional Flow Matching with optimal transport interpolation $x_t = (1 - t)x_0 + tx_1$ yielding constant target velocity $u_t = x_1 - x_0$, and Rectified Flows (Liu et al. 2022) with zero-curvature trajectories enabling high-fidelity data generation in 1 to 4 numerical Euler steps.
+      </p>
+      <div class="topic-links">
+        <a href="05_flow_matching_and_rectified_flows/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_flow_matching_and_rectified_flows/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_flow_matching_and_rectified_flows/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_flow_matching_and_rectified_flows/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_flow_matching_and_rectified_flows/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 25 Experiments</h2>
+    <p>Every experiment is self-contained in standard Python 3 with zero external dependencies:</p>
+    <pre class="code-block">python3 phase_25_diffusion_models_and_flow_matching/01_score_based_models_and_langevin_dynamics/experiment.py
+python3 phase_25_diffusion_models_and_flow_matching/02_ddpm_forward_and_reverse_processes/experiment.py
+python3 phase_25_diffusion_models_and_flow_matching/03_noise_schedules_and_denoising_unet/experiment.py
+python3 phase_25_diffusion_models_and_flow_matching/04_classifier_free_guidance_and_latent_diffusion/experiment.py
+python3 phase_25_diffusion_models_and_flow_matching/05_flow_matching_and_rectified_flows/experiment.py</pre>
+  </section>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+    }
+  </script>
+
+</body>
+</html>

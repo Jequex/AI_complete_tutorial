@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 19: Fine-Tuning &amp; PEFT / LoRA — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--badge-bg);
+      border-color: var(--primary);
+    }
+
+    .quickstart {
+      margin-top: 3.5rem;
+      padding: 1.75rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+    .quickstart h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    pre {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .pillar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+    }
+    .pillar-card h3 {
+      font-size: 1.05rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .pillar-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" style="color:var(--primary); text-decoration:none; font-weight:600; display:inline-block; margin-bottom:1rem;">&larr; Back to Full Course Hub</a>
+    <div>
+      <span class="badge">Phase 19</span>
+      <h1>Fine-Tuning &amp; PEFT / LoRA</h1>
+      <p class="lead">From the 16 bytes/param Full Fine-Tuning Memory Wall and Catastrophic Forgetting to LoRA Low-Rank Decomposition, NF4 Quantization, and Continuous Prefix Steering.</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Topic 19.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="01_full_fine_tuning_vs_peft/lecture.html" class="topic-title">19.1 Full Fine-Tuning vs. PEFT &amp; Catastrophic Forgetting</a>
+        <span class="badge">Topic 19.1</span>
+      </div>
+      <p class="topic-desc">The pre-training vs. fine-tuning paradigm. The 16 bytes/param Memory Wall under mixed-precision AdamW ($2\text{B weights} + 2\text{B grads} + 4\text{B master} + 8\text{B } m_t, v_t$). Mathematical proof of Catastrophic Forgetting via Taylor expansion and destructive gradient interference $\langle \mathbf{g}_A, \mathbf{g}_B \rangle &lt; 0$.</p>
+      <div class="topic-links">
+        <a href="01_full_fine_tuning_vs_peft/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_full_fine_tuning_vs_peft/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="01_full_fine_tuning_vs_peft/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="01_full_fine_tuning_vs_peft/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 19.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="02_lora_low_rank_adaptation/lecture.html" class="topic-title">19.2 LoRA: Low-Rank Adaptation</a>
+        <span class="badge">Topic 19.2</span>
+      </div>
+      <p class="topic-desc">The Intrinsic Rank Hypothesis ($r \ll \min(d, k)$). Low-rank factorization $\Delta W = \frac{\alpha}{r} B A$, the necessity of initializing $B = 0$ for step-0 identity, learning rate stabilization via $\frac{\alpha}{r}$, analytical backprop gradients, and zero-latency inference weight merging $W_{\text{merged}} = W_0 + \frac{\alpha}{r} B A$.</p>
+      <div class="topic-links">
+        <a href="02_lora_low_rank_adaptation/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_lora_low_rank_adaptation/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="02_lora_low_rank_adaptation/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="02_lora_low_rank_adaptation/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 19.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="03_qlora_and_quantization_mechanics/lecture.html" class="topic-title">19.3 QLoRA &amp; Quantization Mechanics</a>
+        <span class="badge">Topic 19.3</span>
+      </div>
+      <p class="topic-desc">Quantization fundamentals. Why uniform 4-bit quantization degrades Gaussian-distributed neural weights, and why NormalFloat4 (NF4) achieves information-theoretic optimality via equal-mass quantiles. Double Quantization compressing scales from $0.5$ to $0.127$ bits/param, and Paged Optimizers via CUDA Unified Memory.</p>
+      <div class="topic-links">
+        <a href="03_qlora_and_quantization_mechanics/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_qlora_and_quantization_mechanics/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="03_qlora_and_quantization_mechanics/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="03_qlora_and_quantization_mechanics/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 19.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="04_peft_adapters_prompt_tuning_and_prefix_tuning/lecture.html" class="topic-title">19.4 PEFT Adapters, Prompt Tuning, and Prefix Tuning</a>
+        <span class="badge">Topic 19.4</span>
+      </div>
+      <p class="topic-desc">Houlsby series bottleneck adapters vs. parallel adapters. Continuous soft Prompt Tuning ($X_{\text{prompted}} = [P; E(x)]$) and the power of scale law. Prefix Tuning ($K_{\text{full}} = [P_K; K_{\text{seq}}], V_{\text{full}} = [P_V; V_{\text{seq}}]$) across all attention layers. Master comparison matrix across throughput, latency, context loss, and parameter counts.</p>
+      <div class="topic-links">
+        <a href="04_peft_adapters_prompt_tuning_and_prefix_tuning/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_peft_adapters_prompt_tuning_and_prefix_tuning/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="04_peft_adapters_prompt_tuning_and_prefix_tuning/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="04_peft_adapters_prompt_tuning_and_prefix_tuning/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Quickstart & Verification -->
+    <div class="quickstart">
+      <h2>Run All Phase 19 Verification Experiments</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">All experiments are implemented in pure Python 3 with zero external dependencies. Run each directly from your terminal:</p>
+      <pre><code>python3 phase_19_fine_tuning_and_lora/01_full_fine_tuning_vs_peft/experiment.py
+python3 phase_19_fine_tuning_and_lora/02_lora_low_rank_adaptation/experiment.py
+python3 phase_19_fine_tuning_and_lora/03_qlora_and_quantization_mechanics/experiment.py
+python3 phase_19_fine_tuning_and_lora/04_peft_adapters_prompt_tuning_and_prefix_tuning/experiment.py</code></pre>
+    </div>
+
+    <!-- The 4 Pillars of Efficient Fine-Tuning -->
+    <div style="margin-top: 3rem;">
+      <h2 style="font-size: 1.4rem; font-weight: 700;">The Four Pillars of Parameter-Efficient Adaptation</h2>
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <h3>1. Manifold Invariance</h3>
+          <p>Freezing base weights $\theta_0$ bitwise guarantees zero degradation of universal pre-trained representations and eliminates catastrophic forgetting.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>2. Low-Rank Factorization</h3>
+          <p>Exploiting the intrinsic rank hypothesis: factorizing $\Delta W = \frac{\alpha}{r} B A$ cuts trainable parameters by $>99\%$ while enabling zero-latency weight merging.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>3. Information-Theoretic 4-Bit</h3>
+          <p>NormalFloat4 (NF4) allocates equal probability mass per quantile to normal distributions, pairing with Double Quantization to compress base weights by 75%.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>4. Multi-Tenant Serving</h3>
+          <p>Serving thousands of specialized customer models from a single immutable base model instance via dynamic LoRA routing and prefix KV-cache injection.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</body>
+</html>

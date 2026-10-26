@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.4: Exercises &amp; Solutions — CFG &amp; Latent Diffusion</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.4: Exercises &amp; Solutions — CFG &amp; Latent Diffusion</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Bayes' score separation, guidance vector extrapolation, and attention speedup derivations.
+    </p>
+
+    <h2>Problem 1: Bayes' Rule Score Separation <span class="badge">Easy</span></h2>
+    <p>
+        Derive from Bayes' rule $p(x_t \mid c) = \frac{p(x_t)p(c \mid x_t)}{p(c)}$ that:
+    </p>
+    $$\nabla_{x_t} \log p(x_t \mid c) = \nabla_{x_t} \log p(x_t) + \nabla_{x_t} \log p(c \mid x_t)$$
+    <p>Explaining why $\nabla_{x_t}\log p(c) \equiv \mathbf{0}$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Taking the logarithm gives $\log p(x_t \mid c) = \log p(x_t) + \log p(c \mid x_t) - \log p(c)$.</p>
+        <p>Differentiating with respect to $x_t$, the prior $p(c)$ is a constant with respect to data vector $x_t$. Hence $\nabla_{x_t}\log p(c) = \mathbf{0}$.</p>
+    </details>
+
+    <h2>Problem 2: Latent Attention Complexity Reduction <span class="badge">Medium</span></h2>
+    <p>
+        For a $1024 \times 1024$ image, compute the quadratic self-attention speedup gained by shifting from pixel space to an LDM latent space with downsampling factor $f = 8$.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <ul>
+            <li>Tokens in pixel space: $N_{\text{pixel}} = 1024 \times 1024 = 1,048,576$.</li>
+            <li>Tokens in latent space: $N_{\text{latent}} = 128 \times 128 = 16,384$.</li>
+            <li>Attention complexity: $\mathcal{O}(N^2)$.</li>
+        </ul>
+        $$\text{Speedup} = \left(\frac{1,048,576}{16,384}\right)^2 = (64)^2 = 4,096\times$$
+        <p>Self-attention is <strong>4,096 times faster</strong> in latent space!</p>
+    </details>
+
+    <h2>Problem 3: Mode Sharpening under CFG <span class="badge">Hard</span></h2>
+    <p>
+        Show that as guidance scale $s \to \infty$, the guided distribution $\tilde{p}_s(x \mid c) \propto p(x)^{1 - s} p(x \mid c)^s$ collapses its variance to zero, proving the fundamental trade-off between fidelity and sample diversity.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>For Gaussian prior $p(x) = \mathcal{N}(0, \sigma_0^2)$ and likelihood $p(c \mid x) = \mathcal{N}(c; x, \sigma_L^2)$, the guided variance is:</p>
+        $$\sigma_s^2 = \frac{1}{\frac{1}{\sigma_0^2} + \frac{s}{\sigma_L^2}} = \frac{\sigma_0^2 \sigma_L^2}{\sigma_L^2 + s \sigma_0^2}$$
+        <p>Taking the limit as $s \to \infty$:</p>
+        $$\lim_{s \to \infty} \sigma_s^2 = 0 \implies \lim_{s \to \infty} \tilde{p}_s(x \mid c) = \delta(x - c)$$
+        <p>High guidance scales force absolute fidelity to condition $c$, at the expense of collapsing sample diversity to zero.</p>
+    </details>
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.5: Exercises &amp; Solutions — Flow Matching &amp; Rectified Flows</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.5: Exercises &amp; Solutions — Flow Matching &amp; Rectified Flows</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Euler truncation errors, Continuity Equation solutions, Fubini CFM proofs, and kinetic action minimization.
+    </p>
+
+    <h2>Problem 1: Straight-Line Kinematics &amp; Euler Truncation <span class="badge">Easy</span></h2>
+    <p>
+        For straight-line path $x_t = (1 - t)x_0 + tx_1$, evaluate velocity $v(t)$, acceleration $a(t)$, and explain why the local Euler truncation error vanishes.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>$$v(t) = \frac{dx_t}{dt} = x_1 - x_0, \quad a(t) = \frac{dv}{dt} = \mathbf{0}$$</p>
+        <p>In Taylor series $x_{t+\Delta t} = x_t + \Delta t \cdot v(t) + \frac{(\Delta t)^2}{2} a(t) + \dots$, since $a(t) \equiv \mathbf{0}$ and all higher derivatives vanish, the truncation error is identically zero. This guarantees that with straight paths, 1-step integration with $\Delta t = 1.0$ is exact!</p>
+    </details>
+
+    <h2>Problem 2: Continuity Equation Velocity for Expanding Gaussians <span class="badge">Medium</span></h2>
+    <p>
+        Find the velocity field $v(x, t)$ satisfying $\frac{\partial p_t}{\partial t} + \frac{\partial (p_t v)}{\partial x} = 0$ for a Gaussian with expanding standard deviation $\sigma_t = 1 + t$.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Evaluating $\frac{\partial p_t}{\partial t} = p_t(x) \left(-\frac{1}{\sigma_t} + \frac{x^2}{\sigma_t^3}\right)$ and matching against $\frac{\partial (p_t v)}{\partial x}$ with linear ansatz $v(x, t) = c(t)x$:</p>
+        $$v(x, t) = \frac{x}{\sigma_t} = \frac{x}{1 + t}$$
+        <p>At $x=0$, $v=0$, and probability mass symmetrically expands outward as time progresses.</p>
+    </details>
+
+    <h2>Problem 3: Fubini's Equivalence Proof for CFM <span class="badge">Hard</span></h2>
+    <p>
+        Prove using Fubini's theorem that $\nabla_\theta L_{CFM}(\theta) \equiv \nabla_\theta L_{FM}(\theta)$.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Expanding the cross term of $\nabla_\theta L_{CFM}(\theta)$:</p>
+        $$\int_0^1 \int (\nabla_\theta v_\theta(x, t)) \left[ \int\int u_t(x \mid x_0, x_1) \frac{p_t(x \mid x_0, x_1) p(x_0, x_1)}{p_t(x)} dx_0 dx_1 \right] p_t(x) \, dx \, dt$$
+        <p>The term in brackets is precisely the definition of the marginal velocity $u_t(x) = \mathbb{E}[u_t(x \mid x_0, x_1)]$. Hence:</p>
+        $$\nabla_\theta L_{CFM}(\theta) \equiv \nabla_\theta L_{FM}(\theta)$$
+    </details>
+
+</body>
+</html>

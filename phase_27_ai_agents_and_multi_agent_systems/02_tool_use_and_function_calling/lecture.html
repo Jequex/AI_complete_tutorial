@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.2: Tool Use &amp; Function Calling</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin-top: 0.5rem; margin-bottom: 0.75rem; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+    p { margin-bottom: 1.25rem; }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .diagram-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: monospace;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 1.5rem 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 27 Overview</a><br>
+    <span class="badge">Topic 27.2</span>
+    <h1>Tool Use &amp; Function Calling</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">JSON Schema definitions, grammar-constrained decoding via FSM logit masking, sandboxed execution, and self-correction error loops.</p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <p>Imagine the world's most brilliant chef locked inside a windowless library. The chef knows every recipe in human history, from French souffl&eacute;s to ramen broths. But if someone asks the chef to bake a real cake, the chef has a problem: there is no oven, no flour, no eggs, no mixer, and no timer. In the library, all the chef can do is write essays describing food.</p>
+    <p>Now, connect that chef to an automated smart kitchen with appliances:</p>
+    <ul>
+      <li>A mixer: <code>mix(speed=3, duration_sec=60)</code></li>
+      <li>An oven: <code>bake(temperature_c=180, time_min=35)</code></li>
+    </ul>
+    <p>Each appliance comes with a strict instruction manual (a <strong>Schema</strong>). If the chef shouts: <em>"Bake at temperature 'extra hot'!"</em>, the oven rejects the command with a red screen: <code>Error: 'temperature_c' must be an integer, got string 'extra hot'</code>. The chef reads the feedback, corrects the command to <code>bake(temperature_c=200, time_min=30)</code>, and the cake bakes successfully.</p>
+
+    <div class="callout">
+      <strong>Core Agent Concept:</strong> Without tools, a Large Language Model is a closed-world text simulator. With tools, schemas, and execution sandboxes, the model becomes an active agent capable of modifying databases, running compilers, fetching live weather, and manipulating real environments.
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Formal Type</th>
+          <th>Intuitive Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{T}_{\text{tools}}$</td>
+          <td>Tool Library / Registry</td>
+          <td>Set $\{f_1, f_2, \dots, f_M\}$</td>
+          <td>The collection of executable functions exposed to the agent.</td>
+        </tr>
+        <tr>
+          <td>$\Sigma_i$</td>
+          <td>Tool Schema</td>
+          <td>JSON Schema specification</td>
+          <td>The formal specification of parameter names, data types, and constraints for tool $f_i$.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{G}_{\text{CFG}}$</td>
+          <td>Context-Free Grammar</td>
+          <td>4-Tuple $(V_N, V_T, P, S)$</td>
+          <td>Formal grammar specifying valid structural syntax (e.g. JSON grammar).</td>
+        </tr>
+        <tr>
+          <td>$q \in Q$</td>
+          <td>FSM State</td>
+          <td>Finite Automaton State</td>
+          <td>Current state of the parser tracking valid next tokens during generation.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{M}(q)$</td>
+          <td>Admissible Token Mask</td>
+          <td>Subset of Vocabulary $\mathcal{V}$</td>
+          <td>Tokens whose emission leaves the prefix legally completable under grammar $\mathcal{G}$.</td>
+        </tr>
+        <tr>
+          <td>$\tilde{z}_t$</td>
+          <td>Masked Logits</td>
+          <td>Real Vector $\mathbb{R}^{|\mathcal{V}|}$</td>
+          <td>Logits after grammar filtering: $\tilde{z}_{t, v} = z_{t, v}$ if $v \in \mathcal{M}(q)$, else $-\infty$.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Grammar-Constrained Decoding: FSM Logit Masking</h2>
+    <p>A critical challenge in tool-using agents is ensuring that the LLM generates 100% syntactically valid JSON matching the exact expected parameter schema. Grammar-constrained decoding achieves this mathematically by masking vocabulary logits before sampling:</p>
+
+    <div class="callout">
+      $$\tilde{z}_{t, v} = \begin{cases} z_{t, v} & \text{if } v \in \mathcal{M}(q) \\ -\infty & \text{if } v \notin \mathcal{M}(q) \end{cases}$$
+      $$\mathbb{P}(w_t = v \mid w_{1:t-1}) = \frac{\exp(\tilde{z}_{t, v})}{\sum_{v' \in \mathcal{M}(q)} \exp(z_{t, v'})}$$
+    </div>
+    <p>Tokens that violate JSON syntax or schema rules are masked to $-\infty$, rendering syntax hallucination mathematically impossible.</p>
+
+    <h2>4. Tool Dispatch &amp; Sandboxed Execution Topology</h2>
+    <div class="diagram-box">
+  LLM Generation ──▶ [Schema Validator] ──▶ (Passed) ──▶ [Sandboxed Dispatcher]
+                            │                                     │
+                        (Failed)                              (Execution)
+                            │                                     │
+                            ▼                                     ▼
+                  SchemaValidationError                  Stdout / Exception
+                            │                                     │
+                            └───────────────┬─────────────────────┘
+                                            ▼
+                              [Error Feedback Injection]
+                                            │
+                                            ▼
+                               [LLM Context Window: Turn t+1]</div>
+
+    <h2>5. Interactive Experiment Runner</h2>
+    <p>Test the zero-dependency pure Python tool registry, JSON schema validation, and multi-turn self-correction loop:</p>
+    <pre class="code-block">python3 phase_27_ai_agents_and_multi_agent_systems/02_tool_use_and_function_calling/experiment.py</pre>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">Go to Exercises &amp; Solutions &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 2.4: Eigenvalues and Eigenvectors — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-callout: #f0fdf4;
+      --border-callout: #22c55e;
+      --bg-tech: #eff6ff;
+      --border-tech: #3b82f6;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-callout: #064e3b33;
+        --border-callout: #10b981;
+        --bg-tech: #1e3a8a33;
+        --border-tech: #60a5fa;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
+
+    .callout {
+      border-left: 4px solid;
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-kid {
+      background-color: var(--bg-callout);
+      border-color: var(--border-callout);
+    }
+    .callout-tech {
+      background-color: var(--bg-tech);
+      border-color: var(--border-tech);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    code {
+      background-color: var(--code-bg);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.9em;
+    }
+    pre code { background: none; padding: 0; }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.4</span>
+    </div>
+    <h1>Topic 2.4: Eigenvalues and Eigenvectors</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Uncovering the invariant axes of space, characteristic polynomials, diagonalization, and vanishing/exploding gradients.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. The 12-Year-Old Analogy: The Spinning Globe</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The North and South Poles</div>
+        <p>Spin a globe of the Earth. London, Tokyo, and New York whip around in circles, continuously changing their spatial direction. But look at the <strong>North Pole</strong> and <strong>South Pole</strong>.</p>
+        <p>They lie on the axis of rotation. <strong>They never leave their line!</strong></p>
+        <p>In linear algebra, almost every vector gets rotated off its direction when multiplied by a matrix. But <strong>Eigenvectors</strong> are the special arrows that <strong>never rotate off their line</strong>—they only get stretched or shrunk by factor $\lambda$!</p>
+      </div>
+
+      <p>$$\boxed{A \mathbf{v} = \lambda \mathbf{v}}$$</p>
+    </section>
+
+    <section>
+      <h2>2. The Characteristic Equation: $\det(A - \lambda I) = 0$</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Finding Eigenvalues Analytically</div>
+        <p>Rewrite $A\mathbf{v} = \lambda\mathbf{v}$ as:</p>
+        <p>$$(A - \lambda I)\mathbf{v} = \mathbf{0}$$</p>
+        <p>For a non-zero eigenvector $\mathbf{v} \neq \mathbf{0}$ to exist in the null space, the matrix $(A - \lambda I)$ must have determinant zero:</p>
+        <p>$$\boxed{\det(A - \lambda I) = 0}$$</p>
+      </div>
+
+      <pre>
+Example: A = [ [4, 1],
+               [2, 3] ]
+
+det(A - λI) = (4 - λ)(3 - λ) - (1 × 2) = 0
+             λ² - 7λ + 10 = 0
+             (λ - 5)(λ - 2) = 0
+
+Eigenvalues: λ₁ = 5,  λ₂ = 2
+
+For λ₁ = 5:  v₁ = [ 1,  1 ]^T  --> A v₁ = [ 5,  5 ]^T = 5 v₁
+For λ₂ = 2:  v₂ = [ 1, -2 ]^T  --> A v₂ = [ 2, -4 ]^T = 2 v₂
+      </pre>
+    </section>
+
+    <section>
+      <h2>3. Diagonalization: $A = Q \Lambda Q^{-1}$</h2>
+      <p>If $A$ has $n$ independent eigenvectors, assemble them into matrix $Q$ and place eigenvalues into diagonal matrix $\Lambda$:</p>
+      <p>$$A = Q \Lambda Q^{-1}$$</p>
+      <p>Computing powers $A^k$ becomes effortless, because all interior $Q^{-1} Q$ terms cancel:</p>
+      <p>$$A^{100} = Q \Lambda^{100} Q^{-1} = Q \begin{bmatrix} \lambda_1^{100} & 0 \\ 0 & \lambda_2^{100} \end{bmatrix} Q^{-1}$$</p>
+    </section>
+
+    <section>
+      <h2>4. Why Eigenvalues Matter for Deep Learning</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Gradient Stability in RNNs and Deep Networks</div>
+        <p>In deep networks, activations and gradients are repeatedly multiplied across layers: $\mathbf{h}_T \approx W^T \mathbf{h}_0$.</p>
+        <ul>
+          <li>If $|\lambda_{\max}| > 1$: Gradients <strong>explode to $\pm\infty$</strong>.</li>
+          <li>If $|\lambda_{\max}| < 1$: Gradients <strong>vanish to $0$</strong>.</li>
+          <li>This insight directly motivated <strong>Spectral Normalization</strong>, <strong>Orthogonal Initialization</strong>, and <strong>ResNet skip connections</strong>!</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="nav-buttons">
+      <a href="../03_vector_spaces/exercises_and_solutions.html" class="btn">← Topic 2.3</a>
+      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

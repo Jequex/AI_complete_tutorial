@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 3.1: Exercises & Solutions — Functions, Limits & Derivatives</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 3.1</a>
+    <header>
+        <h1>Topic 3.1: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Limit Proofs, Tanh Derivative &amp; Optimal Finite Difference Step Sizing</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: First-Principles Limit Derivation of $f(x) = 1/x$</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Using only the limit definition $f'(x) = \lim_{h \to 0} \frac{f(x+h) - f(x)}{h}$, derive the derivative of $f(x) = \frac{1}{x}$, verify against the Power Rule, and find the tangent line equation at $x = 2$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Limit Derivation:</strong>
+                    $$f'(x) = \lim_{h \to 0} \frac{\frac{1}{x+h} - \frac{1}{x}}{h} = \lim_{h \to 0} \frac{-h}{x(x+h)h} = \lim_{h \to 0} \frac{-1}{x(x+h)} = \mathbf{-\frac{1}{x^2}}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Power Rule Check:</strong>
+                    $$\frac{d}{dx} x^{-1} = -1 \cdot x^{-2} = -\frac{1}{x^2}$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Tangent Line at $x = 2$:</strong>
+                    Point: $(2, 0.5)$, Slope: $m = -1/4 = -0.25$.
+                    $$y - 0.5 = -0.25(x - 2) \implies \mathbf{y = -0.25x + 1.0}$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Derivation of the $\tanh(x)$ Activation Derivative</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Using the Quotient Rule, derive $\frac{d}{dx} \tanh(x)$ and prove that it simplifies to $\tanh'(x) = 1 - \tanh^2(x)$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Derivation:</strong>
+                    $$\frac{d}{dx} \left( \frac{e^x - e^{-x}}{e^x + e^{-x}} \right) = \frac{(e^x + e^{-x})^2 - (e^x - e^{-x})^2}{(e^x + e^{-x})^2} = 1 - \left(\frac{e^x - e^{-x}}{e^x + e^{-x}}\right)^2 = \mathbf{1 - \tanh^2(x)}$$
+                </div>
+                <div class="step-box">
+                    <strong>Backprop Efficiency:</strong>
+                    For forward activation $a = 0.8$, the gradient is simply $da = 1 - (0.8)^2 = \mathbf{0.36}$ with zero exponent calculations!
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Optimal Finite Difference Step Size $h$</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Total numerical error combines truncation error ($c_1 h^2$) and machine roundoff ($\epsilon_{\text{mach}} / h$). Prove that the optimal step size for central difference is $h^* \approx \epsilon_{\text{mach}}^{1/3} \approx 10^{-5}$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Minimizing Error:</strong>
+                    $$\frac{d}{dh} \left( c_1 h^2 + \frac{\epsilon_{\text{mach}}}{h} \right) = 2 c_1 h - \frac{\epsilon_{\text{mach}}}{h^2} = 0 \implies h^3 \propto \epsilon_{\text{mach}} \implies h^* \propto \epsilon_{\text{mach}}^{1/3}$$
+                    For $\epsilon_{\text{mach}} \approx 10^{-16}$, $h^* \approx 10^{-16/3} \approx \mathbf{10^{-5.3} \approx 10^{-5} \text{ to } 10^{-6}}$.
+                    This mathematically explains why frameworks pick `eps = 1e-5` for gradient checking.
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>

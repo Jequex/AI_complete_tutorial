@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.4: Direct Preference Optimization (DPO) — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--text); }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.4: Direct Preference Optimization (DPO)</h1>
+
+    <div class="analogy">
+        <h3>🃏 The 12-Year-Old Analogy: Skipping the Middleman in a Trading Game</h3>
+        <p>Imagine collecting and trading cards with your friends:</p>
+        <ul>
+            <li><strong>The PPO Approach (Hiring an Appraiser &amp; Coach):</strong> You hire an appraiser (Reward Model) to give imaginary scores to cards, and a coach (Critic Model) to critique your trades. You juggle 4 things at once, and if the appraiser is biased, you end up with weird cards!</li>
+            <li><strong>The DPO Breakthrough (Direct Learning):</strong> Instead of an imaginary score from a middleman, you look directly at winning cards ($y_w$) and losing cards ($y_l$) from real matches! You increase the chance of playing winning cards and decrease the chance of playing losing cards, keeping your starter deck ($\pi_{\text{ref}}$) as an anchor. No appraiser. No coach. You learn directly from wins and losses!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formal Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\pi_\theta(y \mid x)$</td>
+                <td>Policy Model</td>
+                <td>Trainable language model being directly aligned on preference data.</td>
+            </tr>
+            <tr>
+                <td>$\pi_{\text{ref}}(y \mid x)$</td>
+                <td>Reference Model</td>
+                <td>Frozen SFT model anchoring the policy against distribution drift.</td>
+            </tr>
+            <tr>
+                <td>$\beta > 0$</td>
+                <td>Hyperparameter</td>
+                <td>Regularization coefficient controlling conservatism relative to $\pi_{\text{ref}}$.</td>
+            </tr>
+            <tr>
+                <td>$Z(x)$</td>
+                <td>Partition Function</td>
+                <td>Intractable normalizer summing over all possible completions $\sum_y$.</td>
+            </tr>
+            <tr>
+                <td>$\hat{r}_\theta(x, y)$</td>
+                <td>Implicit Reward</td>
+                <td>Analytical reward implied by log-odds: $\beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{DPO}}(\theta; \pi_{\text{ref}})$</td>
+                <td>Loss Function</td>
+                <td>Closed-form direct preference optimization loss.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. The Analytical Derivation of DPO</h2>
+    <p>Under KL-constrained reinforcement learning, the optimal policy has the exact closed form:</p>
+    $$\pi^*(y \mid x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y \mid x) \exp\left( \frac{1}{\beta} r(x, y) \right)$$
+
+    <p>Inverting this formula isolates the ground-truth reward function:</p>
+    $$r(x, y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)$$
+
+    <p>When substituting this expression into the Bradley-Terry preference model, the partition function $Z(x)$ appears in both terms and <strong>cancels out identically</strong>:</p>
+
+    $$r(x, y_w) - r(x, y_l) = \beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)}$$
+
+    <p>This yields the finalized closed-form <strong>DPO Loss</strong>:</p>
+
+    <div class="box">
+        $$\mathcal{L}_{\text{DPO}}(\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_w, y_l) \sim \mathcal{D}} \left[ \log \sigma\left( \beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\text{ref}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\text{ref}}(y_l \mid x)} \right) \right]$$
+    </div>
+
+    <h2>3. Gradient Dynamics: The Push-Pull Mechanism</h2>
+    <p>The analytical gradient of DPO with respect to policy parameters is:</p>
+    $$\nabla_\theta \mathcal{L}_{\text{DPO}}(\theta) = -\beta \mathbb{E} \left[ \sigma\left(\hat{r}_\theta(y_l) - \hat{r}_\theta(y_w)\right) \left( \nabla_\theta \log \pi_\theta(y_w \mid x) - \nabla_\theta \log \pi_\theta(y_l \mid x) \right) \right]$$
+
+    <div class="card">
+        <h3>Dynamic Error Weighting</h3>
+        <p>The term $\sigma(\hat{r}_l - \hat{r}_w)$ scales the gradient by how incorrect the current policy is. If the model already assigns higher implicit reward to $y_w$, the gradient is near zero. If the model prefers $y_l$, the gradient applies a strong corrective force, increasing $P(y_w)$ and decreasing $P(y_l)$.</p>
+    </div>
+
+    <h2>4. Architectural Comparison: PPO vs. DPO</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Attribute</th>
+                <th>RLHF (PPO)</th>
+                <th>DPO</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Models in Memory</strong></td>
+                <td>4 models ($\pi_\theta, \pi_{\text{ref}}, r_\phi, V_\psi$)</td>
+                <td><strong>2 models</strong> ($\pi_\theta, \pi_{\text{ref}}$)</td>
+            </tr>
+            <tr>
+                <td><strong>Online Generation</strong></td>
+                <td>Required (slow token rollouts)</td>
+                <td><strong>None</strong> (offline dataset training)</td>
+            </tr>
+            <tr>
+                <td><strong>Reward &amp; Critic Models</strong></td>
+                <td>Mandatory separate networks</td>
+                <td><strong>Eliminated completely</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Hyperparameters</strong></td>
+                <td>Fragile ($\epsilon, \lambda, \gamma, \beta$)</td>
+                <td>Robust (primarily $\beta$)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../03_rlhf_and_ppo_policy_gradients/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Topic 21.3: RLHF &amp; PPO Policy Gradients</a>
+        <a href="../05_kto_and_online_preference_optimization/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.5 — KTO &amp; Online Preference Optimization →</a>
+    </div>
+
+</body>
+</html>

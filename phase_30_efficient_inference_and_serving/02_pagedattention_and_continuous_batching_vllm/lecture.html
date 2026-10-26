@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 02: PagedAttention &amp; Continuous Batching (vLLM)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 30 Overview</a>
+    <div>
+      <span class="badge">Topic 30.2</span>
+      <h1>PagedAttention &amp; Continuous Batching (vLLM)</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.25rem;">
+        Iteration-level batch scheduling, virtual memory paging for KV caches, and zero-overhead Copy-on-Write parallel sampling.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>Imagine running a 50-room hotel with two different booking managers:</p>
+      <ul>
+        <li><strong>Manager 1 (Static Batching)</strong>: Demands that 10 guests arrive together and refuses to clean or re-assign any room until the last and slowest guest leaves. If 9 guests stay for 1 night and 1 stays for 7 nights, 9 rooms remain empty and locked for 6 whole days while travelers waiting in line are turned away.</li>
+        <li><strong>Manager 2 (Continuous Batching)</strong>: Operates by the minute. The instant a guest returns their room key, the room is cleaned and handed to the very next waiting traveler. Rooms are occupied 100% of the time.</li>
+      </ul>
+      <p>Now consider how they handle luggage storage:</p>
+      <ul>
+        <li><strong>Traditional Contiguous Buffers</strong>: Reserves a giant 50-suitcase closet for every guest, even if they only carry a backpack. 70% of storage space sits empty, yet new luggage is rejected because the hotel is "out of room."</li>
+        <li><strong>PagedAttention</strong>: Uses small 16-shirt storage lockers. You get 1 locker on arrival. When it fills, you get another locker down the hall. A directory (Block Table) tracks your lockers. Memory waste plummets from 80% to under 1%!</li>
+      </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Domain / Type</th>
+          <th>Physical / System Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{B}_{\text{size}}$</td>
+          <td>Block Size</td>
+          <td>Integer (16 or 32)</td>
+          <td>Number of tokens stored inside a single physical KV memory block.</td>
+        </tr>
+        <tr>
+          <td>$T_{\text{block}}$</td>
+          <td>Logical-to-Physical Table</td>
+          <td>$\mathbb{N} \to \mathbb{N}$</td>
+          <td>Page table mapping logical sequence block indices to physical HBM block indices.</td>
+        </tr>
+        <tr>
+          <td>$\text{ref\_count}(i)$</td>
+          <td>Reference Count</td>
+          <td>Integer $\ge 0$</td>
+          <td>Number of active sequences sharing physical block $i$ (enabling Copy-on-Write).</td>
+        </tr>
+        <tr>
+          <td>$\eta_{\text{mem}}$</td>
+          <td>Memory Utilization</td>
+          <td>$[0.0, 1.0]$</td>
+          <td>Ratio of actively valid cached tokens over total physically allocated capacity.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Architecture of PagedAttention</h2>
+    <p>Inspired by Operating System virtual memory paging, PagedAttention breaks sequential KV allocations into fixed-size physical blocks:</p>
+    
+    <div class="card">
+      <h3>Logical vs. Physical Memory Mapping</h3>
+      <p>A sequence with 37 tokens with block size $\mathcal{B}_{\text{size}} = 16$ spans 3 logical blocks:</p>
+      <ul>
+        <li><strong>Logical Block 0 (Tokens 0..15)</strong> &rarr; Maps to Physical Block 42 (Full)</li>
+        <li><strong>Logical Block 1 (Tokens 16..31)</strong> &rarr; Maps to Physical Block 109 (Full)</li>
+        <li><strong>Logical Block 2 (Tokens 32..36)</strong> &rarr; Maps to Physical Block 17 (Contains 5 tokens, 11 free slots)</li>
+      </ul>
+      <p>Physical blocks need not be contiguous in GPU memory. Hardware pointers are dispatched directly to the non-contiguous attention kernel.</p>
+    </div>
+
+    <h2>4. Analytical Waste Derivation</h2>
+    <p>For an average sequence length $\bar{L}$ with block size $\mathcal{B}_{\text{size}}$:</p>
+    $$\mathbb{E}[\text{Wasted Memory}] = \frac{\mathcal{B}_{\text{size}} - 1}{2} \approx \frac{\mathcal{B}_{\text{size}}}{2} \quad \text{tokens}$$
+    $$\text{Memory Waste Ratio} = \frac{\mathcal{B}_{\text{size}}}{2 \cdot \bar{L}}$$
+    <p>For $\bar{L} = 1024$ and $\mathcal{B}_{\text{size}} = 16$, the memory waste is only $\frac{8}{1024} = \mathbf{0.78\%}$, compared to $60\text{--}80\%$ in contiguous pre-allocation systems.</p>
+
+    <h2>5. Copy-on-Write (CoW) Fork Mechanics</h2>
+    <p>When sampling multiple completions for a prompt (e.g., beam search or best-of-N):</p>
+    <ul>
+      <li>Prompt blocks are shared among all child branches with $\text{ref\_count} = K$. Zero additional KV memory is allocated.</li>
+      <li>When a child sequence writes a new token, if the current block is shared, the block manager duplicates only that single 16-token block and decrements $\text{ref\_count}$.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../03_speculative_decoding/lecture.html" class="btn">Next: Topic 03 &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

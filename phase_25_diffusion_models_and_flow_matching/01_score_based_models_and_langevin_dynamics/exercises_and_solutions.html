@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.1: Exercises &amp; Solutions — Score-Based Models</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            margin-left: 0.5rem;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.1: Exercises &amp; Solutions — Score-Based Models</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Analytical derivations, integration by parts proofs, and denoising score matching properties.
+    </p>
+
+    <h2>Problem 1: Partition Function Vanishing Property <span class="badge">Easy</span></h2>
+    <p>
+        Consider an unnormalized energy distribution $p(x) = \frac{1}{Z} \exp\left(-\frac{1}{4}x^4 + \frac{1}{2}x^2\right)$ over $\mathbb{R}$.
+    </p>
+    <ol>
+        <li>Compute the analytical score $s(x) = \frac{d}{dx} \log p(x)$.</li>
+        <li>Identify all roots where $s(x) = 0$.</li>
+        <li>Classify each root as a stable mode or unstable anti-mode using the second derivative.</li>
+    </ol>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Step 1: Compute Score:</strong></p>
+        $$\log p(x) = -\log Z - \frac{1}{4}x^4 + \frac{1}{2}x^2$$
+        $$s(x) = \frac{d}{dx}\log p(x) = -x^3 + x = x(1 - x^2)$$
+        <p>Notice that the normalizer $Z$ vanishes completely without computing the integral!</p>
+        <p><strong>Step 2: Roots:</strong></p>
+        $$x(1 - x^2) = 0 \implies x \in \{-1, 0, +1\}$$
+        <p><strong>Step 3: Stability:</strong></p>
+        $$s'(x) = 1 - 3x^2$$
+        <ul>
+            <li>At $x = \pm 1$: $s'(\pm 1) = -2 < 0 \implies$ Stable modes (probability maxima).</li>
+            <li>At $x = 0$: $s'(0) = +1 > 0 \implies$ Unstable anti-mode (barrier between modes).</li>
+        </ul>
+    </details>
+
+    <h2>Problem 2: 1D Hyv&auml;rinen Integration by Parts Proof <span class="badge">Medium</span></h2>
+    <p>
+        Prove from first principles using integration by parts that for differentiable densities $p(x)$ vanishing at infinity:
+    </p>
+    $$\mathbb{E}_{x \sim p(x)} \left[ s_\theta(x) \frac{d}{dx} \log p(x) \right] = -\mathbb{E}_{x \sim p(x)} [s_\theta'(x)]$$
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Write the expectation in integral form:</p>
+        $$\int_{-\infty}^{\infty} p(x) s_\theta(x) \frac{1}{p(x)} \frac{dp(x)}{dx} \, dx = \int_{-\infty}^{\infty} s_\theta(x) \frac{dp(x)}{dx} \, dx$$
+        <p>Using integration by parts $\int u \, dv = [uv] - \int v \, du$ with $u = s_\theta(x), v = p(x)$:</p>
+        $$= \left[ s_\theta(x) p(x) \right]_{-\infty}^{\infty} - \int_{-\infty}^{\infty} p(x) s_\theta'(x) \, dx$$
+        <p>Because $p(x) s_\theta(x) \to 0$ as $|x| \to \infty$, the boundary term is 0. Hence:</p>
+        $$= -\int_{-\infty}^{\infty} p(x) s_\theta'(x) \, dx = -\mathbb{E}_{p(x)} [s_\theta'(x)]$$
+    </details>
+
+    <h2>Problem 3: Analytical Equivalence in Denoising Score Matching <span class="badge">Hard</span></h2>
+    <p>
+        Let $x \sim \mathcal{N}(\mu, \sigma_0^2)$ be perturbed by $\tilde{x} = x + \sigma \epsilon$ where $\epsilon \sim \mathcal{N}(0, 1)$.
+        Prove that the Bayes-optimal denoising score estimator $s^*(\tilde{x}) = \mathbb{E}_{x \mid \tilde{x}}\left[-\frac{\tilde{x} - x}{\sigma^2}\right]$ is identical to the ground-truth marginal score $\nabla_{\tilde{x}} \log q_\sigma(\tilde{x})$.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Step 1: Marginal Score:</strong></p>
+        $$\tilde{x} \sim \mathcal{N}(\mu, \sigma_0^2 + \sigma^2) \implies \nabla_{\tilde{x}} \log q_\sigma(\tilde{x}) = -\frac{\tilde{x} - \mu}{\sigma_0^2 + \sigma^2}$$
+        <p><strong>Step 2: Conditional Expectation:</strong></p>
+        $$\mathbb{E}[x \mid \tilde{x}] = \mu + \frac{\sigma_0^2}{\sigma_0^2 + \sigma^2}(\tilde{x} - \mu) = \frac{\sigma^2 \mu + \sigma_0^2 \tilde{x}}{\sigma_0^2 + \sigma^2}$$
+        <p><strong>Step 3: Plug into DSM Estimator:</strong></p>
+        $$s^*(\tilde{x}) = -\frac{\tilde{x} - \mathbb{E}[x \mid \tilde{x}]}{\sigma^2} = -\frac{1}{\sigma^2}\left(\frac{\sigma^2(\tilde{x} - \mu)}{\sigma_0^2 + \sigma^2}\right) = -\frac{\tilde{x} - \mu}{\sigma_0^2 + \sigma^2}$$
+        <p>Both expressions match identically!</p>
+    </details>
+
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 0.2 Exercises & Solutions — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-solution: #f0fdf4;
+      --border-solution: #16a34a;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-solution: #064e3b2e;
+        --border-solution: #10b981;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2.5rem; }
+
+    .problem-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    details.solution {
+      background-color: var(--bg-solution);
+      border: 1px solid var(--border-solution);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    details.solution summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--border-solution);
+      user-select: none;
+      font-size: 1.05rem;
+    }
+    details.solution[open] summary {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th { background-color: var(--bg-card); font-weight: 600; }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 00</a> &gt; <a href="./lecture.html">Topic 0.2</a> &gt; <span>Exercises &amp; Solutions</span>
+    </div>
+    <h1>Topic 0.2: Practice Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Hands-on mathematical synthesis of linear decision boundaries, proof reconstructions, and paradigm comparisons.</p>
+  </header>
+
+  <main>
+    <!-- PROBLEM 1 -->
+    <div class="problem-box">
+      <h2>Problem 1: Manual Synthesis of a Perceptron (NAND Gate)</h2>
+      <p>The logical <strong>NAND</strong> gate is the fundamental universal gate of computing:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>$x_1$</th>
+            <th>$x_2$</th>
+            <th>Target $y$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td>1</td></tr>
+          <tr><td>0</td><td>1</td><td>1</td></tr>
+          <tr><td>1</td><td>0</td><td>1</td></tr>
+          <tr><td>1</td><td>1</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <ul>
+        <li><strong>Part A:</strong> Is the NAND function linearly separable? Explain geometrically.</li>
+        <li><strong>Part B:</strong> Write down the 4 linear inequalities corresponding to the NAND truth table for decision rule $z = w_1 x_1 + w_2 x_2 + b \geq 0 \implies \hat{y} = 1$.</li>
+        <li><strong>Part C:</strong> Find an explicit set of integer values for $w_1, w_2, b$ that satisfy all 4 conditions. Verify your solution.</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A: Geometric Linear Separability</strong><br>
+        Yes! On a 2D Cartesian plane, three points ($(0,0), (0,1), (1,0)$) have label $1$, and only one point ($(1,1)$) has label $0$. A straight line such as $x_1 + x_2 = 1.5$ easily separates the positive points from the negative point.</p>
+
+        <p><strong>Part B: The 4 Inequalities</strong></p>
+        <ol>
+          <li>For $(0, 0) \to 1$: &nbsp; $w_1(0) + w_2(0) + b \geq 0 \implies \mathbf{b \geq 0}$</li>
+          <li>For $(0, 1) \to 1$: &nbsp; $w_1(0) + w_2(1) + b \geq 0 \implies \mathbf{w_2 + b \geq 0}$</li>
+          <li>For $(1, 0) \to 1$: &nbsp; $w_1(1) + w_2(0) + b \geq 0 \implies \mathbf{w_1 + b \geq 0}$</li>
+          <li>For $(1, 1) \to 0$: &nbsp; $w_1(1) + w_2(1) + b < 0 \implies \mathbf{w_1 + w_2 + b < 0}$</li>
+        </ol>
+
+        <p><strong>Part C: Explicit Integer Parameter Synthesis</strong><br>
+        By symmetry, set $w_1 = w_2 = w$.<br>
+        From (4): $2w + b < 0 \implies 2w < -b$.<br>
+        From (1): $b \geq 0$. Choose <strong>$b = 2$</strong>.<br>
+        Then $2w < -2 \implies w < -1$. Choose <strong>$w_1 = -2, w_2 = -2$</strong>.</p>
+        <p><strong>Verification:</strong></p>
+        <ul>
+          <li>$(0, 0): (-2)(0) + (-2)(0) + 2 = +2 \geq 0 \implies \hat{y} = 1$ (Correct)</li>
+          <li>$(0, 1): (-2)(0) + (-2)(1) + 2 = 0 \geq 0 \implies \hat{y} = 1$ (Correct)</li>
+          <li>$(1, 0): (-2)(1) + (-2)(0) + 2 = 0 \geq 0 \implies \hat{y} = 1$ (Correct)</li>
+          <li>$(1, 1): (-2)(1) + (-2)(1) + 2 = -2 < 0 \implies \hat{y} = 0$ (Correct)</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-box">
+      <h2>Problem 2: The Minsky-Papert XOR Proof</h2>
+      <p>Reconstruct the 1969 proof showing that no single-layer perceptron can classify XOR: $(0,0)\to 0, (1,0)\to 1, (0,1)\to 1, (1,1)\to 0$.</p>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p>Assume there exist real numbers $w_1, w_2, b$ that solve XOR. Then:</p>
+        <p>(1) $b < 0$</p>
+        <p>(2) $w_1 + b \geq 0$</p>
+        <p>(3) $w_2 + b \geq 0$</p>
+        <p>(4) $w_1 + w_2 + b < 0$</p>
+        <p>Add (2) and (3):</p>
+        <p>$$(w_1 + w_2 + b) + b \geq 0$$</p>
+        <p>From (4), $(w_1 + w_2 + b) < 0$. From (1), $b < 0$. The sum of two strictly negative values must be strictly negative:</p>
+        <p>$$(w_1 + w_2 + b) + b < 0$$</p>
+        <p>A quantity cannot be simultaneously $\geq 0$ and $< 0$. Contradiction! $\blacksquare$</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-box">
+      <h2>Problem 3: Comparative Analysis of AI Paradigms</h2>
+      <p>Compare a 1982 Medical Expert System (2,000 hand-crafted rules) with a modern 70B parameter Foundation Model across input robustness, interpretability, and scalability.</p>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>1982 Expert System (Symbolic)</th>
+              <th>2024 Foundation Model (Deep Learning)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Noisy / Corrupted Inputs</strong></td>
+              <td>Brittle: A single typo or missing measurement causes the logic rule to fail.</td>
+              <td>Robust: Continuous vector embeddings map synonyms and typos to nearby latent space.</td>
+            </tr>
+            <tr>
+              <td><strong>Interpretability</strong></td>
+              <td>100% Explainable: Exact rule-firing chains can be printed step-by-step.</td>
+              <td>Emergent / Black Box: Reasoning is distributed across billions of weights; requires probing or CoT.</td>
+            </tr>
+            <tr>
+              <td><strong>Scalability</strong></td>
+              <td>Linear human bottleneck: Adding new diseases requires manual rule authoring.</td>
+              <td>Autonomous Ingestion: Can absorb millions of research articles via pretraining or RAG.</td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="./lecture.html" class="btn">← Back to Lecture</a>
+      <a href="../03_the_central_idea/lecture.html" class="btn btn-primary">Next Topic: 0.3 The Central Idea →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

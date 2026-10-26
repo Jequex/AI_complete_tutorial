@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 19.4: PEFT Adapters, Prompt Tuning, and Prefix Tuning — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code, li code, td code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 19 Overview</a>
+
+    <h1>Topic 19.4: PEFT Adapters, Prompt Tuning, and Prefix Tuning</h1>
+    <p><em>Series &amp; parallel bottleneck adapters, soft continuous prompting, cross-layer Key-Value prefix injection, and the architectural trade-off spectrum.</em></p>
+
+    <div class="callout">
+        <strong>The Broad PEFT Taxonomy:</strong> Parameter-efficient adaptation spans modular sub-layer insertion (Adapters), virtual token embedding injection (Prompt Tuning), attention state concatenation (Prefix Tuning), and weight matrix reparameterization (LoRA).
+    </div>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+
+    <p>Before LoRA's emergence in 2021, the AI research community developed foundational alternatives: <strong>Bottleneck Adapters (Houlsby et al. 2019, He et al. 2021)</strong> and <strong>Soft Continuous Prompting (Prompt Tuning &amp; Prefix Tuning)</strong>. Understanding these methods is crucial for understanding how models can be steered without altering internal weights.</p>
+
+    <pre>
+                   THE SPECTRUM OF PEFT ARCHITECTURES
+                   
+    INPUT-LEVEL               KV-STATE ATTENTION              INTERNAL LAYERS
+  (Prompt Tuning)              (Prefix Tuning)             (Adapters &amp; LoRA)
+  
+  [ Virtual P ]                [ P_K ]   [ P_V ]              [ Base Layer W_0 ]
+       │                          │         │                       │      │
+       ▼                          ▼         ▼                       │      ▼
+   [ Embeddings ] ───&gt; ... ───&gt; [ Multi-Head Attn ] ───&gt; ...       │    [ Adapter / LoRA ]
+   (Tokens 1..T)                (Attends over P + Seq)              ▼      │
+                                                                   (+) ◄───┘
+    </pre>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: Custom Tool Attachments for a Swiss Army Knife</h3>
+        <p>Imagine you own a Swiss Army knife with 20 stainless steel tools: blades, scissors, and screwdrivers. You are entering a woodworking contest and need specialized chisels:</p>
+        <ul>
+            <li><strong>Full Fine-Tuning (Reforging the Knife):</strong> You melt the knife down and reforge it into a giant wood chisel. The original scissors and blades are permanently lost.</li>
+            <li><strong>Prompt Tuning (The Instruction Sticky Note):</strong> You write <em>"Act like a wood chisel"</em> on a yellow sticky note and tape it to the handle. It takes up pocket room (<strong>Context Window penalty</strong>) and smaller knives might ignore it.</li>
+            <li><strong>Prefix Tuning (Guide Rails on Every Joint):</strong> You snap miniature guide rails directly onto the pivot joints of <em>every single folding blade inside the knife</em>, steering their angles with surgical precision.</li>
+            <li><strong>Series Adapters &amp; LoRA (Clip-On Attachments):</strong> You snap an ultra-compact magnetic precision tip onto the blade. When cutting is done, you unclip it in one second.</li>
+        </ul>
+    </div>
+
+    <h2>2. Series vs. Parallel Bottleneck Adapters</h2>
+
+    <p><strong>Houlsby Series Adapters (2019)</strong> insert bottleneck MLPs sequentially after attention and FFN blocks:</p>
+    $$\text{Adapter}(h) = h + f\left(h W_{\text{down}} + b_d\right) W_{\text{up}} + b_u$$
+    <p>Because each adapter executes in sequence, it introduces sequential GPU kernel launches, increasing inference latency by $15\% - 30\%$.</p>
+
+    <p><strong>Parallel Adapters (He et al. 2021)</strong> execute concurrently with base layers:</p>
+    $$h_{\text{out}} = \text{BaseLayer}(x) + s \cdot \text{Adapter}(x)$$
+    <p>This eliminates sequential execution bubbles on modern GPU streams.</p>
+
+    <h2>3. Prefix Tuning vs. Prompt Tuning</h2>
+
+    <ul>
+        <li><strong>Prompt Tuning (Lester et al. 2021):</strong> Prepends $L_p$ virtual token embeddings strictly to the input layer: $[P; E(x)]$. Extremely parameter-efficient ($0.001\%$), but consumes $L_p$ tokens of input context length.</li>
+        <li><strong>Prefix Tuning (Li &amp; Liang 2021):</strong> Prepends learnable Key and Value prefixes $P_K^{(l)}, P_V^{(l)}$ to attention at <strong>every layer $l$</strong>:
+            $$K_{\text{full}}^{(l)} = [P_K^{(l)}; K_{\text{seq}}^{(l)}], \quad V_{\text{full}}^{(l)} = [P_V^{(l)}; V_{\text{seq}}^{(l)}]$$
+            This provides deep structural steering across the entire depth of the network.
+        </li>
+    </ul>
+
+    <h2>4. Master Architecture Comparison Matrix</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Dimension</th>
+                <th>Full Fine-Tuning</th>
+                <th>Series Adapters</th>
+                <th>LoRA</th>
+                <th>Prefix Tuning</th>
+                <th>Prompt Tuning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Trainable Params</strong></td>
+                <td>$100\%$</td>
+                <td>$\approx 0.4\% - 1.0\%$</td>
+                <td>$\approx 0.1\% - 0.6\%$</td>
+                <td>$\approx 0.05\% - 0.1\%$</td>
+                <td>$\approx 0.001\%$</td>
+            </tr>
+            <tr>
+                <td><strong>Inference Latency Overhead</strong></td>
+                <td>$0\text{ ms}$</td>
+                <td>$+15\% - 30\%$</td>
+                <td><strong>$0\text{ ms}$</strong> (Mergeable)</td>
+                <td>Minimal ($+2\%$)</td>
+                <td>$0\text{ ms}$</td>
+            </tr>
+            <tr>
+                <td><strong>Context Length Penalty</strong></td>
+                <td>$0$ tokens</td>
+                <td>$0$ tokens</td>
+                <td>$0$ tokens</td>
+                <td>$0$ tokens</td>
+                <td>$-L_p$ tokens</td>
+            </tr>
+            <tr>
+                <td><strong>Optimization Stability</strong></td>
+                <td>Medium</td>
+                <td>High</td>
+                <td>Very High</td>
+                <td>Medium</td>
+                <td>High for $\ge 10\text{B}$</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-Tenant Serving</strong></td>
+                <td>Impossible on 1 GPU</td>
+                <td>Moderate</td>
+                <td><strong>Optimal</strong> (vLLM / S-LoRA)</td>
+                <td>High (KV prepend)</td>
+                <td>High (KV prepend)</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

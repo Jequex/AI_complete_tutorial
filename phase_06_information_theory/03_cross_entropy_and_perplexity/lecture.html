@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.3: Cross-Entropy & Perplexity — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --warning: #fbbf24;
+                --warning-bg: #451a03;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.3rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background: var(--accent-bg);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background: var(--primary-light); }
+        code {
+            background: var(--border);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.3: Cross-Entropy & Perplexity</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        The Universal Loss Engine of Deep Learning & Language Model Evaluation.
+    </p>
+
+    <div class="analogy">
+        <h3 style="margin-top: 0; color: var(--accent);">🧒 1. Intuitive Analogy: The 20 Questions Game with the Wrong Rulebook</h3>
+        <p>
+            Imagine playing 20 Questions with a visitor from Mars:
+            <ul>
+                <li><strong>Earth Reality ($P$):</strong> Dogs and cats are everywhere. Dragons do not exist.</li>
+                <li><strong>Martian Beliefs ($Q$):</strong> The Martian assumes dragons are very common and dogs are rare!</li>
+            </ul>
+        </p>
+        <p>
+            When trying to guess the mystery pet, the Martian asks wasteful questions first: <em>"Does it breathe fire?"</em>. They waste valuable guesses because their model $Q$ does not match reality $P$.
+        </p>
+        <p>
+            <ul>
+                <li><strong>Entropy $H(P)$:</strong> The minimum questions needed if you have a <em>perfect</em> model of reality.</li>
+                <li><strong>Cross-Entropy $H(P, Q)$:</strong> The number of questions you <em>actually</em> ask when reality follows $P$, but your strategy uses model $Q$.</li>
+            </ul>
+        </p>
+        <p>
+            <strong>Training an AI:</strong> Training is simply twisting the AI's internal model $Q$ until it matches human reality $P$, minimizing cross-entropy down to the theoretical limit $H(P)$!
+        </p>
+    </div>
+
+    <h2>🔣 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr><th>Symbol</th><th>Mathematical Name</th><th>Plain English Translation</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>$P(x)$</td><td>True Distribution</td><td>The real ground truth (e.g., the actual word written by humans).</td></tr>
+            <tr><td>$Q(x)$</td><td>Model Distribution</td><td>The AI's predicted probabilities across the vocabulary.</td></tr>
+            <tr><td>$H(P, Q)$</td><td>Cross-Entropy</td><td>Average bits (or nats) spent encoding true events $P$ using model code $Q$.</td></tr>
+            <tr><td>$\text{NLL}$</td><td>Negative Log-Likelihood</td><td>The single-sample loss when $P$ is a one-hot vector: $-\ln Q(y^*)$.</td></tr>
+            <tr><td>$\text{PPL}$</td><td>Perplexity</td><td>Effective branching factor: how many equally likely words the AI is choosing between ($e^{\mathcal{L}}$).</td></tr>
+            <tr><td>$T$</td><td>Temperature</td><td>Softmax scaling hyperparameter that controls sharpness vs diversity.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>📐 3. Mathematical Formulation</h2>
+    <div class="card">
+        <h3>Formal Definition of Cross-Entropy</h3>
+        $$H(P, Q) = -\sum_{x \in \mathcal{X}} P(x) \log_2 Q(x) \quad \text{(bits)}$$
+        $$H_e(P, Q) = -\sum_{x \in \mathcal{X}} P(x) \ln Q(x) \quad \text{(nats)}$$
+    </div>
+
+    <h2>⚡ 4. The One-Hot Case in Deep Learning</h2>
+    <p>
+        In supervised classification and next-token prediction, ground-truth label $y^*$ has probability $1.0$, and all other words have probability $0$. The cross-entropy instantly simplifies to:
+    </p>
+    <div class="callout">
+        <h3 style="margin-top: 0;">Negative Log-Likelihood Loss (NLL)</h3>
+        $$\mathcal{L}_{\text{CE}} = -\ln Q(y^*)$$
+    </div>
+    <p>
+        If the AI puts $100\%$ probability on the correct token ($Q=1.0$), loss is $-\ln(1.0) = 0$. If the AI assigns only $1\%$ probability ($Q=0.01$), loss is $-\ln(0.01) \approx 4.61$. The loss punishes bad predictions logarithmically!
+    </p>
+
+    <h2>🎲 5. Perplexity (PPL): The Benchmark of Modern LLMs</h2>
+    <div class="card">
+        <h3>Definition of Perplexity</h3>
+        $$\text{PPL} = \exp\left( -\frac{1}{N} \sum_{i=1}^N \ln Q(y_i) \right) = e^{\mathcal{L}_{\text{CE}}}$$
+        <p><strong>The "Die Roll" Intuition:</strong></p>
+        <p>
+            A model with a perplexity of $\mathbf{10}$ predicts the next word with the same average uncertainty as if it were choosing uniformly from a bag of <strong>10 equally likely words</strong>.
+        </p>
+        <ul>
+            <li>Untrained Model (32k vocab): $\text{PPL} = 32,000$ (complete confusion).</li>
+            <li>Modern State-of-the-Art LLM (Llama, GPT-4): $\text{PPL} \approx 6 - 15$ on standard benchmarks.</li>
+        </ul>
+    </div>
+
+    <h2>🌡️ 6. Temperature Scaling in Softmax</h2>
+    <div class="card">
+        <h3>Logits to Probabilities</h3>
+        $$Q(x_i) = \frac{\exp(z_i / T)}{\sum_{j} \exp(z_j / T)}$$
+        <ul>
+            <li><strong>$T \to 0$ (Low Temperature):</strong> Greedy mode. The highest logit wins 100% of the mass. High confidence, zero randomness.</li>
+            <li><strong>$T = 1.0$ (Default):</strong> Standard calibrated model confidence.</li>
+            <li><strong>$T > 1.0$ (High Temperature):</strong> Flattens the distribution towards uniform $\frac{1}{K}$. Maximum diversity, but higher risk of hallucinations.</li>
+        </ul>
+    </div>
+
+</body>
+</html>
+

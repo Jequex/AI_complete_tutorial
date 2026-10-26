@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 30.4: Exercises &amp; Solutions — KV Cache Compression &amp; Tensor Parallelism</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 30.4 Lecture</a>
+    <h1>Topic 30.4: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problems on GQA/MQA memory footprints, H2O heavy hitter eviction, and Megatron Tensor Parallel communication volumes.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Quantitative KV Scaling Across MHA, GQA, MQA &amp; Tensor Parallelism</h3>
+      <p>
+        For a 70B parameter model ($n_{\text{layers}} = 80, H = 64, d_{\text{head}} = 128$) at batch size 32 and context length 8192:
+      </p>
+      <ol>
+        <li>Compute total KV memory under MHA, GQA ($H_{\text{kv}} = 8$), and MQA ($H_{\text{kv}} = 1$).</li>
+        <li>Compute per-GPU memory when served across an 8-GPU Tensor Parallel cluster ($N_{\text{tp}} = 8$).</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Total KV Cache Footprint</h4>
+          <p>$\text{Mem}_{\text{KV}} = 4 \cdot 80 \cdot H_{\text{kv}} \cdot 128 \cdot 32 \cdot 8192$ bytes:</p>
+          <ul>
+            <li><strong>MHA ($H_{\text{kv}} = 64$)</strong>: $\mathbf{687.19 \text{ GB}}$</li>
+            <li><strong>GQA ($H_{\text{kv}} = 8$)</strong>: $\mathbf{85.90 \text{ GB}}$ ($8\times$ reduction)</li>
+            <li><strong>MQA ($H_{\text{kv}} = 1$)</strong>: $\mathbf{10.74 \text{ GB}}$ ($64\times$ reduction)</li>
+          </ul>
+
+          <h4>2. Per-GPU Sharded Footprint ($N_{\text{tp}} = 8$)</h4>
+          <ul>
+            <li>MHA: $687.19 / 8 = \mathbf{85.90 \text{ GB/GPU}}$ (exceeds an 80GB GPU)</li>
+            <li>GQA: $85.90 / 8 = \mathbf{10.74 \text{ GB/GPU}}$ (easily fits alongside weights)</li>
+            <li>MQA: $\mathbf{10.74 \text{ GB/GPU}}$ (replicated across ranks)</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Heavy Hitter Oracle (H2O) Dynamic Eviction Trace</h3>
+      <p>
+        Trace step-by-step attention weight accumulation and identify the evicted token when cache budget is limited to 6 tokens ($W_{\text{sink}} = 2, W_{\text{recency}} = 2, k_{\text{heavy}} = 2$).
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p>Initial state: Sinks `{1, 2}`, Candidates `{5, 6, 8}`, Recency `{10}`.</p>
+          <p>New arrival Token 11 brings total tokens to 7. Candidate cumulative scores:</p>
+          <ul>
+            <li>Token 8: $5.7 + 0.15 = 5.85$ (Heavy Hitter 1)</li>
+            <li>Token 5: $4.2 + 0.30 = 4.50$ (Heavy Hitter 2)</li>
+            <li>Token 6: $1.1 + 0.05 = \mathbf{1.15}$ (Lowest score outside protected windows &rarr; <strong>Evicted!</strong>)</li>
+          </ul>
+          <p>Token 6 is discarded, restoring cache size to 6 tokens.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Tensor Parallel Communication Overhead in Prefill vs. Decode</h3>
+      <p>
+        Compare All-Reduce network volume across 80 layers for prefill ($s = 2048$) vs decode ($s = 1$) at batch size 32 on 8 GPUs.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p>Ring All-Reduce volume: $2 \cdot \frac{N_{\text{tp}}-1}{N_{\text{tp}}} \cdot (b \cdot s \cdot d \cdot e)$ across 160 collectives (2 per layer):</p>
+          <ul>
+            <li><strong>Prefill ($s = 2048$)</strong>: Transmits $\mathbf{300.6 \text{ GB}}$ of activation data.</li>
+            <li><strong>Decode ($s = 1$)</strong>: Transmits only $\mathbf{143.36 \text{ MB}}$ of activation data.</li>
+          </ul>
+          <p>In the decode phase, inter-GPU communication is trivial and completely hidden behind memory stalls.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

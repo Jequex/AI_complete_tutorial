@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.5: KTO &amp; Online Preference Optimization — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--text); }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.5: KTO &amp; Online Preference Optimization</h1>
+
+    <div class="analogy">
+        <h3>🕹️ The 12-Year-Old Analogy: The Thumbs-Up / Thumbs-Down Arcade</h3>
+        <p>Imagine you manage a busy arcade with 100 different game machines:</p>
+        <ul>
+            <li><strong>The Paired Problem:</strong> Forcing players to play Game A then Game B and pick a winner is tedious and unnatural. Real kids just play one game at a time.</li>
+            <li><strong>The Unpaired KTO Solution:</strong> You put a Green Button 👍 and Red Button 👎 on each machine. If a kid had fun, they hit Green. If the game ate their quarter, they hit Red.</li>
+            <li><strong>Loss Aversion:</strong> If a player wins a sticker, they are mildly pleased (+1). But if the machine steals their token, they are <em>furious</em> (-2.5)! Kahneman &amp; Tversky won the Nobel Prize for showing that human pain from losses is roughly twice as intense as pleasure from gains. KTO incorporates this asymmetry into AI alignment!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formal Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{D}_{\text{desirable}}$</td>
+                <td>Unpaired Set</td>
+                <td>Completions labeled thumbs-up 👍 (desirable outputs).</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{D}_{\text{undesirable}}$</td>
+                <td>Unpaired Set</td>
+                <td>Completions labeled thumbs-down 👎 (undesirable outputs).</td>
+            </tr>
+            <tr>
+                <td>$z(x, y)$</td>
+                <td>Implicit Reward</td>
+                <td>Log-ratio return $\beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$.</td>
+            </tr>
+            <tr>
+                <td>$z_{\text{ref}}$</td>
+                <td>Reference Point</td>
+                <td>Expected implicit reward baseline: $\mathbb{E}_{(x, y)} [z(x, y)]$.</td>
+            </tr>
+            <tr>
+                <td>$\lambda_{\text{undesirable}}$</td>
+                <td>Loss Multiplier</td>
+                <td>Asymmetric loss penalty ($> 1.0$) reflecting human loss aversion.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{KTO}}(\theta)$</td>
+                <td>Objective</td>
+                <td>Kahneman-Tversky Optimization loss function.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Grounding in Prospect Theory (Loss Aversion)</h2>
+    <p>Daniel Kahneman and Amos Tversky established two foundational insights in cognitive psychology:</p>
+    <ol>
+        <li><strong>Reference Dependence:</strong> Humans evaluate outcomes relative to a subjective anchor ($z_{\text{ref}}$) rather than absolute scales.</li>
+        <li><strong>Loss Aversion:</strong> Losses loom larger than gains. The subjective displeasure of a bad response is far more acute than the pleasure of an acceptable response.</li>
+    </ol>
+
+    <h2>3. The KTO Loss Formulation</h2>
+    <p>For a desirable completion ($y \in \mathcal{D}_D$), KTO minimizes:</p>
+    $$\ell_D(x, y) = 1 - \sigma\left( \lambda_D \left( \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)} - z_{\text{ref}} \right) \right)$$
+
+    <p>For an undesirable completion ($y \in \mathcal{D}_U$), KTO minimizes:</p>
+    $$\ell_U(x, y) = 1 - \sigma\left( \lambda_U \left( z_{\text{ref}} - \beta \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)} \right) \right)$$
+
+    <p>Combining both with the loss aversion multiplier $\lambda_{\text{undesirable}} > 1.0$:</p>
+
+    <div class="box">
+        $$\mathcal{L}_{\text{KTO}}(\theta) = \mathbb{E}_{\mathcal{D}_D} \left[ \ell_D(x, y) \right] + \lambda_{\text{undesirable}} \mathbb{E}_{\mathcal{D}_U} \left[ \ell_U(x, y) \right]$$
+    </div>
+
+    <h2>4. Online DPO &amp; Iterative Alignment</h2>
+    <div class="card">
+        <h3>Solving Off-Policy Distribution Shift</h3>
+        <p>In offline DPO, the preference dataset is static. As the policy improves, it generates new patterns that never appeared in the original dataset, leading to out-of-distribution drift.</p>
+        <p><strong>Online / Iterative DPO</strong> eliminates this by having the current policy generate candidate completions in real-time, labeling them with an external judge or Reward Model, and applying immediate on-policy updates. This continuous feedback loop powers modern frontier models like LLaMA-3 and Claude 3.5.</p>
+    </div>
+
+    <h2>5. Grand Alignment Method Comparison</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Data Format</th>
+                <th>Active Models in VRAM</th>
+                <th>Sampling Required</th>
+                <th>Underlying Theory</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>PPO (RLHF)</strong></td>
+                <td>Paired $(y_w, y_l)$</td>
+                <td>4 models</td>
+                <td>Yes (Token rollouts)</td>
+                <td>Expected Utility RL</td>
+            </tr>
+            <tr>
+                <td><strong>Offline DPO</strong></td>
+                <td>Paired $(y_w, y_l)$</td>
+                <td>2 models</td>
+                <td>No</td>
+                <td>Bradley-Terry Closed-Form</td>
+            </tr>
+            <tr>
+                <td><strong>KTO</strong></td>
+                <td><strong>Unpaired</strong> $(y, \pm 1)$</td>
+                <td>2 models</td>
+                <td>No</td>
+                <td><strong>Prospect Theory</strong></td>
+            </tr>
+            <tr>
+                <td><strong>Online DPO</strong></td>
+                <td>On-Policy Pairs</td>
+                <td>2 models + Judge</td>
+                <td>Yes (Real-time)</td>
+                <td>Active Bradley-Terry</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../04_direct_preference_optimization_dpo/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Topic 21.4: Direct Preference Optimization</a>
+        <a href="../index.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Back to Phase 21 Portal Hub →</a>
+    </div>
+
+</body>
+</html>

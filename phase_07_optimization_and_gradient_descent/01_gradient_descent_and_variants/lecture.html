@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 7.1: Gradient Descent & Its Variants — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 7 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 7.1: Gradient Descent & Its Variants</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        The algorithmic engine of machine learning: steepest descent proofs, batch vs. stochastic dynamics, gradient noise, and learning rate scheduling.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        All machine learning models adjust numeric parameters (weights) to minimize error on a loss function $\mathcal{L}(\theta)$. Because neural network loss functions have millions of dimensions, we cannot solve for the minimum analytically with algebraic equations. Instead, we use <strong>Gradient Descent</strong> to walk down the error landscape step by step.
+    </p>
+
+    <div class="callout">
+        <h3>🧭 The 12-Year-Old Analogy: The Foggy Mountain Descent</h3>
+        <p>
+            Imagine being dropped on top of an unfamiliar mountain in dense fog. You can only see the ground directly beneath your boots. Your goal is to reach the warm cabin at the very bottom of the valley.
+        </p>
+        <ul>
+            <li><strong>Gradient Descent:</strong> You feel which way the ground slopes down with your boots, and take a step in that direction.</li>
+            <li><strong>Learning Rate ($\eta$):</strong> How big a stride you take. If your stride is 1 millimeter, you will never get down. If your stride is 50 feet, you will leap off cliffs and overshoot the valley.</li>
+            <li><strong>Batch Gradient Descent:</strong> You radio every hiker on the entire mountain, gather all their slope readings, average them, and take one step. Safe and steady, but takes forever per step.</li>
+            <li><strong>Stochastic Gradient Descent (SGD):</strong> You ask one random hiker over the radio and immediately jump. Ultra-fast, but you ping-pong erratically across the mountain.</li>
+            <li><strong>Mini-Batch SGD:</strong> You travel with a patrol squad of 32 hikers. You quickly average their readings and take confident, fast strides.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\theta \in \mathbb{R}^d$</td>
+                <td>Parameter vector</td>
+                <td>Weights and biases of the model ($d$ total dimensions)</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}(\theta)$</td>
+                <td>Scalar field</td>
+                <td>Total empirical loss across all $N$ training examples</td>
+            </tr>
+            <tr>
+                <td>$\nabla_\theta \mathcal{L}(\theta)$</td>
+                <td>$\mathbb{R}^d$ vector</td>
+                <td>Gradient: direction of greatest instantaneous increase in loss</td>
+            </tr>
+            <tr>
+                <td>$-\nabla_\theta \mathcal{L}(\theta)$</td>
+                <td>$\mathbb{R}^d$ vector</td>
+                <td>Negative gradient: direction of steepest local descent</td>
+            </tr>
+            <tr>
+                <td>$\eta$</td>
+                <td>$\mathbb{R}_{>0}$</td>
+                <td>Learning rate (step size multiplier)</td>
+            </tr>
+            <tr>
+                <td>$B = |\mathcal{B}|$</td>
+                <td>Positive integer</td>
+                <td>Mini-batch size ($16, 32, 64, \dots, 2048$)</td>
+            </tr>
+            <tr>
+                <td>$g_t$</td>
+                <td>$\mathbb{R}^d$ vector</td>
+                <td>Stochastic gradient estimate computed over mini-batch $\mathcal{B}_t$</td>
+            </tr>
+            <tr>
+                <td>$L$</td>
+                <td>$\mathbb{R}_{>0}$</td>
+                <td>Lipschitz smoothness constant ($\|\nabla \mathcal{L}(u) - \nabla \mathcal{L}(v)\| \le L \|u - v\|$)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. First-Order Mathematical Derivation: Steepest Descent</h2>
+    <p>
+        Why is the negative gradient vector $-\nabla \mathcal{L}(\theta)$ chosen as the descent direction? Consider an arbitrary displacement unit vector $v \in \mathbb{R}^d$ with $\|v\|_2 = 1$ and small step size $\epsilon > 0$.
+    </p>
+    <p>
+        The first-order Taylor series expansion of $\mathcal{L}(\theta + \epsilon v)$ around $\theta$ is:
+        $$\mathcal{L}(\theta + \epsilon v) = \mathcal{L}(\theta) + \epsilon \nabla \mathcal{L}(\theta)^T v + \mathcal{O}(\epsilon^2)$$
+    </p>
+    <p>
+        To produce the maximum instantaneous drop in loss, we seek $v^*$ that minimizes the inner product $\nabla \mathcal{L}(\theta)^T v$:
+        $$v^* = \arg\min_{\|v\|_2 = 1} \nabla \mathcal{L}(\theta)^T v$$
+    </p>
+    <p>
+        By the <strong>Cauchy-Schwarz Inequality</strong>:
+        $$|\nabla \mathcal{L}(\theta)^T v| \le \|\nabla \mathcal{L}(\theta)\|_2 \|v\|_2 = \|\nabla \mathcal{L}(\theta)\|_2$$
+        $$-\|\nabla \mathcal{L}(\theta)\|_2 \le \nabla \mathcal{L}(\theta)^T v \le \|\nabla \mathcal{L}(\theta)\|_2$$
+    </p>
+    <p>
+        The minimum $-\|\nabla \mathcal{L}(\theta)\|_2$ occurs if and only if $v$ is collinear and antiparallel to $\nabla \mathcal{L}(\theta)$:
+        $$v^* = -\frac{\nabla \mathcal{L}(\theta)}{\|\nabla \mathcal{L}(\theta)\|_2}$$
+    </p>
+    <p>
+        Scaling $v^*$ by step size proportional to gradient magnitude yields the canonical Gradient Descent update:
+        $$\theta_{t+1} = \theta_t - \eta \nabla \mathcal{L}(\theta_t)$$
+    </p>
+
+    <h2>4. Batch vs Stochastic vs Mini-Batch SGD</h2>
+    <p>
+        For a dataset with $N$ samples $\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$:
+        $$\mathcal{L}(\theta) = \frac{1}{N} \sum_{i=1}^N \ell_i(\theta)$$
+    </p>
+    <ul>
+        <li><strong>Batch Gradient Descent (BGD):</strong> Uses all $N$ examples per step:
+            $$\theta_{t+1} = \theta_t - \eta \frac{1}{N} \sum_{i=1}^N \nabla \ell_i(\theta_t)$$
+            Zero variance in gradient, but computational complexity $\mathcal{O}(N \cdot d)$ per step is prohibitive for large datasets.
+        </li>
+        <li><strong>Stochastic Gradient Descent (SGD):</strong> Samples a single random index $i_t \in \{1,\dots,N\}$:
+            $$\theta_{t+1} = \theta_t - \eta \nabla \ell_{i_t}(\theta_t)$$
+            The estimate $g_t = \nabla \ell_{i_t}(\theta_t)$ is an unbiased estimator: $\mathbb{E}[g_t] = \nabla \mathcal{L}(\theta_t)$, but exhibits massive variance $\sigma^2$.
+        </li>
+        <li><strong>Mini-Batch SGD:</strong> Samples subset $\mathcal{B} \subset \{1,\dots,N\}$ of size $B$:
+            $$g_t = \frac{1}{B} \sum_{i \in \mathcal{B}_t} \nabla \ell_i(\theta_t), \quad \text{Var}(g_t) = \frac{\sigma^2}{B}$$
+            Reduces gradient variance by a factor of $1/B$ while maximizing GPU parallel tensor core utilization.
+        </li>
+    </ul>
+
+    <h2>5. Stability Limits: The Lipschitz Bound</h2>
+    <p>
+        If the loss function gradient is $L$-Lipschitz continuous, the <strong>Descent Lemma</strong> guarantees:
+        $$\mathcal{L}(\theta_{t+1}) \le \mathcal{L}(\theta_t) - \eta \left(1 - \frac{L \eta}{2}\right) \|\nabla \mathcal{L}(\theta_t)\|^2$$
+    </p>
+    <div class="callout callout-danger">
+        <strong>Divergence Criterion:</strong> To guarantee descent ($\mathcal{L}(\theta_{t+1}) < \mathcal{L}(\theta_t)$), we must have $1 - \frac{L\eta}{2} > 0$, which strictly requires:
+        $$\eta < \frac{2}{L}$$
+        The optimal convergence rate occurs at $\eta^* = \frac{1}{L}$. If $\eta \ge \frac{2}{L}$, iterates oscillate with exponentially increasing amplitude and explode to infinity.
+    </div>
+
+    <h2>6. Implicit Regularization of Gradient Noise</h2>
+    <p>
+        In Mini-Batch SGD, the stochastic update can be modeled as Langevin dynamics:
+        $$d\theta_t = -\nabla \mathcal{L}(\theta_t) dt + \sqrt{2 D} dW_t, \quad D \propto \frac{\eta}{B} \Sigma$$
+        The effective noise temperature $T_{\text{temp}} \propto \frac{\eta}{B}$ dislodges parameters from sharp minima (which have high curvature and poor test generalization) into broad, flat basins (which generalize well).
+    </p>
+
+    <h2>7. Learning Rate Schedules</h2>
+    <p>
+        To ensure convergence under stochastic noise, the step size sequence must satisfy the <strong>Robbins-Monro</strong> conditions: $\sum_{t=1}^\infty \eta_t = \infty$ and $\sum_{t=1}^\infty \eta_t^2 < \infty$.
+    </p>
+    <ul>
+        <li><strong>Cosine Annealing:</strong> $\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})\left(1 + \cos\left(\frac{t}{T_{\max}}\pi\right)\right)$</li>
+        <li><strong>Exponential Decay:</strong> $\eta_t = \eta_0 e^{-kt}$</li>
+        <li><strong>Linear Warmup:</strong> $\eta_t = \eta_{\max} \frac{t}{T_{\text{warmup}}}$ for $t \le T_{\text{warmup}}$, essential for Transformer stability.</li>
+    </ul>
+</body>
+</html>

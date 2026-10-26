@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 11: Neural Networks From Scratch — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.4rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-secondary {
+      background-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background-color: var(--text-muted); color: #fff; }
+
+    .code-box {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 2.5rem;
+    }
+    .code-box pre { margin: 0; }
+
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../README.md" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 1rem;">← Master Curriculum Index</a>
+    <br>
+    <span class="badge">Phase 11</span>
+    <h1>Neural Networks From Scratch</h1>
+    <p class="lead">From artificial neurons and batch vectorization to vanishing gradients, cross-entropy cancellation, and building an end-to-end Multi-Layer Perceptron in pure Python.</p>
+  </header>
+
+  <main>
+    <!-- Topic 11.1 -->
+    <div class="topic-card">
+      <h2>01. Forward Propagation &amp; Neural Network Architectures</h2>
+      <p>The artificial neuron ($z = \mathbf{w}^T \mathbf{x} + b$), biological analogy vs mathematical reality, multi-layer feedforward architecture, batch vectorization ($Z^{[l]} = A^{[l-1]} W^{[l]T} + b^{[l]}$), tensor shape bookkeeping, and the Universal Approximation Theorem.</p>
+      <div class="topic-links">
+        <a href="01_forward_propagation_and_architectures/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="01_forward_propagation_and_architectures/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="01_forward_propagation_and_architectures/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 11.2 -->
+    <div class="topic-card">
+      <h2>02. Activation Functions &amp; The Vanishing Gradient Problem</h2>
+      <p>Mathematical proof of linear collapse ($W_{\text{eff}} \mathbf{x} + \mathbf{b}_{\text{eff}}$), comprehensive activation taxonomy (Sigmoid, Tanh, ReLU, LeakyReLU, GELU, SiLU/SwiGLU), first derivatives, the exponential vanishing gradient problem ($0.25^L \to 0$), and the Dead ReLU pathology.</p>
+      <div class="topic-links">
+        <a href="02_activation_functions_and_vanishing_gradients/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="02_activation_functions_and_vanishing_gradients/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="02_activation_functions_and_vanishing_gradients/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 11.3 -->
+    <div class="topic-card">
+      <h2>03. Loss Functions &amp; Analytical Derivatives</h2>
+      <p>Mean Squared Error (MSE), Binary Cross-Entropy (BCE), Softmax Categorical Cross-Entropy, analytical gradient derivations, the universal error cancellation ($\hat{\mathbf{y}} - \mathbf{y}$), Focal Loss for class imbalance, and non-convex loss landscape topology.</p>
+      <div class="topic-links">
+        <a href="03_loss_functions_and_derivatives/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="03_loss_functions_and_derivatives/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="03_loss_functions_and_derivatives/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 11.4 -->
+    <div class="topic-card">
+      <h2>04. Multilayer Perceptrons From Scratch</h2>
+      <p>Complete Multi-Layer Perceptron implementation in pure Python. Xavier/Glorot initialization, cached forward propagation, analytical backpropagation via chain rule, overcoming the historic Minsky &amp; Papert XOR barrier ($50\% \to 100\%$ accuracy), and non-linear concentric circles classification.</p>
+      <div class="topic-links">
+        <a href="04_multilayer_perceptron_from_scratch/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="04_multilayer_perceptron_from_scratch/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="04_multilayer_perceptron_from_scratch/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Execution Box -->
+    <div class="code-box">
+      <div style="color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Run Labs from Terminal (Pure Python 3, Zero Dependencies)</div>
+      <pre><code># Topic 11.1: Dense layer &amp; batch forward pass verification
+python3 phase_11_neural_networks_from_scratch/01_forward_propagation_and_architectures/experiment.py
+
+# Topic 11.2: Activation function engine &amp; 10-layer gradient flow
+python3 phase_11_neural_networks_from_scratch/02_activation_functions_and_vanishing_gradients/experiment.py
+
+# Topic 11.3: Loss functions (MSE, BCE, Softmax CCE) &amp; finite-difference gradients
+python3 phase_11_neural_networks_from_scratch/03_loss_functions_and_derivatives/experiment.py
+
+# Topic 11.4: End-to-end MLP engine on XOR &amp; concentric circles (100% accuracy)
+python3 phase_11_neural_networks_from_scratch/04_multilayer_perceptron_from_scratch/experiment.py</code></pre>
+    </div>
+  </main>
+
+  <footer>
+    <div>AI Complete Curriculum &bull; Phase 11 Portal</div>
+    <div>Zero external dependencies &bull; First-principles mathematics</div>
+  </footer>
+
+</body>
+</html>

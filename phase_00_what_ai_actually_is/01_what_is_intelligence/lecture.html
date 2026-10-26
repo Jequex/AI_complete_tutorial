@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 0.1: What is Intelligence? — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for beautiful math typography -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-callout: #f0fdf4;
+      --border-callout: #22c55e;
+      --bg-tech: #eff6ff;
+      --border-tech: #3b82f6;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-callout: #064e3b33;
+        --border-callout: #10b981;
+        --bg-tech: #1e3a8a33;
+        --border-tech: #60a5fa;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+    
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
+
+    p, li { font-size: 1.05rem; }
+    
+    /* Callouts */
+    .callout {
+      border-left: 4px solid;
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-kid {
+      background-color: var(--bg-callout);
+      border-color: var(--border-callout);
+    }
+    .callout-tech {
+      background-color: var(--bg-tech);
+      border-color: var(--border-tech);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Pre & Code */
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    code {
+      background-color: var(--code-bg);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.9em;
+    }
+    pre code { background: none; padding: 0; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    /* Navigation buttons */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    ul, ol { padding-left: 1.5rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 00</a> &gt; <span>Topic 0.1</span>
+    </div>
+    <h1>Topic 0.1: What is Intelligence?</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Foundations of computation, learning vs. memorization, agents, and Markov decision processes.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Intelligence vs. Computation: The Calculator Paradox</h2>
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The 12-Year-Old Analogy: The Pocket Calculator vs. Barnaby the Puppy</div>
+        <p>Imagine you hold a $5 solar calculator in your left hand, and your 6-month-old golden retriever puppy named Barnaby is sitting on your right.</p>
+        <p>You punch in <code>492,847 × 839,201</code> into the calculator. In 0.0001 seconds, the screen flashes <code>413,598,348,247</code>. It is 100% correct. No human on Earth can do that in a millisecond.</p>
+        <p>Now, drop a plastic cup on the floor. The calculator lies there motionless. It has zero idea anything happened. If you toss the calculator across the room, it won't react or protect itself. It simply executes rigid copper circuits etched into silicon.</p>
+        <p>The puppy, on the other hand, hears the clatter, predicts where the cup is rolling, dodges chair legs, catches the bouncing cup in its mouth, and brings it back to you wagging its tail.</p>
+        <p><strong>Which one is truly intelligent?</strong></p>
+      </div>
+
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 The Deep Technical Reality</div>
+        <p><strong>Computation</strong> is the mechanical execution of predetermined instructions:</p>
+        <p>$$f(x) \longrightarrow y$$</p>
+        <p>A standard computer program is a fixed algorithm. Given an input $x$, it executes steps written by a human programmer. If the universe presents an input $x'$ that the programmer never anticipated, the program crashes (e.g. <code>NullPointerException</code>) or fails silently.</p>
+        <p><strong>Intelligence</strong> is the capacity of an autonomous system to achieve goals across a wide variety of uncertain, dynamically changing environments.</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Pure Computation (Calculator / Static Script)</th>
+            <th>Genuine Intelligence (Animal / AI Agent)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Response to Novelty</strong></td>
+            <td>Fails or crashes on unexpected inputs</td>
+            <td>Adapts, generalizes, and finds a workaround</td>
+          </tr>
+          <tr>
+            <td><strong>Source of Behavior</strong></td>
+            <td>Explicit instructions hardcoded by human programmer</td>
+            <td>Learned internal representations from data/interaction</td>
+          </tr>
+          <tr>
+            <td><strong>Goal Orientation</strong></td>
+            <td>None (blindly executes instruction $k$ after $k-1$)</td>
+            <td>Optimizes towards a defined objective or reward</td>
+          </tr>
+          <tr>
+            <td><strong>Error Handling</strong></td>
+            <td>Blindly repeats errors unless reprogrammed</td>
+            <td>Detects failure, updates internal parameters, improves</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>2. Learning vs. Memorization: The "Cheat Sheet" Trap</h2>
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The 12-Year-Old Analogy: Timmy vs. Maya's Math Test</div>
+        <p>Imagine two students preparing for an algebra exam:</p>
+        <ul>
+          <li><strong>Timmy</strong> memorizes the textbook's answer key by heart. He memorizes 100 specific practice questions: <em>"Question 14 is 42. Question 15 is 108."</em></li>
+          <li><strong>Maya</strong> ignores the specific numbers. Instead, she figures out the hidden rules: <em>"Whenever there is an unknown $x$ inside parentheses, I isolate $x$ by balancing both sides."</em></li>
+        </ul>
+        <p>On test day, the teacher generates brand-new numbers:</p>
+        <ul>
+          <li>Timmy panics. He has never seen these exact numbers before. He fails with 0%.</li>
+          <li>Maya smiles. The numbers are new, but the <strong>pattern</strong> is identical. She aces the exam with 100%.</li>
+        </ul>
+        <p>In AI, Timmy is doing <strong>Overfitting (Rote Memorization)</strong>. Maya is doing <strong>Generalization (True Learning)</strong>.</p>
+      </div>
+
+      <h3>The Mathematical Formulation of Generalization: The Flashcard Story</h3>
+      
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 Step 1: The Magical Sack of Flashcards</div>
+        <p>Imagine a magical, bottomless sack filled with every photo of an animal that could ever exist in the universe. This sack is called $\mathcal{D}$ (the <strong>Data Distribution</strong>).</p>
+        <p>When you reach your hand into the sack and pull out one random flashcard, mathematicians write:</p>
+        <p>$$(x, y) \sim \mathcal{D}$$</p>
+        <ul>
+          <li><strong>$x$ (The Front):</strong> The picture of whiskers, fur, and pointy ears.</li>
+          <li><strong>$y$ (The Back):</strong> The true answer written on the back: "Cat".</li>
+          <li><strong>$\sim$ (The Pull):</strong> Pronounced <em>"is drawn from"</em>. It just means reaching into the bag!</li>
+        </ul>
+      </div>
+
+      <h4>Step 2: The Practice Homework Set ($S$)</h4>
+      <p>Before the exam, the teacher pulls out $N$ cards from the sack and gives them to you for homework:</p>
+      <p>$$S = \{(x_1, y_1), (x_2, y_2), \dots, (x_N, y_N)\}$$</p>
+      <p>Here, $N$ is just how many practice cards you got (e.g., $N=10$). Timmy memorizes these 10 exact cards using a cheat sheet $h(x_i) = y_i$.</p>
+
+      <h4>Step 3: Homework Error (Empirical Risk): $\widehat{\mathcal{R}}(h)$</h4>
+      <p>How many mistakes does Timmy make on his practice homework?</p>
+      <p>$$\widehat{\mathcal{R}}(h) = \frac{1}{N} \sum_{i=1}^N \mathbb{I}(h(x_i) \neq y_i)$$</p>
+      
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Deconstructing the Homework Error Formula</div>
+        <ul>
+          <li><strong>The Hat ($\,\widehat{}\,$):</strong> In math, a little hat over a letter ($\widehat{\mathcal{R}}$) means <em>"an estimate measured on our small sample"</em> (Empirical).</li>
+          <li><strong>The Game Buzzer $\mathbb{I}(\text{mistake})$:</strong> $\mathbb{I}$ is called the <strong>Indicator Function</strong>. Think of it as a game-show buzzer:
+            $$\mathbb{I}(\text{mistake}) = \begin{cases} 1 & \text{if your model is WRONG } (h(x) \neq y) \longrightarrow \text{BUZZ!} \\ 0 & \text{if your model is RIGHT } (h(x) = y) \longrightarrow \text{Silence} \end{cases}$$
+          </li>
+          <li><strong>The Sum $\sum_{i=1}^N$:</strong> Count up how many times the buzzer buzzed across all $N$ practice cards.</li>
+          <li><strong>Divide by $N$:</strong> Gives the fraction of mistakes. Since Timmy memorized all 10 cards, his buzzer never goes off: $\widehat{\mathcal{R}}(h) = \frac{0}{10} = \mathbf{0\% \text{ error (A+ on homework!)}}$.</li>
+        </ul>
+      </div>
+
+      <h4>Step 4: Real-World Exam Error (True Generalization Risk): $\mathcal{R}(h)$</h4>
+      <p>Now comes the real test day. The teacher pulls out brand-new flashcards from sack $\mathcal{D}$ that were <strong>never</strong> in the practice homework:</p>
+      <p>$$\mathcal{R}(h) = \mathbb{E}_{(x,y)\sim \mathcal{D}} [\mathbb{I}(h(x) \neq y)]$$</p>
+      <ul>
+        <li><strong>What is $\mathbb{E}$?</strong> $\mathbb{E}$ stands for <strong>Expected Value</strong>—the fancy math word for <strong>true long-term average</strong>. It means: <em>"If you were tested on millions of unseen cards from the sack, what percentage would you get wrong on average?"</em></li>
+        <li><strong>Timmy's Total Failure:</strong> Because Timmy only memorized the 10 homework cards, when a new card appears that wasn't on his cheat sheet, he gets it wrong: $\mathcal{R}(h) \approx \mathbf{100\% \text{ error}}$.</li>
+      </ul>
+
+      <h4>Step 5: The Generalization Gap</h4>
+      <p><strong>The goal of AI is never to achieve 0% training homework error.</strong> The true goal is to minimize the <strong>Generalization Gap</strong>:</p>
+      <p>$$\text{Generalization Gap} = \left| \underbrace{\mathcal{R}(f)}_{\text{Real-world exam error}} - \underbrace{\widehat{\mathcal{R}}(f)}_{\text{Homework practice error}} \right| \longrightarrow 0$$</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Pronunciation</th>
+            <th>Plain English Meaning</th>
+            <th>Concrete Flashcard Analogy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$\mathcal{D}$</td>
+            <td>"Script D"</td>
+            <td><strong>The Data Universe</strong></td>
+            <td>The bottomless sack of all possible animal photos</td>
+          </tr>
+          <tr>
+            <td>$(x, y)$</td>
+            <td>"$x$ comma $y$"</td>
+            <td><strong>Input-Output Pair</strong></td>
+            <td>Front of card ($x$ = photo); Back ($y$ = label "Cat")</td>
+          </tr>
+          <tr>
+            <td>$\sim$</td>
+            <td>"drawn from"</td>
+            <td><strong>Sampled from</strong></td>
+            <td>Reaching into the sack and pulling out a card</td>
+          </tr>
+          <tr>
+            <td>$S$</td>
+            <td>"Set S"</td>
+            <td><strong>Training Dataset</strong></td>
+            <td>The 10 practice cards on your homework desk</td>
+          </tr>
+          <tr>
+            <td>$\mathbb{I}(\dots)$</td>
+            <td>"Indicator function"</td>
+            <td><strong>The Game Buzzer</strong></td>
+            <td>$1$ (BUZZ!) if wrong; $0$ (Silence) if correct</td>
+          </tr>
+          <tr>
+            <td>$\widehat{\mathcal{R}}$</td>
+            <td>"R-hat"</td>
+            <td><strong>Practice Error (Empirical Risk)</strong></td>
+            <td>Percentage of practice homework cards gotten wrong</td>
+          </tr>
+          <tr>
+            <td>$\mathbb{E}$</td>
+            <td>"Expected value"</td>
+            <td><strong>True Long-Term Average</strong></td>
+            <td>Average error rate over millions of future questions</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{R}$</td>
+            <td>"True Risk"</td>
+            <td><strong>Real-World Exam Error</strong></td>
+            <td>How many mistakes you make on brand-new exam cards</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Reasoning vs. Pattern Recognition</h2>
+      <ul>
+        <li><strong>Pattern Recognition (System 1 Thinking):</strong> Instantaneous, intuitive mapping ($O(1)$ time). Look at a photo of a dog; within 100 milliseconds your brain recognizes it. You do not calculate ear-to-snout ratios.</li>
+        <li><strong>Reasoning (System 2 Thinking):</strong> Multi-step deliberative inference ($O(K)$ computation steps). For example, solving a chess puzzle, deriving a mathematical proof, or planning a multi-day itinerary.</li>
+      </ul>
+      <p>Classic neural networks excel at fast sensory pattern recognition. The modern frontier of AI (such as reasoning models like OpenAI o1/o3) aims to integrate System 2 step-by-step search and verification into deep architectures.</p>
+    </section>
+
+    <section>
+      <h2>4. Symbolic AI vs. Statistical AI</h2>
+      <p>Historically, AI researchers split into two competing camps:</p>
+      <ol>
+        <li><strong>Symbolic AI (GOFAI — Good Old-Fashioned AI):</strong> Represents knowledge through explicit logic and human-written <code>IF-THEN</code> rules. Highly interpretable, but brittle and impossible to scale to complex perceptual domains.</li>
+        <li><strong>Statistical AI (Connectionism & Machine Learning):</strong> Represents knowledge as continuous numerical weights tuned via optimization. Learns high-dimensional patterns directly from raw data distributions.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>5. The Agent-Environment Loop & Markov Decision Processes</h2>
+      <p>The most general mathematical framework for intelligence is the <strong>Intelligent Agent</strong> interacting with an environment:</p>
+      
+      <pre>
+                    ┌─────────────────────────┐
+                    │          AGENT          │
+                    │   ┌─────────────────┐   │
+                    │   │  Internal State │   │
+                    │   │     Policy π    │   │
+                    │   └─────────────────┘   │
+                    └────┬───────────────▲────┘
+                         │               │
+                  Action │               │ Observation o_t
+                    a_t  │               │ & Reward r_t
+                         │               │
+                    ┌────▼───────────────┴────┐
+                    │       ENVIRONMENT       │
+                    │    State s_t → s_{t+1}  │
+                    └─────────────────────────┘
+      </pre>
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The 12-Year-Old Analogy: Super Mario Plays Video Games</div>
+        <p>Whenever you hear <strong>Markov Decision Process (MDP)</strong> or see $\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma \rangle$, do not panic! It is literally just the blueprint for a <strong>video game</strong>:</p>
+        <ol>
+          <li><strong>The Screen Layout ($\mathcal{S}$ - State):</strong> Mario at position $x=50$, a green pipe at $x=70$, and a Goomba walking left.</li>
+          <li><strong>The Controller Buttons ($\mathcal{A}$ - Action):</strong> Left, Right, Jump, Crouch, Do Nothing.</li>
+          <li><strong>The Physics Engine ($\mathcal{P}$ - Transitions):</strong> If you push "Jump" on grass, Mario leaps up. If you push "Right" on ice, Mario slides!</li>
+          <li><strong>The Scoreboard ($\mathcal{R}$ - Reward):</strong> $+10$ points for a coin, $+100$ for stomping a Goomba, $-500$ for falling down a pit.</li>
+          <li><strong>The Marshmallow Dial ($\gamma$ - Gamma):</strong> Does the player grab 1 coin right now, or wait to reach the giant flagpole (+1000) at the end of the stage?</li>
+        </ol>
+      </div>
+
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Mathematical Dissection of the 5-Tuple: $\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma \rangle$</div>
+        <ul>
+          <li><strong>$\mathcal{S}$ (State Space):</strong> The set of all possible configurations of the world. In Tic-Tac-Toe, $|\mathcal{S}| = 5,478$. In chess, $|\mathcal{S}| \approx 10^{43}$.</li>
+          <li><strong>$\mathcal{A}$ (Action Space):</strong> The set of legal moves available to the agent.</li>
+          <li><strong>$\mathcal{P}(s' \mid s, a)$ (Transition Probability):</strong>
+            $$\mathcal{P}(s' \mid s, a) = \mathbb{P}(S_{t+1} = s' \mid S_t = s, A_t = a)$$
+            Read the vertical bar ($\mid$) as <em>"GIVEN THAT"</em>: <em>"The probability of landing on screen $s'$, given you were on screen $s$ and pushed button $a$."</em> It's a probability because wheels can slip on ice or mud!
+          </li>
+          <li><strong>$\mathcal{R}(s, a, s')$ (Reward Function):</strong> The numerical feedback score awarded by the environment.</li>
+          <li><strong>$\gamma \in [0, 1)$ (Discount Factor "Gamma"):</strong> Measures impatience. Total discounted return $G_t$ is:
+            $$G_t = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \dots = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1}$$
+          </li>
+        </ul>
+      </div>
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 Concrete Arithmetic: Short-Sighted vs. Far-Sighted Agents</div>
+        <p>Suppose Mario collects $+10$ points on step 1, $+10$ points on step 2, and $+100$ points on step 3:</p>
+        <ul>
+          <li><strong>Short-Sighted ($\gamma = 0.5$):</strong>
+            $$G_0 = 10 + (0.5 \times 10) + (0.5^2 \times 100) = 10 + 5 + (0.25 \times 100) = 10 + 5 + 25 = \mathbf{40}$$
+            The distant $+100$ prize was squashed down to only $25$!
+          </li>
+          <li><strong>Far-Sighted ($\gamma = 0.9$):</strong>
+            $$G_0 = 10 + (0.9 \times 10) + (0.9^2 \times 100) = 10 + 9 + (0.81 \times 100) = 10 + 9 + 81 = \mathbf{100}$$
+            The patient agent values the big goal and makes long-term plans.
+          </li>
+        </ul>
+      </div>
+
+      <h3>The Strategy Playbook: Policy $\pi(a \mid s)$</h3>
+      <p>The agent's decision logic is its <strong>Policy</strong> $\pi$ (the Greek letter "Pi"):</p>
+      <p>$$\pi(a \mid s) = \mathbb{P}(A_t = a \mid S_t = s)$$</p>
+      <p>It is Mario's strategy playbook: <em>"When an enemy is 2 feet away ($s$), push Jump ($a$) with 95% probability, and Stand Still with 5% probability."</em></p>
+
+      <h3>The Ultimate Goal of AI: Finding $\pi^*$</h3>
+      <p>In reinforcement learning, training finds the <strong>Optimal Policy</strong> $\pi^*$:</p>
+      <p>$$\pi^* = \arg\max_\pi \mathbb{E}_{\pi} \left[ \sum_{t=0}^\infty \gamma^t R_{t+1} \right]$$</p>
+      
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Deconstructing $\arg\max$</div>
+        <ul>
+          <li><strong>$\max$</strong> asks: <em>"What is the highest high-score possible in this game?"</em> (e.g. 9,990 points).</li>
+          <li><strong>$\arg\max_\pi$</strong> asks: <em>"WHICH strategy playbook $\pi$ achieved that high score?"</em> (e.g. "Playbook #4").</li>
+          <li><strong>$\mathbb{E}_\pi [\dots]$</strong>: The average points won when following that playbook.</li>
+          <li><strong>In Plain English:</strong> <strong>"Find the playbook $\pi$ that wins the highest total points across the game!"</strong></li>
+        </ul>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Pronunciation</th>
+            <th>Plain English Meaning</th>
+            <th>Video Game Analogy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$\mathcal{S}$</td>
+            <td>"Script S"</td>
+            <td><strong>State Space</strong></td>
+            <td>All possible screen layouts in the game</td>
+          </tr>
+          <tr>
+            <td>$s_t$</td>
+            <td>"s sub t"</td>
+            <td><strong>Current State</strong></td>
+            <td>Where Mario and Goombas are right now</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{A}$</td>
+            <td>"Script A"</td>
+            <td><strong>Action Space</strong></td>
+            <td>All buttons on the controller (Jump, Left, Right)</td>
+          </tr>
+          <tr>
+            <td>$a_t$</td>
+            <td>"a sub t"</td>
+            <td><strong>Chosen Action</strong></td>
+            <td>Pushing the "Jump" button at frame $t$</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{P}(s' \mid s, a)$</td>
+            <td>"P of s-prime given s, a"</td>
+            <td><strong>Transition Physics</strong></td>
+            <td>Chance of landing on tile $s'$ after jumping on ice</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{R}(s, a, s')$</td>
+            <td>"Reward function"</td>
+            <td><strong>Game Scoreboard</strong></td>
+            <td>$+10$ for coin, $-500$ for falling down a pit</td>
+          </tr>
+          <tr>
+            <td>$\gamma$</td>
+            <td>"Gamma"</td>
+            <td><strong>Discount Factor</strong></td>
+            <td>Impatience dial ($0$ = short-sighted, $0.99$ = patient)</td>
+          </tr>
+          <tr>
+            <td>$G_t$</td>
+            <td>"Return at time t"</td>
+            <td><strong>Cumulative Score</strong></td>
+            <td>Total discounted points until game over</td>
+          </tr>
+          <tr>
+            <td>$\pi(a \mid s)$</td>
+            <td>"Policy pi of a given s"</td>
+            <td><strong>Strategy Playbook</strong></td>
+            <td>"When enemy nears, Jump 95% of the time"</td>
+          </tr>
+          <tr>
+            <td>$\pi^*$</td>
+            <td>"Pi-star"</td>
+            <td><strong>Optimal Policy</strong></td>
+            <td>The world-record speedrun playbook</td>
+          </tr>
+          <tr>
+            <td>$\arg\max_\pi$</td>
+            <td>"arg-max over pi"</td>
+            <td><strong>Pick the winning playbook</strong></td>
+            <td>Selects the exact strategy that gets the high score</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="nav-buttons">
+      <a href="../index.html" class="btn">← Phase 00 Overview</a>
+      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

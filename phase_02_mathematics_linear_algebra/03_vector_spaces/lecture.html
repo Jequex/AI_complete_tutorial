@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 2.3: Vector Spaces, Span, Basis, and Rank — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-callout: #f0fdf4;
+      --border-callout: #22c55e;
+      --bg-tech: #eff6ff;
+      --border-tech: #3b82f6;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-callout: #064e3b33;
+        --border-callout: #10b981;
+        --bg-tech: #1e3a8a33;
+        --border-tech: #60a5fa;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
+
+    .callout {
+      border-left: 4px solid;
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-kid {
+      background-color: var(--bg-callout);
+      border-color: var(--border-callout);
+    }
+    .callout-tech {
+      background-color: var(--bg-tech);
+      border-color: var(--border-tech);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    code {
+      background-color: var(--code-bg);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.9em;
+    }
+    pre code { background: none; padding: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.3</span>
+    </div>
+    <h1>Topic 2.3: Vector Spaces, Span, Basis, and Rank</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Deconstructing vector spaces, linear independence, the Column and Null spaces, and Rank-Nullity in AI.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. The 12-Year-Old Analogy: The Redundant Teammate</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The Video Game Team</div>
+        <p>Imagine your squad is exploring a 2D map:</p>
+        <ul>
+          <li><strong>Player 1</strong> can only move East/West ($[1, 0]$).</li>
+          <li><strong>Player 2</strong> can only move North/South ($[0, 1]$).</li>
+        </ul>
+        <p>Together, they can reach <strong>every single square on the map</strong> by combining steps!</p>
+        <p>Now, <strong>Player 3</strong> arrives, moving Northeast ($[1, 1]$). Does Player 3 let the team reach any new ground? <strong>No!</strong> Player 3 is a combination of Player 1 and Player 2:</p>
+        <p>$$\begin{bmatrix} 1 \\ 1 \end{bmatrix} = 1 \cdot \begin{bmatrix} 1 \\ 0 \end{bmatrix} + 1 \cdot \begin{bmatrix} 0 \\ 1 \end{bmatrix}$$</p>
+        <p>Player 3 is <strong>linearly dependent (redundant)</strong>!</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Linear Combinations &amp; Span</h2>
+      <p>A linear combination scales and sums vectors: $\mathbf{w} = \sum_{i=1}^k c_i \mathbf{v}_i$.</p>
+      <p>The <strong>Span</strong> is the entire geometric region reachable by all possible combinations:</p>
+      <p>$$\text{Span}(\mathbf{v}_1, \dots, \mathbf{v}_k) = \left\{ \sum_{i=1}^k c_i \mathbf{v}_i \;\middle|\; c_i \in \mathbb{R} \right\}$$</p>
+    </section>
+
+    <section>
+      <h2>3. Linear Independence &amp; Basis</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Formal Definition of Independence</div>
+        <p>Vectors $\{\mathbf{v}_1, \dots, \mathbf{v}_k\}$ are linearly independent if and only if:</p>
+        <p>$$c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_k \mathbf{v}_k = \mathbf{0} \implies c_1 = c_2 = \dots = c_k = 0$$</p>
+        <p>A <strong>Basis</strong> is the minimal set of linearly independent vectors that spans the entire space. The <strong>Dimension</strong> is the count of basis vectors.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. The Column Space &amp; Null Space of Matrix $A$</h2>
+      <pre>
+       INPUT SPACE (ℝⁿ)                               OUTPUT SPACE (ℝᵐ)
+       
+       ┌────────────────────────┐                    ┌────────────────────────┐
+       │                        │                    │                        │
+       │    x ──────────────────┼── Matrix A ───────►│  Ax ∈ C(A)             │
+       │                        │                    │  (Column Space)        │
+       │   [ Null Space N(A) ]  │                    │                        │
+       │   all inputs squashed  │                    │                        │
+       │   straight to zero! ───┼── Matrix A ───────►│  0 (Origin)            │
+       │                        │                    │                        │
+       └────────────────────────┘                    └────────────────────────┘
+      </pre>
+
+      <ul>
+        <li><strong>Column Space $\mathcal{C}(A)$:</strong> The span of all column vectors. It is the set of all possible outputs $A\mathbf{x}$.</li>
+        <li><strong>Null Space $\mathcal{N}(A)$:</strong> The set of all input vectors squashed to zero: $\{\mathbf{x} \mid A\mathbf{x} = \mathbf{0}\}$.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. The Rank-Nullity Theorem &amp; LoRA</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Conservation of Dimensions</div>
+        <p>$$\boxed{\text{Rank}(A) + \text{Nullity}(A) = n}$$</p>
+        <p>where $n$ is the number of input columns. Every dimension either survives into the output or collapses into the null space.</p>
+      </div>
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 Real AI Application: LoRA (Low-Rank Adaptation)</div>
+        <p>In a 70B parameter LLM, updating full $4096 \times 4096$ matrices requires 16.7 million numbers per layer. By factoring the update into a low-rank matrix product $\Delta W = B \cdot A$ with rank $r = 16$, we only train $131,072$ numbers—a <strong>99.2% parameter reduction</strong>!</p>
+      </div>
+    </section>
+
+    <div class="nav-buttons">
+      <a href="../02_linear_transformations/exercises_and_solutions.html" class="btn">← Topic 2.2</a>
+      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

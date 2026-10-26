@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 30.1: Exercises &amp; Solutions — The Inference Bottleneck &amp; Roofline Model</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 30.1 Lecture</a>
+    <h1>Topic 30.1: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering the Roofline Model, arithmetic intensity of generation, and KV cache memory budgeting.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Roofline Analysis of Prefill vs. Decode on NVIDIA H100</h3>
+      <p>
+        An inference engine serves a 13B parameter dense Transformer in FP16 ($M_{\text{weights}} = 26 \text{ GB}$) on an NVIDIA H100 SXM5 GPU ($P_{\text{peak}} = 989 \text{ TFLOP/s}$, $B_{\text{mem}} = 3.35 \text{ TB/s}$).
+      </p>
+      <ol>
+        <li>Calculate the ridge point $I^* = P_{\text{peak}} / B_{\text{mem}}$.</li>
+        <li>For a single prefill request of $S = 2048$ tokens ($b = 1$), compute operational intensity $I_{\text{prefill}}$, attainable performance $P$, and latency. Classify whether it is memory-bound or compute-bound.</li>
+        <li>For decode with $b = 1$, compute operational intensity $I_{\text{decode}}$, attainable performance $P$, time per token, and GPU compute utilization.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Ridge Point Calculation</h4>
+          $$I^* = \frac{989 \times 10^{12} \text{ FLOP/s}}{3.35 \times 10^{12} \text{ Bytes/s}} \approx \mathbf{295.22 \text{ FLOPs/Byte}}$$
+
+          <h4>2. Prefill Phase ($b = 1, S = 2048$)</h4>
+          <p>Total compute: $2 \times (13 \times 10^9) \times 2048 = 53.248 \text{ TFLOPs}$.</p>
+          <p>Memory streamed: $26 \text{ GB}$.</p>
+          $$I_{\text{prefill}} = \frac{53.248 \times 10^{12} \text{ FLOPs}}{26 \times 10^9 \text{ Bytes}} = \mathbf{2048 \text{ FLOPs/Byte}}$$
+          <p>Since $I_{\text{prefill}} = 2048 > I^* = 295.22$, prefill is <strong>Compute-Bound</strong>.</p>
+          <p>Attainable speed $P = P_{\text{peak}} = 989 \text{ TFLOP/s}$. Latency $T_{\text{prefill}} = 53.248 / 989 \approx \mathbf{53.8 \text{ ms}}$.</p>
+
+          <h4>3. Decode Phase ($b = 1, s = 1$)</h4>
+          <p>Total compute: $2 \times (13 \times 10^9) \times 1 = 0.026 \text{ TFLOPs}$.</p>
+          <p>Memory streamed: $26 \text{ GB}$ (the weights must be loaded to generate 1 token!).</p>
+          $$I_{\text{decode}} = \frac{0.026 \times 10^{12} \text{ FLOPs}}{26 \times 10^9 \text{ Bytes}} = \mathbf{1.0 \text{ FLOP/Byte}}$$
+          <p>Since $I_{\text{decode}} = 1.0 \ll I^*$, decode is <strong>Memory-Bandwidth Bound</strong>.</p>
+          <p>Attainable speed $P = B_{\text{mem}} \cdot I = 3.35 \text{ TFLOP/s}$.</p>
+          <p>Time per token $T_{\text{decode}} = 26 \text{ GB} / 3.35 \text{ TB/s} \approx \mathbf{7.76 \text{ ms}}$ ($128.8 \text{ tokens/sec}$).</p>
+          <p>GPU Tensor Core Utilization: $\frac{3.35}{989} \approx \mathbf{0.339\%}$. Over $99.6\%$ of hardware compute is idle!</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: KV Cache Memory Scaling and Max Concurrent Batch Capacity</h3>
+      <p>
+        Consider LLaMA-2-70B ($n_{\text{layers}} = 80, n_{\text{heads}} = 64, d_{\text{head}} = 128$) served in FP16 ($e = 2$ bytes).
+      </p>
+      <ol>
+        <li>Compute the memory per token under Grouped-Query Attention ($n_{\text{kv\_heads}} = 8$) versus Multi-Head Attention ($n_{\text{kv\_heads}} = 64$).</li>
+        <li>On an 8-GPU cluster with 640 GB total VRAM, model weights take 140 GB, and system overhead takes 40 GB. For an average sequence length of $s = 4096$, compute the maximum concurrent batch size $b_{\text{max}}$ under GQA.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. KV Memory per Token</h4>
+          $$\text{Bytes/token (GQA)} = 4 \cdot n_{\text{layers}} \cdot n_{\text{kv\_heads}} \cdot d_{\text{head}} = 4 \times 80 \times 8 \times 128 = \mathbf{327,680 \text{ Bytes}} = \mathbf{320 \text{ KB}}$$
+          $$\text{Bytes/token (MHA)} = 4 \times 80 \times 64 \times 128 = \mathbf{2,621,440 \text{ Bytes}} = \mathbf{2560 \text{ KB}} = \mathbf{2.5 \text{ MB}}$$
+          <p>GQA provides an exact $\frac{64}{8} = \mathbf{8.0\times}$ memory reduction.</p>
+
+          <h4>2. Maximum Batch Size $b_{\text{max}}$</h4>
+          <p>Available memory for KV cache: $640 - 140 - 40 = \mathbf{460 \text{ GB}}$.</p>
+          <p>Per-sequence memory at $s = 4096$: $327,680 \times 4096 = 1,342,177,280 \text{ Bytes} \approx \mathbf{1.342 \text{ GB}}$.</p>
+          $$b_{\text{max}} = \left\lfloor \frac{460 \times 10^9}{1,342,177,280} \right\rfloor = \mathbf{342 \text{ concurrent sequences}}$$
+          <p>Under MHA, each sequence would take $10.74 \text{ GB}$, capping capacity at only 42 sequences.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Analytical Derivation of the Critical Compute-Saturation Batch Size</h3>
+      <p>
+        Prove that the minimal batch size $b^*$ required to transition an LLM decode phase from memory-bound to compute-bound on modern accelerators is approximately $b^* \approx P_{\text{peak}} / B_{\text{mem}}$.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p>At each decode step for batch size $b$, FLOPs are $2 \cdot b \cdot N_{\text{params}}$.</p>
+          <p>Memory loaded is dominated by weights $e \cdot N_{\text{params}}$ (when context length is moderate):</p>
+          $$I(b) = \frac{\text{FLOPs}}{\text{Bytes}} \approx \frac{2 \cdot b \cdot N_{\text{params}}}{e \cdot N_{\text{params}}} = \frac{2 \cdot b}{e}$$
+          <p>For FP16 ($e = 2$ bytes), $I(b) \approx b \text{ FLOPs/Byte}$.</p>
+          <p>To enter the compute-bound regime, operational intensity must exceed the ridge point:</p>
+          $$I(b) \ge I^* \iff b \ge \frac{P_{\text{peak}}}{B_{\text{mem}}}$$
+          $$\boxed{b^* \approx \frac{P_{\text{peak}}}{B_{\text{mem}}}}$$
+          <p>For an H100 GPU, $b^* \approx 295$. Interactive systems rarely achieve this batch size due to tail latency SLA constraints and Poisson arrival variance.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.2: Exercises &amp; Solutions — VAEs &amp; ELBO</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.2: Exercises &amp; Solutions</h1>
+    <p>Analytical calculations, proofs of bound exactness, and the information-theoretic dynamics of posterior collapse in VAEs.</p>
+
+    <h2>Problem 1: Manual Calculation of Gaussian Prior KL Divergence (Easy)</h2>
+    <p>Given latent parameters $\boldsymbol{\mu} = [0.8, -1.2, 0.0]^\top$ and $\boldsymbol{\gamma} = \log \boldsymbol{\sigma}^2 = [-0.5, 0.4, 0.0]^\top$, compute the exact component-wise and total KL divergence against $\mathcal{N}(0, \mathbf{I}_3)$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Using $\text{KL}_j = -\frac{1}{2}(1 + \gamma_j - \mu_j^2 - \exp(\gamma_j))$:</p>
+        <ul>
+            <li><strong>Dim 1:</strong> $\text{KL}_1 = -0.5(1 - 0.5 - 0.64 - 0.60653) \approx 0.37327$</li>
+            <li><strong>Dim 2:</strong> $\text{KL}_2 = -0.5(1 + 0.4 - 1.44 - 1.49182) \approx 0.76591$</li>
+            <li><strong>Dim 3:</strong> $\text{KL}_3 = -0.5(1 + 0.0 - 0.0 - 1.0) = 0.0$ (Matches prior exactly)</li>
+        </ul>
+        <p><strong>Total KL Loss:</strong> $\mathcal{L}_{\text{KL}} \approx 0.37327 + 0.76591 + 0.0 \approx 1.13918$.</p>
+    </details>
+
+    <h2>Problem 2: Proving the Exactness of ELBO at True Posterior (Medium)</h2>
+    <p>Prove that $\text{ELBO} = \log p_\theta(x)$ if and only if $q_\phi(z \mid x) = p_\theta(z \mid x)$ almost everywhere.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>From the divergence decomposition:</p>
+        $$\log p_\theta(x) - \text{ELBO} = D_{\text{KL}}(q_\phi(z \mid x) \parallel p_\theta(z \mid x)) = \mathbb{E}_{q_\phi}\left[-\log \left(\frac{p_\theta(z \mid x)}{q_\phi(z \mid x)}\right)\right]$$
+        <p>Since $-\log u$ is strictly convex, Jensen's inequality yields:</p>
+        $$D_{\text{KL}}(q \parallel p) \ge -\log \left( \mathbb{E}_q\left[\frac{p(z|x)}{q(z|x)}\right] \right) = -\log(1) = 0$$
+        <p>Strict convexity ensures equality holds if and only if the ratio $\frac{p_\theta(z \mid x)}{q_\phi(z \mid x)} = 1$ almost everywhere. Thus, the bound is exact if and only if the variational distribution matches the true posterior.</p>
+    </details>
+
+    <h2>Problem 3: The $\beta$-VAE Formulation &amp; Posterior Collapse (Hard)</h2>
+    <p>Analyze the objective $\mathcal{L}_{\beta} = -\mathbb{E}_q[\log p(x|z)] + \beta D_{\text{KL}}(q \parallel p)$. Explain why an overly expressive autoregressive decoder causes posterior collapse.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>If the decoder $p_\theta(x \mid z) = \prod_t p_\theta(x_t \mid x_{<t})$ can model the entire distribution without relying on $z$, then $\nabla_\phi \mathbb{E}_q[\log p(x|z)] = 0$.</p>
+        <p>The encoder only receives gradients from the KL term $\beta D_{\text{KL}}(q_\phi(z|x) \parallel p(z))$. To minimize this term, the encoder collapses to the prior: $\boldsymbol{\mu}(x) = \mathbf{0}, \boldsymbol{\sigma}^2(x) = \mathbf{1}$ for all $x$. Consequently, mutual information $I(X; Z) = 0$, rendering the latent representation completely useless.</p>
+    </details>
+
+</body>
+</html>

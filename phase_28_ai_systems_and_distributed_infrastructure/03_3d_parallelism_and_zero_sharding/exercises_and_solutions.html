@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 28.3: Exercises &amp; Solutions — 3D Parallelism &amp; ZeRO Sharding</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 28 Overview</a>
+
+    <h1>Topic 28.3: Exercises &amp; Solutions</h1>
+    <p>Quantitative problems on sizing 3D Parallelism for GPT-3 (175B), Megatron-LM All-Reduce communication volume, and ZeRO-2 vs ZeRO-3 trade-offs.</p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Sizing 3D Parallelism for GPT-3 (175B) on 512 A100s</h3>
+        <p>You train a 175B model ($\Phi = 175 \times 10^9$, 96 layers, 96 heads) on $N = 512\text{ A100 (80GB)}$ GPUs arranged in 64 8-GPU NVLink nodes. Global batch size is 1,536.</p>
+        <ol>
+            <li>Why choose $T = 8$? Why not $T = 16$?</li>
+            <li>With $T = 8$ and $p = 8$, find the Data Parallel degree $D$.</li>
+            <li>To achieve bubble fraction $F \le 8\%$, find the minimum micro-batches $m$.</li>
+            <li>What is the micro-batch size if global batch is 1,536?</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Tensor Parallel Degree $T = 8$:</strong></p>
+            <p>TP performs 2 All-Reduces per layer. Intra-node NVLink provides $600\text{ GB/s}$, whereas InfiniBand provides only $25\text{ GB/s}$. Choosing $T = 8$ confines all high-frequency TP communication to the physical 8-GPU node. Also, 96 attention heads divides cleanly by 8 (12 heads/GPU).</p>
+            <p><strong>2. Data Parallel Degree $D$:</strong></p>
+            $$D = \frac{N}{p \times T} = \frac{512}{8 \times 8} = \mathbf{8}$$
+            <p><strong>3. Minimum Micro-Batches $m$:</strong></p>
+            $$F = \frac{p - 1}{m + p - 1} \le 0.08 \implies \frac{7}{m + 7} \le 0.08 \implies m \ge \mathbf{81\text{ micro-batches}}$$
+            <p><strong>4. Micro-batch size:</strong></p>
+            <p>Per DP replica: $\frac{1536}{8} = 192$ sequences. With $m = 96$ microbatches, micro-batch size $b = \frac{192}{96} = \mathbf{2\text{ sequences}}$.</p>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Megatron-LM All-Reduce Volume per Transformer Layer</h3>
+        <p>Given $H = 4{,}096$, $S = 2{,}048$, batch size $B = 4$, FP16 precision ($2\text{ bytes/elem}$), and $T = 4$ GPUs.</p>
+        <ol>
+            <li>Identify all All-Reduce points in the layer.</li>
+            <li>Find the tensor size transmitted in each All-Reduce.</li>
+            <li>Calculate total data transmitted per GPU for one forward-backward step.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. All-Reduce Points:</strong> 1 at end of Attention block (row-parallel $W_O$) + 1 at end of MLP block (row-parallel $W_2$) = <strong>2 in forward</strong>, <strong>2 in backward</strong>.</p>
+            <p><strong>2. Tensor Size:</strong> $B \times S \times H \times 2 = 4 \times 2{,}048 \times 4{,}096 \times 2\text{ bytes} = \mathbf{67.11\text{ MB}}$.</p>
+            <p><strong>3. Total Data Transferred per GPU:</strong></p>
+            <p>Per All-Reduce: $2 \cdot \frac{T-1}{T} M = 2 \cdot \frac{3}{4} \times 67.11\text{ MB} = 100.66\text{ MB}$.</p>
+            $$\text{Total per layer} = 4 \times 100.66\text{ MB} = \mathbf{402.66\text{ MB}}$$
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: ZeRO-2 vs ZeRO-3 on an 8-GPU Node for 13B Model</h3>
+        <p>Model has $\Phi = 13 \times 10^9$ params ($16\Phi = 208\text{ GB}$ total states). Available VRAM is 80GB, with activations requiring 25GB ($55\text{ GB}$ available for states). $N = 8$ GPUs.</p>
+        <ol>
+            <li>Compute memory per GPU under DDP, ZeRO-1, ZeRO-2, and ZeRO-3.</li>
+            <li>Which strategies fit without OOM?</li>
+            <li>Compare network transfer volume between ZeRO-2 and ZeRO-3.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Memory per GPU:</strong></p>
+            <ul>
+                <li>DDP: $16\Phi = \mathbf{208.0\text{ GB}}$</li>
+                <li>ZeRO-1: $4\Phi + \frac{12\Phi}{8} = 52 + 19.5 = \mathbf{71.5\text{ GB}}$</li>
+                <li>ZeRO-2: $2\Phi + \frac{14\Phi}{8} = 26 + 22.75 = \mathbf{48.75\text{ GB}}$</li>
+                <li>ZeRO-3: $\frac{16\Phi}{8} = \mathbf{26.0\text{ GB}}$</li>
+            </ul>
+            <p><strong>2. OOM Assessment:</strong> DDP ($208\text{ GB}$) and ZeRO-1 ($71.5\text{ GB}$) exceed the $55\text{ GB}$ state budget. <strong>Both ZeRO-2 and ZeRO-3 fit.</strong></p>
+            <p><strong>3. Communication:</strong> ZeRO-2 sends $2\Phi = 52\text{ GB}$; ZeRO-3 sends $3\Phi = 78\text{ GB}$. Because ZeRO-2 fits within memory ($48.75 + 25 = 73.75\text{ GB} < 80\text{ GB}$), <strong>ZeRO-2 is optimal</strong>, saving $26\text{ GB}$ of network traffic per step.</p>
+        </details>
+    </div>
+
+</body>
+</html>

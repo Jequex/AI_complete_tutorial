@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 14: Computer Vision: CNNs to Vision Transformers — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.4rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-secondary {
+      background-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background-color: var(--text-muted); color: #fff; }
+
+    .code-box {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 2.5rem;
+    }
+    .code-box pre { margin: 0; }
+
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../README.md" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 1rem;">← Master Curriculum Index</a>
+    <br>
+    <span class="badge">Phase 14</span>
+    <h1>Computer Vision: CNNs to Vision Transformers</h1>
+    <p class="lead">From 2D discrete convolutions, feature maps, and spatial pooling hierarchies to ResNet's gradient highway and the modern Vision Transformer (ViT) self-attention paradigm.</p>
+  </header>
+
+  <main>
+    <!-- Topic 14.1 -->
+    <div class="topic-card">
+      <h2>01. Convolutions &amp; Feature Maps</h2>
+      <p>2D discrete convolution vs cross-correlation, spatial output dimension arithmetic ($O = \lfloor \frac{W - K + 2P}{S} \rfloor + 1$), multi-channel tensor convolution ($[C_{\text{out}}, C_{\text{in}}, K_h, K_w]$), FLOPs/MACs bookkeeping, and recursive receptive field propagation ($RF_l = RF_{l-1} + (k_l - 1) J_{l-1}$).</p>
+      <div class="topic-links">
+        <a href="01_convolutions_and_feature_maps/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="01_convolutions_and_feature_maps/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="01_convolutions_and_feature_maps/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 14.2 -->
+    <div class="topic-card">
+      <h2>02. Pooling &amp; Spatial Hierarchies</h2>
+      <p>Spatial downsampling mechanics: MaxPooling2D, AvgPooling2D, and Global Average Pooling (GAP). Invariance vs. equivariance, argmax routing masks in backpropagation, uniform gradient distribution, and how GAP eliminates 99.5% of classification head parameters.</p>
+      <div class="topic-links">
+        <a href="02_pooling_and_spatial_hierarchies/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="02_pooling_and_spatial_hierarchies/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="02_pooling_and_spatial_hierarchies/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 14.3 -->
+    <div class="topic-card">
+      <h2>03. Classic CNN Architectures: LeNet, VGG, and ResNet</h2>
+      <p>Architectural evolution from LeNet-5 to AlexNet and VGGNet. The $3 \times 3$ stacking advantage (28% parameter reduction over $5 \times 5$). The Degradation Problem (higher training error in deep plain networks), ResNet formulation ($\mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{x}$), and the mathematical proof of the unhindered Gradient Highway ($\frac{\partial \mathcal{L}}{\partial \mathbf{x}} = \frac{\partial \mathcal{L}}{\partial \mathbf{y}}(\frac{\partial \mathcal{F}}{\partial \mathbf{x}} + \mathbf{I})$).</p>
+      <div class="topic-links">
+        <a href="03_classic_cnn_architectures_lenet_vgg_resnet/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="03_classic_cnn_architectures_lenet_vgg_resnet/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="03_classic_cnn_architectures_lenet_vgg_resnet/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 14.4 -->
+    <div class="topic-card">
+      <h2>04. Vision Transformers (ViT)</h2>
+      <p>The visual paradigm shift: "An Image is Worth 16x16 Words". Non-overlapping patch extraction ($N = \frac{HW}{P^2}$), linear projection to dimension $D$, prepending the learnable <code>[CLS]</code> token, 1D positional embeddings, Multi-Head Self-Attention, and the trade-off between convolutional inductive bias and foundation-scale Transformer capacity.</p>
+      <div class="topic-links">
+        <a href="04_vision_transformers_vit/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="04_vision_transformers_vit/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="04_vision_transformers_vit/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Execution Box -->
+    <div class="code-box">
+      <div style="color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Run Labs from Terminal (Pure Python 3, Zero External Dependencies)</div>
+      <pre><code># Topic 14.1: Convolutions, Sobel edge detection &amp; Receptive Field propagation
+python3 phase_14_computer_vision_cnns_to_vits/01_convolutions_and_feature_maps/experiment.py
+
+# Topic 14.2: MaxPooling2D &amp; AvgPooling2D forward/backward gradient checks
+python3 phase_14_computer_vision_cnns_to_vits/02_pooling_and_spatial_hierarchies/experiment.py
+
+# Topic 14.3: ResNet Residual Block &amp; 20-block vanishing gradient elimination proof
+python3 phase_14_computer_vision_cnns_to_vits/03_classic_cnn_architectures_lenet_vgg_resnet/experiment.py
+
+# Topic 14.4: Vision Transformer patch extraction, [CLS] token &amp; self-attention
+python3 phase_14_computer_vision_cnns_to_vits/04_vision_transformers_vit/experiment.py</code></pre>
+    </div>
+  </main>
+
+  <footer>
+    <div>AI Complete Curriculum &bull; Phase 14 Portal</div>
+    <div>Pure Python 3 &bull; Production Rigor</div>
+  </footer>
+
+</body>
+</html>

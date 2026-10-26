@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.2: Exercises &amp; Solutions — Reward Modeling &amp; Loss Derivation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        details {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.2: Exercises &amp; Solutions — Reward Modeling Architecture &amp; Loss</h1>
+
+    <div class="card">
+        <h3>Problem 1: Reward Head vs. LM Head Parameter Count &amp; Memory (Easy)</h3>
+        <p>In an 8B model with $d_{\text{model}} = 4096$ and vocabulary size $|\mathcal{V}| = 128{,}000$:</p>
+        <ol>
+            <li>Compute the parameters and FP16 footprint of the standard LM head.</li>
+            <li>Compute the parameters and FP16 footprint of the scalar Reward head.</li>
+            <li>What fraction of the LM head's size is the Reward head?</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\text{LM Head} = 128{,}000 \times 4096 = 524{,}288{,}000$ parameters ($1.048\text{ GB}$ in FP16).</p>
+            <p><strong>Step 2:</strong> $\text{RM Head} = 1 \times 4096 = 4096$ parameters ($8.192\text{ KB}$ in FP16).</p>
+            <p><strong>Step 3:</strong> $\frac{4096}{524{,}288{,}000} = \frac{1}{128{,}000} \approx 0.000781\%$, saving over $1\text{ GB}$ of head parameter memory.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Ranking Loss with Margin Penalty (Medium)</h3>
+        <p>Consider $\mathcal{L} = -\log \sigma(r_w - r_l - m)$ with margin $m \ge 0$.</p>
+        <ol>
+            <li>Derive $\frac{\partial \mathcal{L}}{\partial \Delta}$ where $\Delta = r_w - r_l$.</li>
+            <li>Evaluate the gradient at $\Delta = 0$ for $m=0.5$ vs $m=0.0$.</li>
+            <li>Explain why a margin penalty prevents models from settling into indifference.</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\frac{\partial \mathcal{L}}{\partial \Delta} = \sigma(\Delta - m) - 1 = -\sigma(m - \Delta)$.</p>
+            <p><strong>Step 2:</strong> For $m=0$, $|\nabla| = \sigma(0) = 0.5$. For $m=0.5$, $|\nabla| = \sigma(0.5) \approx 0.6225$ ($24.5\%$ larger).</p>
+            <p><strong>Step 3:</strong> The margin forces the reward difference $r_w - r_l$ to exceed $m$ before gradient pressure subsides, driving active separation between high and low quality completions.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Score Normalization &amp; Additive Invariance (Medium)</h3>
+        <ol>
+            <li>Show why scaling rewards by standard deviation alters the effective temperature of the preference probability.</li>
+            <li>Under what conditions does $\tilde{r} = a \cdot r + b$ preserve the pairwise cross-entropy loss?</li>
+            <li>Why does an uncentered positive reward offset create artificial length incentives in RL?</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\tilde{\Delta} = \Delta / \sigma$. Because $\sigma_{\text{logistic}}(z)$ is nonlinear, changing $\sigma$ changes the steepness of probabilities.</p>
+            <p><strong>Step 2:</strong> Invariance holds if and only if $a = 1.0$ (for any arbitrary shift $b \in \mathbb{R}$).</p>
+            <p><strong>Step 3:</strong> If rewards are strictly positive without centering, every extra token generated accumulates positive value expectations, incentivizing the policy to delay `<eos>`.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 4: Goodhart's Law &amp; Length Bias Modeling (Hard)</h3>
+        <p>True utility is $U^*(y) = Q(y) - 0.05 \cdot L(y)$, but a trained RM learned $r_{\text{RM}}(y) = 0.6 \cdot Q(y) + 0.04 \cdot L(y)$.</p>
+        <p>Compare Response 1 ($Q=9, L=20$) vs Response 2 ($Q=7, L=150$).</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $U^*(y_1) = 9.0 - 1.0 = 8.0$; $U^*(y_2) = 7.0 - 7.5 = -0.5$. Response 1 is vastly superior to a human.</p>
+            <p><strong>Step 2:</strong> $r_{\text{RM}}(y_1) = 5.4 + 0.8 = 6.2$; $r_{\text{RM}}(y_2) = 4.2 + 6.0 = 10.2$. The RM strongly prefers Response 2 ($10.2 > 6.2$).</p>
+            <p><strong>Step 3:</strong> Because $\Delta r = +4.0$ ($P(y_2 \succ y_1) \approx 98.2\%$), an RL policy will maximize length to the context limit, producing low-utility bloated text. This demonstrates Goodhart's Law in action.</p>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Back to Lecture 21.2</a>
+        <a href="../03_rlhf_and_ppo_policy_gradients/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.3 Lecture →</a>
+    </div>
+
+</body>
+</html>

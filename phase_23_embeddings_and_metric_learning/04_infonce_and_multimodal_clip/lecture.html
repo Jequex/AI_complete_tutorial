@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.4: InfoNCE Loss &amp; Multimodal CLIP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.4: InfoNCE Loss &amp; Multimodal CLIP</h1>
+    <p><em>InfoNCE Formulation, Mutual Information Lower Bounds, Temperature Tuning, Dual Encoders, Symmetric Cross-Entropy, and Zero-Shot Classification.</em></p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: The Universal Bridge Between Pictures and Words</h3>
+        <p>Imagine a city split by a giant river with the Tower of Pictures on one bank and the Tower of Words on the other:</p>
+        <ul>
+            <li><strong>The Language Barrier:</strong> In early AI, picture computers and text computers lived in totally separate worlds. If you asked a vision model to recognize a brand new animal (like an axolotl), it failed completely because that label was never in its fixed 1,000-class list!</li>
+            <li><strong>The Suspension Bridge (CLIP):</strong> OpenAI's CLIP built a mathematical bridge where pictures and sentences share the exact same GPS coordinates. Every picture of a puppy is tied with an invisible elastic rope to the sentence <em>"a photo of a happy puppy"</em>.</li>
+            <li><strong>Zero-Shot Magic:</strong> When an alien shows a photo of an axolotl, you write 3 index cards: <em>"a photo of an axolotl"</em>, <em>"a photo of a jet"</em>, <em>"a photo of a pizza"</em>. You drop the photo onto the bridge, and it glides straight to the axolotl card without any training!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr><th>Symbol</th><th>Domain</th><th>Description &amp; Meaning</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>$q, k_+ \in \mathbb{R}^d$</td><td>Unit Vector</td><td>Normalized query and positive key embeddings ($\|q\|_2 = \|k_+\|_2 = 1$).</td></tr>
+            <tr><td>$\{k_j\}_{j=1}^K \subset \mathbb{R}^d$</td><td>Set of Vectors</td><td>Set of $K$ negative distractor keys.</td></tr>
+            <tr><td>$\tau > 0$</td><td>$\mathbb{R}^+$</td><td>Softmax temperature parameter scaling inner products.</td></tr>
+            <tr><td>$I(X; Y)$</td><td>$\mathbb{R}_{\ge 0}$</td><td>Mutual Information between modalities $X$ and $Y$.</td></tr>
+            <tr><td>$f(I), g(T)$</td><td>$\mathbb{R}^d$</td><td>Vision encoder and text encoder projections.</td></tr>
+            <tr><td>$\mathbf{S} \in \mathbb{R}^{N \times N}$</td><td>Matrix</td><td>$N \times N$ cosine similarity matrix: $S_{ij} = \frac{\hat{\mathbf{I}}_i^\top \hat{\mathbf{T}}_j}{\tau}$.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>2. InfoNCE Loss &amp; Mutual Information Lower Bound</h2>
+    <p>InfoNCE generalizes contrastive learning to $K$ simultaneous negative candidates:</p>
+    $$\mathcal{L}_{\text{InfoNCE}} = -\log \frac{\exp(\text{sim}(q, k_+) / \tau)}{\sum_{j=0}^K \exp(\text{sim}(q, k_j) / \tau)}$$
+
+    <div class="callout">
+        <p><strong>Mutual Information Lower Bound Theorem:</strong> Minimizing InfoNCE directly maximizes a lower bound on the mutual information between representations:</p>
+        $$I(X; Y) \ge \log(K) - \mathcal{L}_{\text{InfoNCE}}$$
+        <p>Increasing the number of negative samples $K$ tightens this bound logarithmically.</p>
+    </div>
+
+    <h2>3. The Temperature Parameter $\tau$: Hard-Negative Selector</h2>
+    <p>The gradient of InfoNCE with respect to negative score $s_j$ is proportional to its softmax probability $p_j = \frac{e^{s_j/\tau}}{\sum_m e^{s_m/\tau}}$:</p>
+    <ul>
+        <li><strong>Small $\tau$ ($\tau \to 0$):</strong> Concentrates 100% of gradient weight onto the single hardest negative (implicit hard-negative mining).</li>
+        <li><strong>Large $\tau$ ($\tau \to \infty$):</strong> Flattens into a uniform distribution $\frac{1}{K+1}$, treating all negatives equally and losing discriminative edge.</li>
+        <li><strong>Optimal $\tau$ ($\approx 0.07$):</strong> Balances sharp discrimination with optimization smoothness (learned dynamically in CLIP via $\exp(\tau_{\text{logit}})$).</li>
+    </ul>
+
+    <h2>4. The CLIP Architecture &amp; Symmetric Pre-Training</h2>
+    <pre>
+    Image Batch (N) ──> [ Image Enc ] ──> I_hat_i ──┐
+                                                    ├──> Cosine Matrix S_ij ──> Symmetric Loss
+    Text Batch (N)  ──> [ Text Enc  ] ──> T_hat_j ──┘
+    </pre>
+    <p>Total objective combines Image-to-Text (rows) and Text-to-Image (columns) cross-entropy:</p>
+    $$\mathcal{L}_{\text{CLIP}} = \frac{1}{2} (\mathcal{L}_{\text{i2t}} + \mathcal{L}_{\text{t2i}})$$
+
+    <h2>5. Zero-Shot Classification via Text Prompts</h2>
+    <p>To classify an image across arbitrary classes $\{y_1, \dots, y_C\}$:</p>
+    <ol>
+        <li>Encode text prompt templates: $\mathbf{w}_c = \frac{g(\text{"a photo of a "} + y_c)}{\|g(\dots)\|}$.</li>
+        <li>Encode test image: $\hat{\mathbf{I}} = \frac{f(I)}{\|f(I)\|}$.</li>
+        <li>Predict highest cosine similarity: $\hat{y} = \arg\max_c (\hat{\mathbf{I}}^\top \mathbf{w}_c)$.</li>
+    </ol>
+
+</body>
+</html>

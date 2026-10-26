@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.3: The Reparameterization Trick &amp; Latent Space Geometry</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.3: The Reparameterization Trick &amp; Latent Space Geometry</h1>
+    <p>Bypassing the stochastic backpropagation bottleneck, pathwise gradient derivations, and high-dimensional spherical latent interpolation.</p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: The Dice on a Platter Trick</h3>
+        <p><strong>The Trapped Game:</strong> Rolling a die inside a box is completely unpredictable. You can't calculate how to move your arm muscles to change the outcome by 0.01.</p>
+        <p><strong>The Platter Trick:</strong> Instead, let an external fan drop a random marble ($\epsilon$) on a platter. You simply slide ($\mu$) and tilt ($\sigma$) the platter with knobs! Backpropagation can now easily twist those knobs with smooth mathematical precision.</p>
+    </div>
+
+    <h2>1. The Stochastic Node Roadblock</h2>
+    <p>Differentiating an expectation with respect to the parameters defining the distribution is non-trivial:</p>
+    $$\nabla_\phi \mathbb{E}_{z \sim q_\phi(z \mid x)} [f(z)] \ne \mathbb{E}_{z \sim q_\phi(z \mid x)} [\nabla_\phi f(z)]$$
+    <p>Standard REINFORCE score-function estimators $\mathbb{E}[f(z) \nabla_\phi \log q_\phi(z)]$ suffer from explosive variance in high-dimensional latent spaces.</p>
+
+    <h2>2. The Reparameterization Trick</h2>
+    <p>We decouple the stochasticity by introducing an independent noise distribution $\boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I})$:</p>
+    $$\boxed{z = g_\phi(x, \boldsymbol{\epsilon}) = \boldsymbol{\mu}_\phi(x) + \boldsymbol{\sigma}_\phi(x) \odot \boldsymbol{\epsilon}}$$
+
+    <p>The expectation transforms via the Law of the Unconscious Statistician:</p>
+    $$\mathbb{E}_{z \sim q_\phi(z \mid x)} [f(z)] = \mathbb{E}_{\boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I})} [f(g_\phi(x, \boldsymbol{\epsilon}))]$$
+
+    <p>The gradient moves directly inside the expectation:</p>
+    $$\boxed{\nabla_\phi \mathbb{E}_{q_\phi}[f(z)] = \mathbb{E}_{\boldsymbol{\epsilon}} \left[ \nabla_z f(z) \cdot \nabla_\phi g_\phi(x, \boldsymbol{\epsilon}) \right]}$$
+
+    <h2>3. Latent Space Interpolation: LERP vs. SLERP</h2>
+    <div class="callout">
+        <h4>The High-Dimensional Annulus Problem</h4>
+        <p>In dimension $d \ge 50$, standard Gaussians concentrate all probability mass on a thin spherical shell of radius $R \approx \sqrt{d}$. Linear interpolation (LERP) cuts through the origin where density is near zero, causing blurriness.</p>
+        <p><strong>Spherical Linear Interpolation (SLERP)</strong> preserves constant radius along the great circle arc:</p>
+        $$\boxed{z_{\text{SLERP}}(\alpha) = \frac{\sin((1 - \alpha)\Omega)}{\sin \Omega} z_A + \frac{\sin(\alpha \Omega)}{\sin \Omega} z_B}$$
+        <p>where $\Omega = \arccos\left(\frac{z_A \cdot z_B}{\|z_A\|_2 \|z_B\|_2}\right)$.</p>
+    </div>
+
+</body>
+</html>

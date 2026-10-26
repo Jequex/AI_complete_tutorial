@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: The Inference Bottleneck &amp; Roofline Model</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 30 Overview</a>
+    <div>
+      <span class="badge">Topic 30.1</span>
+      <h1>The Inference Bottleneck &amp; The Roofline Model</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.25rem;">
+        Prefill vs. Decode dynamics, Arithmetic Intensity, Roofline performance ceilings, and the $4 \cdot n_{\text{layers}} \cdot n_{\text{heads}} \cdot d_{\text{head}} \cdot b \cdot s$ KV cache footprint.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>Imagine you manage an elite translation library with a massive master dictionary that weighs <strong>140 pounds</strong>.</p>
+      <p>Two distinct patrons walk through your doors:</p>
+      <ul>
+        <li><strong>Patron A (The Prefill Customer)</strong>: Hands you an entire 1,000-word essay. You lift the 140-pound dictionary onto your desk once, flip furiously between pages for 3 solid minutes, compare grammar rules, and digest the whole text. Your brain (compute) is working at 100% capacity. You are <strong>compute-bound</strong>.</li>
+        <li><strong>Patron B (The Decode Customer)</strong>: Asks you to write a novel, but allows you to reveal only <em>one single word at a time</em>. To write word 1, you haul the 140-pound book from the shelf to your desk, check one rule, write "The", and put the book back. To write word 2, you haul the 140-pound book across the room again, write "cat", and put it back. To write 500 words, you carry that book <strong>500 times</strong>! Your brain isn't tired at all; your back and arms are broken from hauling dead weight. You are <strong>memory-bandwidth bound</strong>.</li>
+      </ul>
+      <p>This is the fundamental reality of Transformer inference: <strong>Prefill</strong> processes all prompt tokens in parallel with high compute efficiency, while <strong>Decode</strong> generates one token at a time, moving entire multi-gigabyte weight tensors across the GPU bus for a single arithmetic operation per weight!</p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Units / Domain</th>
+          <th>Physical / Engineering Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$P_{\text{peak}}$</td>
+          <td>Peak Compute</td>
+          <td>TFLOP/s</td>
+          <td>Maximum theoretical floating-point execution speed of GPU Tensor Cores.</td>
+        </tr>
+        <tr>
+          <td>$B_{\text{mem}}$</td>
+          <td>Memory Bandwidth</td>
+          <td>TB/s</td>
+          <td>Physical transmission ceiling between High-Bandwidth Memory (HBM) and on-chip SRAM.</td>
+        </tr>
+        <tr>
+          <td>$I$</td>
+          <td>Arithmetic Intensity</td>
+          <td>FLOPs / Byte</td>
+          <td>Ratio of floating-point computations executed per byte of DRAM memory transferred.</td>
+        </tr>
+        <tr>
+          <td>$I^*$</td>
+          <td>Roofline Ridge Point</td>
+          <td>FLOPs / Byte</td>
+          <td>Critical threshold $I^* = P_{\text{peak}} / B_{\text{mem}}$ separating memory-bound from compute-bound regimes.</td>
+        </tr>
+        <tr>
+          <td>$\text{Mem}_{\text{KV}}$</td>
+          <td>KV Cache Footprint</td>
+          <td>Bytes (GB)</td>
+          <td>Memory allocated to Key and Value activations: $2 \cdot e \cdot n_{\text{layers}} \cdot n_{\text{heads}} \cdot d_{\text{head}} \cdot b \cdot s$.</td>
+        </tr>
+        <tr>
+          <td>$b$</td>
+          <td>Batch Size</td>
+          <td>Sequences</td>
+          <td>Number of concurrent sequences or user streams processed in a forward pass.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Williams Roofline Model</h2>
+    <p>The attainable execution speed $P$ on any processor is bounded by:</p>
+    $$P(I) = \min\left(P_{\text{peak}}, \; B_{\text{mem}} \cdot I\right)$$
+    
+    <div class="card">
+      <h3>Hardware Ridge Point Comparisons (16-bit Precision)</h3>
+      <p><strong>NVIDIA A100 (80GB HBM2e)</strong>: Peak FP16 compute is 312 TFLOP/s, Memory Bandwidth is 2.039 TB/s:</p>
+      $$I^*_{\text{A100}} = \frac{312 \times 10^{12} \text{ FLOP/s}}{2.039 \times 10^{12} \text{ Bytes/s}} \approx \mathbf{153 \text{ FLOPs/Byte}}$$
+      <p><strong>NVIDIA H100 SXM5 (80GB HBM3)</strong>: Peak FP16 compute is 989 TFLOP/s, Memory Bandwidth is 3.35 TB/s:</p>
+      $$I^*_{\text{H100}} = \frac{989 \times 10^{12} \text{ FLOP/s}}{3.35 \times 10^{12} \text{ Bytes/s}} \approx \mathbf{295 \text{ FLOPs/Byte}}$$
+      <p>If an operation executes with intensity $I < I^*$, it is trapped on the slanted roofline slope: tensor cores are starved for data and stall on memory reads.</p>
+    </div>
+
+    <h2>4. Prefill vs. Decode Intensity Derivation</h2>
+    <p>For a weight tensor $W \in \mathbb{R}^{d_{\text{in}} \times d_{\text{out}}}$ multiplying input $X \in \mathbb{R}^{b \times s \times d_{\text{in}}}$ in 16-bit precision ($e = 2$ bytes):</p>
+    $$\text{FLOPs} = 2 \cdot b \cdot s \cdot d_{\text{in}} \cdot d_{\text{out}}, \qquad \text{Weight Bytes} = 2 \cdot d_{\text{in}} \cdot d_{\text{out}}$$
+    $$I \approx \frac{2 \cdot b \cdot s \cdot d_{\text{in}} \cdot d_{\text{out}}}{2 \cdot d_{\text{in}} \cdot d_{\text{out}}} = \mathbf{b \cdot s \quad \text{FLOPs/Byte}}$$
+
+    <ul>
+      <li><strong>Prefill ($s = S_{\text{prompt}} = 2048, b = 1$)</strong>:
+        $$I_{\text{prefill}} \approx 2048 \text{ FLOPs/Byte} \gg I^*_{\text{H100}} (295) \implies \textbf{Deeply Compute-Bound}$$
+      </li>
+      <li><strong>Decode ($s = 1, b = 1$)</strong>:
+        $$I_{\text{decode}} \approx 1 \text{ FLOP/Byte} \ll I^*_{\text{H100}} (295) \implies \textbf{Severely Memory-Bound}$$
+        $$\text{Attainable Performance} = 3.35 \text{ TB/s} \times 1 \text{ FLOP/Byte} = 3.35 \text{ TFLOP/s}$$
+        $$\text{Tensor Core Utilization} = \frac{3.35}{989} \approx \mathbf{0.34\%}$$
+      </li>
+    </ul>
+
+    <h2>5. The KV Cache Memory Formula</h2>
+    <p>To avoid recomputing historical keys and values during autoregressive token generation, past $K$ and $V$ tensors are stored in VRAM:</p>
+    $$\boxed{\text{Mem}_{\text{KV}} = 4 \cdot n_{\text{layers}} \cdot n_{\text{heads}} \cdot d_{\text{head}} \cdot b \cdot s \quad \text{Bytes (in FP16)}}$$
+
+    <div class="card">
+      <h3>The Context Scaling Crisis</h3>
+      <p>For LLaMA-65B ($n_{\text{layers}}=80, n_{\text{heads}}=64, d_{\text{head}}=128$), each token costs:</p>
+      $$\text{Footprint per token} = 4 \times 80 \times 64 \times 128 = 2,621,440 \text{ Bytes} \approx 2.62 \text{ MB}$$
+      <p>At batch size $b=64$ and context $s=4096$, the KV cache consumes <strong>687.2 GB of GPU RAM</strong>—requiring 9 high-end GPUs just to hold past activations!</p>
+    </div>
+
+    <h2>6. The 4-Way Serving Tradeoff</h2>
+    <p>Production inference architectures operate on an interconnected tradeoff frontier:</p>
+    <ul>
+      <li><strong>Latency (TTFT &amp; ITL)</strong>: Minimized when batch size $b=1$, but results in massive hardware under-utilization.</li>
+      <li><strong>Throughput (TPS)</strong>: Maximized when $b \ge I^*$, but causes queuing delays and high per-token latency.</li>
+      <li><strong>Memory (VRAM)</strong>: Scales linearly with $b \cdot s$. Out-of-memory triggers request throttling or CPU swapping.</li>
+      <li><strong>Cost ($/1M Tokens)</strong>: Driven by hardware count. Higher throughput directly reduces amortization cost per query.</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../02_pagedattention_and_continuous_batching_vllm/lecture.html" class="btn">Next: Topic 02 &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 1.1: Core and Advanced Python for AI — Complete AI Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .concept-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .warning-box {
+            background-color: var(--danger-bg);
+            border-left: 4px solid var(--danger);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .tip-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        p code, li code {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 1 Index</a>
+    <header>
+        <h1>Topic 1.1: Core &amp; Advanced Python for AI</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Mastering Memory, OOP Abstractions, Generators, and Decorators for Modern AI</p>
+    </header>
+
+    <section>
+        <h2>1. The Sticky Nametag Mental Model: Variables and Memory</h2>
+        <div class="concept-card">
+            <h3>The 12-Year-Old Analogy: Toy Boxes &amp; Nametags</h3>
+            <p>In classical languages like C, a variable is like a fixed wooden cubby box carved into your wall. If you declare <code>int x;</code>, you built a wooden box that can only ever store an integer.</p>
+            <p>In Python, <strong>variables are sticky nametags</strong>, and <strong>values are physical toys floating on a table</strong>.</p>
+            <p>When you write <code>a = [1, 2, 3]</code> and then <code>b = a</code>, you did <em>not</em> make a second list! You merely slapped two nametags (<code>a</code> and <code>b</code>) onto the <strong>exact same list object</strong> sitting in computer memory!</p>
+        </div>
+
+        <p>If you modify <code>b.append(4)</code>, looking at <code>a</code> reveals <code>[1, 2, 3, 4]</code> because both labels point to the same object address in RAM (accessible via <code>id(a)</code>). This is known as <strong>pass-by-object-reference</strong>.</p>
+
+        <h3>Mutability vs. Immutability</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data Type</th>
+                    <th>Mutable?</th>
+                    <th>AI Engineering Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>int</code>, <code>float</code></td>
+                    <td>❌ No</td>
+                    <td>Scalars: Learning rates, scalar loss values, batch indices</td>
+                </tr>
+                <tr>
+                    <td><code>str</code></td>
+                    <td>❌ No</td>
+                    <td>Tokens, user prompts, prompt templates, system instructions</td>
+                </tr>
+                <tr>
+                    <td><code>tuple</code></td>
+                    <td>❌ No</td>
+                    <td>Tensor shapes: <code>(batch_size, channels, height, width)</code></td>
+                </tr>
+                <tr>
+                    <td><code>list</code></td>
+                    <td>✅ Yes</td>
+                    <td>Accumulating loss curves, generated output token streams</td>
+                </tr>
+                <tr>
+                    <td><code>dict</code></td>
+                    <td>✅ Yes</td>
+                    <td>Hyperparameter configs, JSON requests, model weight registries</td>
+                </tr>
+                <tr>
+                    <td><code>set</code></td>
+                    <td>✅ Yes</td>
+                    <td>Vocabulary token deduplication, fast membership lookup $O(1)$</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="warning-box">
+            <strong>⚠️ The Dangerous Default Mutable Argument Trap</strong><br>
+            Python evaluates default function arguments <em>once</em> at definition time, not on every function call. Never do this:
+            <pre><code># ❌ BUG: The same list accumulates data across separate calls!
+def record_loss(loss_val, history=[]):
+    history.append(loss_val)
+    return history
+
+# ✅ FIX: Use None as an immutable sentinel
+def record_loss(loss_val, history=None):
+    if history is None:
+        history = []
+    history.append(loss_val)
+    return history</code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Functions as First-Class Citizens and Closures</h2>
+        <p>In Python, functions are first-class objects. You can pass them into other functions, return them as outputs, and store them in collections.</p>
+        
+        <p>A <strong>closure</strong> occurs when an inner function remembers and retains access to variables in its outer enclosing scope, even after the outer function has finished executing:</p>
+
+        <pre><code>def make_learning_rate_scheduler(initial_lr: float, decay: float):
+    current_lr = initial_lr  # Enclosing scope variable
+    
+    def step():
+        nonlocal current_lr
+        current_lr *= decay
+        return current_lr
+        
+    return step
+
+scheduler = make_learning_rate_scheduler(0.1, 0.95)
+print(scheduler())  # 0.095
+print(scheduler())  # 0.09025</code></pre>
+    </section>
+
+    <section>
+        <h2>3. Object-Oriented Programming (OOP) and Dunder Methods</h2>
+        <p>Frameworks like PyTorch rely heavily on Python's special "dunder" (double underscore) methods to create intuitive, mathematical syntax for neural networks.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Dunder Method</th>
+                    <th>Invoked When</th>
+                    <th>AI Framework Equivalent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>__init__(self, ...)</code></td>
+                    <td>Constructing an instance</td>
+                    <td>Allocates weight matrices and layer parameters</td>
+                </tr>
+                <tr>
+                    <td><code>__call__(self, x)</code></td>
+                    <td><code>model(x)</code></td>
+                    <td>Executes the layer or network forward pass $f(x)$</td>
+                </tr>
+                <tr>
+                    <td><code>__getitem__(self, idx)</code></td>
+                    <td><code>dataset[idx]</code></td>
+                    <td>Custom PyTorch <code>Dataset</code> retrieval</td>
+                </tr>
+                <tr>
+                    <td><code>__len__(self)</code></td>
+                    <td><code>len(dataset)</code></td>
+                    <td>Returns total number of training training examples</td>
+                </tr>
+                <tr>
+                    <td><code>__matmul__(self, other)</code></td>
+                    <td><code>A @ B</code></td>
+                    <td>Overloads matrix multiplication operator</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <pre><code>class LinearLayer:
+    """A minimal PyTorch-style linear transformation layer: y = Wx + b"""
+    def __init__(self, weights: list[list[float]], bias: list[float]):
+        self.weights = weights  # Shape: (out_features, in_features)
+        self.bias = bias        # Shape: (out_features)
+
+    def __call__(self, x: list[float]) -> list[float]:
+        out = []
+        for row, b in zip(self.weights, self.bias):
+            # Compute dot product sum(w_i * x_i) + b
+            val = sum(w * xi for w, xi in zip(row, x)) + b
+            out.append(val)
+        return out
+
+layer = LinearLayer(weights=[[0.5, -0.2], [0.1, 0.8]], bias=[0.1, -0.05])
+print(layer([1.0, 2.0]))  # Invokes __call__ -> [0.2, 1.65]</code></pre>
+    </section>
+
+    <section>
+        <h2>4. Iterators &amp; Generators: Streaming Big Data with <code>yield</code></h2>
+        <div class="tip-box">
+            <strong>💡 The Golden Rule of AI Data Engineering:</strong> Never load a 100 GB training corpus into RAM all at once. Use <em>lazy evaluation</em> to stream batches one at a time.
+        </div>
+
+        <p>A <strong>generator</strong> uses the <code>yield</code> keyword instead of <code>return</code>. When Python hits <code>yield</code>, it freezes the entire execution state, passes the value to the caller, and pauses until the next item is requested via <code>next()</code>.</p>
+
+        <pre><code>def stream_dataset(data: list, batch_size: int):
+    """Streams mini-batches lazily with virtually zero RAM footprint."""
+    for i in range(0, len(data), batch_size):
+        yield data[i : i + batch_size]
+
+# Usage
+batch_stream = stream_dataset(range(100), batch_size=32)
+batch_1 = next(batch_stream)  # [0, 1, ..., 31]
+batch_2 = next(batch_stream)  # [32, 33, ..., 63]</code></pre>
+    </section>
+
+    <section>
+        <h2>5. Decorators: Instrumenting &amp; Monitoring AI Pipelines</h2>
+        <p>Decorators wrap functions with reusable behavioral logic. In production AI, decorators measure inference latency, log token throughput, and check input tensor dimensions.</p>
+
+        <pre><code>import time
+import functools
+
+def measure_latency(func):
+    """Measures execution latency of an AI inference function in milliseconds."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        t0 = time.perf_counter()
+        result = func(*args, **kwargs)
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        print(f"⏱️ [{func.__name__}] Latency: {elapsed_ms:.3f} ms")
+        return result
+    return wrapper
+
+@measure_latency
+def generate_tokens(prompt: str):
+    # Simulated token generation workload
+    time.sleep(0.02)
+    return f"Response to: {prompt}"
+
+generate_tokens("Explain attention mechanisms")</code></pre>
+    </section>
+
+    <section>
+        <h2>6. Domain-Specific AI Exceptions</h2>
+        <p>Clear, domain-specific exception classes simplify debugging complex neural network pipelines.</p>
+
+        <pre><code>class ShapeMismatchError(Exception):
+    """Raised when tensor dimensions are incompatible for linear algebra operations."""
+    def __init__(self, shape_a, shape_b, op):
+        super().__init__(f"Cannot perform {op} between {shape_a} and {shape_b}.")
+
+def matmul(shape_a: tuple, shape_b: tuple):
+    if shape_a[1] != shape_b[0]:
+        raise ShapeMismatchError(shape_a, shape_b, op="matrix multiplication (@)")
+    return (shape_a[0], shape_b[1])</code></pre>
+    </section>
+
+</body>
+</html>
+

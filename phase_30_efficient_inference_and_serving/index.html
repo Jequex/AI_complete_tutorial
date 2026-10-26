@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 30: Efficient Inference &amp; Serving — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; color: var(--text); }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="badge">Curriculum Module</span>
+    <h1>Phase 30: Efficient Inference &amp; Serving</h1>
+    <p class="lead">Deconstructing the LLM inference bottleneck, hardware Roofline dynamics, PagedAttention virtual memory, lossless speculative decoding, KV cache compression, and production serving telemetry.</p>
+  </header>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. The Inference Bottleneck &amp; The Roofline Model</h2>
+      <p>Prefill phase (compute-bound, high arithmetic intensity $\mathcal{O}(S)$ FLOPs/byte) vs Decode phase (memory-bandwidth bound, arithmetic intensity $\approx 1$ FLOP/byte), Roofline analysis of LLM generation, KV cache memory footprint formula: $\text{Mem}_{\text{KV}} = 4 \cdot n_{\text{layers}} \cdot n_{\text{heads}} \cdot d_{\text{head}} \cdot b \cdot s$ bytes, and the fundamental 4-way tradeoff: Latency $\leftrightarrow$ Throughput $\leftrightarrow$ Memory $\leftrightarrow$ Cost.</p>
+      <div class="topic-links">
+        <a href="01_the_inference_bottleneck_and_roofline_model/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_the_inference_bottleneck_and_roofline_model/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_the_inference_bottleneck_and_roofline_model/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_the_inference_bottleneck_and_roofline_model/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_the_inference_bottleneck_and_roofline_model/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. PagedAttention &amp; Continuous Batching (vLLM)</h2>
+      <p>Static batching vs Continuous / Iteration-level batching (Orca), resolving GPU under-utilization from early termination, KV cache memory fragmentation (internal: pre-allocating max context; external: variable sequence lifetimes), PagedAttention (vLLM, Kwon et al. 2023): OS-style virtual memory paging, physical block pool, logical block tables, non-contiguous physical allocations, and copy-on-write fork mechanics for parallel sampling.</p>
+      <div class="topic-links">
+        <a href="02_pagedattention_and_continuous_batching_vllm/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_pagedattention_and_continuous_batching_vllm/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_pagedattention_and_continuous_batching_vllm/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_pagedattention_and_continuous_batching_vllm/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_pagedattention_and_continuous_batching_vllm/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Speculative Decoding</h2>
+      <p>Speculative execution in LLMs (Leviathan et al. 2023, Chen et al. 2023), small draft model $M_q$ generating $\gamma$ candidate tokens, large target model $M_p$ evaluating all $\gamma+1$ tokens in a single parallel forward pass, modified rejection sampling acceptance criterion: $\alpha = \min(1, p(x)/q(x))$, residual recovery distribution $(p(x) - q(x))^+$, complete mathematical proof that the output distribution is identically equal to target model $M_p$, and speedup factor $\mathbb{E}[\alpha]$.</p>
+      <div class="topic-links">
+        <a href="03_speculative_decoding/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_speculative_decoding/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_speculative_decoding/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_speculative_decoding/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_speculative_decoding/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. KV Cache Compression &amp; Tensor Parallel Serving</h2>
+      <p>Architectural KV compression: Multi-Head Attention (MHA) vs Multi-Query Attention (MQA, Shazeer 2019) vs Grouped-Query Attention (GQA, Ainslie et al. 2023); Dynamic KV eviction: Heavy Hitter Oracle (H2O, Zhang et al. 2023) identifying high-attention sink tokens + recency window; Tensor Parallel serving: distributing KV cache across $N$ GPUs with Megatron column/row parallel linear projections.</p>
+      <div class="topic-links">
+        <a href="04_kv_cache_compression_and_tensor_parallel_serving/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_kv_cache_compression_and_tensor_parallel_serving/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_kv_cache_compression_and_tensor_parallel_serving/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_kv_cache_compression_and_tensor_parallel_serving/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_kv_cache_compression_and_tensor_parallel_serving/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Serving Benchmarks &amp; Telemetry: TTFT, ITL, TPS</h2>
+      <p>Serving telemetry &amp; SLA metrics: Time to First Token (TTFT, prefill latency), Inter-Token Latency (ITL / Time Per Output Token TPOT), Tokens Per Second (TPS, throughput: system TPS vs user TPS), tail latency percentiles (p50, p90, p99), Little's Law $L = \lambda W$, Poisson arrival queues and load testing simulation.</p>
+      <div class="topic-links">
+        <a href="05_serving_benchmarks_and_metrics_ttft_itl_tps/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_serving_benchmarks_and_metrics_ttft_itl_tps/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_serving_benchmarks_and_metrics_ttft_itl_tps/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_serving_benchmarks_and_metrics_ttft_itl_tps/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_serving_benchmarks_and_metrics_ttft_itl_tps/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 30 Experiments</h2>
+    <p>Every experiment is implemented from first principles in pure Python 3 standard library with zero external dependencies (no PyTorch, no NumPy, no CUDA required):</p>
+    <pre class="code-block">python3 phase_30_efficient_inference_and_serving/01_the_inference_bottleneck_and_roofline_model/experiment.py
+python3 phase_30_efficient_inference_and_serving/02_pagedattention_and_continuous_batching_vllm/experiment.py
+python3 phase_30_efficient_inference_and_serving/03_speculative_decoding/experiment.py
+python3 phase_30_efficient_inference_and_serving/04_kv_cache_compression_and_tensor_parallel_serving/experiment.py
+python3 phase_30_efficient_inference_and_serving/05_serving_benchmarks_and_metrics_ttft_itl_tps/experiment.py</pre>
+  </section>
+
+</body>
+</html>

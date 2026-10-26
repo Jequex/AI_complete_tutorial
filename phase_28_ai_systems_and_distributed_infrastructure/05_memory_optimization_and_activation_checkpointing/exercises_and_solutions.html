@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 28.5: Exercises &amp; Solutions — Memory Optimization &amp; Activation Checkpointing</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 28 Overview</a>
+
+    <h1>Topic 28.5: Exercises &amp; Solutions</h1>
+    <p>Quantitative problems on activation memory explosion, hierarchical 2-level checkpointing ($\mathcal{O}(L^{1/3})$), and FlashAttention HBM IO reduction factors.</p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Transformer Activation Memory Scaling</h3>
+        <p>For LLaMA-70B ($D = 8{,}192, H = 64, d_{\text{ffn}} = 28{,}672$) in FP16 with $B = 2$, compute activation memory at context lengths $S = 2{,}048$, $S = 8{,}192$, and $S = 32{,}768$. Across 80 layers, does it fit on an 80GB GPU at $S = 32{,}768$? What does checkpointing achieve?</p>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Single Layer Activations:</strong></p>
+            $$A_{\text{layer}}(S) = 327{,}680 \cdot S + 256 \cdot S^2\text{ bytes}$$
+            <ul>
+                <li>$S = 2{,}048$: $671\text{ MB} + 1{,}074\text{ MB} = \mathbf{1.745\text{ GB}}$.</li>
+                <li>$S = 8{,}192$: $2.68\text{ GB} + 17.18\text{ GB} = \mathbf{19.86\text{ GB}}$.</li>
+                <li>$S = 32{,}768$: $10.74\text{ GB} + 274.88\text{ GB} = \mathbf{285.62\text{ GB}}$!</li>
+            </ul>
+            <p><strong>2. 80 Layers Total:</strong></p>
+            <p>At $S = 32{,}768$: $80 \times 285.62\text{ GB} = \mathbf{22{,}849.6\text{ GB}} \approx \mathbf{22.85\text{ TB}}$ (completely impossible on one 80GB GPU!).</p>
+            <p><strong>3. With Activation Checkpointing ($k = 9$) &amp; FlashAttention:</strong></p>
+            <p>FlashAttention eliminates the quadratic term entirely. Peak activation memory drops to:</p>
+            $$M_{\text{peak}} \approx 2\sqrt{80} \times A_{\text{linear}} \approx 18 \times 0.67\text{ GB} \approx \mathbf{12.0\text{ GB}}$$
+            <p>Fits comfortably within the 80GB GPU budget!</p>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Hierarchical 2-Level Activation Checkpointing ($\mathcal{O}(L^{1/3})$)</h3>
+        <p>For an ultra-deep model with $L = 1{,}000$ layers, consider a 2-level hierarchical checkpointing strategy: top-level checkpoints every $k_1$ layers, sub-checkpoints every $k_2$ layers inside active segment $k_1$.</p>
+        <ol>
+            <li>Formulate the memory objective $M(k_1, k_2)$.</li>
+            <li>Derive optimal intervals $k_1^*$ and $k_2^*$.</li>
+            <li>Compare peak memory for $L = 1{,}000$ across standard, 1-level, and 2-level checkpointing.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Memory Objective:</strong></p>
+            $$M(k_1, k_2) = \frac{L}{k_1} + \frac{k_1}{k_2} + k_2$$
+            <p><strong>2. Optimization:</strong></p>
+            $$\frac{\partial M}{\partial k_2} = -\frac{k_1}{k_2^2} + 1 = 0 \implies k_2^* = \sqrt{k_1}$$
+            $$M(k_1) = \frac{L}{k_1} + 2\sqrt{k_1} \implies \frac{dM}{dk_1} = -\frac{L}{k_1^2} + \frac{1}{\sqrt{k_1}} = 0 \implies \mathbf{k_1^* = L^{2/3}}, \quad \mathbf{k_2^* = L^{1/3}}$$
+            <p><strong>3. Peak Memory Comparison ($L = 1{,}000$):</strong></p>
+            <ul>
+                <li>Standard Backprop: $L = \mathbf{1{,}000\text{ units}}$.</li>
+                <li>1-Level Checkpointing: $2\sqrt{1{,}000} \approx \mathbf{63.2\text{ units}}$ ($93.7\%$ savings).</li>
+                <li>2-Level Checkpointing: $3 L^{1/3} = 3 \times 10 = \mathbf{30.0\text{ units}}$ ($97.0\%$ savings).</li>
+            </ul>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: FlashAttention HBM IO Reduction</h3>
+        <p>Calculate HBM data traffic for an attention head with sequence length $S = 16{,}384$ and head dimension $d = 128$ in FP16.</p>
+        <ol>
+            <li>Compute total bytes transferred in standard attention (writing/reading $S \times S$ scores and probabilities).</li>
+            <li>Compute bytes transferred in FlashAttention (only reading $Q, K, V$ and writing $O$).</li>
+            <li>Compute the IO reduction factor.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Standard Attention HBM Traffic:</strong></p>
+            <p>Read $Q, K$ ($8.39\text{ MB}$) + Write $S$ ($536.87\text{ MB}$) + Read/Write Softmax $P$ ($1{,}073.74\text{ MB}$) + Compute $O$ ($545.25\text{ MB}$) = $\mathbf{2{,}164.25\text{ MB}} \approx \mathbf{2.164\text{ GB}}$.</p>
+            <p><strong>2. FlashAttention HBM Traffic:</strong></p>
+            <p>Read $Q, K, V$ ($3 \times 4.19\text{ MB}$) + Write Output $O$ ($4.19\text{ MB}$) = $\mathbf{16.78\text{ MB}}$.</p>
+            <p><strong>3. IO Reduction Factor:</strong></p>
+            $$\text{Reduction Factor} = \frac{2{,}164.25\text{ MB}}{16.78\text{ MB}} \approx \mathbf{129.0\times}$$
+            <p>FlashAttention eliminates $99.2\%$ of off-chip memory traffic, removing memory bus contention entirely.</p>
+        </details>
+    </div>
+
+</body>
+</html>

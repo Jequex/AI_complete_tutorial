@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 09: Unsupervised Learning &amp; Representation — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.4rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-secondary {
+      background-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background-color: var(--text-muted); color: #fff; }
+
+    .code-box {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      margin-top: 2.5rem;
+    }
+    .code-box pre { margin: 0; }
+
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../README.md" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 1rem;">← Master Curriculum Index</a>
+    <br>
+    <span class="badge">Phase 09</span>
+    <h1>Unsupervised Learning &amp; Representation</h1>
+    <p class="lead">From discrete Voronoi partitions and Gaussian mixture models to Rayleigh quotient PCA, SVD equivalence, heavy-tailed t-SNE manifolds, and kernel density estimation.</p>
+  </header>
+
+  <main>
+    <!-- Topic 9.1 -->
+    <div class="topic-card">
+      <h2>01. Clustering — K-Means, Gaussian Mixture Models, &amp; EM</h2>
+      <p>Hard vs soft cluster partitions. Lloyd's algorithm, Voronoi tessellations, the K-Means++ probabilistic initialization guarantee, and complete expectation-maximization derivation of GMM posterior responsibilities and mixture weights.</p>
+      <div class="topic-links">
+        <a href="01_clustering_kmeans_gmm/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="01_clustering_kmeans_gmm/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="01_clustering_kmeans_gmm/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 9.2 -->
+    <div class="topic-card">
+      <h2>02. Dimensionality Reduction — PCA, SVD, &amp; Subspace Learning</h2>
+      <p>Linear dimension compression. Rayleigh quotient variance maximization, Lagrange multiplier proofs of covariance eigendecomposition, SVD singular value equivalence, and the Eckart-Young-Mirsky Theorem.</p>
+      <div class="topic-links">
+        <a href="02_dimensionality_reduction_pca_svd/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="02_dimensionality_reduction_pca_svd/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="02_dimensionality_reduction_pca_svd/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 9.3 -->
+    <div class="topic-card">
+      <h2>03. Manifold Learning — t-SNE, UMAP, &amp; Non-Linear Embeddings</h2>
+      <p>Overcoming the Curse of Dimensionality and the Crowding Problem. High-dimensional Gaussian affinities, low-dimensional Student-t kernels, analytical KL divergence gradients, and UMAP fuzzy simplicial cross-entropy.</p>
+      <div class="topic-links">
+        <a href="03_manifold_learning_tsne_umap/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="03_manifold_learning_tsne_umap/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="03_manifold_learning_tsne_umap/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Topic 9.4 -->
+    <div class="topic-card">
+      <h2>04. Density Estimation &amp; Anomaly Detection</h2>
+      <p>Non-parametric density modeling with Parzen-Rosenblatt Kernel Density Estimation (KDE), Silverman's rule of thumb, covariance-whitened Mahalanobis distance, and recursive partitioning with Isolation Forests.</p>
+      <div class="topic-links">
+        <a href="04_density_estimation_and_anomaly_detection/lecture.html" class="btn btn-primary">📖 Lecture Document</a>
+        <a href="04_density_estimation_and_anomaly_detection/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <a href="04_density_estimation_and_anomaly_detection/lecture.md" class="btn btn-secondary">Markdown Source</a>
+      </div>
+    </div>
+
+    <!-- Execution Box -->
+    <div class="code-box">
+      <div style="color: #94a3b8; margin-bottom: 0.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Run Labs from Terminal (Pure Python 3, Zero Dependencies)</div>
+      <pre><code># Topic 9.1: K-Means &amp; GMM with EM from scratch
+python3 phase_09_unsupervised_learning/01_clustering_kmeans_gmm/experiment.py
+
+# Topic 9.2: PCA &amp; SVD via Power Iteration &amp; Hotelling Deflation
+python3 phase_09_unsupervised_learning/02_dimensionality_reduction_pca_svd/experiment.py
+
+# Topic 9.3: Mini t-SNE Gradient Descent with Student-t Kernels
+python3 phase_09_unsupervised_learning/03_manifold_learning_tsne_umap/experiment.py
+
+# Topic 9.4: Multimodal KDE &amp; Mahalanobis Anomaly Detector
+python3 phase_09_unsupervised_learning/04_density_estimation_and_anomaly_detection/experiment.py</code></pre>
+    </div>
+  </main>
+
+  <footer>
+    <div>AI Complete Curriculum &bull; Phase 09 Portal</div>
+    <div>Zero external dependencies &bull; First-principles mathematics</div>
+  </footer>
+
+</body>
+</html>

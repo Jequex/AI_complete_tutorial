@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.1: Word Embeddings — From Word2Vec to FastText</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        p > code, li > code {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.1: Word Embeddings — From Word2Vec to FastText</h1>
+    <p><em>The Distributional Hypothesis, Continuous Bag-of-Words (CBOW), Continuous Skip-Gram with Negative Sampling (SGNS), Vector Arithmetic, and Subword n-Grams.</em></p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: The Map of Word Neighborhoods &amp; Lego Subwords</h3>
+        <p>Imagine every word in English wants to build a house in a massive 3D fantasy world:</p>
+        <ul>
+            <li><strong>Firth's Rule of Good Neighbors:</strong> <em>"You shall know a word by the company it keeps."</em> Words that hang out in the same places build their houses on the same block. Because <code>cat</code> and <code>dog</code> both hang around with <code>leash</code>, <code>vet</code>, and <code>fur</code>, they live right next door on Pet Boulevard. Meanwhile, <code>apple</code> hangs around with <code>pie</code> and <code>orchard</code>, building miles away in Fruit Valley.</li>
+            <li><strong>The City Compass (Vector Math):</strong> Walking from <code>Man</code> to <code>King</code> moves along "Royalty Avenue". If you start at <code>Woman</code> and walk that exact same direction, you arrive right at <code>Queen</code>! That's $\mathbf{v}_{\text{King}} - \mathbf{v}_{\text{Man}} + \mathbf{v}_{\text{Woman}} \approx \mathbf{v}_{\text{Queen}}$.</li>
+            <li><strong>FastText and Lego Bricks:</strong> Word2Vec carves each house from a single stone. If an unknown word visits (like a typo <code>computerr</code>), Word2Vec panics and labels it <code>&lt;UNK&gt;</code>. FastText builds houses out of character Lego bricks (<code>&lt;co</code>, <code>omp</code>, <code>mpu</code>, <code>uter</code>). Even if the whole word is new, its bricks let us instantly place it next to <code>computer</code>!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr><th>Symbol</th><th>Domain</th><th>Description &amp; Meaning</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>$\mathcal{V}$</td><td>Set</td><td>Discrete vocabulary of size $|\mathcal{V}| = V$ (typically $10^5$ to $10^7$).</td></tr>
+            <tr><td>$d$</td><td>$\mathbb{N}^+$</td><td>Latent embedding dimensionality ($d \ll V$, typically $100 \le d \le 300$).</td></tr>
+            <tr><td>$w_t, w_c$</td><td>$\mathcal{V}$</td><td>Center target word at position $t$ and context word at position $c$.</td></tr>
+            <tr><td>$\mathbf{v}_w, \mathbf{v}_w'$</td><td>$\mathbb{R}^d$</td><td>Input representation vector and output context vector for word $w$.</td></tr>
+            <tr><td>$\sigma(z)$</td><td>$\mathbb{R} \to (0, 1)$</td><td>Logistic sigmoid activation function: $\sigma(z) = \frac{1}{1 + e^{-z}}$.</td></tr>
+            <tr><td>$k$</td><td>$\mathbb{N}^+$</td><td>Number of negative noise samples drawn per positive training pair.</td></tr>
+            <tr><td>$P_n(w)$</td><td>Distribution</td><td>Noise distribution over words, proportional to unigram counts $U(w)^{3/4}$.</td></tr>
+            <tr><td>$\mathcal{G}_w$</td><td>Set of Strings</td><td>Set of subword character $n$-grams (including boundary tags) comprising word $w$.</td></tr>
+            <tr><td>$\mathbf{z}_g$</td><td>$\mathbb{R}^d$</td><td>Subword embedding vector for character $n$-gram $g$.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>2. Word2Vec: CBOW vs. Continuous Skip-Gram</h2>
+    <div class="callout">
+        <p><strong>The Distributional Hypothesis (Firth 1957):</strong> Words that appear in similar linguistic contexts have similar semantic meanings.</p>
+    </div>
+
+    <pre>
+     Continuous Bag-of-Words (CBOW)                  Continuous Skip-Gram
+       w(t-2) ──┐                                            ┌──> w(t-2)
+       w(t-1) ──┼──> [ SUM / AVG ] ──> w(t)         w(t) ────┼──> w(t-1)
+       w(t+1) ──┤                                            ├──> w(t+1)
+       w(t+2) ──┘                                            └──> w(t+2)
+    Predicts center word given context             Predicts context words given center
+    Fast, smooths over frequent words              Superb for infrequent words & nuances
+    </pre>
+
+    <h2>3. The Softmax Bottleneck &amp; Negative Sampling (SGNS)</h2>
+    <p>Under categorical cross-entropy, the conditional probability of context word $w_O$ given center word $w_I$ is:</p>
+    $$P(w_O \mid w_I) = \frac{\exp(\mathbf{v}_{w_O}'^\top \mathbf{v}_{w_I})}{\sum_{w \in \mathcal{V}} \exp(\mathbf{v}_{w}'^\top \mathbf{v}_{w_I})}$$
+    <p>Evaluating the denominator sum over $V = 10^6$ words at each training step requires $3 \times 10^8$ operations per token, which is completely intractable.</p>
+
+    <h3>The Skip-Gram Negative Sampling (SGNS) Objective</h3>
+    <p>Negative sampling formulates independent binary classifications: distinguishing true data pairs from noise pairs drawn from $P_n(w)$:</p>
+    $$\mathcal{L}_{\text{SGNS}} = \log \sigma(\mathbf{v}_{w_O}'^\top \mathbf{v}_{w_I}) + \sum_{i=1}^k \mathbb{E}_{w_i \sim P_n(w)} \left[ \log \sigma(-\mathbf{v}_{w_i}'^\top \mathbf{v}_{w_I}) \right]$$
+
+    <h3>Analytical Gradients</h3>
+    <p>Using the identity $\frac{d}{dz} \log \sigma(z) = 1 - \sigma(z)$ and $\frac{d}{dz} \log \sigma(-z) = -\sigma(z)$:</p>
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{v}_{w_O}'} = (1 - \sigma(\mathbf{v}_{w_O}'^\top \mathbf{v}_{w_I})) \mathbf{v}_{w_I}$$
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{v}_{w_i}'} = -\sigma(\mathbf{v}_{w_i}'^\top \mathbf{v}_{w_I}) \mathbf{v}_{w_I}$$
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{v}_{w_I}} = (1 - \sigma(\mathbf{v}_{w_O}'^\top \mathbf{v}_{w_I})) \mathbf{v}_{w_O}' - \sum_{i=1}^k \sigma(\mathbf{v}_{w_i}'^\top \mathbf{v}_{w_I}) \mathbf{v}_{w_i}'$$
+
+    <p>Negative sampling reduces complexity from $\mathcal{O}(V \cdot d)$ down to $\mathcal{O}((k + 1) \cdot d)$, delivering orders-of-magnitude computational acceleration.</p>
+
+    <h2>4. FastText: Character n-Grams &amp; OOV Generalization</h2>
+    <p>FastText decomposes each word into character $n$-grams bounded by <code>&lt;</code> and <code>&gt;</code>. For example, with $n = 3$ for word <code>where</code>:</p>
+    $$\mathcal{G}_{\text{where}} = \{ \text{&lt;wh}, \text{whe}, \text{her}, \text{ere}, \text{re&gt;}, \text{&lt;where&gt;} \}$$
+    <p>The vector representation is the sum of subword vectors:</p>
+    $$\mathbf{u}_w = \sum_{g \in \mathcal{G}_w} \mathbf{z}_g$$
+    <p>This allows FastText to naturally represent unseen words and handle typos without ever collapsing into <code>&lt;UNK&gt;</code>.</p>
+
+</body>
+</html>

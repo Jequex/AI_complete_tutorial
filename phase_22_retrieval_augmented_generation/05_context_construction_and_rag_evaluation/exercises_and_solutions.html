@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 22.5: Exercises &amp; Solutions — Context Construction &amp; RAG Evaluation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 22 Hub</a>
+    
+    <h1>Topic 22.5: Exercises &amp; Solutions</h1>
+    <p><em>Mean Average Precision Proofs, Lost-in-the-Middle Attention Curves &amp; RAGAS Failure Diagnostics</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Context Precision (Mean Average Precision) Calculation (Easy)</h3>
+        <p>Pipeline A retrieves relevance vector $\mathbf{v}_A = [1, 0, 1, 0, 0]$. Pipeline B retrieves $\mathbf{v}_B = [0, 1, 0, 1, 0]$.</p>
+        <p>1. Compute Precision@$k$ for both pipelines.<br>
+           2. Calculate the final Context Precision (MAP) score.<br>
+           3. Explain why early ranking is prioritized.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1 &amp; 2: MAP Derivation:</strong><br>
+            Pipeline A: $\text{Prec@}1 = 1.0, \text{Prec@}3 = 2/3 \approx 0.667$.<br>
+            $$\text{Context Precision}_A = \frac{1.0 + 0.667}{2} = 83.4\%$$
+            Pipeline B: $\text{Prec@}2 = 0.5, \text{Prec@}4 = 0.5$.<br>
+            $$\text{Context Precision}_B = \frac{0.5 + 0.5}{2} = 50.0\%$$</p>
+
+            <p><strong>Step 3: Ranking Insight:</strong> Although both retrieved 2 relevant chunks, Pipeline A ranks relevant items earlier, shielding the LLM from early distractor noise.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Proof of Lost-in-the-Middle Reordering Optimization (Medium)</h3>
+        <p>Let attention fidelity be $P_{\text{attend}}(x) = 4(x - 0.5)^2 + 0.20$. Two facts have importance weights $w_1 = 0.70$ and $w_2 = 0.30$.</p>
+        <p>1. Compute expected attention score under Naive Layout ($x_1=0.25, x_2=0.50$).<br>
+           2. Compute score under Primacy-Recency Layout ($x_1=0.0, x_2=1.0$).<br>
+           3. Calculate the percentage gain.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Naive:</strong> $(0.70 \times 0.45) + (0.30 \times 0.20) = 0.315 + 0.060 = 0.375$.</p>
+            <p><strong>Step 2: Primacy-Recency:</strong> $(0.70 \times 1.00) + (0.30 \times 1.00) = 1.000$.</p>
+            <p><strong>Step 3: Improvement:</strong> $\frac{1.000 - 0.375}{0.375} = 166.7\%$ relative gain in attention density purely from prompt layout restructuring.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: RAG Failure Root-Cause Diagnostic Matrix (Hard)</h3>
+        <p>Diagnose system failures across three enterprise cases:</p>
+        <ul>
+            <li><strong>Case 1:</strong> Low Faithfulness (0.20), High Precision (0.95), High Recall (0.90).</li>
+            <li><strong>Case 2:</strong> High Faithfulness (0.98), Low Relevance (0.30), High Precision (0.90).</li>
+            <li><strong>Case 3:</strong> High Faithfulness (0.95), High Relevance (0.85), Low Precision (0.25), Low Recall (0.35).</li>
+        </ul>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Diagnosis:</strong><br>
+            - <strong>Case 1:</strong> <em>Generator Hallucination.</em> The retriever found the right passages, but the generator ignored them and hallucinated.<br>
+            - <strong>Case 2:</strong> <em>Instruction Evasion.</em> The model faithfully quoted context but answered a tangent rather than the user's specific prompt.<br>
+            - <strong>Case 3:</strong> <em>Retriever Failure.</em> The retriever missed key chunks, but the generator faithfully operated on what was available without fabricating falsehoods.</p>
+
+            <p><strong>Remediation:</strong> Case 1 requires prompt constraints and lower temperature. Case 3 requires hybrid search (BM25 + Dense + RRF) and improved chunking.</p>
+        </details>
+    </div>
+</body>
+</html>

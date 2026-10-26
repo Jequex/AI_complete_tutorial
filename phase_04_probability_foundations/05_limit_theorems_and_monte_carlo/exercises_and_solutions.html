@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 4.5: Exercises & Solutions — Limit Theorems & LLM Sampling</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 4.5</a>
+    <header>
+        <h1>Topic 4.5: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Benchmark Sizing with CLT, Monte Carlo, and LLM Decoding</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: CLT &amp; Benchmark Test Suite Sample Sizing</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>A lab benchmarks model accuracy ($p \approx 0.80$). Using the Central Limit Theorem, calculate how many benchmark questions $n$ are required to guarantee a margin of error within $\pm 1\%$ ($E \le 0.01$) with $95\%$ confidence ($Z = 1.96$).</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Standard Error Formula:</strong>
+                    $$\text{SE}(\hat{p}) = \sqrt{\frac{p(1-p)}{n}}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Margin of Error Inversion:</strong>
+                    $$E = 1.96 \sqrt{\frac{0.80 \times 0.20}{n}} \le 0.01 \implies n \ge \frac{1.96^2 \times 0.16}{0.0001} \approx \mathbf{6{,}147 \text{ questions}}$$
+                    Evaluating models on small test sets (e.g. 100 questions) leaves wide margins of error ($\pm 10\%$).
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Monte Carlo Integration for Gaussian Error Integral</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Estimate $\int_0^1 e^{-x^2} dx$ using Monte Carlo with $N = 4$ uniform samples: $u = [0.2, 0.5, 0.8, 0.1]$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Hand Calculation:</strong>
+                    $$\hat{I}_4 = \frac{e^{-0.2^2} + e^{-0.5^2} + e^{-0.8^2} + e^{-0.1^2}}{4} = \frac{0.9608 + 0.7788 + 0.5273 + 0.9901}{4} \approx \mathbf{0.8142}$$
+                    True integral is $\approx 0.7468$.
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: LLM Decoding by Hand (Temperature, Top-K &amp; Top-P)</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Given raw logits $[3.0, 2.0, 1.0, 0.0]$ for {"apple", "banana", "carrot", "donut"}:</p>
+        <ol>
+            <li>Compute probabilities under standard Softmax ($T = 1.0$).</li>
+            <li>Compute probabilities under high temperature ($T = 2.0$).</li>
+            <li>Compute probabilities under Top-2 truncation.</li>
+            <li>Compute probabilities under Nucleus Top-P ($P = 0.85$).</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Standard Softmax ($T = 1.0$):</strong>
+                    $$p = [64.39\%, 23.69\%, 8.71\%, 3.21\%]$$
+                </div>
+                <div class="step-box">
+                    <strong>2. High Temp ($T = 2.0$):</strong>
+                    Scaled logits: $[1.5, 1.0, 0.5, 0.0] \implies p = [45.51\%, 27.60\%, 16.74\%, 10.15\%]$
+                </div>
+                <div class="step-box">
+                    <strong>3. Top-2 Truncation:</strong>
+                    Keep {"apple", "banana"}, re-normalize: $p = [73.11\%, 26.89\%, 0\%, 0\%]$
+                </div>
+                <div class="step-box">
+                    <strong>4. Top-P ($P = 0.85$):</strong>
+                    Cumulative: Apple ($0.6439$) + Banana ($0.2369$) $= 0.8808 \ge 0.85$.
+                    Keeps {"apple", "banana"}, pruning carrot and donut!
+                    $$p_{\text{apple}} = 73.10\%, \quad p_{\text{banana}} = 26.90\%$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

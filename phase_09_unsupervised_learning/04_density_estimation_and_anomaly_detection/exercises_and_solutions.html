@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9.4: Exercises & Solutions — Density Estimation & Anomaly Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .solution-content {
+            padding: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 9.4</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">Phase 9 Portal</a>
+
+    <h1>Topic 9.4: Exercises &amp; Solutions</h1>
+    <p><em>Practical problems verifying KDE density calculations, Silverman's bandwidth, Mahalanobis distances on correlated outliers, and Isolation Forest scores.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: 1D Kernel Density Evaluation Hand Calculation</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>Given two sample points $x_1 = 0.0, x_2 = 2.0$, evaluate the KDE density estimate $\hat{f}(x)$ at $x = 1.0$ and $x = 0.0$ using a Gaussian kernel with bandwidth $h = 1.0$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>With $N = 2, h = 1.0$:</p>
+                $$\hat{f}(x) = \frac{1}{2\sqrt{2\pi}} \left( e^{-x^2 / 2} + e^{-(x - 2)^2 / 2} \right) \approx 0.19947 \left( e^{-x^2 / 2} + e^{-(x - 2)^2 / 2} \right)$$
+                <ul>
+                    <li><strong>At $x = 1.0$:</strong> $\hat{f}(1.0) = 0.19947 (e^{-0.5} + e^{-0.5}) = 0.19947 (2 \times 0.60653) \approx 0.242$</li>
+                    <li><strong>At $x = 0.0$:</strong> $\hat{f}(0.0) = 0.19947 (1.0 + e^{-2.0}) = 0.19947 (1.0 + 0.1353) \approx 0.226$</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Silverman's Rule of Thumb Calculation</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>A dataset has $N = 100,000$ points with standard deviation $\hat{\sigma} = 0.02$. Compute optimal bandwidth $h_{\text{opt}} = 1.06 \, \hat{\sigma} \, N^{-1/5}$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                $$N^{-1/5} = (10^5)^{-1/5} = 10^{-1} = 0.1$$
+                $$h_{\text{opt}} = 1.06 \times 0.02 \times 0.1 = 0.00212$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Mahalanobis Distance for Correlated Outlier</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Given mean $\mu = \begin{pmatrix} 0 \\ 0 \end{pmatrix}$ and covariance $\Sigma = \begin{pmatrix} 2 & 1 \\ 1 & 1 \end{pmatrix}$. Compute the Mahalanobis distances for $x_A = \begin{pmatrix} 1 \\ 1 \end{pmatrix}$ and $x_B = \begin{pmatrix} 1 \\ -1 \end{pmatrix}$. Explain why they differ despite having equal Euclidean distance.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Inverse covariance matrix: $\det(\Sigma) = 1 \implies \Sigma^{-1} = \begin{pmatrix} 1 & -1 \\ -1 & 2 \end{pmatrix}$.</p>
+                <ul>
+                    <li><strong>For $x_A = (1, 1)^T$:</strong>
+                    $$x_A^T \Sigma^{-1} x_A = \begin{pmatrix} 1 & 1 \end{pmatrix} \begin{pmatrix} 0 \\ 1 \end{pmatrix} = 1.0 \implies D_M(x_A) = \sqrt{1.0} = 1.0$$</li>
+                    <li><strong>For $x_B = (1, -1)^T$:</strong>
+                    $$x_B^T \Sigma^{-1} x_B = \begin{pmatrix} 1 & -1 \end{pmatrix} \begin{pmatrix} 2 \\ -3 \end{pmatrix} = 2 + 3 = 5.0 \implies D_M(x_B) = \sqrt{5.0} \approx 2.236$$</li>
+                </ul>
+                <p><strong>Explanation:</strong> Features 1 and 2 positively co-vary ($\Sigma_{12} = 1$). $x_A = (1, 1)$ aligns with this correlation, while $x_B = (1, -1)$ violates it, yielding over double the Mahalanobis distance.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 4: Isolation Forest Anomaly Score Calculation</h3>
+            <span class="badge badge-hard">Hard</span>
+        </div>
+        <p>For $n = 256$, $c(256) \approx 10.245$. Calculate the anomaly score $s(x, n) = 2^{-\mathbb{E}[h(x)] / c(n)}$ for an outlier with $\mathbb{E}[h] = 2.0$ versus an inlier with $\mathbb{E}[h] = 9.5$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <ul>
+                    <li><strong>For Outlier ($\mathbb{E}[h] = 2.0$):</strong>
+                    $$\text{Score} = 2^{-2.0 / 10.245} = 2^{-0.1952} \approx 0.873 \quad (\text{Flagged as Anomaly } \ge 0.6)$$</li>
+                    <li><strong>For Inlier ($\mathbb{E}[h] = 9.5$):</strong>
+                    $$\text{Score} = 2^{-9.5 / 10.245} = 2^{-0.9273} \approx 0.526 \quad (\text{Normal Inlier } < 0.6)$$</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" class="back-link">← Back to Lecture 9.4</a>
+        <a href="../index.html" class="back-link">Phase 9 Portal →</a>
+    </div>
+</body>
+</html>

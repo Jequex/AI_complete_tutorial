@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.3: Exercises &amp; Solutions — Planning Strategies</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 27.3 Lecture</a>
+    <h1>Topic 27.3: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">Computational complexity bounds, search tree evaluations, and error recovery proofs in Tree-of-Thoughts.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Search Space Complexity: CoT vs. BFS-ToT vs. Beam-ToT</h3>
+      <p>Consider a task of depth $D$ where an agent can generate $k$ thought candidates per step.</p>
+      <p><strong>Question:</strong> Derive the state evaluation count for linear CoT, exhaustive BFS-ToT, and Beam Search ToT (width $b$). Calculate the counts for $k = 5, D = 4, b = 3$.</p>
+
+      <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+          <ul>
+            <li><strong>CoT:</strong> $N_{\text{CoT}} = D = 4$ evaluations.</li>
+            <li><strong>Exhaustive BFS:</strong> $N_{\text{BFS}} = \sum_{d=1}^D k^d = \frac{k(k^D - 1)}{k - 1} = 5 + 25 + 125 + 625 = \mathbf{780}$ evaluations.</li>
+            <li><strong>Beam Search:</strong> $N_{\text{Beam}} = k + (D - 1)bk = 5 + 3 \times 3 \times 5 = \mathbf{50}$ evaluations.</li>
+          </ul>
+          <p>Beam Search reduces computational overhead by $93.5\%$ while preserving multi-hypothesis tracking.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Mathematical Proof of Error Recovery in DFS Backtracking vs. Linear CoT</h3>
+      <p>Suppose a problem requires $T=6$ steps, where a single-step greedy decision fails with probability $\epsilon = 0.30$. In DFS Tree-of-Thoughts, the agent explores up to $B=3$ alternate thought branches per step.</p>
+      <p><strong>Question:</strong> Derive the full success probability formulas and compare the numerical rates.</p>
+
+      <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. Linear CoT:</strong> Every step must succeed on turn 1:</p>
+          $$\mathbb{P}(\text{Success}_{\text{CoT}}) = (1 - \epsilon)^T = (0.70)^6 \approx \mathbf{11.76\%}$$
+          <p><strong>2. DFS Backtracking (Branching $B=3$):</strong> A step fails only if all $B$ candidate thoughts fail:</p>
+          $$\mathbb{P}(\text{Step succeeds}) = 1 - \epsilon^B = 1 - (0.30)^3 = 0.973$$
+          $$\mathbb{P}(\text{Success}_{\text{ToT}}) = (1 - \epsilon^B)^T = (0.973)^6 \approx \mathbf{84.88\%}$$
+          <p>Backtracking increases the mission success probability from $11.76\%$ to $84.88\%$.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

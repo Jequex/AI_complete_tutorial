@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 16.4: Transformer Architecture &amp; Causal Masking — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            background-color: var(--card-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 16 Overview</a>
+
+    <h1>Topic 16.4: Transformer Architecture &amp; Causal Masking</h1>
+    <p><em>Autoregressive decoding, causal upper-triangular masks, residual stream highways, and quadratic complexity.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        Having developed Scaled Dot-Product Attention, Multi-Head Attention, and Positional Encodings, we now assemble the complete <strong>Transformer Architecture</strong>.
+    </p>
+    <p>
+        In generative models (such as GPT-4, LLaMA 3, Claude, and Gemini), tokens cannot look into the future during autoregressive text generation. To enable simultaneous parallel training over all tokens on GPUs, we introduce <strong>Causal Masking</strong>.
+    </p>
+
+    <div class="box">
+        $$\text{MaskedAttention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right) V$$
+        $$M_{ij} = \begin{cases} 0 & \text{if } j \le i \\ -\infty & \text{if } j > i \end{cases}$$
+    </div>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: The Blindfolded Reader &amp; The Express Subway</h3>
+        <ul>
+            <li><strong>The Time-Machine Curtain (Causal Masking):</strong> When reading a mystery book, a magic curtain covers all future pages ($-\infty$). You are only permitted to read words up to where your eyes currently rest.</li>
+            <li><strong>The Express Subway (Residual Connections):</strong> The original words ride an uninterrupted express subway track ($x + f(x)$). Detectives whisper updates into the subway car, but if a detective has nothing to say, the train speeds along without losing the original message!</li>
+            <li><strong>The Fact Memorizer (Feed-Forward MLP):</strong> While attention connects words across the sentence, the MLP stores factual knowledge (*"Paris is the capital of France"*).</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Tensor Shape</th>
+                <th>Domain</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$T$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Sequence length (context window)</td>
+            </tr>
+            <tr>
+                <td>$d_{\text{model}}$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Token hidden dimension</td>
+            </tr>
+            <tr>
+                <td>$d_{\text{ff}}$</td>
+                <td>Scalar</td>
+                <td>$4 \times d_{\text{model}}$</td>
+                <td>MLP intermediate dimension</td>
+            </tr>
+            <tr>
+                <td>$M \in \mathbb{R}^{T \times T}$</td>
+                <td>Matrix</td>
+                <td>$\{0, -\infty\}$</td>
+                <td>Upper-triangular causal mask</td>
+            </tr>
+            <tr>
+                <td>$\text{LN}(x)$</td>
+                <td>Operator</td>
+                <td>$\mathbb{R}^d \to \mathbb{R}^d$</td>
+                <td>Layer Normalization with learnable scale $\gamma$ and bias $\beta$</td>
+            </tr>
+            <tr>
+                <td>$A_{ij}$</td>
+                <td>Scalar</td>
+                <td>$[0, 1]$</td>
+                <td>Attention weight (strictly 0 for all $j > i$)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Pre-LN vs Post-LN Architecture</h2>
+    <p>
+        The modern Pre-LayerNorm architecture places normalization before each sub-layer:
+    </p>
+    $$x^{(l+1)} = x^{(l)} + \text{MHA}(\text{LN}_1(x^{(l)}))$$
+    $$x^{(l+2)} = x^{(l+1)} + \text{FFN}(\text{LN}_2(x^{(l+1)}))$$
+    <p>
+        Because the identity path $x^{(l)} + \dots$ is unhindered by normalization, the gradient of the loss backpropagates directly to the input without attenuation:
+    </p>
+    $$\frac{\partial \mathcal{L}}{\partial x^{(0)}} = \frac{\partial \mathcal{L}}{\partial x^{(L)}} \left( I + \sum_{l=0}^{L-1} \frac{\partial \mathcal{F}_l}{\partial x^{(0)}} \right)$$
+
+    <h2>4. Computational Complexity: The Quadratic $\mathcal{O}(T^2)$ Bottleneck</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Operation</th>
+                <th>FLOPs</th>
+                <th>Peak Memory</th>
+                <th>Hardware Bottleneck</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Projections ($Q, K, V, W^O$)</td>
+                <td>$\mathcal{O}(T \cdot d_{\text{model}}^2)$</td>
+                <td>$\mathcal{O}(T \cdot d_{\text{model}})$</td>
+                <td>Compute-bound (Tensor Cores)</td>
+            </tr>
+            <tr>
+                <td>Attention Matrix ($Q K^T$)</td>
+                <td>$\mathcal{O}(T^2 \cdot d_k)$</td>
+                <td>$\mathcal{O}(T^2)$</td>
+                <td>Memory bandwidth (HBM bound)</td>
+            </tr>
+            <tr>
+                <td>Feed-Forward MLP</td>
+                <td>$\mathcal{O}(8 T d_{\text{model}}^2)$</td>
+                <td>$\mathcal{O}(T \cdot d_{\text{ff}})$</td>
+                <td>Compute-bound</td>
+            </tr>
+        </tbody>
+    </table>
+    <p>
+        For large contexts ($T \ge 128\text{k}$), the $\mathcal{O}(T^2)$ attention matrix memory footprint requires advanced techniques like <strong>FlashAttention</strong> (SRAM tiling) and <strong>KV-Cache</strong> (autoregressive key-value reuse).
+    </p>
+</body>
+</html>

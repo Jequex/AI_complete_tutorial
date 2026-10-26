@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 0.3 Exercises & Solutions — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-solution: #f0fdf4;
+      --border-solution: #16a34a;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-solution: #064e3b2e;
+        --border-solution: #10b981;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2.5rem; }
+
+    .problem-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    details.solution {
+      background-color: var(--bg-solution);
+      border: 1px solid var(--border-solution);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    details.solution summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--border-solution);
+      user-select: none;
+      font-size: 1.05rem;
+    }
+    details.solution[open] summary {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 00</a> &gt; <a href="./lecture.html">Topic 0.3</a> &gt; <span>Exercises &amp; Solutions</span>
+    </div>
+    <h1>Topic 0.3: Practice Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Perform manual gradient descent by hand, solve the closed-form normal equation, and derive stability bounds.</p>
+  </header>
+
+  <main>
+    <!-- PROBLEM 1 -->
+    <div class="problem-box">
+      <h2>Problem 1: Manual One-Step Gradient Descent by Hand</h2>
+      <p>Given $N=2$ data points: $(x^{(1)}, y^{(1)}) = (2.0, 5.0)$ and $(x^{(2)}, y^{(2)}) = (4.0, 9.0)$.</p>
+      <p>Model: $\hat{y} = w x + b$. Objective: MSE Loss $\mathcal{L}(w, b) = \frac{1}{2} \sum_{i=1}^2 (\hat{y}^{(i)} - y^{(i)})^2$.</p>
+      <p>Initial parameters: $w_0 = 1.0, b_0 = 0.0$. Learning rate: $\eta = 0.05$.</p>
+      <ul>
+        <li><strong>Part A:</strong> Calculate initial predictions, errors, and loss $\mathcal{L}(w_0, b_0)$.</li>
+        <li><strong>Part B:</strong> Compute analytical partial derivatives $\frac{\partial \mathcal{L}}{\partial w}$ and $\frac{\partial \mathcal{L}}{\partial b}$.</li>
+        <li><strong>Part C:</strong> Update $w_1 = w_0 - \eta \frac{\partial \mathcal{L}}{\partial w}$ and $b_1 = b_0 - \eta \frac{\partial \mathcal{L}}{\partial b}$.</li>
+        <li><strong>Part D:</strong> Compute new loss $\mathcal{L}(w_1, b_1)$ and verify error reduction.</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A: Initial Predictions and Errors</strong></p>
+        <ul>
+          <li>$\hat{y}^{(1)} = (1.0)(2.0) + 0.0 = 2.0 \implies e^{(1)} = 2.0 - 5.0 = -3.0$</li>
+          <li>$\hat{y}^{(2)} = (1.0)(4.0) + 0.0 = 4.0 \implies e^{(2)} = 4.0 - 9.0 = -5.0$</li>
+          <li>$\mathcal{L}(w_0, b_0) = \frac{1}{2} [(-3.0)^2 + (-5.0)^2] = \frac{9 + 25}{2} = \mathbf{17.0}$</li>
+        </ul>
+
+        <p><strong>Part B: Computing Analytical Gradients</strong></p>
+        <p>$$\frac{\partial \mathcal{L}}{\partial w} = e^{(1)} x^{(1)} + e^{(2)} x^{(2)} = (-3.0)(2.0) + (-5.0)(4.0) = -6.0 - 20.0 = \mathbf{-26.0}$$</p>
+        <p>$$\frac{\partial \mathcal{L}}{\partial b} = e^{(1)} + e^{(2)} = -3.0 + (-5.0) = \mathbf{-8.0}$$</p>
+
+        <p><strong>Part C: Parameter Updates</strong></p>
+        <p>$$w_1 = 1.0 - [0.05 \times (-26.0)] = 1.0 - (-1.30) = \mathbf{2.30}$$</p>
+        <p>$$b_1 = 0.0 - [0.05 \times (-8.0)] = 0.0 - (-0.40) = \mathbf{0.40}$$</p>
+
+        <p><strong>Part D: New Loss Verification</strong></p>
+        <ul>
+          <li>$\hat{y}^{(1)}_{\text{new}} = (2.30)(2.0) + 0.40 = 5.00 \implies e^{(1)} = 0.00$</li>
+          <li>$\hat{y}^{(2)}_{\text{new}} = (2.30)(4.0) + 0.40 = 9.60 \implies e^{(2)} = +0.60$</li>
+          <li>$\mathcal{L}(w_1, b_1) = \frac{1}{2} [(0.0)^2 + (0.6)^2] = \frac{0.36}{2} = \mathbf{0.18}$</li>
+        </ul>
+        <p>The loss collapsed from <strong>$17.0 \to 0.18$</strong> in a single step—a $98.9\%$ error reduction!</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-box">
+      <h2>Problem 2: The Analytic Closed-Form Normal Equation</h2>
+      <p>For model $\hat{y} = w x$ and MSE loss $\mathcal{L}(w) = \frac{1}{N} \sum_{i=1}^N (w x^{(i)} - y^{(i)})^2$:</p>
+      <ul>
+        <li><strong>Part A:</strong> Take the derivative $\frac{d\mathcal{L}}{dw}$.</li>
+        <li><strong>Part B:</strong> Set $\frac{d\mathcal{L}}{dw} = 0$ to solve for optimal $w^*$ in closed form.</li>
+        <li><strong>Part C:</strong> Evaluate $w^*$ for $x=[2, 4], y=[5, 9]$.</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A:</strong> Using the chain rule: $\frac{d\mathcal{L}}{dw} = \frac{2}{N} \sum_{i=1}^N (w x^{(i)} - y^{(i)}) x^{(i)}$.</p>
+        <p><strong>Part B:</strong> Setting $\frac{d\mathcal{L}}{dw} = 0$ yields:</p>
+        <p>$$w \sum_{i=1}^N (x^{(i)})^2 = \sum_{i=1}^N x^{(i)} y^{(i)} \implies \mathbf{w^* = \frac{\sum_{i=1}^N x^{(i)} y^{(i)}}{\sum_{i=1}^N (x^{(i)})^2}}$$</p>
+        <p><strong>Part C:</strong> $\sum x y = (2 \times 5) + (4 \times 9) = 10 + 36 = 46$. $\sum x^2 = 4 + 16 = 20$.</p>
+        <p>$$w^* = \frac{46}{20} = \mathbf{2.30}$$</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-box">
+      <h2>Problem 3: Learning Rate Stability Threshold</h2>
+      <p>Let loss $\mathcal{L}(w) = 3w^2$ with update $w_{t+1} = w_t - \eta \frac{d\mathcal{L}}{dw}$. Determine the maximum threshold $\eta_{\text{crit}}$ to avoid exponential divergence.</p>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p>Derivative: $\frac{d\mathcal{L}}{dw} = 6w$.<br>
+        Recurrence: $w_{t+1} = w_t - 6\eta w_t = (1 - 6\eta)w_t$.<br>
+        For convergence, $|1 - 6\eta| < 1 \implies -1 < 1 - 6\eta < 1$.<br>
+        Solving bounds: $6\eta < 2 \implies \eta < \frac{1}{3}$.<br>
+        $$\mathbf{\eta_{\text{crit}} = \frac{1}{3} \approx 0.3333}$$</p>
+      </details>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="./lecture.html" class="btn">← Back to Lecture</a>
+      <a href="../index.html" class="btn btn-primary">Phase 00 Complete! →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

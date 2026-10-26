@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 10.2: Exercises & Solutions — Feature Engineering & Scaling</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-proof { background: #fef3c7; color: #92400e; }
+        .badge-stat { background: #dbeafe; color: #1e40af; }
+        .badge-bayes { background: #f3e8ff; color: #6b21a8; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 10.2</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">🏠 Phase 10 Hub</a>
+
+    <h1>Topic 10.2: Exercises & Solutions</h1>
+    <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">
+        Mathematical proofs of matrix singularity in dummy encoding, outlier breakdown points, and empirical Bayes target smoothing.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: The Dummy Variable Trap Proof</h3>
+            <span class="badge badge-proof">Matrix Algebra Proof</span>
+        </div>
+        <p>
+            Consider a linear model with an intercept column $\mathbf{1}$ and 3 mutually exclusive categorical indicator columns $\mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3$ from one-hot encoding.
+        </p>
+        <ol>
+            <li>Prove mathematically that the Gram matrix $X^T X$ is singular (non-invertible).</li>
+            <li>Describe two standard engineering techniques to fix this singularity.</li>
+            <li>Explain why Ridge regression ($L_2$) avoids this issue.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Proof of Singularity:</strong></p>
+                $$\mathbf{x}_1 + \mathbf{x}_2 + \mathbf{x}_3 = \mathbf{1} \implies 1\cdot\mathbf{1} - \mathbf{x}_1 - \mathbf{x}_2 - \mathbf{x}_3 = \mathbf{0}$$
+                <p>For $v = [1, -1, -1, -1]^T \ne \mathbf{0}$, we have $X v = \mathbf{0}$. Therefore $(X^T X) v = X^T (X v) = \mathbf{0}$, meaning $\lambda = 0$ is an eigenvalue and $\det(X^T X) = 0$. The matrix is singular.</p>
+                <p><strong>2. Two Resolutions:</strong> (a) Drop one dummy column ($K-1$ encoding), letting the intercept absorb the reference class; or (b) Fit the model without an explicit intercept term $w_0$.</p>
+                <p><strong>3. Ridge Impact:</strong> Ridge optimizes $(X^T X + \lambda I)$. Since all eigenvalues shift by $\lambda > 0$, the matrix becomes strictly positive definite and invertible.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Outlier Breakdown Point: StandardScaler vs. RobustScaler</h3>
+            <span class="badge badge-stat">Robust Statistics</span>
+        </div>
+        <p>
+            A dataset consists of 20 normal values between 40 and 60, plus one extreme billionaire outlier $M = 10,000$.
+        </p>
+        <ol>
+            <li>Compute the median, $Q_1, Q_3$, and $\text{IQR}$.</li>
+            <li>What happens to $x_{\text{robust}}$ of the median sample as $M \to \infty$?</li>
+            <li>What happens to the Z-score of typical samples under <code>StandardScaler</code> as $M \to \infty$?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Order Statistics:</strong> $Q_2 = 50$, $Q_1 = 44.5$, $Q_3 = 56.5$, $\text{IQR} = 12.0$.</p>
+                <p><strong>2. Robust Invariance:</strong> $x_{\text{robust}} = \frac{50 - 50}{12.0} = 0.0$. Because $M$ only impacts the highest rank, the order statistics are unchanged as $M \to \infty$.</p>
+                <p><strong>3. Standard Breakdown:</strong> Sample standard deviation $s$ scales as $\mathcal{O}(M)$. As $M \to \infty$, the denominator explodes, squashing all 20 normal samples into an indistinguishable microscopic point near $-0.23$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Empirical Bayes Target Encoding</h3>
+            <span class="badge badge-bayes">Bayesian Smoothing</span>
+        </div>
+        <p>
+            In ad click prediction with global CTR $\mu_{\text{global}} = 0.05$ and smoothing prior $m = 10$:
+            $$S(c) = \frac{n_c \bar{y}_c + m \mu_{\text{global}}}{n_c + m}$$
+        </p>
+        <ol>
+            <li>Domain A has $n_A = 2$ impressions and $2$ clicks ($\bar{y}_A = 1.0$). Compute $S(A)$.</li>
+            <li>Domain B has $n_B = 10,000$ impressions and $600$ clicks ($\bar{y}_B = 0.06$). Compute $S(B)$.</li>
+            <li>Explain how $m$ serves as a pseudo-count prior.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Small Domain A:</strong></p>
+                $$S(A) = \frac{2 \times 1.0 + 10 \times 0.05}{2 + 10} = \frac{2.5}{12} \approx 0.2083 \quad (20.8\%)$$
+                <p>Prevents small sample noise from assigning an unrealistic 100% CTR.</p>
+                <p><strong>2. Large Domain B:</strong></p>
+                $$S(B) = \frac{10,000 \times 0.06 + 0.5}{10,010} \approx 0.05999 \quad (6.0\%)$$
+                <p>Empirical evidence dominates the prior when $n_B \gg m$.</p>
+                <p><strong>3. Prior Interpretation:</strong> $m$ represents the strength of our belief in the global average, acting as $m$ hypothetical prior observations before observing real category data.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

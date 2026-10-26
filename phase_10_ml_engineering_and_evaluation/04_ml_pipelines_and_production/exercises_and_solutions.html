@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 10.4: Exercises & Solutions — ML Pipelines & Production Systems</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-proof { background: #fef3c7; color: #92400e; }
+        .badge-shift { background: #dbeafe; color: #1e40af; }
+        .badge-sec { background: #fee2e2; color: #991b1b; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+        }
+        pre {
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 10.4</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">🏠 Phase 10 Hub</a>
+
+    <h1>Topic 10.4: Exercises & Solutions</h1>
+    <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">
+        Mathematical proofs of PSI symmetric divergence, importance weighting under covariate shift, and pickle serialization security analysis.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Algebraic Proof of PSI Symmetric KL Divergence</h3>
+            <span class="badge badge-proof">Information Theory Proof</span>
+        </div>
+        <p>
+            The Population Stability Index is defined as:
+        </p>
+        $$\text{PSI}(P, Q) = \sum_{b=1}^B (P_b - Q_b) \ln\left(\frac{P_b}{Q_b}\right)$$
+        <ol>
+            <li>Prove that $\text{PSI}(P, Q) = D_{\text{KL}}(P \parallel Q) + D_{\text{KL}}(Q \parallel P)$.</li>
+            <li>Prove that $\text{PSI}(P, Q) \ge 0$, and identify when it equals 0.</li>
+            <li>Why is symmetry important for monitoring pipelines?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Proof:</strong></p>
+                $$D_{\text{KL}}(P \parallel Q) + D_{\text{KL}}(Q \parallel P) = \sum P_b \ln\frac{P_b}{Q_b} + \sum Q_b \ln\frac{Q_b}{P_b}$$
+                $$= \sum P_b \ln\frac{P_b}{Q_b} - \sum Q_b \ln\frac{P_b}{Q_b} = \sum (P_b - Q_b) \ln\left(\frac{P_b}{Q_b}\right) = \text{PSI}(P, Q)$$
+                <p><strong>2. Non-negativity:</strong> By Gibbs' inequality, both $D_{\text{KL}}$ terms are non-negative, hence $\text{PSI} \ge 0$, with equality if and only if $P_b = Q_b \ \forall b$.</p>
+                <p><strong>3. Symmetry:</strong> Standard KL divergence is asymmetric. PSI guarantees that swapping baseline and current production batches produces the exact same drift severity score.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Importance Weighting Under Covariate Shift</h3>
+            <span class="badge badge-shift">Statistical Risk Minimization</span>
+        </div>
+        <p>
+            Assume $P_{\text{deploy}}(Y \mid X) = P_{\text{tr}}(Y \mid X)$, but $P_{\text{deploy}}(X) \ne P_{\text{tr}}(X)$.
+        </p>
+        <ol>
+            <li>Derive the training expectation for $R_{\text{deploy}}(f) = \mathbb{E}_{\text{deploy}}[L(f(X), Y)]$.</li>
+            <li>Define the importance weight function $w(x)$.</li>
+            <li>What happens when the training distribution has zero density where production data exists?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Derivation:</strong></p>
+                $$R_{\text{deploy}}(f) = \int L(f(x), y) P_{\text{tr}}(y \mid x) P_{\text{deploy}}(x) dx dy = \int L(f(x), y) \left[\frac{P_{\text{deploy}}(x)}{P_{\text{tr}}(x)}\right] P_{\text{tr}}(x, y) dx dy$$
+                $$R_{\text{deploy}}(f) = \mathbb{E}_{\text{tr}}[w(X) L(f(X), Y)]$$
+                <p><strong>2. Weight Function:</strong> $w(x) = \frac{P_{\text{deploy}}(x)}{P_{\text{tr}}(x)}$.</p>
+                <p><strong>3. Support Violation:</strong> When $P_{\text{tr}}(x) = 0$ while $P_{\text{deploy}}(x) > 0$, the ratio explodes to infinity and the model has zero data to generalize to that domain.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Pickle Security Exploit vs. Safetensors Defense</h3>
+            <span class="badge badge-sec">Software Security</span>
+        </div>
+        <p>
+            An attacker crafts a file using Python's <code>__reduce__</code> hook that triggers <code>os.system(...)</code> during unpickling.
+        </p>
+        <ol>
+            <li>Why does <code>pickle.load()</code> automatically execute this code?</li>
+            <li>Why is Python pickle inherently unsafe for untrusted models?</li>
+            <li>How does the <code>Safetensors</code> format eliminate remote code execution?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Unpickling Execution:</strong> <code>pickle</code> operates a virtual stack machine. The <code>__reduce__</code> method instructs the unpickler to instantiate an object by calling a specified callable (e.g. <code>os.system</code>) with arbitrary arguments.</p>
+                <p><strong>2. Inherent Flaw:</strong> Pickle does not store pure data; it serializes arbitrary Python execution state and callable hooks.</p>
+                <p><strong>3. Safetensors Defense:</strong> Safetensors uses an 8-byte length header, a pure UTF-8 JSON header for tensor metadata, and raw contiguous binary buffers. It has no bytecode VM or execution hooks, enabling safe, zero-copy memory mapping.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

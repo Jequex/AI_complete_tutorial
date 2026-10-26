@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 0.1 Exercises & Solutions — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-solution: #f0fdf4;
+      --border-solution: #16a34a;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-solution: #064e3b2e;
+        --border-solution: #10b981;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2.5rem; }
+
+    .problem-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    details.solution {
+      background-color: var(--bg-solution);
+      border: 1px solid var(--border-solution);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    details.solution summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--border-solution);
+      user-select: none;
+      font-size: 1.05rem;
+    }
+    details.solution[open] summary {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 00</a> &gt; <a href="./lecture.html">Topic 0.1</a> &gt; <span>Exercises &amp; Solutions</span>
+    </div>
+    <h1>Topic 0.1: Practice Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Test your understanding of intelligence vs. computation, discounted return calculations, and generalization risk.</p>
+  </header>
+
+  <main>
+    <!-- PROBLEM 1 -->
+    <div class="problem-box">
+      <h2>Problem 1: The Smart Thermostat (Conceptual Drill)</h2>
+      <p>A home thermostat measures temperature $T$. If $T < 68^\circ\text{F}$, it turns on the furnace. If $T > 72^\circ\text{F}$, it turns off the furnace.</p>
+      <ul>
+        <li><strong>Part A:</strong> Is this thermostat performing computation, or does it exhibit genuine intelligence? Explain using the definition of intelligence from the lecture.</li>
+        <li><strong>Part B:</strong> What specific capability would you need to add to this thermostat for it to qualify as an adaptive, intelligent agent?</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A: Pure Computation</strong><br>
+        The basic thermostat is performing <strong>pure computation</strong>. It evaluates a hard-coded deterministic conditional rule:</p>
+        <p>$$\text{Action} = \begin{cases} \text{Heater ON} & \text{if } T < 68^\circ\text{F} \\ \text{Heater OFF} & \text{if } T > 72^\circ\text{F} \\ \text{Maintain} & \text{otherwise} \end{cases}$$</p>
+        <p>It possesses no internal model of the environment, cannot learn from experience, and cannot adapt to novel situations (e.g., if a window is left wide open in winter, it will fire continuously without realizing the room is not retaining heat).</p>
+
+        <p><strong>Part B: Transforming into an Intelligent Agent</strong><br>
+        To become an intelligent agent, it requires:</p>
+        <ol>
+          <li><strong>Broader Observation Space:</strong> Ingesting external weather forecasts, time-of-day occupancy, and indoor humidity.</li>
+          <li><strong>Environmental Learning:</strong> Learning the specific thermal inertia of the home (e.g., <em>"It takes 40 minutes to raise the master bedroom by $3^\circ\text{F}$ when exterior temperature is $20^\circ\text{F}$"</em>).</li>
+          <li><strong>Objective Optimization:</strong> Balancing the trade-off between human comfort and energy bill minimization ($$$).</li>
+        </ol>
+      </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-box">
+      <h2>Problem 2: Mathematical Return Calculation (Hand Derivation)</h2>
+      <p>An intelligent cleaning robot explores a room modeled as an MDP. At time step $t=0$, it takes 4 sequential actions, receiving the following scalar rewards:</p>
+      <ul>
+        <li>$t=1$: $R_1 = -1.0$ (energy spent moving forward)</li>
+        <li>$t=2$: $R_2 = -1.0$ (energy spent turning left)</li>
+        <li>$t=3$: $R_3 = +10.0$ (vacuumed a pile of dust)</li>
+        <li>$t=4$: $R_4 = +50.0$ (safely docked and recharged)</li>
+      </ul>
+      <p>The discount factor is set to <strong>$\gamma = 0.5$</strong>.</p>
+      <ul>
+        <li><strong>Part A:</strong> State the formal mathematical formula for the discounted return $G_0$.</li>
+        <li><strong>Part B:</strong> Calculate the exact numerical value of $G_0$ step-by-step.</li>
+        <li><strong>Part C:</strong> Recalculate the return for $\gamma = 0.9$. Compare the two results: how does $\gamma$ influence agent behavior?</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A: The Formula</strong><br>
+        The discounted cumulative return $G_t$ is defined as:</p>
+        <p>$$G_t = \sum_{k=0}^{\infty} \gamma^k R_{t+k+1} = R_{t+1} + \gamma R_{t+2} + \gamma^2 R_{t+3} + \dots$$</p>
+        <p>For our 4-step trajectory starting at $t=0$:</p>
+        <p>$$G_0 = R_1 + \gamma R_2 + \gamma^2 R_3 + \gamma^3 R_4$$</p>
+
+        <p><strong>Part B: Arithmetic with $\gamma = 0.5$</strong></p>
+        <ol>
+          <li>Calculate powers of $\gamma$:
+            $$\gamma^0 = 1.0, \quad \gamma^1 = 0.5, \quad \gamma^2 = 0.25, \quad \gamma^3 = 0.125$$
+          </li>
+          <li>Multiply each reward:
+            $$\text{Step 1: } 1.0 \times (-1.0) = -1.0$$
+            $$\text{Step 2: } 0.5 \times (-1.0) = -0.5$$
+            $$\text{Step 3: } 0.25 \times (+10.0) = +2.5$$
+            $$\text{Step 4: } 0.125 \times (+50.0) = +6.25$$
+          </li>
+          <li>Sum terms:
+            $$G_0 = -1.0 - 0.5 + 2.5 + 6.25 = \mathbf{7.25}$$
+          </li>
+        </ol>
+
+        <p><strong>Part C: Arithmetic with $\gamma = 0.9$</strong></p>
+        <ol>
+          <li>Calculate powers of $\gamma$:
+            $$\gamma^0 = 1.0, \quad \gamma^1 = 0.9, \quad \gamma^2 = 0.81, \quad \gamma^3 = 0.729$$
+          </li>
+          <li>Multiply each reward:
+            $$\text{Step 1: } 1.0 \times (-1.0) = -1.0$$
+            $$\text{Step 2: } 0.9 \times (-1.0) = -0.9$$
+            $$\text{Step 3: } 0.81 \times (+10.0) = +8.1$$
+            $$\text{Step 4: } 0.729 \times (+50.0) = +36.45$$
+          </li>
+          <li>Sum terms:
+            $$G_0 = -1.0 - 0.9 + 8.1 + 36.45 = \mathbf{42.65}$$
+          </li>
+        </ol>
+        <p><strong>Behavioral Insight:</strong> When $\gamma = 0.5$, distant rewards decay sharply (the $+50$ reward shrank to only $+6.25$). When $\gamma = 0.9$, the distant goal dominates ($+36.45$), making the agent willing to incur small negative step penalties to achieve long-term success.</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-box">
+      <h2>Problem 3: The Generalization Gap (Overfitting Proof)</h2>
+      <p>A team trains an image classifier on 5,000 photos of cats and dogs. The model achieves:</p>
+      <p>$$\widehat{\mathcal{R}}_{\text{train}} = 0.00 \quad (0\% \text{ error on training data})$$</p>
+      <p>When tested on real-world photos submitted by users, the error is:</p>
+      <p>$$\mathcal{R}_{\text{test}} = 0.48 \quad (48\% \text{ error on test data})$$</p>
+      <ul>
+        <li><strong>Part A:</strong> Compute the Generalization Gap.</li>
+        <li><strong>Part B:</strong> What does this result tell us about what the model learned?</li>
+        <li><strong>Part C:</strong> In a balanced binary classification task (cat vs. dog), how does 48% error compare to chance?</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A: Generalization Gap Calculation</strong></p>
+        <p>$$\text{Generalization Gap} = |\mathcal{R}_{\text{test}} - \widehat{\mathcal{R}}_{\text{train}}| = |0.48 - 0.00| = \mathbf{0.48 \quad (48\%)}$$</p>
+
+        <p><strong>Part B: Interpretation</strong><br>
+        The model severely <strong>overfitted</strong>. It memorized the 5,000 specific training images (perhaps by background pixel colors, file artifacts, or unique noise) rather than learning invariant morphological features of cats and dogs.</p>
+
+        <p><strong>Part C: Comparison with Random Guessing</strong><br>
+        For a balanced 2-class problem, a random coin flip has an expected error rate of $50\%$ ($0.50$). An error rate of $48\%$ ($0.48$) means this multi-layer neural network is performing almost identically to a random coin flip on unseen images.</p>
+      </details>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="./lecture.html" class="btn">← Back to Lecture</a>
+      <a href="../02_history_of_ai/lecture.html" class="btn btn-primary">Next Topic: 0.2 History of AI →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

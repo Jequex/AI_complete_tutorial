@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 7.3: Exercises & Solutions — Adaptive Learning Rates</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .solution-content {
+            padding: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 7.3</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">Phase 7 Portal</a>
+
+    <h1>Topic 7.3: Exercises & Solutions</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Step-by-step hand calculations and analytical proofs on Adam moment tracking, AdaGrad freezing, and AdamW weight decay decoupling.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Manual Step-by-Step Adam Hand Calculation</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>
+            Optimize parameter $\theta$ initialized at $\theta_0 = 1.0$ with $\eta = 0.01, \beta_1 = 0.9, \beta_2 = 0.99, \epsilon = 10^{-6}$.
+            Gradients received: $g_1 = 0.40$, $g_2 = 0.20$.
+        </p>
+        <ol>
+            <li>Compute $m_1, v_1, \hat{m}_1, \hat{v}_1$, and updated parameter $\theta_1$.</li>
+            <li>Compute $m_2, v_2, \hat{m}_2, \hat{v}_2$, and updated parameter $\theta_2$.</li>
+            <li>Explain the critical role of bias correction in preventing step-size distortion.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Step 1 ($t = 1$):</strong></p>
+                $$m_1 = 0.9(0) + 0.1(0.40) = 0.040, \quad v_1 = 0.99(0) + 0.01(0.40^2) = 0.00160$$
+                $$\hat{m}_1 = \frac{0.040}{1 - 0.9^1} = \frac{0.040}{0.10} = 0.400, \quad \hat{v}_1 = \frac{0.00160}{1 - 0.99^1} = \frac{0.00160}{0.01} = 0.160$$
+                $$\Delta \theta_1 = -\frac{0.01}{\sqrt{0.160} + 10^{-6}}(0.400) = -0.010 \implies \theta_1 = 1.0 - 0.010 = 0.990$$
+                <p><strong>2. Step 2 ($t = 2$):</strong></p>
+                $$m_2 = 0.9(0.040) + 0.1(0.20) = 0.056, \quad v_2 = 0.99(0.0016) + 0.01(0.04) = 0.001984$$
+                $$\hat{m}_2 = \frac{0.056}{1 - 0.9^2} = \frac{0.056}{0.19} \approx 0.2947, \quad \hat{v}_2 = \frac{0.001984}{1 - 0.99^2} = \frac{0.001984}{0.0199} \approx 0.0997$$
+                $$\Delta \theta_2 = -\frac{0.01}{\sqrt{0.0997}}(0.2947) \approx -0.009335 \implies \theta_2 = 0.980665$$
+                <p><strong>3. Bias Correction Significance:</strong> Without $(1-\beta_1^t)$ and $(1-\beta_2^t)$, uncorrected moments are dominated by initial zero-initialization, causing wild initial step anomalies.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: AdaGrad Monotonic Freezing Proof</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>In AdaGrad, $G_t = \sum_{k=1}^t g_k^2$. Prove that under constant gradient $g_k = c > 0$, the parameter update decays as $\mathcal{O}(1/\sqrt{t})$ and cumulative distance is bounded by $\mathcal{O}(\sqrt{T})$.</p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p><strong>Accumulator:</strong> $G_t = t \cdot c^2$.</p>
+                <p><strong>Step Size:</strong> $\Delta \theta_t = \frac{\eta}{\sqrt{t c^2}} c = \frac{\eta}{\sqrt{t}} = \mathcal{O}(1/\sqrt{t})$.</p>
+                <p><strong>Total Distance:</strong></p>
+                $$\sum_{t=1}^T \frac{\eta}{\sqrt{t}} \approx \eta \int_1^T t^{-1/2} dt = 2\eta (\sqrt{T} - 1) = \mathcal{O}(\sqrt{T})$$
+                Standard SGD traverses $\mathcal{O}(T)$. AdaGrad's rapid step decay makes it freeze prematurely before exploring deep non-convex valleys.
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: AdamW vs L2 Regularization Mathematical Proof</h3>
+            <span class="badge badge-hard">Hard</span>
+        </div>
+        <p>
+            Prove that standard Adam with $L_2$ decay applies effective shrinkage $\frac{\eta \lambda}{\sqrt{\hat{v}_t} + \epsilon} \theta_t$, whereas AdamW applies uniform shrinkage $\eta \lambda \theta_t$. Calculate the shrinkage discrepancy between frequent and rare token weights.
+        </p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p><strong>$L_2$ Penalty in Adam:</strong> Gradients become $\nabla \mathcal{L} + \lambda \theta$. The moment update divides the entire term by $\sqrt{\hat{v}_t}$, giving effective decay $\frac{\eta \lambda}{\sqrt{\hat{v}_t}} \theta_t$.</p>
+                <p><strong>AdamW:</strong> Weight decay is subtracted directly: $\theta_{t+1} = (1 - \eta \lambda)\theta_t - \frac{\eta}{\sqrt{\hat{v}_t}+\epsilon} \hat{m}_t$.</p>
+                <p><strong>Discrepancy:</strong> For frequent token ($\hat{v}=100$) vs rare token ($\hat{v}=0.01$):</p>
+                $$\text{Ratio} = \frac{\sqrt{100}}{\sqrt{0.01}} = \frac{10}{0.1} = 100\times$$
+                Standard Adam penalizes rare tokens 100 times harder than frequent ones! AdamW fixes this critical bug.
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 4: Scale Invariance of Adam Step Sizes</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Prove that scaling the loss function by a positive scalar $c > 0$ ($\tilde{\mathcal{L}} = c \mathcal{L}$) leaves Adam updates unchanged.</p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p>$\tilde{g}_t = c g_t \implies \tilde{m}_t = c m_t$ and $\tilde{v}_t = c^2 v_t$.</p>
+                <p>Therefore $\sqrt{\hat{\tilde{v}}_t} = c \sqrt{\hat{v}_t}$.</p>
+                $$\Delta \tilde{\theta} = -\frac{\eta}{c \sqrt{\hat{v}_t}} (c \hat{m}_t) = -\frac{\eta}{\sqrt{\hat{v}_t}} \hat{m}_t = \Delta \theta$$
+                The scaling constant $c$ cancels exactly, providing automatic scale invariance.
+            </div>
+        </details>
+    </div>
+</body>
+</html>

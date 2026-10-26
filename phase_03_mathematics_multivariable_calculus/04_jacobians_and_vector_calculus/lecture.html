@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 3.4: Jacobians & Vector Calculus in Deep Learning</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 3 Portal</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 3.4: Jacobians & Vector Calculus in Deep Learning</h1>
+    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Bridging vector-to-vector mappings, the full Softmax Jacobian derivation, gradient collapse in cross-entropy, and modern Vector-Jacobian Products (VJP).
+    </p>
+
+    <h2>1. Executive Summary & The Mixing Console Analogy</h2>
+    <p>
+        In single-variable calculus, functions map a single number to another number: $f: \mathbb{R} \to \mathbb{R}$. In Topic 3.2, loss functions mapped high-dimensional weight vectors down to a single scalar error: $f: \mathbb{R}^n \to \mathbb{R}$.
+    </p>
+    <p>
+        In deep learning, almost every internal transformation (dense layers, attention projections, LayerNorm, and Softmax) takes a vector of inputs and emits a vector of outputs:
+    </p>
+    $$\mathbf{f}: \mathbb{R}^n \to \mathbb{R}^m$$
+    $$\mathbf{f}(\mathbf{x}) = \begin{bmatrix} f_1(x_1, \dots, x_n) \\ f_2(x_1, \dots, x_n) \\ \vdots \\ f_m(x_1, \dots, x_n) \end{bmatrix}$$
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Sound Engineer's Mixing Console</h3>
+        <p>
+            Imagine a soundboard with <strong>$n$ input sliders</strong> (bass, treble, reverb, echo) and <strong>$m$ output stadium speakers</strong> (front left, front right, overhead, subwoofers).
+        </p>
+        <p>
+            If you nudge Slider $j$ up by 1 millimeter:
+        </p>
+        <ul>
+            <li>Speaker 1 might get louder by 0.5 decibels.</li>
+            <li>Speaker 2 might get quieter by 0.2 decibels.</li>
+            <li>Subwoofer 3 might boom with 2.0 decibels.</li>
+        </ul>
+        <p>
+            To capture how <em>every single slider</em> influences <em>every single speaker</em>, you need a 2D table of numbers: the <strong>Jacobian Matrix</strong>!
+            Row $i$ tells you how Speaker $i$ responds to each slider. Column $j$ tells you how Slider $j$ radiates its effects across all speakers.
+        </p>
+    </div>
+
+    <h2>2. Mathematical Definition of the Jacobian Matrix</h2>
+    <p>
+        Let $\mathbf{f}: \mathbb{R}^n \to \mathbb{R}^m$ be a differentiable vector-valued function. The <strong>Jacobian matrix</strong> $J \in \mathbb{R}^{m \times n}$ gathers all $m \times n$ first-order partial derivatives:
+    </p>
+    $$J = \frac{\partial \mathbf{f}}{\partial \mathbf{x}} = \begin{bmatrix} 
+    \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \cdots & \frac{\partial f_1}{\partial x_n} \\
+    \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \cdots & \frac{\partial f_2}{\partial x_n} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    \frac{\partial f_m}{\partial x_1} & \frac{\partial f_m}{\partial x_2} & \cdots & \frac{\partial f_m}{\partial x_n}
+    \end{bmatrix}$$
+
+    <h3>The 3 Structural Invariants</h3>
+    <ol>
+        <li><strong>Rows ($m$):</strong> Each row $i$ is the transposed gradient of output component $f_i$: $\text{Row } i = \nabla f_i(\mathbf{x})^T$.</li>
+        <li><strong>Columns ($n$):</strong> Each column $j$ is the derivative vector of the entire output with respect to input scalar $x_j$: $\text{Col } j = \frac{\partial \mathbf{f}}{\partial x_j}$.</li>
+        <li><strong>Index notation:</strong> $J_{ij} = \frac{\partial f_i}{\partial x_j}$.</li>
+    </ol>
+
+    <h2>3. Mathematical Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Name</th>
+                <th>Plain-English Meaning</th>
+                <th>Dimension</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbf{x}$</td>
+                <td>Input vector</td>
+                <td>Features entering the transformation</td>
+                <td>$n \times 1$</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{f}(\mathbf{x})$</td>
+                <td>Output vector</td>
+                <td>Features emitted after transformation</td>
+                <td>$m \times 1$</td>
+            </tr>
+            <tr>
+                <td>$J \text{ or } \frac{\partial \mathbf{f}}{\partial \mathbf{x}}$</td>
+                <td>Jacobian Matrix</td>
+                <td>Complete table of all output-input partial sensitivities</td>
+                <td>$m \times n$</td>
+            </tr>
+            <tr>
+                <td>$\delta_{ij}$</td>
+                <td>Kronecker Delta</td>
+                <td>Filter flag: $1$ if $i = j$, and $0$ if $i \neq j$</td>
+                <td>Scalar</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{z}$</td>
+                <td>Logits vector</td>
+                <td>Raw scores entering Softmax classification</td>
+                <td>$K \times 1$</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{p}$</td>
+                <td>Probability vector</td>
+                <td>Normalized probabilities summing to 1.0</td>
+                <td>$K \times 1$</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{v}^T J$</td>
+                <td>Vector-Jacobian Product (VJP)</td>
+                <td>The efficient reverse-mode autodiff primitive (adjoint multiplication)</td>
+                <td>$1 \times n$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. First-Order Linear Approximation</h2>
+    <p>
+        The Jacobian represents the optimal local linear mapping from perturbations in the input space to perturbations in the output space:
+    </p>
+    $$\mathbf{f}(\mathbf{x} + \Delta\mathbf{x}) \approx \mathbf{f}(\mathbf{x}) + J \Delta\mathbf{x}$$
+    <p>
+        If an autonomous car or robotic arm moves its joints by a tiny amount $\Delta\mathbf{x}$, the new position of its gripper $\mathbf{f}(\mathbf{x})$ changes directly by the matrix product $J \Delta\mathbf{x}$.
+    </p>
+
+    <h2>5. Complete Derivation of the Softmax Jacobian</h2>
+    <p>
+        The Softmax function normalizes a vector of logits $\mathbf{z} = [z_1, \dots, z_K]^T$ into probabilities:
+    </p>
+    $$p_i = \frac{e^{z_i}}{\sum_{k=1}^K e^{z_k}}$$
+    <p>
+        Every output probability $p_i$ is coupled to every input logit $z_j$ through the common sum in the denominator.
+        Let numerator $u = e^{z_i}$ and denominator $v = \sum_{k=1}^K e^{z_k}$. We use the quotient rule:
+    </p>
+    $$\frac{\partial p_i}{\partial z_j} = \frac{\frac{\partial u}{\partial z_j} v - u \frac{\partial v}{\partial z_j}}{v^2}$$
+
+    <div class="callout">
+        <h4>Case 1: Diagonal Elements ($i = j$)</h4>
+        <p>When differentiating $p_i$ with respect to its own logit $z_i$:</p>
+        $$\frac{\partial u}{\partial z_i} = e^{z_i}, \quad \frac{\partial v}{\partial z_i} = e^{z_i}$$
+        $$\frac{\partial p_i}{\partial z_i} = \frac{e^{z_i} \left( \sum_k e^{z_k} \right) - e^{z_i} e^{z_i}}{\left( \sum_k e^{z_k} \right)^2} = \frac{e^{z_i}}{\sum_k e^{z_k}} - \left( \frac{e^{z_i}}{\sum_k e^{z_k}} \right)^2$$
+        $$\mathbf{\frac{\partial p_i}{\partial z_i} = p_i - p_i^2 = p_i(1 - p_i)}$$
+    </div>
+
+    <div class="callout callout-danger">
+        <h4>Case 2: Off-Diagonal Elements ($i \neq j$)</h4>
+        <p>When differentiating $p_i$ with respect to a competing logit $z_j$ ($j \neq i$):</p>
+        $$\frac{\partial u}{\partial z_j} = 0 \quad (\text{since } u = e^{z_i} \text{ does not contain } z_j!), \quad \frac{\partial v}{\partial z_j} = e^{z_j}$$
+        $$\frac{\partial p_i}{\partial z_j} = \frac{0 \cdot v - e^{z_i} e^{z_j}}{v^2} = -\frac{e^{z_i}}{\sum_k e^{z_k}} \cdot \frac{e^{z_j}}{\sum_k e^{z_k}} = \mathbf{-p_i p_j}$$
+    </div>
+
+    <h3>Unified Matrix Representation</h3>
+    <p>Using the Kronecker delta $\delta_{ij}$ ($1$ when $i=j$, $0$ when $i \neq j$):</p>
+    $$J_{ij} = p_i(\delta_{ij} - p_j)$$
+    <p>In matrix notation:</p>
+    $$\mathbf{J_{\text{softmax}} = \operatorname{diag}(\mathbf{p}) - \mathbf{p} \mathbf{p}^T}$$
+
+    <h2>6. The Miracle of Gradient Collapse: Softmax + Cross-Entropy</h2>
+    <p>
+        In neural networks, Softmax is almost universally combined with Cross-Entropy Loss:
+    </p>
+    $$\mathcal{L} = -\sum_{k=1}^K y_k \ln(p_k)$$
+    <p>Using the multivariable chain rule to find $\frac{\partial \mathcal{L}}{\partial z_j}$:</p>
+    $$\frac{\partial \mathcal{L}}{\partial z_j} = \sum_{i=1}^K \frac{\partial \mathcal{L}}{\partial p_i} \frac{\partial p_i}{\partial z_j} = \sum_{i=1}^K \left( -\frac{y_i}{p_i} \right) \left[ p_i(\delta_{ij} - p_j) \right]$$
+    <p>The probability $p_i$ in the denominator cancels with $p_i$ from the Jacobian:</p>
+    $$\frac{\partial \mathcal{L}}{\partial z_j} = -\sum_{i=1}^K y_i(\delta_{ij} - p_j) = -\sum_{i=1}^K y_i \delta_{ij} + p_j \sum_{i=1}^K y_i$$
+    <p>Because $\sum_{i=1}^K y_i \delta_{ij} = y_j$ and $\sum_{i=1}^K y_i = 1$ (the true distribution sums to 1):</p>
+    $$\mathbf{\frac{\partial \mathcal{L}}{\partial z_j} = p_j - y_j \implies \nabla_{\mathbf{z}} \mathcal{L} = \mathbf{p} - \mathbf{y}}$$
+
+    <div class="callout callout-success">
+        <strong>The Deep Learning Miracle:</strong>
+        The gradient of the entire classification head is literally just:
+        $$\mathbf{\text{Gradient}} = \mathbf{\text{Prediction}} - \mathbf{\text{Target}}$$
+        All exponential divisions, outer products, and logarithms cancel out into an astonishingly simple difference!
+    </div>
+
+    <h2>7. Vector-Jacobian Products (VJP) in Autodiff Engines</h2>
+    <p>
+        For a language model with a vocabulary of size $V = 128{,}000$, a materialized Jacobian matrix would contain:
+    </p>
+    $$128{,}000 \times 128{,}000 = 16{,}384{,}000{,}000 \text{ floats} \approx \mathbf{65.5 \text{ Gigabytes!}}$$
+    <p>
+        PyTorch and JAX never materialize this matrix. Instead, when an upstream gradient $\mathbf{v} \in \mathbb{R}^{1 \times K}$ arrives, they compute the <strong>Vector-Jacobian Product (VJP)</strong> directly:
+    </p>
+    $$\mathbf{v}^T J = \mathbf{v}^T (\operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}^T) = (\mathbf{v} \odot \mathbf{p}) - (\mathbf{v} \cdot \mathbf{p}) \mathbf{p}$$
+    <p>
+        This requires only <strong>$O(K)$ time and $O(K)$ memory</strong>, avoiding 65 GB of memory overhead completely!
+    </p>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../03_the_chain_rule_and_backpropagation/lecture.html" class="back-link">← Previous: 3.3 The Chain Rule</a>
+        <a href="exercises_and_solutions.html" class="back-link">Next: 3.4 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>

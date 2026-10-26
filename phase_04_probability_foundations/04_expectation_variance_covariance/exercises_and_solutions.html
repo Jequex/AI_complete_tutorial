@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 4.4: Exercises & Solutions — Expectation, Variance & Covariance</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 4.4</a>
+    <header>
+        <h1>Topic 4.4: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Uncorrelated vs Independent, He Initialization &amp; Covariance Math</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Zero Covariance Does NOT Imply Independence</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Let $X \sim \text{Uniform}(-1, 1)$ and $Y = X^2$.</p>
+        <ol>
+            <li>Compute $\mathbb{E}[X]$, $\mathbb{E}[Y]$, and $\mathbb{E}[XY]$.</li>
+            <li>Compute $\text{Cov}(X, Y)$.</li>
+            <li>Explain why $X$ and $Y$ are completely dependent despite having zero linear covariance.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Expected Values:</strong>
+                    $$\mathbb{E}[X] = \int_{-1}^1 \frac{x}{2} dx = 0$$
+                    $$\mathbb{E}[Y] = \mathbb{E}[X^2] = \int_{-1}^1 \frac{x^2}{2} dx = \frac{1}{3}$$
+                    $$\mathbb{E}[XY] = \mathbb{E}[X^3] = \int_{-1}^1 \frac{x^3}{2} dx = 0$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Covariance:</strong>
+                    $$\text{Cov}(X, Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y] = 0 - (0 \times \frac{1}{3}) = \mathbf{0}$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Dependency:</strong>
+                    $Y$ is completely deterministic given $X$ ($Y = X^2$). Covariance only captures linear relationships, making it blind to quadratic dependencies!
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Derivation of He / Kaiming Weight Initialization</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>For a linear layer $z = \sum_{i=1}^{d_{\text{in}}} w_i x_i$ followed by ReLU $a = \max(0, z)$ where $\text{Var}(a) = \frac{1}{2} \text{Var}(z)$, derive the required weight variance $\sigma_w^2$ to preserve variance $\text{Var}(a) = \text{Var}(x_i) = \sigma_x^2$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Variance of Pre-activation $z$:</strong>
+                    $$\text{Var}(z) = \sum_{i=1}^{d_{\text{in}}} \text{Var}(w_i x_i) = d_{\text{in}} \sigma_w^2 \sigma_x^2$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Post-ReLU Activation Variance:</strong>
+                    $$\text{Var}(a) = \frac{1}{2} d_{\text{in}} \sigma_w^2 \sigma_x^2 = \sigma_x^2 \implies \frac{1}{2} d_{\text{in}} \sigma_w^2 = 1 \implies \mathbf{\sigma_w^2 = \frac{2}{d_{\text{in}}}}$$
+                    This yields the famous He / Kaiming normal initialization.
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Covariance Matrix &amp; Correlation by Hand</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Given 3 points in $\mathbb{R}^2$: $x_1 = [1, 2]^T, x_2 = [2, 5]^T, x_3 = [3, 5]^T$. Compute sample variances, sample covariance, the $2 \times 2$ covariance matrix $\Sigma$, and Pearson correlation $\rho$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Mean Vector $\mu$:</strong>
+                    $$\mu_1 = \frac{1+2+3}{3} = 2.0, \quad \mu_2 = \frac{2+5+5}{3} = 4.0 \implies \mu = \begin{bmatrix} 2.0 \\ 4.0 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Covariance Matrix $\Sigma$:</strong>
+                    $$s_1^2 = \frac{(-1)^2 + 0^2 + 1^2}{2} = 1.0, \quad s_2^2 = \frac{(-2)^2 + 1^2 + 1^2}{2} = 3.0$$
+                    $$s_{12} = \frac{(-1)(-2) + (0)(1) + (1)(1)}{2} = \frac{3}{2} = 1.5$$
+                    $$\Sigma = \begin{bmatrix} 1.0 & 1.5 \\ 1.5 & 3.0 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Pearson Correlation $\rho$:</strong>
+                    $$\rho = \frac{1.5}{\sqrt{1.0 \times 3.0}} = \frac{1.5}{\sqrt{3}} \approx \mathbf{0.8660}$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

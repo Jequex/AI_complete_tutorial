@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 2.6: Tensors & Capstone Project — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-callout: #f0fdf4;
+      --border-callout: #22c55e;
+      --bg-tech: #eff6ff;
+      --border-tech: #3b82f6;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-callout: #064e3b33;
+        --border-callout: #10b981;
+        --bg-tech: #1e3a8a33;
+        --border-tech: #60a5fa;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
+
+    .callout {
+      border-left: 4px solid;
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-kid {
+      background-color: var(--bg-callout);
+      border-color: var(--border-callout);
+    }
+    .callout-tech {
+      background-color: var(--bg-tech);
+      border-color: var(--border-tech);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    code {
+      background-color: var(--code-bg);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.9em;
+    }
+    pre code { background: none; padding: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.6</span>
+    </div>
+    <h1>Topic 2.6: Tensors &amp; Capstone Project</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Multidimensional arrays, memory strides, broadcasting mechanics, and Principal Component Analysis (PCA).</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. The 12-Year-Old Analogy: The Filing Cabinet of Books</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 From Lines to Boxes</div>
+        <ul>
+          <li><strong>0D (Scalar):</strong> A single number written in one box ($5$).</li>
+          <li><strong>1D (Vector):</strong> A line of numbers on a page ($[1, 2, 3]$).</li>
+          <li><strong>2D (Matrix):</strong> An entire spreadsheet of rows and columns.</li>
+          <li><strong>3D (Tensor / Book):</strong> A book stacking pages together (e.g. Height $\times$ Width $\times$ 3 Color Channels [R, G, B]).</li>
+          <li><strong>4D (Batch Tensor / Shipping Box):</strong> Stacking 32 books into a crate:
+            $$X \in \mathbb{R}^{B \times C \times H \times W}$$
+            Process 32 images simultaneously on a GPU!
+          </li>
+        </ul>
+      </div>
+
+      <pre>
+       0D SCALAR            1D VECTOR               2D MATRIX                3D TENSOR              4D BATCH TENSOR
+      Single Number         List of numbers         Table of numbers         Stack of tables        Batch of stacks
+      
+          [ 42 ]           ┌───┐                  ┌───               ───┐         ┌───────────┐         ┌───┐ ┌───┐ ┌───┐
+                           │ 1 │                  │  1   2   3   4   5  │        /           /│         │   │ │   │ │   │
+                           │ 2 │                  │  6   7   8   9  10  │       /───────────/ │         │ 1 │ │ 2 │ │ 3 │ ...
+                           │ 3 │                  │ 11  12  13  14  15  │       │   RED     │ │         └───┘ └───┘ └───┘
+                           └───┘                  └───               ───┘       │   GREEN   │/          B images in parallel
+                                                                                │   BLUE    │
+                                                                                └───────────┘
+      </pre>
+    </section>
+
+    <section>
+      <h2>2. Common Tensor Shapes in Modern AI</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Application</th>
+            <th>Tensor Shape</th>
+            <th>Dimension Labels</th>
+            <th>Concrete Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Computer Vision</strong></td>
+            <td>$\mathbb{R}^{B \times C \times H \times W}$</td>
+            <td>Batch $\times$ Channels $\times$ Height $\times$ Width</td>
+            <td>$(32, 3, 224, 224)$</td>
+          </tr>
+          <tr>
+            <td><strong>Transformers / LLMs</strong></td>
+            <td>$\mathbb{R}^{B \times T \times D}$</td>
+            <td>Batch $\times$ Token Sequence $\times$ Embedding Dim</td>
+            <td>$(8, 2048, 4096)$</td>
+          </tr>
+          <tr>
+            <td><strong>Audio Modeling</strong></td>
+            <td>$\mathbb{R}^{B \times C \times L}$</td>
+            <td>Batch $\times$ Audio Channels $\times$ Raw Samples</td>
+            <td>$(16, 2, 44100)$</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Flat Physical Memory &amp; Strides</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 How PyTorch Represents Multidimensional Arrays in 1D RAM</div>
+        <p>Physical RAM is a flat 1D strip of memory addresses. A tensor is specified by its <strong>Shape</strong> and its <strong>Strides</strong>:</p>
+        <p>$$\text{Physical Address}(i, j) = (i \times \text{stride}_0) + (j \times \text{stride}_1)$$</p>
+        <p>Calling <code>.transpose()</code> or <code>.permute()</code> merely swaps the stride metadata without copying bytes in RAM! This makes tensor manipulation instantaneous.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Broadcasting Rules</h2>
+      <p>Broadcasting allows elementwise arithmetic between tensors of different shapes by expanding dimensions of size 1:</p>
+      <pre>
+Tensor A: (3, 1)  +  Tensor B: (1, 4)  -->  Broadcasted Output: (3, 4)
+      </pre>
+      <p>Working right-to-left: dimensions must either be identical or one of them must be 1.</p>
+    </section>
+
+    <section>
+      <h2>5. Principal Component Analysis (PCA)</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 Maximum Variance Axis</div>
+        <p>Given data spread across high dimensions, PCA finds the axes where the data spread is widest. These axes are the eigenvectors of the covariance matrix, which correspond directly to the right singular vectors $V$ of the SVD!</p>
+      </div>
+      <p>Centered data $\tilde{X} = X - \mu$. SVD decomposition: $\tilde{X} = U \Sigma V^T$. The low-dimensional coordinates are:</p>
+      <p>$$\mathbf{Z = \tilde{X} V_k}$$</p>
+    </section>
+
+    <div class="nav-buttons">
+      <a href="../05_singular_value_decomposition/exercises_and_solutions.html" class="btn">← Topic 2.5</a>
+      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

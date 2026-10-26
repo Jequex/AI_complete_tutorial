@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 1.4: Capstone Project — Building a Micro-Tensor Library</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .concept-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .tip-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        p code, li code {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 1 Index</a>
+    <header>
+        <h1>Topic 1.4: Capstone Project — Building a Micro-Tensor Library</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Designing a Mini-PyTorch Numerical Computing Engine from Scratch in Pure Python</p>
+    </header>
+
+    <section>
+        <h2>1. The Anatomy of a Tensor</h2>
+        <div class="concept-card">
+            <h3>Under the Hood of PyTorch and NumPy</h3>
+            <p>A tensor is fundamentally composed of three components:</p>
+            <ul>
+                <li><strong>1D Storage Buffer:</strong> A single continuous array holding raw floating-point numbers.</li>
+                <li><strong>Shape Tuple:</strong> The dimensional sizes, e.g. <code>(rows, cols)</code>.</li>
+                <li><strong>Strides Tuple:</strong> Step sizes needed to jump in the flat 1D buffer to advance along each dimension.</li>
+            </ul>
+            <p>For any 2D coordinate $(r, c)$, the 1D index in memory is calculated via:</p>
+            <p>$$\text{flat\_index}(r, c) = r \times S_0 + c \times S_1$$</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Zero-Copy Transposition</h2>
+        <p>In classical programming, transposing a matrix creates a new matrix and copies every value. In high-performance tensor engines, transposition is an $O(1)$ constant-time operation that merely swaps the <strong>shape</strong> and <strong>strides</strong> metadata while sharing the exact same underlying 1D data buffer!</p>
+        <div class="tip-box">
+            <strong>Stride Swap Magic:</strong>
+            $$\text{Matrix } A: \text{Shape } (M, N), \text{Strides } (N, 1)$$
+            $$\text{Matrix } A^T: \text{Shape } (N, M), \text{Strides } (1, N)$$
+        </div>
+    </section>
+
+    <section>
+        <h2>3. The Desired Target API</h2>
+        <p>Our micro-tensor engine will support standard deep learning syntax:</p>
+        <pre><code># Instantiation
+x = Tensor([[1.0, 2.0], [3.0, 4.0]])
+
+# Matrix Multiplication Operator
+y = x @ x
+
+# Transposition (Zero-Copy)
+y_trans = y.T
+
+# Elementwise Arithmetic & Reductions
+z = y + 10.0
+total = z.sum()</code></pre>
+    </section>
+
+    <section>
+        <h2>4. Multi-Layer Perceptron (MLP) Forward Pass</h2>
+        <p>Using our custom tensor engine, we will execute a complete 2-layer neural network forward pass:</p>
+        <p>$$z_1 = X W_1 + b_1$$</p>
+        <p>$$a_1 = \text{ReLU}(z_1)$$</p>
+        <p>$$\hat{y} = a_1 W_2 + b_2$$</p>
+    </section>
+
+</body>
+</html>
+

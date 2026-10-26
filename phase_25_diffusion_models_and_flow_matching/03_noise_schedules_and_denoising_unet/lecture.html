@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.3: Noise Schedules and Denoising U-Net — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.3: Noise Schedules and Denoising U-Net Architectures</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Cosine noise schedules, the simplified variational objective derivation, and U-Net structural motifs.
+    </p>
+
+    <div class="analogy-box">
+        <h3 style="margin-top: 0; color: var(--primary);">The 12-Year-Old Analogy: The Smart Dimmer &amp; The Express Elevator</h3>
+        <p>Two essential engineering components power modern diffusion:</p>
+        <ul>
+            <li><strong>The Cosine Dimmer:</strong> A linear dimmer turns the window to thick fog at 20% rotation. A cosine dimmer slowly softens edges first, and reaches pure noise only at the very end, making every single timestep useful for training.</li>
+            <li><strong>Express Skip Elevators:</strong> As an image passes down the floors of a U-Net, fine details get compressed into broad ideas ("a dog"). Express elevator skip connections ferry the exact fine pixel blueprints across directly to the output painters!</li>
+        </ul>
+    </div>
+
+    <h2>1. Linear vs. Cosine Noise Schedules</h2>
+    <p>
+        Under a linear schedule, $\bar{\alpha}_t$ drops off prematurely. Nichol &amp; Dhariwal (2021) proposed the cosine schedule:
+    </p>
+    $$\bar{\alpha}_t = \frac{f(t)}{f(0)}, \quad f(t) = \cos^2\left(\frac{t/T + s}{1 + s} \frac{\pi}{2}\right)$$
+    <p>
+        with small offset $s = 0.008$ preventing degenerate tiny variances near $t=0$.
+    </p>
+
+    <h2>2. Derivation of the Simplified Loss $L_{\text{simple}}(\theta)$</h2>
+    <p>
+        The Variational Lower Bound (ELBO) term for step $t-1$ between Gaussians evaluates to:
+    </p>
+    $$L_{t-1} = D_{KL}(q(x_{t-1}\mid x_t, x_0) \parallel p_\theta(x_{t-1}\mid x_t)) = \frac{\beta_t^2}{2\sigma_t^2 \alpha_t (1 - \bar{\alpha}_t)} \|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(x_t, t)\|^2$$
+    <p>
+        Jonathan Ho et al. dropped the leading scalar weight, establishing the <strong>simplified training objective</strong>:
+    </p>
+    $$L_{\text{simple}}(\theta) = \mathbb{E}_{t \sim \mathcal{U}(1, T), x_0, \boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I})} \left[ \|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(x_t, t)\|^2 \right]$$
+    <div class="callout">
+        <strong>Curriculum Effect:</strong> Dropping the coefficient down-weights loss at small $t$ (where noise is trivial to predict) and focuses network capacity on intermediate and large $t$ where global semantics and high-level structure are generated.
+    </div>
+
+    <h2>3. Positional Sinusoidal Time Embeddings</h2>
+    <p>
+        Timesteps $t$ are projected into a continuous latent space using multi-frequency harmonic sinusoidal embeddings:
+    </p>
+    $$\text{PE}_{(t, 2i)} = \sin\left(\frac{t}{10000^{2i/d}}\right), \quad \text{PE}_{(t, 2i+1)} = \cos\left(\frac{t}{10000^{2i/d}}\right)$$
+
+    <pre><code># Run the self-contained pure Python 1D diffusion experiment:
+python3 phase_25_diffusion_models_and_flow_matching/03_noise_schedules_and_denoising_unet/experiment.py</code></pre>
+
+</body>
+</html>

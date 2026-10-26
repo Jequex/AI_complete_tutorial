@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.2: Joint & Conditional Entropy — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.3rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background: var(--accent-bg);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background: var(--primary-light); }
+        code {
+            background: var(--border);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.2: Joint & Conditional Entropy</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        How Context Collapses Uncertainty & Why Modern LLMs Rely on the Chain Rule of Entropy.
+    </p>
+
+    <div class="analogy">
+        <h3 style="margin-top: 0; color: var(--accent);">🧒 1. Intuitive Analogy: The Umbrella Detective & Context Clues</h3>
+        <p>
+            Imagine you are standing inside an office building with no windows. You want to guess what someone walking through the front lobby is holding. Is it an <strong>umbrella</strong> or a <strong>coffee cup</strong>? Right now, your uncertainty is high.
+        </p>
+        <p>
+            Now imagine a security guard shouts: <em>"It is pouring rain outside!"</em>
+        </p>
+        <p>
+            Suddenly, your uncertainty collapses! You can predict with 99% certainty: <em>"They are holding an umbrella!"</em>
+        </p>
+        <p>
+            In information theory:
+            <ul>
+                <li><strong>Joint Entropy $H(X, Y)$:</strong> The total uncertainty about <em>both things together</em> (the weather AND what they are holding).</li>
+                <li><strong>Conditional Entropy $H(Y \mid X)$:</strong> The uncertainty that remains about $Y$ (the object) <em>after you already know $X$</em> (the rain).</li>
+            </ul>
+        </p>
+        <p>
+            <strong>The Golden Rule:</strong> <em>"Information Never Hurts."</em> Conditioning on context can never increase average uncertainty: $H(Y \mid X) \le H(Y)$.
+        </p>
+    </div>
+
+    <h2>🔣 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Name</th>
+                <th>Plain English Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$X, Y$</td>
+                <td>Random Variables</td>
+                <td>Two different uncertain events (e.g. Previous Word $X$, Next Word $Y$).</td>
+            </tr>
+            <tr>
+                <td>$P(x, y)$</td>
+                <td>Joint Probability</td>
+                <td>Probability that $X = x$ and $Y = y$ occur at the same time.</td>
+            </tr>
+            <tr>
+                <td>$P(y \mid x)$</td>
+                <td>Conditional Probability</td>
+                <td>Probability of $Y = y$ given that we already observed $X = x$.</td>
+            </tr>
+            <tr>
+                <td>$H(X, Y)$</td>
+                <td>Joint Entropy</td>
+                <td>Total uncertainty in bits when measuring both variables together.</td>
+            </tr>
+            <tr>
+                <td>$H(Y \mid X)$</td>
+                <td>Conditional Entropy</td>
+                <td>Remaining uncertainty about $Y$ once $X$ is known.</td>
+            </tr>
+            <tr>
+                <td>$H(X)$</td>
+                <td>Marginal Entropy</td>
+                <td>Standalone uncertainty of $X$ ignoring everything else.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>📐 3. Formal Definitions</h2>
+    <div class="card">
+        <h3>Joint Shannon Entropy</h3>
+        <p>The joint entropy of two discrete random variables $(X, Y)$ is:</p>
+        $$H(X, Y) = -\sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} P(x, y) \log_2 P(x, y)$$
+        <p>It represents the average number of optimal binary questions needed to identify both $X$ and $Y$ simultaneously.</p>
+    </div>
+
+    <div class="card">
+        <h3>Conditional Shannon Entropy</h3>
+        <p>Conditional entropy is the expected value of the entropy of $Y$ given $X$:</p>
+        $$H(Y \mid X) = \sum_{x \in \mathcal{X}} P(x) H(Y \mid X = x) = -\sum_{x \in \mathcal{X}} \sum_{y \in \mathcal{Y}} P(x, y) \log_2 P(y \mid x)$$
+    </div>
+
+    <h2>🔬 4. Complete Derivation: The Chain Rule of Entropy</h2>
+    <div class="callout">
+        <h3 style="margin-top: 0;">Theorem: The Chain Rule</h3>
+        $$H(X, Y) = H(X) + H(Y \mid X)$$
+    </div>
+
+    <p><strong>Proof:</strong></p>
+    <p>By definition of conditional probability: $P(x, y) = P(x) P(y \mid x)$, which implies:</p>
+    $$\log_2 P(x, y) = \log_2 P(x) + \log_2 P(y \mid x)$$
+
+    <p>Substitute this into the formula for joint entropy:</p>
+    $$H(X, Y) = -\sum_{x} \sum_{y} P(x, y) \Big[ \log_2 P(x) + \log_2 P(y \mid x) \Big]$$
+    $$H(X, Y) = -\sum_{x} \sum_{y} P(x, y) \log_2 P(x) - \sum_{x} \sum_{y} P(x, y) \log_2 P(y \mid x)$$
+
+    <p>In the first term, $\log_2 P(x)$ is independent of $y$, so factor it out:</p>
+    $$-\sum_{x} \log_2 P(x) \left( \sum_{y} P(x, y) \right)$$
+    <p>Since the marginal distribution satisfies $\sum_{y} P(x, y) = P(x)$:</p>
+    $$-\sum_{x} P(x) \log_2 P(x) = H(X)$$
+
+    <p>The second term is precisely the definition of $H(Y \mid X)$:</p>
+    $$-\sum_{x} \sum_{y} P(x, y) \log_2 P(y \mid x) = H(Y \mid X)$$
+
+    <p>Combining both terms proves the Chain Rule:</p>
+    $$H(X, Y) = H(X) + H(Y \mid X) \quad \blacksquare$$
+
+    <h2>📉 5. Fundamental Law: Conditioning Never Increases Entropy</h2>
+    <div class="callout">
+        <h3 style="margin-top: 0;">Theorem: Information Never Hurts</h3>
+        $$H(Y \mid X) \le H(Y)$$
+        <p>Equality holds if and only if $X$ and $Y$ are independent ($P(x, y) = P(x)P(y)$).</p>
+    </div>
+
+    <p>
+        Knowing extra information $X$ can only ever reduce (or at worst leave unchanged) our uncertainty about $Y$. In modern AI, this explains why expanding the context window of Large Language Models (LLMs) from 512 tokens to 128,000+ tokens makes generation sharper, more factual, and dramatically less prone to hallucinations.
+    </p>
+
+    <h2>🤖 6. AI Application: Autoregressive Factorization in Transformers</h2>
+    <div class="card">
+        <h3>Sequential Chain Rule in Generative AI</h3>
+        <p>For any sequence of tokens $\mathbf{w} = (w_1, w_2, \dots, w_T)$, the joint entropy decomposes as:</p>
+        $$H(W_1, W_2, \dots, W_T) = H(W_1) + H(W_2 \mid W_1) + H(W_3 \mid W_1, W_2) + \dots + H(W_T \mid W_1, \dots, W_{T-1})$$
+        <p>
+            Each attention layer in a Transformer learns conditional representations that minimize $H(W_t \mid W_{<t})$. The smaller this conditional entropy becomes, the closer the AI is to human-level prediction!
+        </p>
+    </div>
+
+</body>
+</html>
+

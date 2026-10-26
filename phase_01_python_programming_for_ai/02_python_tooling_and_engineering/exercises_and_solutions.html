@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 1.2: Exercises & Solutions — AI Software Engineering & Reproducibility</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 1.2</a>
+    <header>
+        <h1>Topic 1.2: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Invariant Testing, Safe Softmax, Profiling &amp; Seeds</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Unit Testing Numerical Invariants &amp; Safe Softmax</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>In standard floating-point arithmetic, computing $e^{z_i}$ for $z_i \ge 710$ raises an <code>OverflowError</code> or produces <code>nan</code>.</p>
+        <ol>
+            <li>Implement <code>safe_softmax(logits)</code> using the max-subtraction stabilization technique.</li>
+            <li>Write a <code>unittest.TestCase</code> checking:
+                <ul>
+                    <li>Probabilities sum to $1.0$ within tolerance.</li>
+                    <li>No <code>nan</code> or overflow occurs when tested with <code>[1000.0, 1001.0, 1002.0]</code>.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <pre><code>import math
+import unittest
+
+def safe_softmax(logits: list[float]) -> list[float]:
+    if not logits:
+        return []
+    max_val = max(logits)
+    # Subtract max_val to prevent overflow
+    exps = [math.exp(x - max_val) for x in logits]
+    sum_exps = sum(exps)
+    return [e / sum_exps for e in exps]
+
+class TestSoftmax(unittest.TestCase):
+    def test_sum_to_one(self):
+        probs = safe_softmax([1.0, 2.0, 3.0])
+        self.assertAlmostEqual(sum(probs), 1.0, places=6)
+
+    def test_overflow_protection(self):
+        probs = safe_softmax([1000.0, 1001.0, 1002.0])
+        self.assertFalse(any(math.isnan(p) for p in probs))
+        self.assertAlmostEqual(sum(probs), 1.0, places=6)</code></pre>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Algorithmic Profiling &amp; Eliminating Bottlenecks</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Consider an unoptimized vocabulary filter scanning $N = 100{,}000$ tokens against a stopword list of $M = 5{,}000$ items using a Python list: <code>token not in stopwords</code>.</p>
+        <ol>
+            <li>What is the Big-O time complexity?</li>
+            <li>How can the data structure be altered to reduce lookup complexity to $O(1)$?</li>
+            <li>Why does this CPU bottleneck cause GPU starvation during deep learning training?</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Complexity:</strong> Scanning an $M$-element list for $N$ tokens is $O(N \times M)$ ($500{,}000{,}000$ comparisons).
+                </div>
+                <div class="step-box">
+                    <strong>2. Optimization:</strong> Convert the stopword collection into a <code>set</code> (hash table). Set lookups are $O(1)$ on average, reducing total runtime to $O(N + M)$—yielding a ~9,000x speedup!
+                </div>
+                <div class="step-box">
+                    <strong>3. GPU Starvation:</strong> Deep learning accelerators (GPUs) compute batches in milliseconds. If the CPU host thread takes tens of seconds preparing the next batch, the GPU remains idle at 0% utilization.
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Production Training Configuration &amp; Reproducibility Harness</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Implement an <code>ExperimentConfig</code> dataclass that manages hyperparameters, locks pseudo-random seeds, and ensures that separate script executions produce identical stochastic weight draws.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <pre><code>import random
+from dataclasses import dataclass
+
+@dataclass
+class ExperimentConfig:
+    seed: int
+    learning_rate: float
+    batch_size: int
+
+    def lock_seeds(self):
+        random.seed(self.seed)
+
+# Verification
+cfg1 = ExperimentConfig(seed=42, learning_rate=1e-4, batch_size=32)
+cfg2 = ExperimentConfig(seed=42, learning_rate=1e-4, batch_size=32)
+
+cfg1.lock_seeds()
+draws1 = [random.random() for _ in range(3)]
+
+cfg2.lock_seeds()
+draws2 = [random.random() for _ in range(3)]
+
+assert draws1 == draws2
+print("Deterministic reproducibility confirmed!")</code></pre>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.2: Exercises &amp; Solutions — Bellman Equations &amp; Dynamic Programming</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .solution-content {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.2: Exercises &amp; Solutions</h1>
+    <p><em>Proofs and algorithmic derivations for Bellman operators and Dynamic Programming.</em></p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Monotonicity of the Bellman Operator</h3>
+        <p>Let $U, V \in \mathbb{R}^{|\mathcal{S}|}$ satisfy $U(s) \le V(s)$ for all $s \in \mathcal{S}$ ($U \le V$). Prove that both $\mathcal{T}^\pi$ and $\mathcal{T}^*$ are monotonic:</p>
+        <ol>
+            <li>$\mathcal{T}^\pi U \le \mathcal{T}^\pi V$</li>
+            <li>$\mathcal{T}^* U \le \mathcal{T}^* V$</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Part 1 ($\mathcal{T}^\pi$):</strong></p>
+                $$(\mathcal{T}^\pi V)(s) - (\mathcal{T}^\pi U)(s) = \gamma \sum_{a \in \mathcal{A}} \pi(a \mid s) \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) \big( V(s') - U(s') \big)$$
+                <p>Because $\pi \ge 0$, $\mathcal{P} \ge 0$, $\gamma \ge 0$, and $(V(s') - U(s')) \ge 0$, every term in the sum is non-negative. Hence $(\mathcal{T}^\pi V)(s) \ge (\mathcal{T}^\pi U)(s)$.</p>
+
+                <p><strong>Part 2 ($\mathcal{T}^*$):</strong></p>
+                <p>For each individual action $a \in \mathcal{A}$:</p>
+                $$\mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) U(s') \le \mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) V(s')$$
+                <p>Taking the maximum over all actions preserves the inequality:</p>
+                $$\max_a \left[ \mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) U(s') \right] \le \max_a \left[ \mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) V(s') \right]$$
+                $$\implies \mathcal{T}^* U \le \mathcal{T}^* V \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Proof of the Policy Improvement Theorem</h3>
+        <p>Let $\pi$ and $\pi'$ be deterministic policies such that $Q^\pi(s, \pi'(s)) \ge V^\pi(s)$ for all $s \in \mathcal{S}$. Prove that $V^{\pi'}(s) \ge V^\pi(s)$ for all $s$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>From $V^\pi(s) \le Q^\pi(s, \pi'(s))$:</p>
+                $$V^\pi(s) \le \mathcal{R}(s, \pi'(s)) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, \pi'(s)) V^\pi(s') = (\mathcal{T}^{\pi'} V^\pi)(s)$$
+                <p>Thus $V^\pi \le \mathcal{T}^{\pi'} V^\pi$. Applying $\mathcal{T}^{\pi'}$ repeatedly, monotonicity guarantees:</p>
+                $$V^\pi \le \mathcal{T}^{\pi'} V^\pi \le (\mathcal{T}^{\pi'})^2 V^\pi \le \dots \le (\mathcal{T}^{\pi'})^k V^\pi$$
+                <p>Taking $k \to \infty$:</p>
+                $$V^\pi \le \lim_{k \to \infty} (\mathcal{T}^{\pi'})^k V^\pi = V^{\pi'} \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Value Iteration Stopping Bound</h3>
+        <p>Prove that if $\|V_{k+1} - V_k\|_\infty < \theta = \epsilon \frac{1 - \gamma}{2\gamma}$, then the greedy policy $\pi$ extracted from $V_{k+1}$ satisfies $\|V^\pi - V^*\|_\infty \le \epsilon$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>By contraction mapping triangle inequality expansion:</p>
+                $$\|V_{k+1} - V^*\|_\infty \le \sum_{j=1}^\infty \|V_{k+j+1} - V_{k+j}\|_\infty \le \sum_{j=1}^\infty \gamma^j \|V_{k+1} - V_k\|_\infty = \frac{\gamma}{1 - \gamma} \|V_{k+1} - V_k\|_\infty$$
+                <p>The gap between the greedy policy $V^\pi$ and $V^*$ satisfies:</p>
+                $$\|V^\pi - V^*\|_\infty \le \frac{2\gamma}{1 - \gamma} \|V_{k+1} - V_k\|_\infty$$
+                <p>Substituting $\theta = \epsilon \frac{1 - \gamma}{2\gamma}$ yields $\|V^\pi - V^*\|_\infty < \epsilon$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 4 -->
+    <div class="card">
+        <h3>Exercise 4: Manual Two-Sweep Value Iteration Trace</h3>
+        <p>2-State MDP $\{A, B\}$, $\gamma = 0.5$, $V_0 = [0, 0]$:</p>
+        <ul>
+            <li>State A: Act 1 &rarr; A ($P=1, R=+1$); Act 2 &rarr; B ($P=1, R=+3$).</li>
+            <li>State B: Act 1 &rarr; 50% B, 50% A ($R=+2$); Act 2 &rarr; A ($P=1, R=0$).</li>
+        </ul>
+        <p>Trace 2 sweeps of synchronous Value Iteration.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Sweep 1:</strong></p>
+                <ul>
+                    <li>$Q_1(A, 1) = 1 + 0.5(0) = 1.0$; $Q_1(A, 2) = 3 + 0.5(0) = 3.0 \implies V_1(A) = 3.0$ (Action 2)</li>
+                    <li>$Q_1(B, 1) = 2 + 0.5(0) = 2.0$; $Q_1(B, 2) = 0 + 0.5(0) = 0.0 \implies V_1(B) = 2.0$ (Action 1)</li>
+                </ul>
+                <p><strong>Sweep 2 ($V_1 = [3.0, 2.0]$):</strong></p>
+                <ul>
+                    <li>$Q_2(A, 1) = 1 + 0.5(3.0) = 2.5$; $Q_2(A, 2) = 3 + 0.5(2.0) = 4.0 \implies V_2(A) = 4.0$ (Action 2)</li>
+                    <li>$Q_2(B, 1) = 2 + 0.5[0.5(2) + 0.5(3)] = 2 + 0.5(2.5) = 3.25$; $Q_2(B, 2) = 0 + 0.5(3.0) = 1.5 \implies V_2(B) = 3.25$ (Action 1)</li>
+                </ul>
+                <p><strong>Result:</strong> $V_1 = [3.0, 2.0]$, $V_2 = [4.0, 3.25]$.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

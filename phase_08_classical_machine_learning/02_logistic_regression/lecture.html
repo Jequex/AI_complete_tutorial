@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 8.2: Logistic Regression & Binary Classification — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .highlight {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.25rem 0;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 08 Hub</a>
+
+    <h1>Topic 8.2: Logistic Regression & Binary Classification</h1>
+    <p><em>From linear log-odds and sigmoid activation to maximum likelihood estimation and binary cross-entropy gradients.</em></p>
+
+    <div class="analogy-box">
+        <h4>The 12-Year-Old Analogy: The Exam Pass/Fail Dimmer Switch</h4>
+        <p>Imagine your school friends are studying for a difficult math exam. You want to build a machine that predicts whether a student will <strong>Pass</strong> ($y=1$) or <strong>Fail</strong> ($y=0$) based on how many hours they studied.</p>
+        <p>If you use a simple straight line, someone studying 80 hours gets predicted a "160% chance of passing", while someone studying 0 hours gets "-20%". But real probabilities can never go below 0% or above 100%!</p>
+        <p>Instead of a rigid ruler, you use an S-shaped silicon ramp: the <strong>Sigmoid function</strong>. No matter how few or many hours they study, the curve stays strictly between 0 and 1. The <strong>Binary Cross-Entropy Loss</strong> is a strict penalty for arrogance: if a student passes and your model predicted a 1% chance, it gets hit with an astronomical penalty; if the prediction is accurate, the penalty vanishes to zero!</p>
+    </div>
+
+    <h2>Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Type</th>
+                <th>Description & Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$x \in \mathbb{R}^d$</td>
+                <td>Feature vector</td>
+                <td>$d$-dimensional input attributes of an observation</td>
+            </tr>
+            <tr>
+                <td>$y \in \{0, 1\}$</td>
+                <td>Binary label</td>
+                <td>Discrete target outcome (0 for negative, 1 for positive)</td>
+            </tr>
+            <tr>
+                <td>$z = w^T x + b$</td>
+                <td>Logit / Log-odds</td>
+                <td>Unconstrained real-valued linear prediction score</td>
+            </tr>
+            <tr>
+                <td>$\sigma(z) \in (0, 1)$</td>
+                <td>Sigmoid activation</td>
+                <td>$\frac{1}{1 + e^{-z}}$, maps $(-\infty, \infty) \to (0, 1)$</td>
+            </tr>
+            <tr>
+                <td>$\hat{y} = \sigma(z)$</td>
+                <td>Posterior probability</td>
+                <td>$P(y = 1 \mid x; w, b)$</td>
+            </tr>
+            <tr>
+                <td>$\text{logit}(p)$</td>
+                <td>Inverse sigmoid</td>
+                <td>$\ln\left(\frac{p}{1-p}\right)$, natural log of odds ratio</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{BCE}}(w, b)$</td>
+                <td>Scalar loss</td>
+                <td>Binary Cross-Entropy (Negative Log-Likelihood) loss</td>
+            </tr>
+            <tr>
+                <td>$\nabla_w \mathcal{L}$</td>
+                <td>Gradient vector</td>
+                <td>$\frac{1}{N} X^T (\hat{y} - y)$, steepest ascent direction</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>1. The Sigmoid Function & Log-Odds</h2>
+    <p>The logistic sigmoid function transforms the unconstrained linear logit $z = w^T x + b \in \mathbb{R}$ into a calibrated probability:</p>
+    $$\sigma(z) = \frac{1}{1 + e^{-z}}$$
+
+    <p>Its first derivative satisfies the famous self-referential property:</p>
+    $$\frac{d}{dz} \sigma(z) = \sigma(z) (1 - \sigma(z))$$
+
+    <p>Inverting the sigmoid equation reveals that the model is linear in the <strong>log-odds (logit)</strong>:</p>
+    $$\ln\left(\frac{P(y=1 \mid x)}{1 - P(y=1 \mid x)}\right) = w^T x + b$$
+
+    <h2>2. Maximum Likelihood & Binary Cross-Entropy Loss</h2>
+    <p>Assuming labels follow independent Bernoulli distributions, the likelihood over $N$ observations is:</p>
+    $$L(w, b) = \prod_{i=1}^N \left(\hat{y}^{(i)}\right)^{y^{(i)}} \left(1 - \hat{y}^{(i)}\right)^{1 - y^{(i)}}$$
+
+    <p>Taking the negative average log-likelihood yields the <strong>Binary Cross-Entropy (BCE) Loss</strong>:</p>
+    $$\mathcal{L}(w, b) = -\frac{1}{N} \sum_{i=1}^N \left[ y^{(i)} \ln \hat{y}^{(i)} + (1 - y^{(i)}) \ln\left(1 - \hat{y}^{(i)}\right) \right]$$
+
+    <h2>3. The Gradient Derivation via Chain Rule</h2>
+    <p>Differentiating with respect to weight $w_j$ for sample $i$:</p>
+    $$\frac{\partial \ell^{(i)}}{\partial w_j} = \frac{\partial \ell^{(i)}}{\partial \hat{y}^{(i)}} \cdot \frac{\partial \hat{y}^{(i)}}{\partial z^{(i)}} \cdot \frac{\partial z^{(i)}}{\partial w_j}$$
+    $$\frac{\partial \ell^{(i)}}{\partial w_j} = \left(\frac{\hat{y}^{(i)} - y^{(i)}}{\hat{y}^{(i)}(1 - \hat{y}^{(i)})}\right) \cdot \left(\hat{y}^{(i)}(1 - \hat{y}^{(i)})\right) \cdot x_j^{(i)} = \left(\hat{y}^{(i)} - y^{(i)}\right) x_j^{(i)}$$
+
+    <div class="highlight">
+        <strong>Matrix Gradient Formulation:</strong>
+        $$\nabla_w \mathcal{L} = \frac{1}{N} X^T (\hat{y} - y)$$
+    </div>
+
+    <h2>4. Convexity & Optimization Guarantee</h2>
+    <p>The Hessian matrix of logistic regression is:</p>
+    $$H = \nabla^2 \mathcal{L}(w) = \frac{1}{N} X^T D X$$
+    <p>where $D = \text{diag}(\hat{y}^{(i)}(1 - \hat{y}^{(i)}))$. Since $0 < \hat{y}^{(i)} < 1$, $D_{ii} > 0$ for all samples. For any vector $v$:</p>
+    $$v^T H v = \frac{1}{N} (Xv)^T D (Xv) \ge 0$$
+    <p>Thus $H \succeq 0$, proving that the Binary Cross-Entropy loss surface is strictly <strong>convex</strong> with a unique global optimum!</p>
+
+</body>
+</html>

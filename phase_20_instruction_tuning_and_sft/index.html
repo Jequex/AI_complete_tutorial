@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 20: Instruction Tuning &amp; Supervised Fine-Tuning (SFT) — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    .overview-box {
+      background-color: var(--badge-bg);
+      border: 1px solid var(--primary);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overview-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    .overview-box p {
+      margin-bottom: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    pre.code-block {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 20</div>
+    <h1>Instruction Tuning &amp; Supervised Fine-Tuning (SFT)</h1>
+    <p class="lead">From Raw Internet Auto-Completer to Aligned Conversational Assistant</p>
+  </header>
+
+  <div class="overview-box">
+    <h3>Architectural Paradigm</h3>
+    <p>Pre-trained language models predict the next token across arbitrary web documents, lacking conversational alignment. Phase 20 covers the mathematical and algorithmic techniques required to transform base models into helpful, honest, and harmless assistants: chat templates, loss masking on prompt tokens (<code>ignore_index = -100</code>), synthetic instruction generation (Self-Instruct, Evol-Instruct), multi-turn conversation modeling with tool use, and automated evaluation using debiased LLM-as-a-Judge harnesses.</p>
+  </div>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Base Models vs. Instruct Models &amp; Chat Templates</h2>
+      <p>The fundamental shift from web continuation to instruction following. The HHH Triad (Helpfulness, Honesty, Harmlessness), prompt formats (Stanford Alpaca vs OpenAI ChatML vs Meta LLaMA 3), special control tokens, and generation prompt mechanics.</p>
+      <div class="topic-links">
+        <a href="01_base_models_vs_instruct_models/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_base_models_vs_instruct_models/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_base_models_vs_instruct_models/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_base_models_vs_instruct_models/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_base_models_vs_instruct_models/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Supervised Fine-Tuning &amp; The Loss Masking Mechanism</h2>
+      <p>The SFT objective function, sequence concatenation, and the critical necessity of loss masking on prompt tokens (<code>target = -100</code>). Analytical proof that unmasked loss forces prompt memorization and wastes capacity. Shift dynamics and zero gradient guarantees.</p>
+      <div class="topic-links">
+        <a href="02_supervised_fine_tuning_and_loss_masking/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_supervised_fine_tuning_and_loss_masking/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_supervised_fine_tuning_and_loss_masking/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_supervised_fine_tuning_and_loss_masking/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_supervised_fine_tuning_and_loss_masking/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Instruction Datasets, Multi-Turn Conversations &amp; Function Calling</h2>
+      <p>Instruction dataset engineering via Self-Instruct (with ROUGE-L deduplication) and Evol-Instruct (depth/breadth mutations). Multi-turn dialogue tree serialization, loss mask vectors, function schema injection, tool invocation generation, and environmental response masking.</p>
+      <div class="topic-links">
+        <a href="03_instruction_datasets_and_multi_turn_conversations/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_instruction_datasets_and_multi_turn_conversations/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_instruction_datasets_and_multi_turn_conversations/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_instruction_datasets_and_multi_turn_conversations/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_instruction_datasets_and_multi_turn_conversations/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Instruction Evaluation &amp; The LLM-as-a-Judge Framework</h2>
+      <p>Ground-truth benchmarks (MMLU, GSM8K, HumanEval pass@k) vs open-ended conversational suites (MT-Bench, AlpacaEval). Automated evaluation using frontier judges, cognitive biases (Position, Verbosity, Self-Enhancement), bidirectional order swapping, and Bradley-Terry Elo modeling.</p>
+      <div class="topic-links">
+        <a href="04_instruction_evaluation_and_llm_as_a_judge/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_instruction_evaluation_and_llm_as_a_judge/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_instruction_evaluation_and_llm_as_a_judge/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_instruction_evaluation_and_llm_as_a_judge/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_instruction_evaluation_and_llm_as_a_judge/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 20 Experiments</h2>
+    <p>Every experiment runs independently in pure Python 3 without any external dependencies:</p>
+    <pre class="code-block">python3 phase_20_instruction_tuning_and_sft/01_base_models_vs_instruct_models/experiment.py
+python3 phase_20_instruction_tuning_and_sft/02_supervised_fine_tuning_and_loss_masking/experiment.py
+python3 phase_20_instruction_tuning_and_sft/03_instruction_datasets_and_multi_turn_conversations/experiment.py
+python3 phase_20_instruction_tuning_and_sft/04_instruction_evaluation_and_llm_as_a_judge/experiment.py</pre>
+  </section>
+
+</body>
+</html>

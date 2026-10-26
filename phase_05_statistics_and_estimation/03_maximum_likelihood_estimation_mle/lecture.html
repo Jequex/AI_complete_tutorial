@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 5.3: Maximum Likelihood Estimation (MLE)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 5.3: Maximum Likelihood Estimation (MLE)</h1>
+    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        The mathematical origin of AI loss functions: proving why Gaussian noise yields Mean Squared Error (MSE) and categorical distributions yield Cross-Entropy.
+    </p>
+
+    <h2>1. Executive Summary & The Archery Detective</h2>
+    <p>
+        In deep learning, we train models by minimizing objective loss functions like <strong>Mean Squared Error (MSE)</strong> and <strong>Cross-Entropy</strong>.
+        These loss functions are not arbitrary inventions: they are the direct mathematical consequence of <strong>Maximum Likelihood Estimation (MLE)</strong>.
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Archery Detective</h3>
+        <p>
+            You enter an archery field and see 10 arrows clustered tightly in the upper-right corner of a target (the <strong>Data</strong>).
+            You didn't see the archer shoot. You only know there was wind blowing across the field (the unknown <strong>Parameter $\theta$</strong>).
+        </p>
+        <ul>
+            <li>Could the wind have blown to the south-west? Probability: $0.000001\%$.</li>
+            <li>Could the wind have been calm? Probability: $0.01\%$.</li>
+            <li>Could the wind have blown strongly north-east? Probability: $85\%$.</li>
+        </ul>
+        <p>
+            As a rational detective, you pick the north-east wind because it makes the observed arrow landings <strong>most likely</strong>!
+            In AI, the arrows are your training dataset, and the wind is the weights of your neural network!
+        </p>
+    </div>
+
+    <h2>2. Probability vs Likelihood</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Probability: $P(D \mid \theta)$</th>
+                <th>Likelihood: $L(\theta; D)$</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>What is fixed?</strong></td>
+                <td>Parameters $\theta$ are fixed constants</td>
+                <td>Observed dataset $D$ is fixed</td>
+            </tr>
+            <tr>
+                <td><strong>What is varying?</strong></td>
+                <td>Hypothetical future data outcomes $D$</td>
+                <td>Candidate parameter values $\theta$</td>
+            </tr>
+            <tr>
+                <td><strong>Total Sum/Integral</strong></td>
+                <td>$\int P(D \mid \theta) dD = 1$</td>
+                <td>Does not sum or integrate to 1 over $\theta$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Log-Likelihood Formulation</h2>
+    <p>
+        For independent and identically distributed (i.i.d.) observations, the joint likelihood is a product:
+    </p>
+    $$L(\theta; D) = \prod_{i=1}^n P(x_i \mid \theta)$$
+    <p>
+        Multiplying thousands of probabilities causes hardware floating-point underflow ($0.01^{1000} \to 0.0$).
+        Taking the natural log converts the product into an easily differentiable sum:
+    </p>
+    $$\mathbf{\ell(\theta) = \ln L(\theta; D) = \sum_{i=1}^n \ln P(x_i \mid \theta)}$$
+    <p>
+        Because $\ln(x)$ is strictly monotonic, maximizing $\ell(\theta)$ is identical to maximizing $L(\theta)$.
+        In deep learning, we minimize the <strong>Negative Log-Likelihood (NLL)</strong>:
+    </p>
+    $$\mathbf{\mathcal{L}_{\text{NLL}}(\theta) = -\sum_{i=1}^n \ln P(x_i \mid \theta)}$$
+
+    <h2>4. Master Derivation 1: Gaussian Likelihood $\implies$ Mean Squared Error (MSE)</h2>
+    <p>
+        Assume a regression target $y_i$ equals the network prediction $f(\mathbf{x}_i; \mathbf{w})$ plus Gaussian noise $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$:
+    </p>
+    $$P(y_i \mid \mathbf{x}_i; \mathbf{w}) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left( -\frac{(y_i - f(\mathbf{x}_i; \mathbf{w}))^2}{2\sigma^2} \right)$$
+    <p>Forming the dataset log-likelihood:</p>
+    $$\ell(\mathbf{w}, \sigma^2) = \sum_{i=1}^n \left[ -\frac{1}{2}\ln(2\pi\sigma^2) - \frac{(y_i - f(\mathbf{x}_i; \mathbf{w}))^2}{2\sigma^2} \right]$$
+    $$\ell(\mathbf{w}, \sigma^2) = -\frac{n}{2}\ln(2\pi\sigma^2) - \frac{1}{2\sigma^2}\sum_{i=1}^n (y_i - f(\mathbf{x}_i; \mathbf{w}))^2$$
+    <p>
+        The first term does not depend on weights $\mathbf{w}$. Dropping constants and flipping the sign to minimize:
+    </p>
+    $$\mathbf{\arg\max_{\mathbf{w}} \ell(\mathbf{w}) = \arg\min_{\mathbf{w}} \frac{1}{n}\sum_{i=1}^n (y_i - f(\mathbf{x}_i; \mathbf{w}))^2 = \arg\min_{\mathbf{w}} \mathcal{L}_{\text{MSE}}(\mathbf{w})} \quad \blacksquare$$
+
+    <div class="callout callout-success">
+        <strong>The Fundamental Insight:</strong> Minimizing Mean Squared Error is mathematically equivalent to Maximum Likelihood Estimation under zero-mean Gaussian noise!
+    </div>
+
+    <h2>5. Master Derivation 2: Categorical Likelihood $\implies$ Cross-Entropy Loss</h2>
+    <p>
+        For binary classification where model outputs probability $\hat{p}_i = \sigma(f(\mathbf{x}_i))$:
+    </p>
+    $$P(y_i \mid \mathbf{x}_i) = \hat{p}_i^{y_i} (1 - \hat{p}_i)^{1 - y_i}$$
+    <p>Taking the negative log-likelihood across all training samples:</p>
+    $$\mathbf{\mathcal{L}_{\text{BCE}}(\mathbf{w}) = -\frac{1}{n}\sum_{i=1}^n \Big[ y_i \ln\hat{p}_i + (1 - y_i)\ln(1 - \hat{p}_i) \Big]} \quad \blacksquare$$
+    <p>
+        For language models predicting token $k$ out of $K$ vocabulary classes with one-hot label $\mathbf{y}_i$:
+    </p>
+    $$\mathbf{\mathcal{L}_{\text{CE}}(\mathbf{w}) = -\frac{1}{n}\sum_{i=1}^n \sum_{k=1}^K y_{ik} \ln \hat{p}_{ik}} \quad \blacksquare$$
+
+    <div class="callout callout-success">
+        <strong>The Language Model Secret:</strong> Training ChatGPT or Llama on trillions of tokens is simply Maximum Likelihood Estimation of a multinomial categorical distribution!
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../02_confidence_intervals_and_hypothesis_testing/lecture.html" class="back-link">← Previous: 5.2 Confidence Intervals</a>
+        <a href="exercises_and_solutions.html" class="back-link">Next: 5.3 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 4.4: Expectation, Variance & Covariance — Complete AI Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .concept-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .tip-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 4 Index</a>
+    <header>
+        <h1>Topic 4.4: Expectation, Variance &amp; Covariance</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Linearity of Expectation, Spread Metrics, Pearson Correlation &amp; Covariance Matrices</p>
+    </header>
+
+    <section>
+        <h2>1. Symbol Decoder Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Formula</th>
+                    <th>Plain-English Meaning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$\mathbb{E}[X]$</td>
+                    <td>Expected Value</td>
+                    <td>$\sum x p(x)$ or $\int x f(x) dx$</td>
+                    <td>The balance point / center of mass of the distribution</td>
+                </tr>
+                <tr>
+                    <td>$\text{Var}(X)$</td>
+                    <td>Variance</td>
+                    <td>$\mathbb{E}[X^2] - (\mathbb{E}[X])^2$</td>
+                    <td>The average squared distance of outcomes from the center</td>
+                </tr>
+                <tr>
+                    <td>$\text{Cov}(X, Y)$</td>
+                    <td>Covariance</td>
+                    <td>$\mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y]$</td>
+                    <td>Do two variables move together (+) or opposite (-)?</td>
+                </tr>
+                <tr>
+                    <td>$\rho(X, Y)$</td>
+                    <td>Pearson Correlation</td>
+                    <td>$\frac{\text{Cov}(X, Y)}{\sigma_X \sigma_Y} \in [-1, 1]$</td>
+                    <td>Normalized linear dependency independent of units</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>2. Linearity of Expectation</h2>
+        <div class="tip-box">
+            <strong>The Superpower of Machine Learning:</strong><br>
+            $$\mathbb{E}[aX + bY + c] = a\mathbb{E}[X] + b\mathbb{E}[Y] + c$$
+            <em>Crucial Fact: This equality holds true even when $X$ and $Y$ are strongly dependent or non-linearly entangled!</em>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. Covariance &amp; Variance of Sums</h2>
+        <div class="concept-card">
+            <h3>Variance of Summed Random Variables:</h3>
+            <p>$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X, Y)$$</p>
+            <p>If $X$ and $Y$ are uncorrelated ($\text{Cov}(X, Y) = 0$), then:</p>
+            <p>$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$$</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. The Covariance Matrix in High-Dimensional AI</h2>
+        <p>For feature vector $\mathbf{x} \in \mathbb{R}^D$:</p>
+        <p>$$\Sigma = \mathbb{E}[(\mathbf{x} - \mu)(\mathbf{x} - \mu)^T]$$</p>
+        <p>Diagonal entries are individual feature variances $\text{Var}(X_i)$, while off-diagonal entries represent interactions $\text{Cov}(X_i, X_j)$. This matrix forms the foundation of <strong>PCA dimensionality reduction</strong> and <strong>Batch Normalization</strong>.</p>
+    </section>
+
+</body>
+</html>
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 19.2: Exercises &amp; Solutions — LoRA Mechanics — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 19 Overview</a>
+
+    <h1>Topic 19.2: Exercises &amp; Solutions — LoRA Mechanics</h1>
+    <p><em>Step-by-step hand calculations, large-scale parameter budgeting, and batch analytical gradient derivations.</em></p>
+
+    <div class="problem-card">
+        <h3>Problem 1: Manual Step-by-Step LoRA Forward Pass &amp; Weight Merging (Easy)</h3>
+        <p>Given $W_0 = \begin{bmatrix} 1.0 & 2.0 \\ 3.0 & 4.0 \end{bmatrix}$, $A = \begin{bmatrix} 1.0 & -1.0 \end{bmatrix}$, $B = \begin{bmatrix} 2.0 \\ -1.0 \end{bmatrix}$, $r = 1$, $\alpha = 2.0$, and input $\mathbf{x} = \begin{bmatrix} 3.0 \\ 1.0 \end{bmatrix}$:</p>
+        <ol>
+            <li>Compute $\mathbf{h}_{\text{base}} = W_0 \mathbf{x}$.</li>
+            <li>Compute intermediate LoRA activation $u = A \mathbf{x}$.</li>
+            <li>Compute low-rank delta $\Delta \mathbf{h} = \frac{\alpha}{r} B u$.</li>
+            <li>Compute total output $\mathbf{h} = \mathbf{h}_{\text{base}} + \Delta \mathbf{h}$.</li>
+            <li>Compute merged weight $W_{\text{merged}} = W_0 + \frac{\alpha}{r} B A$ and verify $W_{\text{merged}} \mathbf{x} = \mathbf{h}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <h4>Steps 1 to 4: Dynamic Forward Pass</h4>
+            $$\mathbf{h}_{\text{base}} = \begin{bmatrix} 1(3) + 2(1) \\ 3(3) + 4(1) \end{bmatrix} = \begin{bmatrix} 5.0 \\ 13.0 \end{bmatrix}$$
+            $$u = 1(3) - 1(1) = 2.0$$
+            $$\frac{\alpha}{r} = 2.0 \implies \Delta \mathbf{h} = 2.0 \begin{bmatrix} 2.0 \\ -1.0 \end{bmatrix} (2.0) = \begin{bmatrix} 8.0 \\ -4.0 \end{bmatrix}$$
+            $$\mathbf{h} = \begin{bmatrix} 5.0 \\ 13.0 \end{bmatrix} + \begin{bmatrix} 8.0 \\ -4.0 \end{bmatrix} = \begin{bmatrix} 13.0 \\ 9.0 \end{bmatrix}$$
+
+            <h4>Step 5: Merged Verification</h4>
+            $$B A = \begin{bmatrix} 2 \\ -1 \end{bmatrix} \begin{bmatrix} 1 & -1 \end{bmatrix} = \begin{bmatrix} 2 & -2 \\ -1 & 1 \end{bmatrix} \implies \Delta W = \begin{bmatrix} 4 & -4 \\ -2 & 2 \end{bmatrix}$$
+            $$W_{\text{merged}} = \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix} + \begin{bmatrix} 4 & -4 \\ -2 & 2 \end{bmatrix} = \begin{bmatrix} 5.0 & -2.0 \\ 1.0 & 6.0 \end{bmatrix}$$
+            $$W_{\text{merged}} \mathbf{x} = \begin{bmatrix} 5(3) - 2(1) \\ 1(3) + 6(1) \end{bmatrix} = \begin{bmatrix} 13.0 \\ 9.0 \end{bmatrix} = \mathbf{h} \quad \checkmark$$
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <h3>Problem 2: Full-Stack Parameter Reduction in LLaMA-3-8B (Medium)</h3>
+        <p>Across all 32 layers of LLaMA-3-8B, we adapt all 7 linear projections ($W_q, W_k, W_v, W_o, W_{\text{gate}}, W_{\text{up}}, W_{\text{down}}$) with rank $r = 16$.</p>
+        <p>Calculate total base parameters vs. LoRA parameters and the reduction percentage.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <ul>
+                <li>Total Base Linear Parameters: $\mathbf{6,979,321,856 \text{ parameters}}$ ($\approx 6.98\text{ B}$).</li>
+                <li>Total LoRA Parameters ($r=16$): $\mathbf{41,943,040 \text{ parameters}}$ ($\approx 41.94\text{ M}$).</li>
+                <li>Parameter Percentage: $41.94\text{M} / 6.98\text{B} = \mathbf{0.601\%}$.</li>
+                <li><strong>Parameter Reduction: $99.40\%$ reduction!</strong></li>
+            </ul>
+        </details>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 22.1: RAG Architecture & Retrieval Foundations — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 22 Hub</a>
+    
+    <h1>Topic 22.1: RAG Architecture &amp; Retrieval Foundations</h1>
+    <p><em>The Fundamental Paradigm Shift from Isolated Parametric Auto-completion to Grounded Dual-Memory Systems</em></p>
+
+    <div class="card">
+        <h3>Executive Summary</h3>
+        <p>When an LLM generates text using only its <strong>parametric memory</strong> (the static weights learned during training), it is prone to hallucination, temporal obsolescence, domain blindness, and complete lack of verifiable provenance. <strong>Retrieval-Augmented Generation (RAG)</strong> pairs this frozen parametric reasoning core with an external, dynamic <strong>non-parametric memory</strong> (a searchable vector database), delivering grounded, verifiable, and real-time knowledge synthesis.</p>
+    </div>
+
+    <div class="analogy">
+        <h3>💡 The 12-Year-Old Analogy: The Open-Book Exam with a Helpful Librarian</h3>
+        <p>Imagine taking an intensely difficult science test. In a <strong>closed-book exam</strong> (Parametric Only), you sit in an empty room with only your memory. If the test asks for the exact temperature of a lab experiment run this morning, you have to guess—and you fabricate a convincing hallucination!</p>
+        <p>In an <strong>open-book RAG exam</strong>, you have a lightning-fast librarian assistant. The moment a question appears, the librarian sprints through the library shelves, pulls the exact index card with this morning's recorded lab readings, and places it on your desk. You read the card, write the exact answer, and cite <em>"Index Card #42, Box B."</em> When the experiment updates tomorrow, no brain surgery is required—the librarian just swaps the card!</p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formal Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{D}$</td>
+                <td>Corpus Set</td>
+                <td>Non-parametric external document corpus: $\mathcal{D} = \{d_1, d_2, \dots, d_N\}$.</td>
+            </tr>
+            <tr>
+                <td>$q$</td>
+                <td>Text String</td>
+                <td>User query / natural language prompt ($q \in \mathcal{V}^*$).</td>
+            </tr>
+            <tr>
+                <td>$c \in \mathcal{D}$</td>
+                <td>Document Chunk</td>
+                <td>Ingested text segment or retrieved context passage.</td>
+            </tr>
+            <tr>
+                <td>$E_Q(q) \in \mathbb{R}^d$</td>
+                <td>Vector ($\ell_2$-norm)</td>
+                <td>Dense vector embedding of query $q$ generated by an encoder.</td>
+            </tr>
+            <tr>
+                <td>$E_D(c) \in \mathbb{R}^d$</td>
+                <td>Vector ($\ell_2$-norm)</td>
+                <td>Dense vector embedding of document chunk $c$.</td>
+            </tr>
+            <tr>
+                <td>$\text{sim}(q, c)$</td>
+                <td>Scalar ($\mathbb{R}$)</td>
+                <td>Similarity metric between query and candidate passage (e.g. Cosine Similarity).</td>
+            </tr>
+            <tr>
+                <td>$\text{Top-}k(\mathcal{D}, q)$</td>
+                <td>Sequence / Set</td>
+                <td>Set of the $k$ most relevant document chunks retrieved for query $q$.</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{x}_{\text{aug}}$</td>
+                <td>Structured Prompt</td>
+                <td>Augmented input context constructed by concatenating $q$ and $\text{Top-}k$ chunks.</td>
+            </tr>
+            <tr>
+                <td>$\pi_\theta(y \mid \mathbf{x}_{\text{aug}})$</td>
+                <td>Conditional Dist.</td>
+                <td>Generative language model distribution conditioned on the augmented prompt.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. The Canonical RAG Pipeline</h2>
+    <p>The standard RAG pipeline operates across two decoupled workflows:</p>
+    <pre>
+=============================================================================================
+                              OFFLINE INGESTION PIPELINE
+=============================================================================================
+ [Raw Documents] ──> [Text Extraction] ──> [Chunking] ──> [Dense Embedding] ──> [Vector DB]
+ (PDFs, Markdown,      (Normalize text,     (Fixed, Sliding,   (Bi-Encoder E_D)     (Index HNSW /
+  Databases, APIs)      strip artifacts)     Recursive)                              IVF-PQ)
+
+=============================================================================================
+                              ONLINE INFERENCE PIPELINE
+=============================================================================================
+ [User Query q] ───────┐
+                       ▼
+             [Embedding Encoder E_Q] ──> Query Vector v_q
+                       │
+                       ▼
+             [Vector DB Search] ────────> Retrieve Top-k Chunks {c_1, ..., c_k}
+                       │
+                       ▼
+             [Context Augmentation] ───> Prompt: "Context: {c_1..k} \n Question: {q}"
+                       │
+                       ▼
+             [Autoregressive LLM] ────> Factual Response + Verified Citations
+    </pre>
+
+    <h3>Stage-by-Stage Mathematical Formulation</h3>
+    <ol>
+        <li><strong>Document Ingestion &amp; Chunking:</strong> Raw text $d$ is partitioned into passages: $d \implies \{c_1, c_2, \dots, c_m\}$.</li>
+        <li><strong>Dense Representation:</strong> Each chunk $c_i$ is mapped to a unit-norm embedding vector $\mathbf{v}_i = \frac{E_D(c_i)}{\|E_D(c_i)\|_2} \in \mathbb{R}^d$.</li>
+        <li><strong>Indexing in Vector Memory:</strong> Embeddings are stored in spatial index graphs (such as HNSW) to support $\mathcal{O}(\log N)$ approximate nearest neighbor lookup.</li>
+        <li><strong>Online Query Encoding &amp; Retrieval:</strong> Query $q$ is mapped to $\mathbf{q} = \frac{E_Q(q)}{\|E_Q(q)\|_2}$. The vector database computes cosine similarities:
+            $$\text{sim}(q, c_i) = \langle \mathbf{q}, \mathbf{v}_i \rangle = \sum_{j=1}^d q_j v_{i, j}$$
+            Extracting the top-$k$ documents: $\mathcal{C}_k = \arg\max_{c \in \mathcal{D}}^{(k)} \text{sim}(q, c)$.
+        </li>
+        <li><strong>Context Augmentation:</strong> The retrieved chunks are assembled into an augmented prompt:
+            $$\mathbf{x}_{\text{aug}} = \tau(q, \mathcal{C}_k)$$
+        </li>
+        <li><strong>Grounded Generation:</strong> The autoregressive LM samples tokens conditioned strictly on the augmented prompt:
+            $$P_\theta(y_1, \dots, y_T \mid \mathbf{x}_{\text{aug}}) = \prod_{t=1}^T P_\theta(y_t \mid \mathbf{x}_{\text{aug}}, y_{<t})$$
+        </li>
+    </ol>
+
+    <h2>3. Formal Formulations: RAG-Sequence vs. RAG-Token</h2>
+    <div class="card">
+        <h4>A. RAG-Sequence Model</h4>
+        <p>In RAG-Sequence (Lewis et al., 2020), a single retrieved document passage conditions the entire generated sequence $\mathbf{y}$. The probability of sequence $\mathbf{y}$ is obtained by marginalizing over the top-$k$ retrieved documents:</p>
+        $$P_{\text{RAG-Seq}}(\mathbf{y} \mid q) = \sum_{z \in \text{Top-}k} P_\eta(z \mid q) \prod_{t=1}^T P_\theta(y_t \mid q, z, y_{<t})$$
+    </div>
+
+    <div class="card">
+        <h4>B. RAG-Token Model</h4>
+        <p>In RAG-Token, different tokens in the response can be conditioned on different retrieved passages. The passage prior is marginalized token-by-token:</p>
+        $$P_{\text{RAG-Tok}}(\mathbf{y} \mid q) = \prod_{t=1}^T \left[ \sum_{z \in \text{Top-}k} P_\eta(z \mid q) P_\theta(y_t \mid q, z, y_{<t}) \right]$$
+    </div>
+
+    <h2>4. Summary Checklist</h2>
+    <ul>
+        <li>&#9745; Parametric memory is static and stored in network weights; non-parametric memory is dynamic and stored in external indices.</li>
+        <li>&#9745; The canonical RAG flow: Ingestion &rarr; Chunking &rarr; Embedding &rarr; Indexing &rarr; Retrieval &rarr; Augmentation &rarr; Generation.</li>
+        <li>&#9745; RAG eliminates hallucinations by restricting synthesis to verified text spans.</li>
+        <li>&#9745; Updating non-parametric knowledge requires no costly backpropagation or GPU retraining.</li>
+    </ul>
+</body>
+</html>

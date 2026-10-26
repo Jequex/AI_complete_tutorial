@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 13.5: Exercises & Solutions — Deep Regularization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 13.5</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">🏠 Phase 13 Hub</a>
+
+    <h1>Topic 13.5: Exercises & Solutions</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Analytical proof of Dropout as adaptive feature-weighted $L_2$ regularization, data augmentation as tangent manifold regularization, and AdamW weight decay dynamics.
+    </p>
+
+    <h2>Problem 1: Dropout as Adaptive Data-Dependent $L_2$ Regularization</h2>
+    <p>
+        For a linear model $\hat{y} = \mathbf{w}^T \tilde{\mathbf{x}}$ with Inverted Dropout $\tilde{x}_j = \frac{m_j}{1-p} x_j$, prove that:
+    </p>
+    $$\mathbb{E}_{\mathbf{m}}\left[ \frac{1}{2}(y - \mathbf{w}^T \tilde{\mathbf{x}})^2 \right] = \frac{1}{2}(y - \mathbf{w}^T \mathbf{x})^2 + \frac{p}{2(1 - p)} \sum_{j=1}^D w_j^2 x_j^2$$
+
+    <div class="callout callout-success">
+        <h3>Solution 1</h3>
+        <p>Using $\mathbb{E}[Z^2] = (\mathbb{E}[Z])^2 + \text{Var}(Z)$:</p>
+        $$\mathbb{E}[(y - \mathbf{w}^T \tilde{\mathbf{x}})^2] = (y - \mathbf{w}^T \mathbf{x})^2 + \text{Var}\left(\sum_{j=1}^D \frac{w_j x_j}{1-p} m_j\right)$$
+        <p>Since the Bernoulli masks $m_j$ are independent with variance $\text{Var}(m_j) = p(1-p)$:</p>
+        $$\text{Var} = \sum_{j=1}^D \frac{w_j^2 x_j^2}{(1-p)^2} p(1-p) = \frac{p}{1-p} \sum_{j=1}^D w_j^2 x_j^2$$
+        <p>Multiplying by $1/2$ completes the proof. Notice that Dropout penalizes $w_j^2$ proportionally to feature power $x_j^2$, regularizing high-variance features more strictly.</p>
+    </div>
+
+    <h2>Problem 2: Data Augmentation as Tangent Invariance</h2>
+    <p>
+        Show that infinitesimal data transformations $T_\epsilon(\mathbf{x}) \approx \mathbf{x} + \epsilon \mathbf{v}(\mathbf{x})$ add a directional gradient penalty:
+    </p>
+    $$\mathcal{L}_{\text{aug}} \approx \mathcal{L}_0 + \frac{\sigma_\epsilon^2}{2} \|\nabla_{\mathbf{x}} f(\mathbf{x}) \cdot \mathbf{v}(\mathbf{x})\|^2$$
+
+    <div class="callout callout-success">
+        <h3>Solution 2</h3>
+        <p>
+            By second-order Taylor expansion around $\epsilon=0$ and taking expectation over zero-mean noise $\epsilon \sim \mathcal{N}(0, \sigma_\epsilon^2)$, the first-order term cancels out while the quadratic term produces the directional derivative penalty. This forces the model to be locally flat along the transformation manifold.
+        </p>
+    </div>
+
+    <h2>Problem 3: Decoupled Weight Decay under Cosine Annealing</h2>
+    <p>
+        In AdamW with learning rate $\alpha_t \to 0$, why does shrinking the weight decay step $\alpha_t \lambda \mathbf{w}_t$ improve late-stage optimization?
+    </p>
+
+    <div class="callout callout-danger">
+        <h3>Solution 3</h3>
+        <p>
+            In early training, high learning rates drive strong weight decay, simplifying the network hypothesis space. As $\alpha_t \to 0$ in final epochs, decay force approaches zero, allowing the optimizer to settle smoothly into the local minimum without being artificially dragged toward zero.
+        </p>
+    </div>
+</body>
+</html>

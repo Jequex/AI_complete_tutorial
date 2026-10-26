@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 22.1: Exercises &amp; Solutions — RAG Architecture &amp; Retrieval Foundations</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 22 Hub</a>
+    
+    <h1>Topic 22.1: Exercises &amp; Solutions</h1>
+    <p><em>RAG Architecture, Memory Scaling, Marginal Likelihoods &amp; Hallucination Upper Bounds</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Parametric vs. Non-Parametric Memory Scaling Analysis (Easy)</h3>
+        <p>An enterprise organization possesses $N = 10^7$ document passages of length $L = 200$ tokens. Compare:</p>
+        <ul>
+            <li><strong>Strategy A:</strong> Continual fine-tuning of a 70B parameter model.</li>
+            <li><strong>Strategy B:</strong> Indexing into a vector database with embedding dimension $d = 1024$ (FP16).</li>
+        </ul>
+        <p>1. Calculate the raw storage footprint of the vector index in gigabytes.<br>
+           2. Contrast the compute complexity and turnaround time when 10,000 documents are updated weekly.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Storage Calculation:</strong><br>
+            Each vector takes $1024 \times 2 \text{ bytes} = 2048 \text{ bytes} = 2 \text{ KB}$.<br>
+            For $10^7$ passages:
+            $$\text{Total Size} = 10^7 \times 2048 \text{ bytes} = 20.48 \text{ GB}$$
+            The entire 10-million document index fits inside ordinary server RAM.</p>
+
+            <p><strong>Step 2: Update Complexity:</strong><br>
+            Strategy A requires fine-tuning 70B parameters over $2 \times 10^6$ tokens, requiring $\sim 2.5 \times 10^{18}$ FLOPs, distributed clusters, and hours of compute, risking catastrophic forgetting.<br>
+            Strategy B only embeds the 10,000 updated passages (milliseconds per doc) and updates vector records in $\mathcal{O}(\log N)$ time with zero downtime and zero parameter degradation.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Mathematical Derivation of RAG-Sequence vs. RAG-Token Marginalization (Medium)</h3>
+        <p>Recall the definitions:</p>
+        $$P_{\text{Seq}}(\mathbf{y} \mid q) = \sum_{z \in \mathcal{Z}} P_\eta(z \mid q) \prod_{t=1}^T P_\theta(y_t \mid q, z, y_{<t})$$
+        $$P_{\text{Tok}}(\mathbf{y} \mid q) = \prod_{t=1}^T \left[ \sum_{z \in \mathcal{Z}} P_\eta(z \mid q) P_\theta(y_t \mid q, z, y_{<t}) \right]$$
+        <p>1. Prove whether or not $P_{\text{Seq}}(\mathbf{y} \mid q) = P_{\text{Tok}}(\mathbf{y} \mid q)$ for $T > 1$ and $|\mathcal{Z}| > 1$.<br>
+           2. Identify the conditions for equivalence.<br>
+           3. Explain which model enables multi-document synthesis.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Proof of Divergence:</strong><br>
+            For $T=2$ and $|\mathcal{Z}|=2$, let $\alpha_z = P_\eta(z \mid q)$ and $\beta_{t, z} = P_\theta(y_t \mid q, z, y_{<t})$. Then:
+            $$P_{\text{Tok}} - P_{\text{Seq}} = \alpha_1 \alpha_2 (\beta_{1, 1} - \beta_{1, 2})(\beta_{2, 2} - \beta_{2, 1})$$
+            Since the token probabilities generally differ across documents, this difference is non-zero. Hence, $P_{\text{Seq}} \ne P_{\text{Tok}}$.</p>
+
+            <p><strong>Conditions for Equivalence:</strong> Equivalence holds if $|\mathcal{Z}| = 1$, or if the retrieval prior is a Dirac delta ($P_\eta(z^* \mid q) = 1$), or if token predictions are independent of document $z$.</p>
+
+            <p><strong>Multi-document Synthesis:</strong> <strong>RAG-Token</strong> natively supports cross-document synthesis because passage probabilities are marginalized at each token step $t$.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Groundedness &amp; Hallucination Upper Bound (Hard)</h3>
+        <p>Let parametric accuracy be $P(a_i \in \mathcal{A}) = 0.65$. Under RAG, retrieval recall is $0.92$, conditioned on which grounded accuracy is $0.98$. When retrieval fails, the model falls back to parametric memory with probability $0.10$ or refuses with probability $0.90$.</p>
+        <p>1. Calculate the expected hallucination rate per claim for RAG vs. Parametric Only.<br>
+           2. For an answer with $M = 5$ independent claims, compute the probability that the entire answer is 100% hallucination-free.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Expected Hallucination Rate:</strong><br>
+            Parametric Only: $1 - 0.65 = 35\%$.<br>
+            RAG (attempted answer):
+            $$P(a_i \in \mathcal{A}) = (0.98 \times 0.92) + (0.65 \times 0.08) = 0.9016 + 0.0520 = 0.9536$$
+            Hallucination rate = $1 - 0.9536 = 4.64\%$. (An 86.7% relative reduction).</p>
+
+            <p><strong>Step 2: 5-Claim Hallucination-Free Probability:</strong><br>
+            Parametric: $(0.65)^5 \approx 11.6\%$. (88.4% chance of containing a hallucination).<br>
+            RAG: $(0.9536)^5 \approx 78.9\%$. (Nearly 7x improvement in completely factual answers).</p>
+        </details>
+    </div>
+</body>
+</html>

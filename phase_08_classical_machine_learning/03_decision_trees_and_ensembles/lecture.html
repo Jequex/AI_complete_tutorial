@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 8.3: Decision Trees & Ensemble Methods — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .highlight {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.25rem 0;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 08 Hub</a>
+
+    <h1>Topic 8.3: Decision Trees & Ensemble Methods</h1>
+    <p><em>From Gini Impurity and Shannon Entropy to Bagging, Random Forests, and Gradient Boosting.</em></p>
+
+    <div class="analogy-box">
+        <h4>The 12-Year-Old Analogy: 20 Questions & The Council of Friends</h4>
+        <p>A <strong>Decision Tree</strong> is like playing the game "20 Questions". You ask: <em>"Does it have feathers?"</em> If yes, you ask: <em>"Can it swim?"</em> Each question cuts the possibilities down until you reach a pure guess.</p>
+        <p><strong>Gini Impurity & Entropy:</strong> Think of a jar with 50 red marbles and 50 blue marbles. It's totally mixed up (high impurity!). If a question separates them into one pure-red jar and one pure-blue jar, impurity drops to zero. That improvement is <strong>Information Gain</strong>.</p>
+        <p><strong>Random Forest:</strong> Instead of relying on one friend who might have bizarre biases, you ask a <em>Council of 100 Friends</em>. Each friend looks at different clues (feature subsampling) and reads different notes (bootstrapped data). When they vote, individual errors cancel out!</p>
+        <p><strong>Gradient Boosting:</strong> Like an apprentice workshop: Apprentice 1 builds a basic model. Apprentice 2 inspects <em>only the mistakes</em> Apprentice 1 made and builds a tiny correction. Apprentice 3 fixes the leftover errors. Together, they achieve near perfection.</p>
+    </div>
+
+    <h2>Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description & Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$p_k$</td>
+                <td>Probability $[0, 1]$</td>
+                <td>Proportion of samples in node $T$ belonging to class $k$</td>
+            </tr>
+            <tr>
+                <td>$G(T)$</td>
+                <td>Impurity $[0, 1 - 1/C]$</td>
+                <td>Gini Impurity: $1 - \sum p_k^2$</td>
+            </tr>
+            <tr>
+                <td>$H(T)$</td>
+                <td>Information Bits $\ge 0$</td>
+                <td>Shannon Entropy: $-\sum p_k \log_2(p_k)$</td>
+            </tr>
+            <tr>
+                <td>$IG(T, a, \theta)$</td>
+                <td>Impurity Reduction</td>
+                <td>Information Gain from partitioning on feature $a$ at threshold $\theta$</td>
+            </tr>
+            <tr>
+                <td>$M$</td>
+                <td>$\mathbb{N}$</td>
+                <td>Number of trees in an ensemble</td>
+            </tr>
+            <tr>
+                <td>$\rho$</td>
+                <td>Correlation $[0, 1]$</td>
+                <td>Pairwise correlation between tree predictions</td>
+            </tr>
+            <tr>
+                <td>$r_{im}$</td>
+                <td>Residual / Gradient</td>
+                <td>Negative gradient (pseudo-residual) for instance $i$ at iteration $m$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>1. Mathematical Formulations of Impurity</h2>
+    <p>For a node $T$ with class probabilities $p_1, \dots, p_C$:</p>
+    <div class="highlight">
+        <strong>Gini Impurity (CART):</strong>
+        $$G(T) = 1 - \sum_{k=1}^C p_k^2$$
+    </div>
+    <div class="highlight">
+        <strong>Shannon Entropy (ID3 / C4.5):</strong>
+        $$H(T) = -\sum_{k=1}^C p_k \log_2(p_k)$$
+    </div>
+
+    <p>For a binary split dividing $T$ into left and right children $T_L$ and $T_R$:</p>
+    $$IG(T, j, \theta) = I(T) - \left[ \frac{|T_L|}{|T|} I(T_L) + \frac{|T_R|}{|T|} I(T_R) \right]$$
+
+    <h2>2. Ensembles: The Variance Reduction Law</h2>
+    <p>For an ensemble of $M$ trees with individual variance $\sigma^2$ and pairwise correlation $\rho$, the total variance of the average prediction is:</p>
+    $$\text{Var}\left(\frac{1}{M}\sum_{m=1}^M f_m(x)\right) = \rho \sigma^2 + \frac{1 - \rho}{M} \sigma^2$$
+    <p>As $M \to \infty$, the term $\frac{1-\rho}{M}\sigma^2 \to 0$. But the variance cannot drop below $\rho \sigma^2$! <strong>Random Forests</strong> resolve this by subsampling $k = \lfloor\sqrt{d}\rfloor$ features at each split, radically lowering the tree correlation $\rho \to 0$.</p>
+
+    <h2>3. Gradient Boosting: Fitting Pseudo-Residuals</h2>
+    <p>Rather than averaging independent trees in parallel, Gradient Boosting constructs an additive sequence $F_M(x) = \sum_{m=0}^M \nu \cdot h_m(x)$ where each stage fits the negative gradient (pseudo-residuals):</p>
+    $$r_{im} = -\left[\frac{\partial \mathcal{L}(y_i, F(x_i))}{\partial F(x_i)}\right]_{F = F_{m-1}}$$
+
+</body>
+</html>

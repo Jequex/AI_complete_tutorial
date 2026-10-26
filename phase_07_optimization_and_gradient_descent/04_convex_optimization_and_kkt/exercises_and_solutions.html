@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 7.4: Exercises & Solutions — Convex Optimization & KKT</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .solution-content {
+            padding: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 7.4</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">Phase 7 Portal</a>
+
+    <h1>Topic 7.4: Exercises & Solutions</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Rigorous analytical derivations of convexity, hand-solved KKT constrained quadratic programs, SVM dual transformations, and Euclidean ball projections.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Convexity Proof via Hessian</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>Prove that the log-barrier function $f(x) = -\sum_{i=1}^n \ln(x_i)$ on $\mathbb{R}_{++}^n$ is strictly convex by computing its Hessian matrix.</p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p><strong>Gradient:</strong> $\frac{\partial f}{\partial x_i} = -1/x_i$.</p>
+                <p><strong>Hessian Matrix:</strong> $H(x) = \text{diag}(1/x_1^2, \dots, 1/x_n^2)$.</p>
+                <p>For any non-zero vector $z \ne 0$:</p>
+                $$z^T H(x) z = \sum_{i=1}^n \frac{z_i^2}{x_i^2} > 0$$
+                Since $x_i > 0$ and $z \ne 0$, $H(x) \succ 0$ (strictly positive definite), proving $f(x)$ is strictly convex.
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Hand-Solved Constrained Optimization via KKT</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>
+            Minimize $f(x_1, x_2) = x_1^2 + x_2^2$ subject to $g(x_1, x_2) = 2 - (x_1 + x_2) \le 0$.
+            Solve analytically using the four KKT conditions.
+        </p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p><strong>Lagrangian:</strong> $\mathcal{L}(x, \lambda) = x_1^2 + x_2^2 + \lambda(2 - x_1 - x_2)$.</p>
+                <p><strong>Stationarity:</strong> $2x_1^* = \lambda^*, 2x_2^* = \lambda^* \implies x_1^* = x_2^* = \lambda^* / 2$.</p>
+                <p><strong>Case $\lambda = 0$:</strong> Gives $(0, 0)$, which violates $x_1 + x_2 \ge 2$.</p>
+                <p><strong>Case $\lambda > 0$:</strong> Constraint is active: $\frac{\lambda^*}{2} + \frac{\lambda^*}{2} = 2 \implies \lambda^* = 2$.</p>
+                <p>Therefore, $x_1^* = 1.0, x_2^* = 1.0$, with minimum loss $f(1, 1) = 2.0$. All 4 KKT conditions are verified.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: SVM Dual Formulation from KKT</h3>
+            <span class="badge badge-hard">Hard</span>
+        </div>
+        <p>
+            Derive the dual quadratic program of hard-margin SVM: $\min \frac{1}{2}\|w\|^2$ s.t. $y_i(w^T x_i + b) \ge 1$.
+            Explain how complementary slackness reveals "support vectors".
+        </p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p><strong>Lagrangian:</strong> $\mathcal{L}(w, b, \alpha) = \frac{1}{2}\|w\|^2 + \sum \alpha_i [1 - y_i(w^T x_i + b)]$.</p>
+                <p><strong>Stationarity:</strong> $w = \sum \alpha_i y_i x_i$ and $\sum \alpha_i y_i = 0$.</p>
+                <p>Substituting back yields the Dual problem: $\max_\alpha \sum \alpha_i - \frac{1}{2}\sum_{i,j} \alpha_i \alpha_j y_i y_j x_i^T x_j$ s.t. $\alpha_i \ge 0, \sum \alpha_i y_i = 0$.</p>
+                <p><strong>Support Vectors:</strong> By complementary slackness $\alpha_i [1 - y_i(w^T x_i + b)] = 0$, points with $y_i(w^T x_i + b) > 1$ have $\alpha_i = 0$. Only boundary points where the margin is tight have $\alpha_i > 0$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 4: Euclidean Projection Operator Derivation</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Derive the projection operator $\Pi_C(z)$ for the closed Euclidean ball $C = \{x \in \mathbb{R}^d : \|x\|_2 \le R\}$.</p>
+
+        <details>
+            <summary>Click to view step-by-step solution</summary>
+            <div class="solution-content">
+                <p>If $\|z\| \le R$, $z \in C \implies \Pi_C(z) = z$.</p>
+                <p>If $\|z\| > R$, solving $\min \frac{1}{2}\|y - z\|^2$ s.t. $\frac{1}{2}\|y\|^2 \le \frac{1}{2}R^2$ gives stationarity $y - z + \lambda y = 0 \implies y = \frac{z}{1+\lambda}$. Since $\|y\| = R$, $1 + \lambda = \frac{\|z\|}{R}$.</p>
+                $$\Pi_C(z) = \begin{cases} z & \text{if } \|z\| \le R \\ R \frac{z}{\|z\|} & \text{if } \|z\| > R \end{cases}$$
+            </div>
+        </details>
+    </div>
+</body>
+</html>

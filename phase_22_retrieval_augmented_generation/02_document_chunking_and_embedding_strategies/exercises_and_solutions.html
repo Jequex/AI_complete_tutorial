@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 22.2: Exercises &amp; Solutions — Document Chunking &amp; Embedding Strategies</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 22 Hub</a>
+    
+    <h1>Topic 22.2: Exercises &amp; Solutions</h1>
+    <p><em>Chunking Formulas, Token Redundancy Ratios &amp; Semantic Dilution Proofs</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Sliding Window Chunk Count &amp; Redundancy Ratio (Easy)</h3>
+        <p>A document contains $T = 10,000$ tokens. An engineer implements sliding window chunking with chunk size $N = 500$ and overlap $K = 100$.</p>
+        <p>1. Compute the total number of chunks $M(T, N, K)$.<br>
+           2. Calculate the Token Redundancy Ratio $\rho$ and analyze behavior as $K \to N$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Chunk Count:</strong><br>
+            With stride $S = N - K = 500 - 100 = 400$:
+            $$M = 1 + \left\lceil \frac{10000 - 500}{400} \right\rceil = 1 + \lceil 23.75 \rceil = 25 \text{ chunks}$$</p>
+
+            <p><strong>Step 2: Redundancy Ratio:</strong><br>
+            Total stored tokens $\approx 25 \times 500 = 12,500$.
+            $$\rho = \frac{12,500}{10,000} = 1.25 \quad (25\% \text{ storage overhead})$$
+            As $K \to N$, stride $S \to 1$, leading to $M \approx T$ and $\rho \approx N$, causing catastrophic index blowup ($500\times$ storage multiplication).</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Dynamic Semantic Chunking with Statistical Cutoffs (Medium)</h3>
+        <p>Adjacent sentence cosine distances across 6 sentences are measured as $\mathbf{d} = [0.12, 0.18, 0.82, 0.15, 0.23]$.</p>
+        <p>1. Compute mean $\mu_d$ and standard deviation $\sigma_d$.<br>
+           2. Apply threshold $\tau = \mu_d + 1.0 \cdot \sigma_d$ to identify chunk boundaries.<br>
+           3. Compare this result with a naive fixed-character chunker.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Statistics:</strong> $\mu_d = 0.30$, $\sigma_d \approx 0.2935$.</p>
+            <p><strong>Step 2: Thresholding:</strong> Cutoff $\tau = 0.30 + 0.2935 = 0.5935$.<br>
+            Since $d_3 = 0.82 > \tau$, a split is triggered between sentences 3 and 4, producing Chunk 1 $[s_1, s_2, s_3]$ and Chunk 2 $[s_4, s_5, s_6]$.</p>
+            <p><strong>Step 3: Comparison:</strong> Fixed-size chunking splits arbitrarily without regard to meaning, risking severing coherent thoughts, whereas semantic chunking groups by topic continuity.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Proof of Semantic Dilution in Centroid Embeddings (Hard)</h3>
+        <p>Let passage embedding $\mathbf{v}_c = \frac{1}{\sqrt{|c|}} \sum_{t=1}^{|c|} \mathbf{e}_t$. A chunk contains a single factual needle $\mathbf{e}^*$ where $\mathbf{e}^* \cdot \mathbf{q} = 1.0$, while the remaining $|c|-1$ tokens are uncorrelated filler.</p>
+        <p>1. Derive $\mathbb{E}[\mathbf{v}_c \cdot \mathbf{q}]$ as a function of chunk size $|c|$.<br>
+           2. Show that signal decays as $\mathcal{O}(|c|^{-1/2})$.<br>
+           3. For a minimum ranking threshold of $0.40$, determine maximum chunk length $|c|_{\max}$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Derivation:</strong> $\mathbb{E}[\mathbf{v}_c \cdot \mathbf{q}] = \frac{1.0}{\sqrt{|c|}} = \mathcal{O}(|c|^{-1/2})$.</p>
+            <p><strong>Threshold Calculation:</strong> $\frac{1}{\sqrt{|c|}} \ge 0.40 \implies |c| \le (1/0.40)^2 = 6.25 \approx 6 \text{ tokens}$. This mathematically demonstrates why large chunks dilute factual needles, explaining why fine-grained chunking improves retrieval precision.</p>
+        </details>
+    </div>
+</body>
+</html>

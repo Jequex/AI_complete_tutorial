@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 4.2: Exercises & Solutions — Random Variables, PMF, PDF & CDF</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: center;
+        }
+        th { background: var(--primary-light); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 4.2</a>
+    <header>
+        <h1>Topic 4.2: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: PDF Calculus, Inverse Transform Sampling &amp; Joint Matrices</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: PDF Normalization Constant &amp; CDF Calculus</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>A continuous random variable $X$ has density $f(x) = c x^2$ on $[0, 3]$, and $0$ elsewhere.</p>
+        <ol>
+            <li>Determine $c$ such that $\int f(x) dx = 1$.</li>
+            <li>Derive CDF $F_X(x)$.</li>
+            <li>Find $P(1 \le X \le 2)$.</li>
+            <li>Find the distribution median $m$ where $F(m) = 0.5$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Normalization:</strong>
+                    $$\int_0^3 c x^2 dx = \left[ c \frac{x^3}{3} \right]_0^3 = 9c = 1 \implies c = \frac{1}{9}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. CDF:</strong>
+                    $$F_X(x) = \int_0^x \frac{1}{9} t^2 dt = \frac{x^3}{27} \quad (\text{for } 0 \le x \le 3)$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Interval Probability:</strong>
+                    $$P(1 \le X \le 2) = F(2) - F(1) = \frac{8 - 1}{27} = \frac{7}{27} \approx 0.2593$$
+                </div>
+                <div class="step-box">
+                    <strong>4. Median:</strong>
+                    $$\frac{m^3}{27} = 0.5 \implies m^3 = 13.5 \implies m \approx 2.3811$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Inverse Transform Sampling for Pareto Distribution</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>For the Pareto distribution $f(x) = \frac{\alpha x_m^\alpha}{x^{\alpha+1}}$ ($x \ge x_m$):</p>
+        <ol>
+            <li>Derive CDF $F(x)$.</li>
+            <li>Derive the inverse CDF $F^{-1}(u)$ to generate samples from uniform random numbers $u \sim \text{Uniform}(0, 1)$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. CDF:</strong>
+                    $$F(x) = \int_{x_m}^x \alpha x_m^\alpha t^{-\alpha-1} dt = 1 - \left(\frac{x_m}{x}\right)^\alpha$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Inverse CDF:</strong>
+                    $$u = 1 - \left(\frac{x_m}{x}\right)^\alpha \implies \left(\frac{x_m}{x}\right)^\alpha = 1 - u \implies x = x_m (1 - u)^{-1/\alpha}$$
+                    $$X = \frac{x_m}{U^{1/\alpha}}$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Joint Probability Matrix &amp; Independence Test</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Given the sensor joint distribution matrix $P(X, Y)$:</p>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>$Y = 0$</th>
+                    <th>$Y = 1$</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>$X = 0$</strong></td>
+                    <td>0.54</td>
+                    <td>0.06</td>
+                </tr>
+                <tr>
+                    <td><strong>$X = 1$</strong></td>
+                    <td>0.16</td>
+                    <td>0.24</td>
+                </tr>
+            </tbody>
+        </table>
+        <ol>
+            <li>Compute marginals $P(X)$ and $P(Y)$.</li>
+            <li>Compute $P(Y = 1 \mid X = 1)$.</li>
+            <li>Are $X$ and $Y$ statistically independent?</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Marginals:</strong>
+                    $$P(X=0) = 0.54 + 0.06 = 0.60, \quad P(X=1) = 0.16 + 0.24 = 0.40$$
+                    $$P(Y=0) = 0.54 + 0.16 = 0.70, \quad P(Y=1) = 0.06 + 0.24 = 0.30$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Conditional:</strong>
+                    $$P(Y = 1 \mid X = 1) = \frac{P(X=1, Y=1)}{P(X=1)} = \frac{0.24}{0.40} = 0.60$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Independence Check:</strong>
+                    $$P(X=1) \times P(Y=1) = 0.40 \times 0.30 = 0.12 \neq 0.24 = P(X=1, Y=1)$$
+                    Since the joint probability does not equal the product of marginals, <strong>$X$ and $Y$ are NOT independent</strong>.
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

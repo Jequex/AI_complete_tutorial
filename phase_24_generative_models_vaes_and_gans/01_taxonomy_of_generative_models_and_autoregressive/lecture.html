@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.1: Taxonomy of Generative Models &amp; Autoregressive Foundations</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        p > code, li > code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.1: Taxonomy of Generative Models &amp; Autoregressive Foundations</h1>
+    <p>Understanding the fundamental landscape: Explicit vs. Implicit Likelihood, the Autoregressive Chain Rule, and why Deterministic Autoencoders fail to generate.</p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: The Blueprint Architect vs. The Swiss Cheese Map</h3>
+        <p><strong>The Blueprint Architect:</strong> An autoregressive model places one Lego block at a time, looking at all previous blocks. It has an exact mathematical recipe, but building takes sequential time.</p>
+        <p><strong>The Swiss Cheese Map:</strong> A standard deterministic autoencoder compresses your house into coordinate (1, 1) and your school into coordinate (9, 9). But if you pick coordinate (5, 5) in the middle of nowhere, the decoder has no clue what to build! It is an empty hole in the map, so it produces a bizarre hallucination. To fix this, we need a smooth density over latent space.</p>
+    </div>
+
+    <h2>1. The Landscape of Generative Modeling</h2>
+    <p>Unlike discriminative models that calculate conditional probabilities $P(y \mid x)$, generative models estimate or sample from the true high-dimensional data distribution $P(x)$.</p>
+
+    <pre>
+                                Generative Models
+                                        |
+               +------------------------+------------------------+
+               |                                                 |
+       Explicit Likelihood                              Implicit Likelihood
+     (Optimizes log P(x))                          (No explicit density function)
+               |                                                 |
+     +---------+---------+                             +---------+---------+
+     |                   |                             |                   |
+Tractable Density   Approximate Density               GANs              GFlowNets
+     |                   |                   (Adversarial game)   (Flow trajectories)
++----+----+         +----+----+
+|         |         |         |
+Auto-   Normalizing Variational Diffusion /
+regressive Flows       Auto-    Score Models
+(PixelCNN, (RealNVP) encoders   (DDPM, Score SDE)
+ GPT)                 (VAEs)
+    </pre>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$x \in \mathcal{X}$</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>High-dimensional observable data instance (images, waveforms, tokens).</td>
+            </tr>
+            <tr>
+                <td>$p_{\text{data}}(x)$</td>
+                <td>Density</td>
+                <td>True underlying distribution of natural data.</td>
+            </tr>
+            <tr>
+                <td>$p_\theta(x)$</td>
+                <td>Parametric Density</td>
+                <td>Generative model probability density parameterized by $\theta$.</td>
+            </tr>
+            <tr>
+                <td>$x_{<t}$</td>
+                <td>Prefix</td>
+                <td>History of tokens/dimensions preceding step $t$: $(x_1, \dots, x_{t-1})$.</td>
+            </tr>
+            <tr>
+                <td>$z \in \mathcal{Z}$</td>
+                <td>$\mathbb{R}^d$</td>
+                <td>Latent variable bottleneck vector ($d \ll D$).</td>
+            </tr>
+            <tr>
+                <td>$q_\phi(z \mid x)$</td>
+                <td>Distribution</td>
+                <td>Encoder recognition model predicting latent coordinates given $x$.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{AR}}(\theta)$</td>
+                <td>$\mathbb{R}$</td>
+                <td>Negative log-likelihood objective under autoregressive chain rule.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Autoregressive Factorization via Chain Rule</h2>
+    <p>Any joint probability distribution can be factorized into a product of 1D conditionals without loss of generality:</p>
+    $$P(x_1, x_2, \dots, x_T) = \prod_{t=1}^T P(x_t \mid x_{<t})$$
+    
+    <div class="callout">
+        <h4>Teacher Forcing vs. Exposure Bias</h4>
+        <p><strong>Training:</strong> Teacher forcing feeds ground-truth prefixes $x_{<t}$ at every step, allowing parallelized forward passes across all sequence lengths.</p>
+        <p><strong>Inference:</strong> Sequential autoregressive generation feeds the model's own previous sampled tokens $\tilde{x}_{<t}$. A single erroneous token can shift the context into an unseen region of distribution space, compounding downstream errors.</p>
+    </div>
+
+    <h2>4. Deterministic Autoencoders: The Bottleneck Without a Prior</h2>
+    <p>A deterministic autoencoder optimizes reconstruction MSE:</p>
+    $$\min_{\theta, \phi} \frac{1}{N} \sum_{i=1}^N \|x^{(i)} - g_\phi(f_\theta(x^{(i)}))\|_2^2$$
+    <p>Because there is no prior distribution $p(z)$ constraining the latent vectors $z$, the encoder places points on isolated, measure-zero manifolds. If you sample $z \sim \mathcal{N}(0, \mathbf{I})$, you land in the empty voids of latent space, causing the decoder to generate meaningless noise.</p>
+
+    <h2>5. Model Family Comparison</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Autoregressive</th>
+                <th>Deterministic AE</th>
+                <th>VAEs</th>
+                <th>GANs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Density Estimation</strong></td>
+                <td>Exact $P(x)$</td>
+                <td>None</td>
+                <td>Lower bound (ELBO)</td>
+                <td>None (Implicit)</td>
+            </tr>
+            <tr>
+                <td><strong>Sampling Speed</strong></td>
+                <td>Slow ($\mathcal{O}(T)$)</td>
+                <td>Not Generative</td>
+                <td>Fast (1 forward pass)</td>
+                <td>Fast (1 forward pass)</td>
+            </tr>
+            <tr>
+                <td><strong>Training Stability</strong></td>
+                <td>High (Convex MLE)</td>
+                <td>High (MSE)</td>
+                <td>High (ELBO)</td>
+                <td>Adversarial (Minimax)</td>
+            </tr>
+            <tr>
+                <td><strong>Latent Space</strong></td>
+                <td>None</td>
+                <td>Empty holes / voids</td>
+                <td>Smooth Gaussian prior</td>
+                <td>Continuous noise prior</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

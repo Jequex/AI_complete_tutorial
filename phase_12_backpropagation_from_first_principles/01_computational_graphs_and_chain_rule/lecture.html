@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 12.1: Computational Graphs & the Chain Rule — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        .graph-diagram {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 12 Overview</a>
+
+    <h1>Topic 12.1: Computational Graphs & the Multivariable Chain Rule</h1>
+
+    <div class="callout">
+        <strong>Core Thesis:</strong> Modern automatic differentiation does not rely on symbolic algebraic manipulation or numerical approximation. Instead, it converts mathematical execution traces into <em>Directed Acyclic Graphs (DAGs)</em> and computes exact analytical derivatives in linear time $\mathcal{O}(|\mathcal{E}|)$ by evaluating the <em>multivariable chain rule</em> in reverse topological order.
+    </div>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+
+    <p>
+        Modern deep learning architectures contain hundreds of billions of interconnected mathematical operations. How does PyTorch or JAX compute the exact derivative of a scalar loss function with respect to every single parameter in such vast networks without making algebraic errors or exploding in computational complexity?
+    </p>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: The Rube Goldberg Machine &amp; Tracing Dominos</h3>
+        <p>Imagine you build an elaborate Rube Goldberg machine in your living room:</p>
+        <ol>
+            <li>You roll a marble labeled <strong>$x$</strong>.</li>
+            <li>Marble <strong>$x$</strong> strikes a lever that tips a seesaw (<strong>Node $a$</strong>).</li>
+            <li>Simultaneously, marble <strong>$x$</strong> trips a wire dropping a steel ball down a chute (<strong>Node $b$</strong>).</li>
+            <li>Both the seesaw and the steel ball strike a chime that rings a brass bell (<strong>Node $L$</strong>).</li>
+        </ol>
+        <p><strong>The Forward Pass:</strong> You push marble $x$ with 2 Newtons of force. Kinetic energy cascades forward through levers and chutes, and the bell rings with 47 decibels. That is forward execution: inputs produce intermediate values, which culminate in the final output.</p>
+        <p><strong>The Backward Pass (Sensitivity Analysis):</strong> Now your friend asks: <em>"If I push marble $x$ slightly harder, how much louder will the bell chime?"</em></p>
+        <p>You trace backward from the bell:</p>
+        <ul>
+            <li>The chime was struck by both the seesaw ($a$) and the steel ball ($b$).</li>
+            <li>You compute how much the seesaw affected the bell ($\frac{\partial L}{\partial a}$) times how much marble $x$ tipped the seesaw ($\frac{\partial a}{\partial x}$). That's the sensitivity along Path 1!</li>
+            <li>You compute how much the steel ball affected the bell ($\frac{\partial L}{\partial b}$) times how much marble $x$ tripped the wire ($\frac{\partial b}{\partial x}$). That's the sensitivity along Path 2!</li>
+            <li><strong>The Golden Rule:</strong> Because marble $x$ caused ripples down two distinct pathways, its total effect on the bell is the <strong>sum of both pathways</strong>:</li>
+        </ul>
+        $$\text{Total Impact} = \left(\frac{\partial L}{\partial a} \cdot \frac{\partial a}{\partial x}\right) + \left(\frac{\partial L}{\partial b} \cdot \frac{\partial b}{\partial x}\right)$$
+        <p>This is the <strong>Multivariable Chain Rule on Graphs</strong>. When a variable fans out into multiple consumers, its gradient is the sum of gradients accumulating from all its downstream children.</p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description &amp; Operational Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{G} = (\mathcal{V}, \mathcal{E})$</td>
+                <td>Graph Theory</td>
+                <td>Directed Acyclic Graph (DAG) representing data flow across operations</td>
+            </tr>
+            <tr>
+                <td>$v_i \in \mathcal{V}$</td>
+                <td>Tensor / Scalar</td>
+                <td>Graph node representing an input, intermediate variable, or output</td>
+            </tr>
+            <tr>
+                <td>$(u, v) \in \mathcal{E}$</td>
+                <td>Directed Edge</td>
+                <td>Data dependency: node $u$ is an input argument to operation $v$</td>
+            </tr>
+            <tr>
+                <td>$\text{Parents}(v)$</td>
+                <td>Node Set</td>
+                <td>Predecessors of $v$: $\{u \in \mathcal{V} \mid (u, v) \in \mathcal{E}\}$</td>
+            </tr>
+            <tr>
+                <td>$\text{Children}(u)$</td>
+                <td>Node Set</td>
+                <td>Successors of $u$: $\{v \in \mathcal{V} \mid (u, v) \in \mathcal{E}\}$</td>
+            </tr>
+            <tr>
+                <td>$L \in \mathbb{R}$</td>
+                <td>Scalar Field</td>
+                <td>Terminal scalar objective loss function</td>
+            </tr>
+            <tr>
+                <td>$\bar{v} \equiv \frac{\partial L}{\partial v}$</td>
+                <td>Adjoint</td>
+                <td>Sensitivity of terminal loss $L$ to infinitesimal changes in node $v$</td>
+            </tr>
+            <tr>
+                <td>$\frac{\partial v}{\partial u}$</td>
+                <td>Local Jacobian</td>
+                <td>Elementary derivative of operation $v$ with respect to its input $u$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Computational Graphs as Directed Acyclic Graphs (DAGs)</h2>
+
+    <p>
+        A computational graph decomposes any mathematical expression into a sequence of atomic primitive operations (such as $+$, $\times$, $\exp$, $\tanh$).
+    </p>
+
+    <div class="graph-diagram">
+        <svg width="600" height="220" viewBox="0 0 600 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--primary)" />
+                </marker>
+            </defs>
+            <!-- Nodes -->
+            <rect x="30" y="40" width="70" height="40" rx="8" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2"/>
+            <text x="65" y="65" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="var(--primary)">x = 2</text>
+
+            <rect x="30" y="140" width="70" height="40" rx="8" fill="var(--primary-light)" stroke="var(--primary)" stroke-width="2"/>
+            <text x="65" y="165" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="var(--primary)">y = 3</text>
+
+            <rect x="180" y="40" width="90" height="40" rx="8" fill="var(--card-bg)" stroke="var(--border)" stroke-width="2"/>
+            <text x="225" y="65" text-anchor="middle" font-family="sans-serif" fill="var(--text)">a = x * y</text>
+
+            <rect x="180" y="140" width="90" height="40" rx="8" fill="var(--card-bg)" stroke="var(--border)" stroke-width="2"/>
+            <text x="225" y="165" text-anchor="middle" font-family="sans-serif" fill="var(--text)">b = x + y</text>
+
+            <rect x="340" y="80" width="90" height="40" rx="8" fill="var(--card-bg)" stroke="var(--border)" stroke-width="2"/>
+            <text x="385" y="105" text-anchor="middle" font-family="sans-serif" fill="var(--text)">c = a * b</text>
+
+            <rect x="490" y="80" width="80" height="40" rx="8" fill="var(--accent-bg)" stroke="var(--accent)" stroke-width="2"/>
+            <text x="530" y="105" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="var(--accent)">L = c</text>
+
+            <!-- Directed Edges -->
+            <path d="M 100 60 L 172 60" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 95 75 L 175 145" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 95 145 L 175 75" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 100 160 L 172 160" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+
+            <path d="M 270 60 L 335 88" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 270 160 L 335 112" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+            <path d="M 430 100 L 482 100" stroke="var(--primary)" stroke-width="2" marker-end="url(#arrow)"/>
+        </svg>
+    </div>
+
+    <h3>3.1 Key Properties of Computational DAGs</h3>
+    <ul>
+        <li><strong>Acyclicity:</strong> Absence of directed loops guarantees that forward evaluation follows a deterministic topological sequence and backward gradients do not encounter infinite recursion.</li>
+        <li><strong>Topological Sort:</strong> A linear permutation $v_1, v_2, \dots, v_n$ such that every edge $(v_i, v_j)$ has $i < j$.</li>
+        <li><strong>Reverse Topological Order:</strong> Backpropagation traverses the nodes in strictly reverse order ($v_n, v_{n-1}, \dots, v_1$), ensuring that whenever an adjoint $\bar{u}$ is computed, all downstream consumers of $u$ have already contributed their gradients!</li>
+    </ul>
+
+    <h2>4. The Multivariable Chain Rule on Graphs</h2>
+
+    <p>
+        If an intermediate variable $x$ fans out into multiple children $y_1, y_2, \dots, y_k \in \text{Children}(x)$, then by the multivariable total derivative:
+    </p>
+
+    $$\boxed{\bar{x} = \frac{\partial L}{\partial x} = \sum_{y \in \text{Children}(x)} \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial x} = \sum_{y \in \text{Children}(x)} \bar{y} \cdot \frac{\partial y}{\partial x}}$$
+
+    <div class="callout callout-danger">
+        <h3>Critical Implementation Bug: Overwriting vs. Accumulating</h3>
+        <p>In autograd code, writing <code>parent.grad = child.grad * local_deriv</code> is a critical bug whenever a tensor is reused across multiple operations (e.g. <code>x + x</code> or residual connections). The assignment operator overwrites prior branch gradients!</p>
+        <pre><code class="language-python"># BUGGY (Overwrites gradients on multi-use variables):
+def backward():
+    self.prev[0].grad = self.grad * d_prev0
+
+# CORRECT (Accumulates gradients across all downstream branches):
+def backward():
+    self.prev[0].grad += self.grad * d_prev0</code></pre>
+    </div>
+
+    <h2>5. Verified Experiment Output</h2>
+    <p>Our pure Python standard library test (<code>experiment.py</code>) verified analytical backpropagation against two-sided finite difference numerical approximations:</p>
+    <pre><code>Test Point 1: x = 2.0000, y = 3.0000
+Forward Activations: a = 6.0, b = 5.0, c = 30.0, d = 25.0, e = 7.3891, L = 47.6109
+Backward Adjoints:   dL/db = 16.0000, dL/da = 5.0000, dL/dy = 26.0000, dL/dx = 23.6109
+Central Differences: dL/dx Num = 23.610944 (Abs Err: 1.66e-08)
+                     dL/dy Num = 26.000000 (Abs Err: 1.22e-07)
+=> ALL TESTS PASSED SUCCESSFULLY! Exact match between Chain Rule and Finite Differences.</code></pre>
+
+</body>
+</html>

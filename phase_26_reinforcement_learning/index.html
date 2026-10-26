@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 26: Reinforcement Learning — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; color: var(--text); }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="badge">Curriculum Module</span>
+    <h1>Phase 26: Reinforcement Learning</h1>
+    <p class="lead">From formal Markov Decision Processes and Bellman contractions to Deep Q-Networks, Policy Gradients, and Proximal Policy Optimization (PPO).</p>
+  </header>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Markov Decision Processes &amp; Formal Framework</h2>
+      <p>The formal MDP 5-tuple $\langle \mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma \rangle$, the Markov Property, trajectory probability distributions, discounted returns $G_t$, state-value function $V^\pi(s)$, action-value function $Q^\pi(s, a)$, and exact analytical matrix inversion $(\mathbf{I} - \gamma \mathbf{P}^\pi)^{-1}\mathbf{r}^\pi$.</p>
+      <div class="topic-links">
+        <a href="01_markov_decision_processes_and_formal_framework/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_markov_decision_processes_and_formal_framework/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_markov_decision_processes_and_formal_framework/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_markov_decision_processes_and_formal_framework/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_markov_decision_processes_and_formal_framework/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Bellman Equations &amp; Dynamic Programming</h2>
+      <p>Bellman Expectation and Optimality Equations for $V$ and $Q$. The Banach Fixed-Point Theorem and full mathematical proof that the Bellman operator is a $\gamma$-contraction mapping under the $\ell_\infty$ norm ($\|\mathcal{T}^* U - \mathcal{T}^* V\|_\infty \le \gamma \|U - V\|_\infty$). Policy Evaluation, Policy Iteration, and Value Iteration with convergence guarantees.</p>
+      <div class="topic-links">
+        <a href="02_bellman_equations_and_dynamic_programming/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_bellman_equations_and_dynamic_programming/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_bellman_equations_and_dynamic_programming/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_bellman_equations_and_dynamic_programming/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_bellman_equations_and_dynamic_programming/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Temporal Difference Learning, Q-Learning &amp; DQN</h2>
+      <p>Model-free learning: Monte Carlo vs Temporal Difference (TD(0)) error $\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$. On-policy SARSA vs off-policy Q-Learning. The Deadly Triad, and Deep Q-Networks (DQN, Mnih et al. 2015) using Experience Replay buffers $\mathcal{D}$ and periodic Target Networks $Q_{\theta^-}$.</p>
+      <div class="topic-links">
+        <a href="03_temporal_difference_q_learning_and_dqn/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_temporal_difference_q_learning_and_dqn/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_temporal_difference_q_learning_and_dqn/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_temporal_difference_q_learning_and_dqn/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_temporal_difference_q_learning_and_dqn/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. The Policy Gradient Theorem &amp; REINFORCE</h2>
+      <p>Value-based vs Policy-based paradigms. Full mathematical derivation of the Policy Gradient Theorem using the log-derivative trick $\nabla_\theta \pi_\theta = \pi_\theta \nabla_\theta \log \pi_\theta$, trajectory distribution decomposition, causality reward-to-go, the REINFORCE algorithm, and proof that state-dependent baselines $b(s)$ yield zero bias with massive variance reduction.</p>
+      <div class="topic-links">
+        <a href="04_policy_gradient_theorem_and_reinforce/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_policy_gradient_theorem_and_reinforce/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_policy_gradient_theorem_and_reinforce/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_policy_gradient_theorem_and_reinforce/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_policy_gradient_theorem_and_reinforce/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Actor-Critic Architectures &amp; Proximal Policy Optimization (PPO)</h2>
+      <p>Actor-Critic topology (Actor $\pi_\theta$, Critic $V_\phi$), 1-step TD advantages, Generalized Advantage Estimation (GAE($\gamma, \lambda$)) trading off bias vs variance, Trust Region Policy Optimization (TRPO), and Proximal Policy Optimization (PPO, Schulman et al. 2017) with clipped surrogate objective $\mathcal{L}^{\text{CLIP}}$.</p>
+      <div class="topic-links">
+        <a href="05_actor_critic_and_ppo/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_actor_critic_and_ppo/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_actor_critic_and_ppo/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_actor_critic_and_ppo/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_actor_critic_and_ppo/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 26 Experiments</h2>
+    <p>Every experiment is implemented from first principles in pure Python 3 standard library with zero external dependencies (no Gym, no PyTorch, no NumPy):</p>
+    <pre class="code-block">python3 phase_26_reinforcement_learning/01_markov_decision_processes_and_formal_framework/experiment.py
+python3 phase_26_reinforcement_learning/02_bellman_equations_and_dynamic_programming/experiment.py
+python3 phase_26_reinforcement_learning/03_temporal_difference_q_learning_and_dqn/experiment.py
+python3 phase_26_reinforcement_learning/04_policy_gradient_theorem_and_reinforce/experiment.py
+python3 phase_26_reinforcement_learning/05_actor_critic_and_ppo/experiment.py</pre>
+  </section>
+
+</body>
+</html>

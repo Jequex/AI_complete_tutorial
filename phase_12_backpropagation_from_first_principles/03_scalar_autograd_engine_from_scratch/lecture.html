@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 12.3: Scalar Autograd Engine From Scratch — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 12 Overview</a>
+
+    <h1>Topic 12.3: Scalar Autograd Engine From Scratch</h1>
+
+    <div class="callout">
+        <strong>Architecture Blueprint:</strong> Building a full autograd engine requires only three core abstractions:
+        <ol>
+            <li>A <code>Value</code> container tracking numerical data, accumulated gradients, and DAG predecessors.</li>
+            <li>Local differentiation closures implementing primitive operations ($+$, $\times$, $\tanh$, $\dots$).</li>
+            <li>A recursive Depth-First Search (DFS) topological sort guaranteeing reverse topological backpropagation.</li>
+        </ol>
+    </div>
+
+    <h2>1. The 12-Year-Old Analogy: The Magic Mathematical Echo</h2>
+    <div class="callout callout-success">
+        <p>Imagine magic stones stacked into towers. When two stones combine to form a new stone, the new stone attaches a walkie-talkie with a recorded rule: <em>"To tell my left parent, multiply my incoming signal by the right stone's value."</em></p>
+        <p>When the loss stone at the top is struck, it whispers its echo downward. Each stone multiplies the incoming sound, echoes it to its parents, and adds up vibrations if echoes arrive from multiple paths. When the sound reaches the bottom, the total vibration on each stone is exactly its derivative!</p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Attribute</th>
+                <th>Type</th>
+                <th>Mathematical Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>self.data</code></td>
+                <td><code>float</code></td>
+                <td>Forward pass evaluation $v$</td>
+            </tr>
+            <tr>
+                <td><code>self.grad</code></td>
+                <td><code>float</code></td>
+                <td>Accumulated adjoint $\bar{v} = \frac{\partial L}{\partial v}$</td>
+            </tr>
+            <tr>
+                <td><code>self._prev</code></td>
+                <td><code>Set[Value]</code></td>
+                <td>Direct parent inputs $\{u \in \mathcal{V} \mid (u, v) \in \mathcal{E}\}$</td>
+            </tr>
+            <tr>
+                <td><code>self._backward</code></td>
+                <td><code>Callable[[], None]</code></td>
+                <td>Closure applying local chain rule: $\bar{u} \mathrel{+}= \bar{v} \cdot \frac{\partial v}{\partial u}$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. DFS Topological Sorting</h2>
+    <p>To ensure that all downstream consumers of a node have contributed their gradient before that node backpropagates to its predecessors, we execute Depth-First Search post-order traversal:</p>
+    <pre><code class="language-python">def backward(self):
+    topo = []
+    visited = set()
+
+    def build_topo(v):
+        if v not in visited:
+            visited.add(v)
+            for child in v._prev:
+                build_topo(child)
+            topo.append(v)
+
+    build_topo(self)
+    self.grad = 1.0
+
+    for node in reversed(topo):
+        node._backward()</code></pre>
+
+    <h2>4. Verified Experiment Results</h2>
+    <p>Our 2-layer MLP test (<code>experiment.py</code>) built an end-to-end network of 17 parameters and verified every single weight gradient against central finite differences:</p>
+    <pre><code>Total Model Parameters: 17 (Architecture: 2 -> 4 -> 1)
+Initial Loss: 1.255046
+Maximum Relative Error across ALL 17 parameters: 5.80e-08 (< 1e-7)
+Loss after 1 gradient step: 1.058992 (Reduction: 0.196054)
+=> GRADIENT CHECK PASSED & OPTIMIZATION VERIFIED!</code></pre>
+
+</body>
+</html>

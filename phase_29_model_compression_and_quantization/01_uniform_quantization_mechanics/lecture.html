@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 29.1: Uniform Quantization Mechanics — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #60a5fa;
+                --primary-light: #1e293b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); font-weight: 600; }
+        pre.code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: "JetBrains Mono", "Fira Code", monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            padding-left: 1.25rem;
+            font-style: italic;
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 29 Hub</a>
+    
+    <header>
+        <h1>Topic 29.1: Uniform Quantization Mechanics</h1>
+        <p style="color: #64748b; font-size: 1.1rem;">From Continuous Reals to Discrete Integers: Affine Mapping, Symmetric Simplification, and the 6.02 dB Rule</p>
+    </header>
+
+    <section>
+        <h2>1. 12-Year-Old Intuition: The Crayon Box Analogy</h2>
+        <div class="card analogy">
+            <p>Imagine you have a giant set of high-end artist watercolor paints with <strong>16.7 million distinct micro-shades</strong> of color (this is 32-bit floating-point numbers, FP32). When you paint a massive mural, packing all 16.7 million paint bottles requires a gigantic, heavy shipping container that takes up enormous space and costs a fortune to transport.</p>
+            <p>Now imagine someone tells you: <em>"You can only take a tiny wooden box with <strong>256 crayons</strong> (8-bit integer, INT8), or even a pocket box with just <strong>16 crayons</strong> (4-bit integer, INT4). But your painting still needs to look almost identical to the human eye!"</em></p>
+            <p>How do you do it? You measure the darkest and brightest shades in your painting, lay down a ruler with 255 equal notches (your <strong>scale factor $s$</strong>), designate one crayon as your reference mark (the <strong>zero-point $z$</strong>), and snap every original watercolor paint to the nearest crayon notch. Because you rounded to the nearest crayon, you made a tiny mistake on each color—called <strong>Quantization Noise</strong>. Quantization is the mathematical craft of making that noise practically imperceptible.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Mathematical Symbol Decoder</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Domain</th>
+                    <th>Intuition &amp; Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$x \in \mathbb{R}$</td>
+                    <td>Continuous Value</td>
+                    <td>$\text{FP32} / \text{FP16}$</td>
+                    <td>Original continuous weight or activation scalar.</td>
+                </tr>
+                <tr>
+                    <td>$q \in \mathbb{Z}$</td>
+                    <td>Quantized Value</td>
+                    <td>$\text{INT8} / \text{INT4}$</td>
+                    <td>Discrete quantized integer code stored in physical memory.</td>
+                </tr>
+                <tr>
+                    <td>$\hat{x} \in \mathbb{R}$</td>
+                    <td>Dequantized Value</td>
+                    <td>$\mathbb{R}$</td>
+                    <td>Reconstructed real-valued approximation of $x$.</td>
+                </tr>
+                <tr>
+                    <td>$b$</td>
+                    <td>Bit-width</td>
+                    <td>$\mathbb{Z}^+$ ($4, 8, 16$)</td>
+                    <td>Number of bits allocated per numerical tensor value.</td>
+                </tr>
+                <tr>
+                    <td>$s \in \mathbb{R}^+$</td>
+                    <td>Scale Factor</td>
+                    <td>$\mathbb{R}^+$</td>
+                    <td>Quantization step size $\Delta$ represented by 1 integer increment.</td>
+                </tr>
+                <tr>
+                    <td>$z \in \mathbb{Z}$</td>
+                    <td>Zero-Point</td>
+                    <td>$[q_{\min}, q_{\max}]$</td>
+                    <td>Quantized integer index corresponding exactly to real zero ($x = 0.0$).</td>
+                </tr>
+                <tr>
+                    <td>$\sigma_e^2$</td>
+                    <td>Noise Power</td>
+                    <td>$\mathbb{R}^+$</td>
+                    <td>Quantization error variance: $\sigma_e^2 = \frac{s^2}{12}$ under uniform assumptions.</td>
+                </tr>
+                <tr>
+                    <td>$\text{SQNR}$</td>
+                    <td>Signal-to-Noise Ratio</td>
+                    <td>$\text{dB}$</td>
+                    <td>Logarithmic metric $10 \log_{10}(P_{\text{signal}} / P_{\text{noise}})$.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>3. Uniform Affine (Asymmetric) Quantization</h2>
+        <p>In deep learning, activations (such as post-ReLU or post-GELU states) are often strictly positive or asymmetric. Uniform affine quantization maps the dynamic range $[x_{\min}, x_{\max}]$ to integer grid $[q_{\min}, q_{\max}]$.</p>
+        
+        <div class="card">
+            <h3>Scale Factor ($s$) and Zero-Point ($z$)</h3>
+            $$s = \frac{x_{\max} - x_{\min}}{q_{\max} - q_{\min}}$$
+            $$z = \text{clip}\left( \left\lfloor -\frac{x_{\min}}{s} \right\rceil + q_{\min}, \; q_{\min}, \; q_{\max} \right)$$
+            
+            <h3>Quantization Operator:</h3>
+            $$q = Q(x; s, z) = \text{clip}\left( \left\lfloor \frac{x}{s} \right\rceil + z, \; q_{\min}, \; q_{\max} \right)$$
+            
+            <h3>Dequantization Operator:</h3>
+            $$\hat{x} = \hat{Q}(q; s, z) = s \cdot (q - z)$$
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Symmetric Quantization</h2>
+        <p>For symmetric distributions (e.g. weights centered around zero), setting $z = 0$ simplifies integer matrix multiplications and eliminates hardware zero-point subtraction overhead.</p>
+        <div class="card">
+            $$s = \frac{\max(|x_{\min}|, |x_{\max}|)}{q_{\max}} = \frac{\|x\|_\infty}{2^{b-1} - 1}$$
+            $$q = \text{clip}\left( \left\lfloor \frac{x}{s} \right\rceil, \; -2^{b-1}, \; 2^{b-1} - 1 \right)$$
+            $$\hat{x} = s \cdot q$$
+        </div>
+    </section>
+
+    <section>
+        <h2>5. Quantization Noise &amp; The 6.02 dB Rule Derivation</h2>
+        <p>Assuming rounding error $e = x - \hat{x}$ is uniformly distributed over $[-\Delta/2, \Delta/2]$ with step $\Delta = s$:</p>
+        
+        <div class="card">
+            <h3>Noise Variance Derivation:</h3>
+            $$\sigma_e^2 = \int_{-\Delta/2}^{\Delta/2} e^2 \cdot \frac{1}{\Delta} \, de = \frac{1}{\Delta} \left[ \frac{e^3}{3} \right]_{-\Delta/2}^{\Delta/2} = \frac{\Delta^2}{12} = \frac{s^2}{12}$$
+            
+            <h3>Full-Scale Sinusoid SQNR Derivation:</h3>
+            <p>For a full-scale sinusoid $x(t) = A \sin(\omega t)$ with dynamic range $[-A, A]$: $P_{\text{signal}} = \frac{A^2}{2}$. Since $\Delta = \frac{2A}{2^b} = 2A \cdot 2^{-b}$:</p>
+            $$P_{\text{noise}} = \frac{\Delta^2}{12} = \frac{(2A \cdot 2^{-b})^2}{12} = \frac{A^2 \cdot 2^{-2b}}{3}$$
+            $$\text{SQNR} = 10 \log_{10} \left( \frac{A^2 / 2}{A^2 2^{-2b} / 3} \right) = 10 \log_{10} \left( 1.5 \cdot 2^{2b} \right)$$
+            $$= 10 \log_{10}(1.5) + 20 b \log_{10}(2) \approx \mathbf{6.02 \cdot b + 1.76 \text{ dB}}$$
+        </div>
+    </section>
+
+    <section>
+        <h2>6. Dynamic Range vs. Precision: INT8 vs. INT4</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Format</th>
+                    <th>Levels</th>
+                    <th>Memory vs FP32</th>
+                    <th>Theoretical SQNR</th>
+                    <th>Use Case</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>FP32</strong></td>
+                    <td>$4.29 \times 10^9$</td>
+                    <td>$1\times$ (4 bytes)</td>
+                    <td>$> 150 \text{ dB}$</td>
+                    <td>Master training &amp; gradients</td>
+                </tr>
+                <tr>
+                    <td><strong>INT8</strong></td>
+                    <td>256</td>
+                    <td>$4\times$ (1 byte)</td>
+                    <td>$\approx 48.16 \text{ dB}$</td>
+                    <td>Standard inference (W8A8)</td>
+                </tr>
+                <tr>
+                    <td><strong>INT4</strong></td>
+                    <td>16</td>
+                    <td>$8\times$ (0.5 bytes)</td>
+                    <td>$\approx 24.08 \text{ dB}$</td>
+                    <td>Edge LLM weights (GPTQ, AWQ)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>7. Verification Script</h2>
+        <p>Run the pure Python verification script:</p>
+        <pre class="code-block">python3 phase_29_model_compression_and_quantization/01_uniform_quantization_mechanics/experiment.py</pre>
+    </section>
+</body>
+</html>

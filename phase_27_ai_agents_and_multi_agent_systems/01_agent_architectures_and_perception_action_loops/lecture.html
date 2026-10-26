@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.1: Agent Architectures &amp; Perception-Action Loops</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin-top: 0.5rem; margin-bottom: 0.75rem; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+    p { margin-bottom: 1.25rem; }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .diagram-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: monospace;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 1.5rem 0;
+      line-height: 1.4;
+    }
+    .math-formula {
+      overflow-x: auto;
+      padding: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 27 Overview</a><br>
+    <span class="badge">Topic 27.1</span>
+    <h1>Agent Architectures &amp; Perception-Action Loops</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">From passive next-token prediction to cybernetic closed-loop agency, POMDPs, and Bayesian belief state tracking.</p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <p>Imagine you are captaining a submarine 2,000 meters beneath the frozen Arctic Ocean. Through the thick steel hull, you cannot see anything with your eyes. Pitch-black water surrounds you.</p>
+    <p>How do you keep the submarine from crashing into jagged underwater mountains? You have three systems working in harmony:</p>
+    <ul>
+      <li><strong>Sensors (Sense)</strong>: Every few seconds, your sonar emits a high-pitched "ping" and listens for echoes. The dials register water pressure, engine temperature, and magnetic orientation. These readings are incomplete and noisy—a school of fish might look like an iceberg for a split second!</li>
+      <li><strong>A Nautical Map &amp; Mental Model (Plan)</strong>: You do not just react blindly to a single ping. You have a nautical chart and a track record of past pings. In your head (or on the navigation table), you maintain a <em>belief</em> about where the submarine probably is: <em>"Based on the last three pings and our speed, we are 90% likely in Sector 4, but there is a 10% chance ocean currents pushed us toward Sector 5."</em></li>
+      <li><strong>Propellers &amp; Rudders (Act)</strong>: You order the helm: <em>"Turn rudder 15 degrees starboard, engines half ahead!"</em> The submarine cuts through the water, changing its physical position.</li>
+    </ul>
+    <p>A few seconds later, you ping again. The new echo confirms or refutes your belief, and the cycle repeats.</p>
+
+    <div class="callout">
+      <strong>Model vs. Agent:</strong> A standard Large Language Model (like raw GPT-4 or Gemini) is like a world-class encyclopedia sitting on a shelf. If you read a sentence, it predicts the next word. It does not decide anything, possesses no continuous memory, cannot touch the world, and receives no feedback from the consequences of its outputs. An <strong>AI Agent</strong> takes that predictive engine, places it in the captain's chair, connects it to sensors (terminal outputs, web search results, sensor readings), connects it to rudders and motors (code execution, database queries, robotic arms), and loops its outputs back into its inputs over time.
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Formal Domain / Type</th>
+          <th>Intuitive Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{S}$</td>
+          <td>Environmental State Space</td>
+          <td>Set $\{s_1, s_2, \dots\}$ or $\mathbb{R}^d$</td>
+          <td>The true, underlying physical configuration of the world (often hidden from the agent).</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{A}$</td>
+          <td>Action Space</td>
+          <td>Set $\{a_1, a_2, \dots\}$ or $\mathbb{R}^k$</td>
+          <td>The set of valid commands or actions the agent can project onto the environment.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{T}$ (or $P$)</td>
+          <td>Transition Function</td>
+          <td>$\mathcal{S} \times \mathcal{A} \times \mathcal{S} \to [0, 1]$</td>
+          <td>Environmental dynamics: $\mathbb{P}(s_{t+1}=s' \mid s_t=s, a_t=a)$, the law governing how states mutate.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{R}$</td>
+          <td>Reward Function</td>
+          <td>$\mathcal{S} \times \mathcal{A} \to \mathbb{R}$</td>
+          <td>Scalar feedback signal scoring agent progress toward an objective.</td>
+        </tr>
+        <tr>
+          <td>$\Omega$</td>
+          <td>Observation Space</td>
+          <td>Set $\{o_1, o_2, \dots\}$ or $\mathbb{R}^m$</td>
+          <td>The set of signals, tokens, or perceptual readings the agent can directly observe.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{O}$</td>
+          <td>Observation Function</td>
+          <td>$\mathcal{S} \times \mathcal{A} \times \Omega \to [0, 1]$</td>
+          <td>Sensor emissions: $\mathbb{P}(o_{t+1}=o \mid s_{t+1}=s', a_t=a)$, the noisy lens over true reality.</td>
+        </tr>
+        <tr>
+          <td>$b(s)$</td>
+          <td>Belief State</td>
+          <td>Probability distribution $\Delta(\mathcal{S})$</td>
+          <td>Sufficient statistic: $b_t(s) \triangleq \mathbb{P}(S_t = s \mid h_t)$, the agent's probability distribution over world states.</td>
+        </tr>
+        <tr>
+          <td>$h_t$</td>
+          <td>History / Trajectory</td>
+          <td>$(a_0, o_1, a_1, o_2, \dots, a_{t-1}, o_t)$</td>
+          <td>The complete historical trace of actions taken and sensory observations gathered.</td>
+        </tr>
+        <tr>
+          <td>$\pi_\theta(a \mid b)$</td>
+          <td>Agent Policy</td>
+          <td>$\Delta(\mathcal{S}) \times \mathcal{A} \to [0, 1]$</td>
+          <td>The agent's decision rule mapping its current belief state (or prompt context) to an action.</td>
+        </tr>
+        <tr>
+          <td>$H(b)$</td>
+          <td>Belief Entropy</td>
+          <td>Scalar $\ge 0$ (in bits / nats)</td>
+          <td>Information-theoretic measure of epistemic uncertainty: $-\sum_{s} b(s) \log_2 b(s)$.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Cybernetic Sense-Plan-Act Feedback Loop</h2>
+    <p>Autonomous agency is grounded in <strong>Cybernetics</strong> (Norbert Wiener, 1948) and control theory:</p>
+    <div class="diagram-box">
+       ┌────────────────────────────────────────────────────────┐
+       │                      ENVIRONMENT                       │
+       │                   True State S_t                       │
+       └──────────────┬──────────────────────────▲──────────────┘
+                      │                          │
+           Sensory Emission (O)           Action Effectuation (A)
+                      │                          │
+       ┌──────────────▼──────────────────────────┴──────────────┐
+       │                         AGENT                          │
+       │  ┌───────────────┐   ┌───────────────┐   ┌──────────┐  │
+       │  │     SENSE     │──▶│     PLAN      │──▶│   ACT    │  │
+       │  │ (Observation) │   │ (Belief/State)│   │ (Policy) │  │
+       │  └───────────────┘   └───────────────┘   └──────────┘  │
+       └────────────────────────────────────────────────────────┘</div>
+
+    <p><strong>Ashby's Law of Requisite Variety (1956):</strong> <em>Only variety in the agent's internal policy can destroy variety in the environment.</em> Formally:
+    $$\mathcal{V}(\text{Controller}) \ge \mathcal{V}(\text{Disturbances})$$
+    If an environment can exhibit $K$ distinct operational failures or configurations, an agent architecture lacking at least $K$ distinct sensing and remedial action pathways will inevitably enter unrecoverable failure states.</p>
+
+    <h2>4. Step-by-Step Mathematical Derivation: Exact Bayesian Belief State Updating</h2>
+    <p>Tracking the full arbitrary-length history $h_t = (a_0, o_1, \dots, a_{t-1}, o_t)$ is computationally impossible over long horizons. However, the <strong>Belief State</strong> $b_t(s) \triangleq \mathbb{P}(S_t = s \mid h_t)$ is a <em>sufficient statistic</em> for history.</p>
+    <p>Let us rigorously derive the recursive update rule $b_{t+1} = \text{BayesFilter}(b_t, a_t, o_{t+1})$:</p>
+
+    <h3>Step 1: Definition of Posterior Belief</h3>
+    $$b_{t+1}(s') = \mathbb{P}(S_{t+1} = s' \mid h_{t+1}) = \mathbb{P}(S_{t+1} = s' \mid h_t, a_t, o_{t+1})$$
+
+    <h3>Step 2: Applying Bayes' Rule</h3>
+    $$\mathbb{P}(S_{t+1} = s' \mid h_t, a_t, o_{t+1}) = \frac{\mathbb{P}(o_{t+1} \mid S_{t+1} = s', h_t, a_t) \cdot \mathbb{P}(S_{t+1} = s' \mid h_t, a_t)}{\mathbb{P}(o_{t+1} \mid h_t, a_t)}$$
+
+    <h3>Step 3: Conditional Independence of Observations</h3>
+    <p>Under the POMDP assumption, observation $o_{t+1}$ depends only on state $S_{t+1} = s'$ and action $a_t$:</p>
+    $$\mathbb{P}(o_{t+1} \mid S_{t+1} = s', h_t, a_t) = \mathcal{O}(o_{t+1} \mid s', a_t)$$
+
+    <h3>Step 4: Marginalizing Over Prior States (Prediction Step)</h3>
+    $$\mathbb{P}(S_{t+1} = s' \mid h_t, a_t) = \sum_{s \in \mathcal{S}} \mathbb{P}(S_{t+1} = s' \mid S_t = s, h_t, a_t) \cdot \mathbb{P}(S_t = s \mid h_t, a_t) = \sum_{s \in \mathcal{S}} \mathcal{T}(s' \mid s, a_t) b_t(s)$$
+
+    <h3>Step 5: Normalization Factor &amp; Master Closed Form</h3>
+    <p>Combining the numerator and denominator yielding evidence normalization $Z$:</p>
+    <div class="callout">
+      $$\boxed{b_{t+1}(s') = \frac{\mathcal{O}(o_{t+1} \mid s', a_t) \sum_{s \in \mathcal{S}} \mathcal{T}(s' \mid s, a_t) b_t(s)}{\sum_{s'' \in \mathcal{S}} \mathcal{O}(o_{t+1} \mid s'', a_t) \sum_{s \in \mathcal{S}} \mathcal{T}(s'' \mid s, a_t) b_t(s)}}$$
+    </div>
+
+    <h2>5. The LLM Context Window as an Empirical Belief State</h2>
+    <p>In modern LLM-based autonomous agent architectures, the agent does not maintain a closed-form probability vector across billions of physical world states. Instead:</p>
+    <ul>
+      <li><strong>Observations $\Omega$</strong>: Text tokens (JSON payloads, shell stdout/stderr, HTML DOM trees, tool execution returns).</li>
+      <li><strong>Actions $\mathcal{A}$</strong>: Structured tool invocations (JSON function calls, SQL commands, terminal commands).</li>
+      <li><strong>Belief State Approximation</strong>: Autoregressive context buffer:
+      $$\tau_t = [\text{System Prompt}, o_1, a_1, o_2, a_2, \dots, o_t]$$
+      The Transformer self-attention mechanism computes deep latent representations $\mathbf{h}_L \in \mathbb{R}^{d_{\text{model}}}$, approximating the posterior belief $\hat{b}_t \approx \phi(\tau_t)$.</li>
+    </ul>
+
+    <h2>6. Interactive Experiment Runner</h2>
+    <p>Run the accompanying zero-dependency pure Python experiment to observe the Bayesian filter tracking hidden states and reducing entropy in real time:</p>
+    <pre class="code-block">python3 phase_27_ai_agents_and_multi_agent_systems/01_agent_architectures_and_perception_action_loops/experiment.py</pre>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">Go to Exercises &amp; Solutions &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

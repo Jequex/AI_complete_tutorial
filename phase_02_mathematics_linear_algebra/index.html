@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 02: Mathematics I — Linear Algebra — Complete AI Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+    .links-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-lecture {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-lecture:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .quickstart {
+      background-color: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-top: 3rem;
+    }
+    pre {
+      background-color: #0b1120;
+      color: #f8fafc;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      margin: 0.5rem 0 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 02 • Core Mathematical Foundation</div>
+    <h1>Mathematics I — Linear Algebra</h1>
+    <p class="lead">Linear algebra is the foundational mathematical grammar of artificial intelligence. Every neural network, transformer attention block, and embedding space is an engine of vectors, matrices, and linear transformations.</p>
+  </header>
+
+  <main>
+    <!-- TOPIC 2.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./01_scalars_vectors_matrices/lecture.html" class="topic-title">2.1 Scalars, Vectors, and Matrices</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 2.1</span>
+      </div>
+      <p class="topic-desc">The building blocks of AI representations. Dot products, cosine similarity in semantic embeddings, L1 vs L2 norms, matrix multiplication ($O(N^3)$), and geometric projections.</p>
+      <div class="links-row">
+        <a href="./01_scalars_vectors_matrices/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./01_scalars_vectors_matrices/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 2.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./02_linear_transformations/lecture.html" class="topic-title">2.2 Linear Transformations and Matrix Operations</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 2.2</span>
+      </div>
+      <p class="topic-desc">Matrices as dynamic spatial warping engines. Determinants as scaling factors of hyper-volumes, matrix inversions ($A^{-1}$), condition numbers, numerical stability, and neural feedforward layers.</p>
+      <div class="links-row">
+        <a href="./02_linear_transformations/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./02_linear_transformations/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 2.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./03_vector_spaces/lecture.html" class="topic-title">2.3 Vector Spaces, Basis, and Rank</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 2.3</span>
+      </div>
+      <p class="topic-desc">Span, linear independence, basis coordinate systems, rank, column space, and null space. The Rank-Nullity Theorem, matrix rank collapse, and the foundation of LoRA (Low-Rank Adaptation).</p>
+      <div class="links-row">
+        <a href="./03_vector_spaces/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./03_vector_spaces/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 2.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./04_eigenvalues_eigenvectors/lecture.html" class="topic-title">2.4 Eigenvalues, Eigenvectors, and Diagonalization</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 2.4</span>
+      </div>
+      <p class="topic-desc">The invariant directional axes of matrices ($Av = \lambda v$). The Spectral Theorem for symmetric matrices, eigendecomposition ($A = Q \Lambda Q^T$), and PCA dimensionality reduction from scratch.</p>
+      <div class="links-row">
+        <a href="./04_eigenvalues_eigenvectors/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./04_eigenvalues_eigenvectors/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 2.5 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./05_singular_value_decomposition/lecture.html" class="topic-title">2.5 Singular Value Decomposition (SVD)</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 2.5</span>
+      </div>
+      <p class="topic-desc">The crown jewel of linear algebra: $A = U \Sigma V^T$ for any rectangular matrix. Geometric breakdown (Rotate-Scale-Rotate), the Eckart-Young-Mirsky Theorem, and lossy compression of weights.</p>
+      <div class="links-row">
+        <a href="./05_singular_value_decomposition/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./05_singular_value_decomposition/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 2.6 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./06_tensors_and_project/lecture.html" class="topic-title">2.6 Tensors &amp; Linear Algebra Capstone Project</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 2.6</span>
+      </div>
+      <p class="topic-desc">Higher-order multi-dimensional tensors, shape tracking in CNNs and Transformer attention, broadcasting arithmetic, row-major memory strides, and a full pure Python linear algebra engine.</p>
+      <div class="links-row">
+        <a href="./06_tensors_and_project/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./06_tensors_and_project/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <div class="quickstart">
+      <h3 style="margin-top: 0; font-size: 1.1rem;">🧪 How to Run Phase 2 Python Experiments</h3>
+      <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">All experiments are 100% self-contained standard library Python 3 scripts with zero external dependencies:</p>
+      <pre><code>python3 phase_02_mathematics_linear_algebra/01_scalars_vectors_matrices/experiment.py
+python3 phase_02_mathematics_linear_algebra/02_linear_transformations/experiment.py
+python3 phase_02_mathematics_linear_algebra/03_vector_spaces/experiment.py
+python3 phase_02_mathematics_linear_algebra/04_eigenvalues_eigenvectors/experiment.py
+python3 phase_02_mathematics_linear_algebra/05_singular_value_decomposition/experiment.py
+python3 phase_02_mathematics_linear_algebra/06_tensors_and_project/experiment.py</code></pre>
+    </div>
+  </main>
+
+</body>
+</html>
+

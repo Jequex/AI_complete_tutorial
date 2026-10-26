@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.5: Exercises &amp; Solutions — Multi-Agent Orchestration</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 27.5 Lecture</a>
+    <h1>Topic 27.5: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">Condorcet's Jury Theorem derivations, message complexity bounds, and consensus protocol analysis.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Quantitative Condorcet Jury Amplification in Multi-Agent Consensus</h3>
+      <p>Assume each debating agent has independent accuracy $p = 0.70$.</p>
+      <p><strong>Question:</strong> Derive the exact ensemble accuracy under majority rule for $N=1, 3, 5$, and determine the relative error reduction.</p>
+
+      <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+          <p><strong>General Formula:</strong></p>
+          $$P_N = \sum_{k=\frac{N+1}{2}}^N \binom{N}{k} p^k (1 - p)^{N - k}$$
+          <ul>
+            <li>$P_1 = p = \mathbf{70.00\%}$</li>
+            <li>$P_3 = 3(0.7^2)(0.3) + 0.7^3 = 0.441 + 0.343 = \mathbf{78.40\%}$</li>
+            <li>$P_5 = 10(0.7^3)(0.3^2) + 5(0.7^4)(0.3) + 0.7^5 = \mathbf{83.69\%}$</li>
+          </ul>
+          <p><strong>Relative Error Reduction:</strong> From $30.0\%$ to $16.31\%$ is a <strong>$45.64\%$ reduction in error</strong> simply by orchestrating 5 debating agents.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Communication Message Complexity in Contract Net Protocol (CNP)</h3>
+      <p>Analyze the 4-phase Contract Net Protocol (CFP broadcast, Propose/Refuse replies, Award/Reject decisions, Inform result) for 1 Manager and $N$ Workers.</p>
+
+      <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+          <p><strong>Message Breakdown:</strong></p>
+          <ul>
+            <li>Phase 1 (CFP broadcast): $N$ messages</li>
+            <li>Phase 2 (Worker proposals): $N$ messages</li>
+            <li>Phase 3 (Award + Rejections): $N$ messages</li>
+            <li>Phase 4 (Final result return): $1$ message</li>
+          </ul>
+          $$M_{\text{CNP}}(N) = 3N + 1 = \mathcal{O}(N)$$
+          <p>Compared to uncoordinated peer-to-peer all-to-all negotiation which scales quadratically as $\mathcal{O}(N^2)$ ($2 \binom{N}{2} = N(N-1)$), CNP reduces communication overhead by over $83.9\%$ for $N = 20$.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

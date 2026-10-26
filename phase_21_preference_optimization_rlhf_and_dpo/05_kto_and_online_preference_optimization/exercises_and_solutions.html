@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.5: Exercises &amp; Solutions — KTO &amp; Online Preference Optimization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        details {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.5: Exercises &amp; Solutions — KTO &amp; Online Preference Optimization</h1>
+
+    <div class="card">
+        <h3>Problem 1: Prospect Theory &amp; Asymmetric Loss Weighting (Easy)</h3>
+        <p>In KTO, evaluate the loss for desirable output ($\Delta z = +1.0$) vs undesirable output ($\Delta z = -1.0$) with $\lambda_{\text{undesirable}} = 1.50$.</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\ell_D = 1 - \sigma(1.0) = 1 - 0.7311 = 0.2689$.</p>
+            <p><strong>Step 2:</strong> $\ell_U = 1 - \sigma(1.0) = 0.2689$. Multiplied by $\lambda_{\text{undesirable}} = 1.50$, the loss contribution is $0.4034$.</p>
+            <p><strong>Step 3:</strong> The undesirable output is penalized $1.5\times$ more heavily, enforcing risk-averse behavior on harmful or low-quality generations.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Reference Point $z_{\text{ref}}$ Dynamics &amp; Running Estimates (Medium)</h3>
+        <ol>
+            <li>What is $z_{\text{ref}}$ at epoch 0 when $\pi_\theta = \pi_{\text{ref}}$?</li>
+            <li>What happens if $z_{\text{ref}}$ is kept static at 0.0 while policy reward drifts to $+1.5$?</li>
+            <li>How does an Exponential Moving Average (EMA) maintain calibration?</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $z_{\text{ref}}^{(0)} = \beta \log(1.0) = 0.0$.</p>
+            <p><strong>Step 2:</strong> If $z_{\text{ref}}$ is frozen, an undesirable output with reward $+1.0$ (bad compared to the $+1.5$ average) is mistakenly treated as a gain relative to $0.0$, corrupting training.</p>
+            <p><strong>Step 3:</strong> EMA tracks $z_{\text{ref}}^{(t)} = \alpha z_{\text{ref}}^{(t-1)} + (1-\alpha) \bar{z}_{\text{batch}}$, keeping the baseline centered on the model's current capability.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Unpaired Telemetry vs. Paired Annotation Economics (Medium)</h3>
+        <p>A production system serves 1M queries/day with a 2% thumbs-up/down click rate. Compare this to a $200k/year budget for paid paired contractor annotations at $0.80/pair.</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>Paid contractors produce $200{,}000 / 0.80 = 250{,}000$ pairs.</p>
+            <p>Unpaired telemetry generates $1{,}000{,}000 \times 0.02 \times 365 = 7{,}300{,}000$ binary examples ($29.2\times$ more data for free!), providing massive sample efficiency via KTO.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 4: Distribution Shift in Offline DPO vs. Online Self-Correction (Hard)</h3>
+        <p>How does Online / Iterative DPO eliminate persistent bad habits (e.g. unsolicited disclaimers) that offline DPO cannot correct?</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>In offline DPO, static pairs only contain mistakes made by the old SFT model. New habits developed during training never appear in the negative dataset and go unpenalized.</p>
+            <p>Online DPO samples responses directly from the active policy $\pi_\theta$, catches the new disclaimer in real-time with an LLM judge, and applies an immediate on-policy corrective gradient.</p>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Back to Lecture 21.5</a>
+        <a href="../index.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Back to Phase 21 Portal Hub →</a>
+    </div>
+
+</body>
+</html>

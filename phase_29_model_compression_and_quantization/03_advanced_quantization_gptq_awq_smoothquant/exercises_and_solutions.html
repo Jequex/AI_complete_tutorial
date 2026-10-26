@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 29.3: Exercises &amp; Solutions — Advanced Quantization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #60a5fa;
+                --primary-light: #1e293b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--primary-light);
+            border: 1px solid var(--border);
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 29 Hub</a>
+    
+    <header>
+        <h1>Topic 29.3: Exercises &amp; Solutions</h1>
+        <p style="color: #64748b; font-size: 1.1rem;">Analytical Proofs: Optimal Brain Surgery Lagrange Multipliers, SmoothQuant Equi-Range Scaling, and Cholesky Factorization</p>
+    </header>
+
+    <section class="card">
+        <h2>Exercise 1: Lagrange Multiplier Derivation for the Optimal Brain Surgeon Update</h2>
+        <p><strong>Problem:</strong> Minimize $\frac{1}{2} \Delta \mathbf{w}^\top \mathbf{H} \Delta \mathbf{w}$ subject to $\mathbf{e}_q^\top \Delta \mathbf{w} = \delta_q \triangleq w_q - \hat{w}_q$. Derive the closed-form compensation vector $\Delta \mathbf{w}$ and scalar loss penalty $\Delta E_q$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div style="margin-top: 1rem;">
+                <p><strong>1. Lagrangian:</strong> $\mathcal{L}(\Delta \mathbf{w}, \lambda) = \frac{1}{2} \Delta \mathbf{w}^\top \mathbf{H} \Delta \mathbf{w} + \lambda (\mathbf{e}_q^\top \Delta \mathbf{w} - \delta_q)$.</p>
+                <p><strong>2. Stationary Point:</strong> $\mathbf{H} \Delta \mathbf{w} + \lambda \mathbf{e}_q = \mathbf{0} \implies \Delta \mathbf{w} = -\lambda \mathbf{H}^{-1} \mathbf{e}_q$.</p>
+                <p>Substituting into the constraint: $\mathbf{e}_q^\top (-\lambda \mathbf{H}^{-1} \mathbf{e}_q) = -\lambda [\mathbf{H}^{-1}]_{qq} = \delta_q \implies \lambda = -\frac{\delta_q}{[\mathbf{H}^{-1}]_{qq}}$.</p>
+                <p>Therefore:
+                $$\boxed{\Delta \mathbf{w} = -\frac{w_q - \hat{w}_q}{[\mathbf{H}^{-1}]_{qq}} \mathbf{H}^{-1}_{:, q}}$$</p>
+                <p><strong>3. Quadratic Penalty:</strong> $\Delta E_q = \frac{1}{2} \Delta \mathbf{w}^\top \mathbf{H} \Delta \mathbf{w} = \frac{1}{2} \lambda^2 [\mathbf{H}^{-1}]_{qq} = \boxed{\frac{(w_q - \hat{w}_q)^2}{2 [\mathbf{H}^{-1}]_{qq}}}$.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="card">
+        <h2>Exercise 2: Derivation of the Optimal SmoothQuant Scaling Factor</h2>
+        <p><strong>Problem:</strong> Let $X_j$ and $W_j$ be channel maximums. Show that setting $s_j = \frac{X_j^\alpha}{W_j^{1 - \alpha}}$ with $\alpha = 0.5$ makes the dynamic ranges of smoothed activations $\hat{X}_j = X_j / s_j$ and smoothed weights $\hat{W}_j = W_j s_j$ identical.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div style="margin-top: 1rem;">
+                <p>Equating $\hat{X}_j = \hat{W}_j$:
+                $$\frac{X_j}{s_j} = W_j s_j \implies s_j^2 = \frac{X_j}{W_j} \implies s_j = \sqrt{\frac{X_j}{W_j}} = \frac{X_j^{0.5}}{W_j^{0.5}}$$</p>
+                <p>Comparing with $s_j = \frac{X_j^\alpha}{W_j^{1 - \alpha}}$, this matches exactly when $\alpha = 0.5$.</p>
+                <p>Under this choice, $\hat{X}_j = \hat{W}_j = \sqrt{X_j W_j}$. The outlier dynamic range is divided evenly between activations and weights, unlocking INT8 precision without clipping.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="card">
+        <h2>Exercise 3: Cholesky Factorization in GPTQ</h2>
+        <p><strong>Problem:</strong> How does Cholesky decomposition $\mathbf{H}^{-1} = \mathbf{L}\mathbf{L}^\top$ accelerate second-order quantization?</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div style="margin-top: 1rem;">
+                <p>Frantar et al. (2022) prove that the compensation vector simplifies to $\frac{\mathbf{H}^{-1}_{:, q}}{[\mathbf{H}^{-1}]_{qq}} = \frac{\mathbf{L}_{:, q}}{L_{qq}}$.</p>
+                <p>Because $\mathbf{L}$ is lower-triangular ($L_{jq} = 0$ for $j < q$):</p>
+                <ul>
+                    <li>Quantizing column $q$ only updates subsequent columns $j > q$.</li>
+                    <li>Already quantized weights $k < q$ are never disturbed.</li>
+                    <li>The Cholesky factor depends only on calibration activations $\mathbf{X}$ and can be computed once upfront, enabling lazy block updates with fast matrix multiplications (`GEMM`).</li>
+                </ul>
+            </div>
+        </details>
+    </section>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 16.2: Multi-Head Attention — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            background-color: var(--card-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 16 Overview</a>
+
+    <h1>Topic 16.2: Multi-Head Attention</h1>
+    <p><em>Jointly attending to information from different representation subspaces at different positions.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        Single-head scaled dot-product attention has an inherent bottleneck: <strong>it averages conflicting relationships together into a single blurry distribution</strong>.
+    </p>
+    <p>
+        In language, a single token often simultaneously participates in multiple relationships:
+    </p>
+    <ul>
+        <li><strong>Syntactic:</strong> Subject-verb agreement (*"The cat [singular] jumps [singular]"*).</li>
+        <li><strong>Coreference:</strong> Pronoun resolution (*"The animal didn't cross because <u>it</u> was tired"*).</li>
+        <li><strong>Semantic:</strong> Predicate-object association (*"tired"* attributes state to *"animal"*).</li>
+    </ul>
+    <p>
+        Multi-Head Attention (MHA) splits the model's embedding dimension $d_{\text{model}}$ into $h$ separate heads with dimension $d_k = d_{\text{model}} / h$, performs attention in parallel across each subspace, concatenates the resulting heads, and projects them with an output matrix $W^O$.
+    </p>
+
+    <div class="box">
+        $$\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \dots, \text{head}_h) W^O$$
+        $$\text{where } \text{head}_i = \text{Attention}(Q W_i^Q, K W_i^K, V W_i^V)$$
+    </div>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: The Team of Specialized Detectives</h3>
+        <p>Imagine a mysterious classroom incident:</p>
+        <ul>
+            <li><strong>The Single Detective (Single Head):</strong> One detective inspects footprints, broken rulers, student handwriting, and timestamps all at once. Their notes become a scrambled, indecipherable mess.</li>
+            <li><strong>The Specialized Detective Squad (Multi-Head Attention):</strong> The Chief assigns 4 specialized detectives ($h = 4$):
+                <ul>
+                    <li><em>Detective 1:</em> Studies only grammar and handwriting.</li>
+                    <li><em>Detective 2:</em> Connects nicknames and pronouns to student names.</li>
+                    <li><em>Detective 3:</em> Listens for emotional motives and conflicts.</li>
+                    <li><em>Detective 4:</em> Verifies who was standing where on a physical map.</li>
+                </ul>
+            </li>
+            <li><strong>The Concatenation &amp; Chief's Synthesis ($W^O$):</strong> All four detectives tape their 4 reports side-by-side. The Chief ($W^O$) synthesizes the four specialized reports into one final, coherent briefing!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Tensor Shape</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$d_{\text{model}}$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Embedding dimensionality (e.g. 512 in Vaswani et al., 4096 in LLaMA)</td>
+            </tr>
+            <tr>
+                <td>$h$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Number of attention heads (e.g. 8, 32)</td>
+            </tr>
+            <tr>
+                <td>$d_k$</td>
+                <td>Scalar</td>
+                <td>$d_{\text{model}} / h$</td>
+                <td>Query and Key feature dimension per head</td>
+            </tr>
+            <tr>
+                <td>$d_v$</td>
+                <td>Scalar</td>
+                <td>$d_{\text{model}} / h$</td>
+                <td>Value feature dimension per head</td>
+            </tr>
+            <tr>
+                <td>$W_i^Q \in \mathbb{R}^{d_{\text{model}} \times d_k}$</td>
+                <td>Matrix</td>
+                <td>Parameters</td>
+                <td>Linear query projection matrix for head $i$</td>
+            </tr>
+            <tr>
+                <td>$W_i^K \in \mathbb{R}^{d_{\text{model}} \times d_k}$</td>
+                <td>Matrix</td>
+                <td>Parameters</td>
+                <td>Linear key projection matrix for head $i$</td>
+            </tr>
+            <tr>
+                <td>$W_i^V \in \mathbb{R}^{d_{\text{model}} \times d_v}$</td>
+                <td>Matrix</td>
+                <td>Parameters</td>
+                <td>Linear value projection matrix for head $i$</td>
+            </tr>
+            <tr>
+                <td>$W^O \in \mathbb{R}^{h d_v \times d_{\text{model}}}$</td>
+                <td>Matrix</td>
+                <td>Parameters</td>
+                <td>Output projection matrix blending all concatenated heads</td>
+            </tr>
+            <tr>
+                <td>$\text{head}_i$</td>
+                <td>3D Tensor</td>
+                <td>$\mathbb{R}^{B \times T \times d_v}$</td>
+                <td>Attention output for individual head $i$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Computational Cost Invariance</h2>
+    <p>
+        A remarkable property of choosing $d_k = d_v = d_{\text{model}} / h$ is that Multi-Head Attention has the <strong>exact same computational cost</strong> as single-head attention of full dimension $d_{\text{model}}$:
+    </p>
+    $$\text{Single Head FLOPs} = \mathcal{O}(T^2 \cdot d_{\text{model}})$$
+    $$\text{Multi-Head FLOPs} = h \times \mathcal{O}(T^2 \cdot d_k) = h \times \mathcal{O}\left(T^2 \cdot \frac{d_{\text{model}}}{h}\right) = \mathcal{O}(T^2 \cdot d_{\text{model}})$$
+    <p>
+        The model acquires $h$ independent representational subspaces without paying any extra computational penalty!
+    </p>
+
+    <h2>4. Tensor Reshaping: Parallel Head Execution Without Loops</h2>
+    <pre>
+    Shape: [B, T, d_model]
+           │
+           ▼  (1) Projections: Q = X @ W_Q, K = X @ W_K, V = X @ W_V
+    Shape: [B, T, d_model] = [B, T, h * d_k]
+           │
+           ▼  (2) Reshape to 4D: split d_model into [h, d_k]
+    Shape: [B, T, h, d_k]
+           │
+           ▼  (3) Permute dimensions (swap axes 1 and 2):
+    Shape: [B, h, T, d_k]
+           │
+           ▼  (4) Single Batched MatMul over (B * h) items simultaneously!
+    Attention Output: [B, h, T, d_k]
+           │
+           ▼  (5) Permute back (swap axes 1 and 2):
+    Shape: [B, T, h, d_k]
+           │
+           ▼  (6) Flatten last two dimensions:
+    Shape: [B, T, h * d_k] = [B, T, d_model]
+           │
+           ▼  (7) Output projection: Out @ W^O
+    Final Output: [B, T, d_model]
+    </pre>
+</body>
+</html>

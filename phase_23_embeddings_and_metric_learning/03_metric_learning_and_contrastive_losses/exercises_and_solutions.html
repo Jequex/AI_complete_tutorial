@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.3: Exercises &amp; Solutions — Metric Learning &amp; Contrastive Losses</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.3: Exercises &amp; Solutions</h1>
+    <p><em>Analytical derivations of Contrastive Loss springs, Triplet Loss relative boundaries, and Semi-Hard negative mining classification.</em></p>
+
+    <h2>Problem 1: Contrastive Loss Gradient Step &amp; Equilibrium (Easy)</h2>
+    <p>Given 2D points $f(x_1) = [1.0, 2.0]^\top$ and $f(x_2) = [4.0, 6.0]^\top$ with margin $m = 8.0$, compare positive and negative gradient updates.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Euclidean distance: $D = \sqrt{(-3)^2 + (-4)^2} = 5.0$.</p>
+        <p><strong>Positive Pair:</strong> $\nabla_{f(x_1)} \mathcal{L} = f(x_1) - f(x_2) = [-3.0, -4.0]^\top$ (attractive pull).</p>
+        <p><strong>Negative Pair:</strong> Since $D = 5.0 < m = 8.0$, repulsive force: $\nabla_{f(x_1)} \mathcal{L} = -(8 - 5)\frac{1}{5}[-3.0, -4.0]^\top = [+1.8, +2.4]^\top$ (repelling push away from $f(x_2)$).</p>
+    </details>
+
+    <h2>Problem 2: Triplet Loss Negative Mining Classification (Medium)</h2>
+    <p>Given $D_{ap} = 0.36$ and margin $\alpha = 0.40$, classify four candidate negatives with distances $0.20, 0.50, 0.72, 0.95$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Threshold range: $[D_{ap}, D_{ap} + \alpha] = [0.36, 0.76]$.</p>
+        <ul>
+            <li>$D = 0.20 < 0.36$: <strong>Hard Negative</strong> (Loss = 0.56).</li>
+            <li>$D = 0.50 \in [0.36, 0.76]$: <strong>Semi-Hard Negative</strong> (Loss = 0.26). Selected by FaceNet.</li>
+            <li>$D = 0.72 \in [0.36, 0.76]$: <strong>Semi-Hard Negative</strong> (Loss = 0.04).</li>
+            <li>$D = 0.95 > 0.76$: <strong>Easy Negative</strong> (Loss = 0.00). Provides zero gradient.</li>
+        </ul>
+    </details>
+
+    <h2>Problem 3: Geometric Boundary of Zero Triplet Loss (Hard)</h2>
+    <p>Prove that for anchor at origin and positive at $[1, 0]^\top$ with margin $\alpha = 1.0$, the zero-loss boundary is a circle of radius $\sqrt{2}$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Condition for zero triplet loss: $\|a - p\|^2 - \|a - n\|^2 + \alpha \le 0$.</p>
+        <p>Substituting $a=[0, 0]^\top, p=[1, 0]^\top \implies 1.0 - (x^2 + y^2) + 1.0 \le 0 \implies x^2 + y^2 \ge 2.0$.</p>
+        <p>The boundary curve is a circle of radius $R = \sqrt{2} \approx 1.414$ centered at the anchor.</p>
+    </details>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.4: Kullback-Leibler (KL) Divergence — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.3rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background: var(--accent-bg);
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background: var(--primary-light); }
+        code {
+            background: var(--border);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.4: Kullback-Leibler (KL) Divergence</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Measuring Statistical Asymmetry, Forward vs. Reverse KL, VAE Loss Derivations, and RLHF Alignment.
+    </p>
+
+    <div class="analogy">
+        <h3 style="margin-top: 0; color: var(--accent);">🧒 1. Intuitive Analogy: The Outdated Mountain Map</h3>
+        <p>
+            Imagine you are hiking through a mountain range.
+            <ul>
+                <li><strong>Terrain Reality ($P$):</strong> Heavy rain washed away an old trail and created a new river.</li>
+                <li><strong>Your Map ($Q$):</strong> You bought a cheap paper map printed in 1960.</li>
+            </ul>
+        </p>
+        <p>
+            Every time your map says <em>"straight path"</em> but you hit a roaring river, you have to stop, backtrack, and take a 2-hour detour. The extra sweat and wasted time you spend because your map ($Q$) did not match reality ($P$) is the <strong>Kullback-Leibler Divergence</strong> $D_{\text{KL}}(P \parallel Q)$.
+        </p>
+        <p>
+            <strong>Why it is NOT a "Distance":</strong> Walking in a real city with a video game map is totally different from playing a video game using a real city map! KL Divergence is asymmetric: $D_{\text{KL}}(P \parallel Q) \ne D_{\text{KL}}(Q \parallel P)$.
+        </p>
+    </div>
+
+    <h2>🔣 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr><th>Symbol</th><th>Mathematical Name</th><th>Plain English Meaning</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>$P(x)$</td><td>True / Reference Distribution</td><td>Ground truth data or the reference LLM policy.</td></tr>
+            <tr><td>$Q(x)$</td><td>Approximating Distribution</td><td>The model's current predicted probabilities or trained policy.</td></tr>
+            <tr><td>$D_{\text{KL}}(P \parallel Q)$</td><td>Relative Entropy (KL Divergence)</td><td>Expected excess bits wasted when encoding $P$ with model code $Q$.</td></tr>
+            <tr><td>$D_{\text{KL}} \ge 0$</td><td>Gibbs' Inequality</td><td>Relative entropy can never be negative; zero if and only if $P = Q$.</td></tr>
+            <tr><td>$\beta$</td><td>KL Penalty Coefficient</td><td>The anchor weight in RLHF preventing policy drift.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>📐 3. Definition & Fundamental Triad</h2>
+    <div class="card">
+        <h3>Definition of Discrete KL Divergence</h3>
+        $$D_{\text{KL}}(P \parallel Q) = \sum_{x \in \mathcal{X}} P(x) \log_2 \left( \frac{P(x)}{Q(x)} \right)$$
+        <h3>The Fundamental Triad</h3>
+        $$H(P, Q) = H(P) + D_{\text{KL}}(P \parallel Q)$$
+        <p>
+            Cross-Entropy equals the intrinsic entropy of reality plus the penalty for having an imperfect model. Minimizing Cross-Entropy is mathematically identical to minimizing KL Divergence!
+        </p>
+    </div>
+
+    <h2>🛡️ 4. Gibbs' Inequality Proof</h2>
+    <div class="callout">
+        <h3 style="margin-top: 0;">Theorem: Non-Negativity of Relative Entropy</h3>
+        $$D_{\text{KL}}(P \parallel Q) \ge 0$$
+    </div>
+    <p>Using $\ln(u) \le u - 1$ with $u = \frac{Q(x)}{P(x)}$:</p>
+    $$-D_{\text{KL}}(P \parallel Q) = \sum_{x} P(x) \ln\left(\frac{Q(x)}{P(x)}\right) \le \sum_{x} P(x) \left( \frac{Q(x)}{P(x)} - 1 \right) = \sum_{x} Q(x) - \sum_{x} P(x) = 1 - 1 = 0$$
+    <p>Multiplying by $-1$ gives $D_{\text{KL}}(P \parallel Q) \ge 0$. $\blacksquare$</p>
+
+    <h2>⚖️ 5. Forward KL vs. Reverse KL</h2>
+    <table>
+        <thead>
+            <tr><th>Feature</th><th>Forward KL: $D_{\text{KL}}(P \parallel Q)$</th><th>Reverse KL: $D_{\text{KL}}(Q \parallel P)$</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Expectation</strong></td><td>$\mathbb{E}_{x \sim P}[\ln(P / Q)]$</td><td>$\mathbb{E}_{x \sim Q}[\ln(Q / P)]$</td></tr>
+            <tr><td><strong>Behavior</strong></td><td><strong>Mode-Covering (Zero-Avoiding)</strong>: Stretches out to cover all modes of $P$.</td><td><strong>Mode-Seeking (Zero-Forcing)</strong>: Locks onto a single mode and ignores others.</td></tr>
+            <tr><td><strong>AI Applications</strong></td><td>Supervised Pretraining, Maximum Likelihood.</td><td>Variational Autoencoders (VAEs), RLHF, DPO.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>🎨 6. Analytical Gaussian KL & VAE Latent Loss</h2>
+    <div class="card">
+        <h3>Gaussian KL Divergence</h3>
+        $$D_{\text{KL}}(\mathcal{N}(\mu_0, \sigma_0^2) \parallel \mathcal{N}(\mu_1, \sigma_1^2)) = \ln\left(\frac{\sigma_1}{\sigma_0}\right) + \frac{\sigma_0^2 + (\mu_0 - \mu_1)^2}{2\sigma_1^2} - \frac{1}{2}$$
+        <h3>The Canonical VAE Loss Term:</h3>
+        <p>Matching latent distribution $\mathcal{N}(\mu, \sigma^2)$ to standard normal prior $\mathcal{N}(0, 1)$:</p>
+        $$\mathcal{L}_{\text{VAE\_KL}} = -\frac{1}{2} \sum_{j=1}^d \left( 1 + \ln(\sigma_j^2) - \mu_j^2 - \sigma_j^2 \right)$$
+    </div>
+
+</body>
+</html>
+

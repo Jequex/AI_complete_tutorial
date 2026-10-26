@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 18.3: Exercises & Solutions — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .problem-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+        details {
+            margin-top: 1rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 18 Overview</a>
+
+    <h1>Topic 18.3: Exercises & Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: -0.25rem;">
+        Analytical & Engineering Problems in 3D Parallelism, ZeRO Memory Sizing, and Tensor Parallelism.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">Exercise 1: Memory Wall & ZeRO Sharding Sizing for a 175B Model</div>
+        <p>
+            An engineering team prepares to train a 175B parameter model on 80GB H100 GPUs using AdamW in mixed precision.
+        </p>
+        <ol>
+            <li>Calculate monolithic static memory $M_{\text{static}}$ ($16N$ bytes).</li>
+            <li>Compute memory per GPU for DDP, ZeRO-1, ZeRO-2, and ZeRO-3 across $N_d \in \{16, 64, 256\}$.</li>
+            <li>Determine the minimum number of 80GB GPUs required for ZeRO-3 with a 20GB activation budget.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Mathematical Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Monolithic Static Memory:</strong></p>
+                $$M_{\text{static}} = 16 \times 175 \times 10^9 \text{ bytes} = 2,800 \text{ GB (2.8 Terabytes)}$$
+
+                <p><strong>2. Memory per GPU:</strong></p>
+                <ul>
+                    <li>At $N_d = 16$: ZeRO-1 = $831\text{ GB}$, ZeRO-2 = $503\text{ GB}$, ZeRO-3 = $175\text{ GB}$ (All OOM on 80GB GPUs).</li>
+                    <li>At $N_d = 64$: ZeRO-1 = $733\text{ GB}$, ZeRO-2 = $388\text{ GB}$, ZeRO-3 = $\mathbf{43.75\text{ GB}}$ (Fits in 80GB!).</li>
+                    <li>At $N_d = 256$: ZeRO-3 = $\mathbf{10.94\text{ GB}}$ per GPU.</li>
+                </ul>
+
+                <p><strong>3. Minimum GPUs with 20GB Activations:</strong></p>
+                $$\text{Max Static Budget} = 80 - 20 = 60 \text{ GB}$$
+                $$\frac{2800}{N_d} \le 60 \implies N_d \ge 46.7 \implies \mathbf{64\text{ GPUs}}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">Exercise 2: Megatron-LM Tensor Parallelism Communication Overhead</div>
+        <p>
+            For a Transformer layer with hidden size $d = 8192$, batch size $B = 4$, sequence length $S = 4096$, and TP world size $K = 8$:
+        </p>
+        <ol>
+            <li>State the number of forward <code>All-Reduce</code> operations.</li>
+            <li>Compute the total megabytes transferred per GPU across the layer using ring All-Reduce volume formula:
+                $$\text{Volume} = 2 \cdot \left(\frac{K - 1}{K}\right) \cdot T \cdot 2 \text{ bytes}$$
+            </li>
+            <li>Calculate communication latency at $600\text{ GB/s}$ NVLink bandwidth.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Mathematical Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Forward Communication:</strong> Exactly 2 All-Reduces per layer (1 after Attention output $W_O$, 1 after MLP down-projection $W_{down}$).</p>
+                
+                <p><strong>2. Transferred Volume:</strong> Tensor has $4 \times 4096 \times 8192 = 134,217,728$ elements ($256\text{ MB}$ in BF16).
+                $$\text{Volume per All-Reduce} = 2 \cdot \left(\frac{7}{8}\right) \times 256 \text{ MB} = 448 \text{ MB}$$
+                $$\text{Total per Layer} = 2 \times 448 = 896 \text{ MB (0.896 GB)}$$
+                </p>
+
+                <p><strong>3. NVLink Latency:</strong></p>
+                $$\text{Latency} = \frac{0.896 \text{ GB}}{600 \text{ GB/s}} \approx 1.49 \text{ milliseconds}$$
+                This 1.5 ms communication cost is negligible compared to tens of milliseconds of tensor math.
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">Exercise 3: Pipeline Parallelism Bubble Fraction and 1F1B Scheduling</div>
+        <p>
+            A model is partitioned across $p = 8$ pipeline stages with $m = 64$ microbatches.
+        </p>
+        <ol>
+            <li>Compute the pipeline bubble fraction $F_{\text{bubble}} = \frac{p - 1}{m + p - 1}$.</li>
+            <li>Compare the peak activation memory between GPipe and 1F1B.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Mathematical Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Bubble Fraction:</strong></p>
+                $$F_{\text{bubble}} = \frac{8 - 1}{64 + 8 - 1} = \frac{7}{71} \approx 9.86\% \implies 90.14\% \text{ utilization}$$
+
+                <p><strong>2. Activation Memory Comparison:</strong></p>
+                <ul>
+                    <li>GPipe stores all $m = 64$ microbatch activations simultaneously before backward begins.</li>
+                    <li>1F1B alternates forward and backward steps, bounding peak stored activations to $p = 8$.</li>
+                    <li>1F1B delivers an exact $\frac{64}{8} = \mathbf{8\times}$ reduction in peak activation memory.</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture.html">← Back to Lecture 18.3</a>
+        <a href="../04_modern_llm_architectures_gqa_swiglu_flashattention/lecture.html">Next Topic: Modern LLM Architectures →</a>
+    </div>
+</body>
+</html>

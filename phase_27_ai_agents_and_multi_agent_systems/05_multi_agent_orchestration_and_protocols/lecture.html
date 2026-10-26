@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.5: Multi-Agent Orchestration &amp; Protocols</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin-top: 0.5rem; margin-bottom: 0.75rem; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+    p { margin-bottom: 1.25rem; }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .diagram-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: monospace;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 1.5rem 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 27 Overview</a><br>
+    <span class="badge">Topic 27.5</span>
+    <h1>Multi-Agent Orchestration &amp; Communication Protocols</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">Topologies, FIPA-ACL structured message envelopes, adversarial debate mechanics, and Condorcet consensus guarantees.</p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <p>Imagine an emergency operating room during heart surgery. If one doctor tried to simultaneously monitor the heartbeat, operate the heart-lung pump, cut with the scalpel, and hand themselves sterile tools, the patient would be in grave danger.</p>
+    <p>Instead, a hospital relies on a specialized team:</p>
+    <ul>
+      <li><strong>Lead Surgeon:</strong> Focuses purely on delicate surgical incisions (Specialized Executor).</li>
+      <li><strong>Anesthesiologist:</strong> Audits vital signs and warns if oxygen or pressure drops (The Critic).</li>
+      <li><strong>Scrub Nurse:</strong> Hands the exact tools needed (Tool Specialist).</li>
+      <li><strong>Chief of Surgery:</strong> Resolves medical disagreements and ratifies the final plan (The Judge).</li>
+    </ul>
+    <p>They use strict verbal communication protocols (<em>"Requesting 10mg Epinephrine" &rarr; "Confirming 10mg drawn" &rarr; "Administer now"</em>). Multi-agent AI systems mirror this exact architecture.</p>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Formal Type</th>
+          <th>Intuitive Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{A}_{\text{society}}$</td>
+          <td>Agent Society</td>
+          <td>Set $\{A_1, A_2, \dots, A_N\}$</td>
+          <td>Collection of specialized autonomous agents participating in a shared mission.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{G} = (\mathcal{V}, \mathcal{E})$</td>
+          <td>Coordination Graph</td>
+          <td>Directed Graph</td>
+          <td>The communication topology and authority hierarchy connecting agents.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{m}$</td>
+          <td>Communication Envelope</td>
+          <td>FIPA-ACL Message Object</td>
+          <td>Structured message passed between agents with metadata and speech act performatives.</td>
+        </tr>
+        <tr>
+          <td>$\text{perf} \in \mathcal{P}$</td>
+          <td>Performative</td>
+          <td>Enum String</td>
+          <td>Intent: <code>PROPOSE</code>, <code>CRITIQUE</code>, <code>REVISE</code>, <code>ACCEPT</code>, <code>INFORM</code>.</td>
+        </tr>
+        <tr>
+          <td>$P_N$</td>
+          <td>Ensemble Accuracy</td>
+          <td>Real $\in [0, 1]$</td>
+          <td>Probability of the debating ensemble selecting the correct decision under Condorcet's theorem.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Multi-Agent Coordination Topologies</h2>
+    <div class="diagram-box">
+  1. Centralized Coordinator (Hub & Spoke)
+                   [ Orchestrator ]
+                     /    |    \
+                    ▼     ▼     ▼
+               [Worker] [Worker] [Worker]
+
+  2. Hierarchical Supervisor (Tree Delegation)
+                    [ Supervisor ]
+                     /          \
+                    ▼            ▼
+             [Sub-Lead A]     [Sub-Lead B]
+              /        \        /        \
+             ▼          ▼      ▼          ▼
+          [Coder]    [Tester] [Writer]  [Reviewer]
+
+  3. Peer-to-Peer Blackboard Architecture
+             [ Agent 1 ] ◀───┐
+                  │          │   (Shared Memory /
+                  ▼          │    Blackboard Buffer)
+             [ BLACKBOARD ]──┼──▶ [ Agent 2 ]
+                  ▲          │
+                  │          │
+             [ Agent 3 ] ────┘</div>
+
+    <h2>4. Condorcet's Jury Theorem &amp; Error Suppression</h2>
+    <p>Why does multi-agent debate outperform a single agent? If each agent has an independent probability $p > 0.5$ of finding or verifying a correct step, the majority vote accuracy across $N$ debating agents is:</p>
+    <div class="callout">
+      $$\boxed{P_N = \sum_{k=\frac{N+1}{2}}^N \binom{N}{k} p^k (1 - p)^{N - k}}$$
+      <p>As $N \to \infty$, $P_N \to 1.0$. Even modest individual models, when configured as specialized Proposers and Critics, amplify ensemble accuracy toward near-certainty.</p>
+    </div>
+
+    <h2>5. Interactive Experiment Runner</h2>
+    <p>Run the accompanying zero-dependency pure Python experiment to watch a Proposer, Critic, and Judge engage in an automated FIPA-ACL debate to eliminate silent software flaws:</p>
+    <pre class="code-block">python3 phase_27_ai_agents_and_multi_agent_systems/05_multi_agent_orchestration_and_protocols/experiment.py</pre>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">Go to Exercises &amp; Solutions &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

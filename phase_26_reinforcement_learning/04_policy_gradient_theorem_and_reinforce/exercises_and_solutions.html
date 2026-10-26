@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.4: Exercises &amp; Solutions — Policy Gradient &amp; REINFORCE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .solution-content {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.4: Exercises &amp; Solutions</h1>
+    <p><em>Analytical proofs and derivations for Policy Gradients and Variance Reduction.</em></p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Causality Proof — Why Past Rewards Drop Out</h3>
+        <p>Prove that for any past reward $r_{t'}$ with $t' \le t$:</p>
+        $$\mathbb{E}_{\tau \sim \pi_\theta} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) r_{t'} \right] = \mathbf{0}$$
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Condition on history up to state $s_t$ using the tower property:</p>
+                $$\mathbb{E}_{\tau} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) r_{t'} \right] = \mathbb{E}_{\tau_{0:t}} \left[ r_{t'} \mathbb{E}_{a_t \sim \pi_\theta} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) \mid s_t \right] \right]$$
+                <p>Evaluating the inner expectation:</p>
+                $$\mathbb{E}_{a_t} \left[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) \right] = \sum_{a} \pi_\theta(a \mid s_t) \frac{\nabla_\theta \pi_\theta(a \mid s_t)}{\pi_\theta(a \mid s_t)} = \nabla_\theta \left( \sum_{a} \pi_\theta(a \mid s_t) \right) = \nabla_\theta (1) = \mathbf{0}$$
+                <p>Therefore $\mathbb{E}[ \nabla_\theta \log \pi_\theta(a_t \mid s_t) r_{t'} ] = \mathbf{0} \quad \blacksquare$. Past rewards cannot correlate with future decisions.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Derivation of the Softmax Score Function</h3>
+        <p>For discrete policy $\pi_\theta(a \mid s) = \frac{\exp(\boldsymbol{\theta}_a^T \mathbf{x}(s))}{\sum_b \exp(\boldsymbol{\theta}_b^T \mathbf{x}(s))}$, derive $\nabla_{\boldsymbol{\theta}_k} \log \pi_\theta(a \mid s)$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                $$\log \pi_\theta(a \mid s) = \boldsymbol{\theta}_a^T \mathbf{x}(s) - \log \sum_b \exp(\boldsymbol{\theta}_b^T \mathbf{x}(s))$$
+                $$\nabla_{\boldsymbol{\theta}_k} \log \pi_\theta(a \mid s) = \mathbb{I}(a = k) \mathbf{x}(s) - \frac{\exp(\boldsymbol{\theta}_k^T \mathbf{x}(s))}{\sum_b \exp(\boldsymbol{\theta}_b^T \mathbf{x}(s))} \mathbf{x}(s)$$
+                $$= \mathbf{x}(s) \left[ \mathbb{I}(a = k) - \pi_\theta(k \mid s) \right] \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Variance-Minimizing Baseline $b^*$</h3>
+        <p>For estimator $\hat{g}(b) = g(R - b)$, find the scalar baseline $b^*$ that minimizes variance $\text{Var}(\hat{g}(b))$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Since $\mathbb{E}[g b] = 0$, $\mathbb{E}[\hat{g}]$ is constant. Minimizing variance is minimizing $\mathbb{E}[g^2 (R - b)^2]$:</p>
+                $$\frac{d}{db} \mathbb{E}\left[ g^2 (R^2 - 2 b R + b^2) \right] = -2 \mathbb{E}[g^2 R] + 2 b \mathbb{E}[g^2] = 0 \implies b^* = \frac{\mathbb{E}[g^2 R]}{\mathbb{E}[g^2]}$$
+                <p>This justifies using $V(s) \approx \mathbb{E}[R \mid s]$ as the standard baseline.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

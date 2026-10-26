@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.4: Exercises &amp; Solutions — Agent Memory Systems</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--bg-card); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 27.4 Lecture</a>
+    <h1>Topic 27.4: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">Mathematical derivations of memory half-life, tri-factor scoring, and context eviction priority.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Multi-Factor Memory Scoring &amp; Ranking</h3>
+      <p>Given weights $w_r = 0.25, w_i = 0.35, w_s = 0.40$ and decay rate $\lambda = 0.05$ at $t = 50$:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Memory ID</th>
+            <th>Content</th>
+            <th>$t_m$</th>
+            <th>Importance $I(m)$</th>
+            <th>Cosine Sim $\text{Sim}(m, q)$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$m_1$</td>
+            <td>User preferred language: Rust</td>
+            <td>10</td>
+            <td>0.90</td>
+            <td>0.85</td>
+          </tr>
+          <tr>
+            <td>$m_2$</td>
+            <td>Compiler error: unresolved import</td>
+            <td>48</td>
+            <td>0.60</td>
+            <td>0.40</td>
+          </tr>
+          <tr>
+            <td>$m_3$</td>
+            <td>GC freed 42MB</td>
+            <td>49</td>
+            <td>0.10</td>
+            <td>0.05</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>Question:</strong> Calculate composite scores $S(m, q, 50)$ and determine which memory is retrieved #1 into active context.</p>
+
+      <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. Recency Scores:</strong></p>
+          <ul>
+            <li>$R(m_1) = \exp(-0.05 \times 40) = e^{-2} \approx 0.1353$</li>
+            <li>$R(m_2) = \exp(-0.05 \times 2) = e^{-0.1} \approx 0.9048$</li>
+            <li>$R(m_3) = \exp(-0.05 \times 1) = e^{-0.05} \approx 0.9512$</li>
+          </ul>
+          <p><strong>2. Composite Retrieval Scores $S = 0.25 R + 0.35 I + 0.40 \text{Sim}$:</strong></p>
+          <ul>
+            <li>$S(m_1) = 0.25(0.1353) + 0.35(0.90) + 0.40(0.85) = 0.0338 + 0.3150 + 0.3400 = \mathbf{0.6888}$</li>
+            <li>$S(m_2) = 0.25(0.9048) + 0.35(0.60) + 0.40(0.40) = 0.2262 + 0.2100 + 0.1600 = \mathbf{0.5962}$</li>
+            <li>$S(m_3) = 0.25(0.9512) + 0.35(0.10) + 0.40(0.05) = 0.2378 + 0.0350 + 0.0200 = \mathbf{0.2928}$</li>
+          </ul>
+          <p><strong>Result:</strong> $m_1$ is ranked #1 ($0.6888$). Its high importance and relevance dominate its older age.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Deriving the Memory Half-Life under Exponential Decay</h3>
+      <p>For decay function $R(\Delta t) = \exp(-\lambda \Delta t)$, derive the half-life $T_{1/2}$ and determine $\lambda$ for $T_{1/2} = 25$ steps.</p>
+
+      <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+          <p>Setting $R(T_{1/2}) = 0.5 \implies \exp(-\lambda T_{1/2}) = 0.5 \implies -\lambda T_{1/2} = -\ln 2$:</p>
+          $$\boxed{T_{1/2} = \frac{\ln 2}{\lambda} \approx \frac{0.69315}{\lambda}}$$
+          <p>For $T_{1/2} = 25$:</p>
+          $$\lambda = \frac{0.69315}{25} \approx \mathbf{0.0277}$$
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

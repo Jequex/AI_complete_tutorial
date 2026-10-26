@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9.4: Density Estimation &amp; Anomaly Detection — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 9 Portal</a>
+
+    <h1>Topic 9.4: Density Estimation &amp; Anomaly Detection</h1>
+    <p><em>Mastering Kernel Density Estimation (KDE), Silverman's rule, Mahalanobis distances, and Isolation Forests.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>How do we model the continuous shape of data without making rigid distribution assumptions? And how do we catch rare, fraudulent, or dangerous anomalies? <strong>Density Estimation</strong> fits continuous probabilities over observations, while <strong>Anomaly Detection</strong> identifies deviations that violate expected correlations or densities.</p>
+
+    <div class="diagram">                  THE SPECTRUM OF NORMALITY VS ANOMALIES
+       Density ^
+               │               /\  <-- High density mode (Common / Normal)
+               │              /  \
+               │             /    \
+               │            /      \       /\  <-- Secondary mode
+               │           /        \_____/  \
+               │          /                   \
+               └─────────┴─────────────────────┴─────────────*──> Feature x
+                                                        Anomaly / Outlier
+                                                        (Extremely low density)</div>
+
+    <div class="callout">
+        <strong>The 12-Year-Old Analogy: The Airport Scanner Finding Anomalous Baggage</strong>
+        <p>Imagine inspecting thousands of passenger suitcases passing through an airport X-ray scanner:</p>
+        <ul>
+            <li><strong>Kernel Density Estimation (KDE):</strong> Instead of guessing a rigid bell curve, you place a small glowing light (a kernel) on every suitcase. Where hundreds of bags weigh 40 lbs, their glowing lights blend into a bright sun. You get a continuous probability map without rigid formulas!</li>
+            <li><strong>Mahalanobis Distance:</strong> Normal bags are either small &amp; light (carry-ons: 20 in, 15 lbs) or large &amp; heavy (checked: 32 in, 50 lbs). When a bag arrives that is <strong>32 inches tall but weighs only 2 lbs</strong>, Euclidean distance looks normal, but Mahalanobis distance flags the broken correlation immediately: <em>"A huge suitcase with zero weight is hollow and suspicious!"</em></li>
+            <li><strong>Isolation Forest:</strong> You play a game using scissors to make random cuts across a dartboard. A lone outlier dot in the far corner gets isolated in <strong>1 or 2 cuts</strong> (short tree depth), while a dot inside a dense crowd takes dozens of cuts. Fast isolation = anomaly!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>$\hat{f}(x)$</td><td>$\mathbb{R}^d \to \mathbb{R}_{\ge 0}$</td><td>Non-parametric Kernel Density Estimate</td></tr>
+            <tr><td>$K(u)$</td><td>$\mathbb{R}^d \to \mathbb{R}_{\ge 0}$</td><td>Kernel function (symmetric, integrates to 1)</td></tr>
+            <tr><td>$h \in \mathbb{R}_{>0}$</td><td>Bandwidth</td><td>Window smoothing parameter controlling bias-variance trade-off</td></tr>
+            <tr><td>$h_{\text{opt}}$</td><td>Optimal Bandwidth</td><td>Silverman's rule of thumb: $h \approx 1.06 \, \hat{\sigma} \, N^{-1/5}$</td></tr>
+            <tr><td>$D_M(x)$</td><td>$\mathbb{R}_{\ge 0}$</td><td><strong>Mahalanobis distance</strong>: $\sqrt{(x - \mu)^T \Sigma^{-1} (x - \mu)}$</td></tr>
+            <tr><td>$\chi_d^2$</td><td>Distribution</td><td>Chi-squared distribution with $d$ degrees of freedom ($D_M^2 \sim \chi_d^2$)</td></tr>
+            <tr><td>$h(x)$</td><td>Integer $\ge 0$</td><td>Tree isolation path length to isolate instance $x$</td></tr>
+            <tr><td>$s(x, n)$</td><td>$[0, 1]$</td><td>Isolation Forest anomaly score: $s = 2^{-\mathbb{E}[h(x)] / c(n)}$</td></tr>
+        </tbody>
+    </table>
+
+    <h2>3. Kernel Density Estimation (KDE)</h2>
+    <p>The Parzen-Rosenblatt kernel density estimator constructs a continuous density from $N$ samples:</p>
+    $$\hat{f}(x) = \frac{1}{N h^d} \sum_{i=1}^N K\left( \frac{x - x_i}{h} \right)$$
+    <p>Using the standard Gaussian kernel $K(u) = \frac{1}{(2\pi)^{d/2}} e^{-\frac{1}{2}\|u\|^2}$, the optimal 1D bandwidth minimizing Mean Integrated Squared Error (MISE) is given by <strong>Silverman's Rule of Thumb</strong>:</p>
+    $$h_{\text{opt}} = 1.06 \, \hat{\sigma} \, N^{-1/5}$$
+
+    <h2>4. Mahalanobis Distance for Correlated Outliers</h2>
+    <p>Standard Euclidean distance ignores feature correlations. The <strong>Mahalanobis Distance</strong> measures distance in terms of the covariance structure:</p>
+    $$D_M(x) = \sqrt{(x - \mu)^T \Sigma^{-1} (x - \mu)}$$
+    <div class="callout callout-success">
+        <strong>Chi-Squared Statistical Gating:</strong>
+        <p>If inliers follow a multivariate Gaussian $\mathcal{N}(\mu, \Sigma)$, then $D_M(x)^2 \sim \chi_d^2$. For $d = 2$ at the $\alpha = 0.01$ significance level (99% confidence):</p>
+        $$\chi_{2, 0.99}^2 = -2 \ln(0.01) \approx 9.2103 \implies \text{Flag as anomaly if } D_M(x) > \sqrt{9.2103} \approx 3.035$$
+    </div>
+
+    <h2>5. Isolation Forest (iForest)</h2>
+    <p>Anomalies are "few and different", which means they require far fewer random splits to isolate than normal instances. An observation's anomaly score across an ensemble of trees is:</p>
+    $$s(x, n) = 2^{-\frac{\mathbb{E}[h(x)]}{c(n)}}, \quad \text{where } c(n) = 2\ln(n-1) + 2\gamma - \frac{2(n-1)}{n}$$
+    <ul>
+        <li>If $\mathbb{E}[h(x)] \to 0 \implies s(x, n) \to 1$: <strong>Definite Anomaly</strong></li>
+        <li>If $\mathbb{E}[h(x)] \to c(n) \implies s(x, n) \to 0.5$: <strong>Normal Inlier</strong></li>
+        <li>If $\mathbb{E}[h(x)] \to n - 1 \implies s(x, n) \to 0$: <strong>Dense Cluster Inlier</strong></li>
+    </ul>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../index.html" class="back-link">← Phase 9 Hub</a>
+        <a href="exercises_and_solutions.html" class="back-link">Exercises &amp; Solutions →</a>
+    </div>
+</body>
+</html>

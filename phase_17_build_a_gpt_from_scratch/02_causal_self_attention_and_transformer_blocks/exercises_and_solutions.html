@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 17.2: Exercises &amp; Solutions — Causal Attention &amp; Transformer Blocks</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 17 Hub</a>
+    
+    <h1>Topic 17.2: Exercises &amp; Solutions</h1>
+    <p><em>Causal Self-Attention &amp; Transformer Blocks — Practice Problems &amp; Step-by-Step Derivations</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Manual Causal Attention Softmax Calculation (Easy)</h3>
+        <p>Given the unnormalized score matrix $S \in \mathbb{R}^{3 \times 3}$:</p>
+        $$S = \begin{bmatrix} 2.0 & 4.0 & 1.0 \\ 1.5 & 3.0 & 5.0 \\ 0.0 & 2.5 & 4.0 \end{bmatrix}$$
+        <p>Apply the causal mask $M$ and calculate the exact lower-triangular attention weights matrix $A$.</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Masked Logits $\tilde{S} = S + M$:</strong></p>
+            $$\tilde{S} = \begin{bmatrix} 2.0 & -\infty & -\infty \\ 1.5 & 3.0 & -\infty \\ 0.0 & 2.5 & 4.0 \end{bmatrix}$$
+            <p><strong>Applying Softmax Row-by-Row:</strong></p>
+            <ul>
+                <li>Row 1: $\text{softmax}([2.0, -\infty, -\infty]) = [1.0, 0.0, 0.0]$</li>
+                <li>Row 2: $\exp([1.5, 3.0, -\infty]) = [4.4817, 20.0855, 0] \implies [0.1824, 0.8176, 0.0000]$</li>
+                <li>Row 3: $\exp([0.0, 2.5, 4.0]) = [1.0, 12.1825, 54.5982] \implies [0.0148, 0.1797, 0.8055]$</li>
+            </ul>
+            $$A = \begin{bmatrix} 1.0000 & 0.0000 & 0.0000 \\ 0.1824 & 0.8176 & 0.0000 \\ 0.0148 & 0.1797 & 0.8055 \end{bmatrix}$$
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Parameter Count of a Single GPT-2 Small Transformer Block (Medium)</h3>
+        <p>Calculate the total parameter count of a single GPT-2 Small Transformer block ($d_{\text{model}} = 768$, $H = 12$, $d_{\text{ff}} = 3072$).</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>1. Attention Sub-Layer:</strong><br>
+            4 projection matrices ($W_q, W_k, W_v, W_o$) of shape $[768, 768]$ plus biases:<br>
+            $4 \times (768 \times 768 + 768) = 4 \times (589{,}824 + 768) = 2{,}362{,}368$ parameters.</p>
+            
+            <p><strong>2. MLP Sub-Layer:</strong><br>
+            $W_1: 768 \times 3072 + 3072 = 2{,}362{,}368$<br>
+            $W_2: 3072 \times 768 + 768 = 2{,}360{,}064$<br>
+            Total MLP = $4{,}722{,}432$ parameters (exactly $2\times$ the attention weights!).</p>
+
+            <p><strong>3. Layer Normalization:</strong><br>
+            2 layers $\times 2 \times 768 = 3{,}072$ parameters.</p>
+
+            <p><strong>Total Block Parameters:</strong><br>
+            $2{,}362{,}368 + 4{,}722{,}432 + 3{,}072 = \mathbf{7{,}087{,}872}$ parameters ($\approx 7.09\text{M}$).</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Mathematical Proof of Gradient Highway in Pre-LN (Hard)</h3>
+        <p>Prove that in Pre-LN architectures, the gradient of the loss $\mathcal{L}$ with respect to layer activation $x_l$ contains an unattenuated identity component $\mathbf{I}$.</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>Unrolling the Pre-LN recurrence $x_{l+1} = x_l + F_l(\text{LN}(x_l))$ yields:</p>
+            $$x_L = x_l + \sum_{i=l}^{L-1} F_i(\text{LN}(x_i))$$
+            <p>Differentiating with respect to $x_l$ via the chain rule:</p>
+            $$\frac{\partial \mathcal{L}}{\partial x_l} = \frac{\partial \mathcal{L}}{\partial x_L} \frac{\partial x_L}{\partial x_l} = \frac{\partial \mathcal{L}}{\partial x_L} \left( \mathbf{I} + \frac{\partial}{\partial x_l} \sum_{i=l}^{L-1} F_i(\text{LN}(x_i)) \right)$$
+            <p>The term $\frac{\partial \mathcal{L}}{\partial x_L} \mathbf{I}$ flows backward unhindered through arbitrarily deep Transformer stacks without passing through repeated matrix multiplications or non-linear decay.</p>
+        </details>
+    </div>
+</body>
+</html>

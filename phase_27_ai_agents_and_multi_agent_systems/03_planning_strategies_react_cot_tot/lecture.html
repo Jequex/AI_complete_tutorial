@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.3: Planning Strategies — ReAct, CoT &amp; Tree-of-Thoughts</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin-top: 0.5rem; margin-bottom: 0.75rem; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+    p { margin-bottom: 1.25rem; }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .diagram-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: monospace;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 1.5rem 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 27 Overview</a><br>
+    <span class="badge">Topic 27.3</span>
+    <h1>Planning Strategies: ReAct, Chain-of-Thought &amp; Tree-of-Thoughts</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">Linear reasoning vs. interleaved Thought-Action-Observation loops, heuristic branch evaluation, beam search, and backtracking.</p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <p>Imagine trying to escape a giant hedge maze in an amusement park. You have four possible strategies:</p>
+    <ul>
+      <li><strong>The Blind Sprinter (Chain-of-Thought):</strong> You close your eyes, plan 50 turns in your head, and sprint blindly. If turn 2 is off by 10 centimeters, you crash into the hedge at turn 3, and the other 47 turns are wasted.</li>
+      <li><strong>The Observant Hiker (ReAct):</strong> You take three steps, pause, open your eyes, check the compass, and read the signpost. You interleave <em>Thinking</em> with <em>Acting</em> and <em>Observing</em>.</li>
+      <li><strong>The Grandmaster (Tree-of-Thoughts):</strong> You reach a 3-way fork. You look down each path, score them, reject dead-ends, follow the most promising trail, and if you get stuck, you calmly <em>backtrack</em> to your last decision point.</li>
+      <li><strong>The Journaler (Reflexion):</strong> You record notes in your pocket journal: <em>"Never pull the red lever; it activates a water sprinkler."</em> Next time you run the maze, you consult your notes and never repeat past errors.</li>
+    </ul>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Formal Type</th>
+          <th>Intuitive Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$x \in \mathcal{X}$</td>
+          <td>Task Input / Goal</td>
+          <td>Token Sequence</td>
+          <td>The user prompt, constraint puzzle, or objective.</td>
+        </tr>
+        <tr>
+          <td>$y_t$</td>
+          <td>Intermediate Thought</td>
+          <td>Token Sequence</td>
+          <td>A discrete reasoning step or cognitive deliberation token.</td>
+        </tr>
+        <tr>
+          <td>$a_t \in \mathcal{A}$</td>
+          <td>Environment Action</td>
+          <td>Tool Call</td>
+          <td>An external tool call or command sent to the environment.</td>
+        </tr>
+        <tr>
+          <td>$o_t \in \Omega$</td>
+          <td>Observation</td>
+          <td>Text / Object</td>
+          <td>The response or error emitted by the environment after action $a_t$.</td>
+        </tr>
+        <tr>
+          <td>$G(p_\theta, s, k)$</td>
+          <td>Thought Generator</td>
+          <td>Function: $\mathcal{S} \to 2^{\mathcal{S}}$</td>
+          <td>Samples $k$ candidate next reasoning thoughts from state node $s$.</td>
+        </tr>
+        <tr>
+          <td>$V(p_\theta, s)$</td>
+          <td>State Evaluator</td>
+          <td>Function: $\mathcal{S} \to [0, 1]$</td>
+          <td>Heuristic rating measuring the probability that branch $s$ reaches a solution.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Taxonomy of Planning Topology</h2>
+    <div class="diagram-box">
+  1. Standard Chain-of-Thought (Linear)
+     Input ──▶ Thought 1 ──▶ Thought 2 ──▶ Thought 3 ──▶ Output
+
+  2. ReAct (Interleaved Closed-Loop)
+     Thought 1 ──▶ Action 1 ──▶ Observation 1 ──▶ Thought 2 ──▶ Action 2 ──▶ Output
+
+  3. Tree-of-Thoughts (Branching + Backtracking)
+                  ┌──▶ [Thought 1A] (Score: 0.1) ── [PRUNED]
+     [Input State]├──▶ [Thought 1B] (Score: 0.8) ──▶ [Thought 2A] (Solved! 1.0)
+                  └──▶ [Thought 1C] (Score: 0.4) ── [BACKTRACK]
+
+  4. Reflexion (Episodic Verbal Reinforcement)
+     Attempt 1 (Failed) ──▶ Self-Reflection Summary ──▶ Memory Buffer ──▶ Attempt 2 (Success)</div>
+
+    <h2>4. Tree-of-Thoughts (ToT) Formalism</h2>
+    <p>In Tree-of-Thoughts, problem solving is framed as search over a tree where each node represents a partial state $s = [x, y_{1:i}]$.</p>
+    <div class="callout">
+      <strong>ToT Search Objective:</strong> Find a terminal state $s^*$ such that $V(s^*) = 1.0$ using Depth-First Search with backtracking:
+      $$\text{DFS}(s): \text{if } V(s) = \text{"impossible"} \implies \text{return None (Backtrack)}$$
+      $$\text{for } s' \in G(s): \text{res} = \text{DFS}(s'); \text{if res} \neq \text{None} \implies \text{return res}$$
+    </div>
+
+    <h2>5. Interactive Experiment Runner</h2>
+    <p>Run the accompanying zero-dependency pure Python experiment to see Tree-of-Thoughts and ReAct solve constraint puzzles with backtracking:</p>
+    <pre class="code-block">python3 phase_27_ai_agents_and_multi_agent_systems/03_planning_strategies_react_cot_tot/experiment.py</pre>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">Go to Exercises &amp; Solutions &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.3: Exercises &amp; Solutions — TD Learning, Q-Learning &amp; DQN</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .solution-content {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.3: Exercises &amp; Solutions</h1>
+    <p><em>Theoretical proofs and mathematical analysis for Temporal Difference Learning and Deep Q-Networks.</em></p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Overestimation Bias in Q-Learning via Jensen's Inequality</h3>
+        <p>Let $\hat{Q}(s, a) = Q^*(s, a) + \epsilon_a$ with independent zero-mean noise $\mathbb{E}[\epsilon_a] = 0$. Prove that $\mathbb{E}[\max_{a} \hat{Q}(s, a)] \ge \max_{a} Q^*(s, a)$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>The maximum function $f(\mathbf{x}) = \max_i x_i$ is convex on $\mathbb{R}^k$. By <strong>Jensen's Inequality</strong>:</p>
+                $$\mathbb{E}[f(\mathbf{X})] \ge f(\mathbb{E}[\mathbf{X}])$$
+                $$\mathbb{E}\left[ \max_{a \in \mathcal{A}} \hat{Q}(s, a) \right] \ge \max_{a \in \mathcal{A}} \mathbb{E}[\hat{Q}(s, a)] = \max_{a \in \mathcal{A}} Q^*(s, a) \quad \blacksquare$$
+                <p>The maximization operator systematically picks the highest positive noise fluctuation, leading to overoptimistic Q-value estimates. This motivates Double DQN:</p>
+                $$y^{\text{Double}} = R + \gamma Q\left(S', \arg\max_{a'} Q(S', a'; \theta); \, \theta^-\right)$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Semi-Gradient Nature of DQN Loss</h3>
+        <p>Why does taking the full gradient $\nabla_\theta \frac{1}{2} (y(\theta) - Q(s, a; \theta))^2$ fail to minimize Bellman error, and why is the semi-gradient required?</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Full differentiation with respect to $\theta$ yields:</p>
+                $$\nabla_\theta \mathcal{L}(\theta) = -(y(\theta) - Q_\theta) \nabla_\theta Q_\theta + \gamma (y(\theta) - Q_\theta) \nabla_\theta \max_{a'} Q(s', a'; \theta)$$
+                <p>The second term attempts to move the <em>target toward the prediction</em> rather than the prediction toward the target. In contrast, the semi-gradient treats the target $y$ as a constant supervisory signal:</p>
+                $$\nabla_\theta^{\text{semi}} \mathcal{L}(\theta) = -(y - Q_\theta) \nabla_\theta Q_\theta$$
+                <p>This guarantees the update implements a projected Bellman contraction step.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Variance Comparison: Monte Carlo vs TD(0)</h3>
+        <p>For independent transition rewards with variance $\sigma^2$, show that Monte Carlo return variance grows as $\frac{\sigma^2}{1 - \gamma^2}$ while TD(0) has single-step variance $\sigma^2$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Monte Carlo return $G_0 = \sum_{t=0}^{T-1} \gamma^t R_{t+1}$:</p>
+                $$\text{Var}(G_0) = \sum_{t=0}^{T-1} (\gamma^2)^t \text{Var}(R_{t+1}) = \sigma^2 \frac{1 - \gamma^{2T}}{1 - \gamma^2} \xrightarrow{T \to \infty} \frac{\sigma^2}{1 - \gamma^2}$$
+                <p>For $\gamma = 0.99$, this variance is $\approx 50 \sigma^2$. The one-step TD(0) target $R_1 + \gamma V(S_1)$ has variance $\approx \sigma^2$, demonstrating why TD methods converge with much lower variance.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

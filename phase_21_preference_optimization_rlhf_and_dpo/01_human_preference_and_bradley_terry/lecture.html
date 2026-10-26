@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.1: Human Preference Modeling &amp; Bradley-Terry — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--text); }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.1: Human Preference Modeling &amp; The Bradley-Terry Framework</h1>
+
+    <div class="analogy">
+        <h3>🥤 The 12-Year-Old Analogy: The Soda Taste Test Challenge</h3>
+        <p>Imagine you are hired by a soda company to find the most delicious soda recipe in the world:</p>
+        <ul>
+            <li><strong>The Flawed Approach (The 1-to-10 Scorecard):</strong> You ask Charlie to rate Soda A from 1 to 10; he says <em>7.4</em>. Three hours later, Maya rates Soda B a <em>6.8</em>. Does that prove Soda A is better? No! Charlie gives everyone a 7 or 8 because he is polite. Maya is a strict judge who rarely gives anything above a 5. Even worse, if Charlie tests Soda A on an empty stomach vs right after eating a donut, his score shifts wildly. Absolute scalar ratings are noisy, uncalibrated, and inconsistent.</li>
+            <li><strong>The Robust Approach (The Blind Sip Challenge):</strong> Instead, you pour Soda A into Cup 1 and Soda B into Cup 2. You blindfold 20 friends and say: <em>"Take a sip of both. Which cup tastes better to you?"</em> Both Charlie and Maya instantly pick Cup 1! Pairwise comparisons eliminate the need for an arbitrary numerical scale.</li>
+        </ul>
+        <p>In 1952, Ralph A. Bradley and Milton E. Terry developed the mathematical formula that turns these simple pairwise comparisons into smooth, continuous, differentiable reward scores. This is the foundation of modern RLHF and DPO.</p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formal Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$x \in \mathcal{X}$</td>
+                <td>Discrete Sequence</td>
+                <td>Context prompt or user instruction sequence.</td>
+            </tr>
+            <tr>
+                <td>$y_w, y_l \in \mathcal{Y}$</td>
+                <td>Discrete Sequences</td>
+                <td>Winning (preferred) completion $y_w$ and losing (dispreferred) completion $y_l$.</td>
+            </tr>
+            <tr>
+                <td>$y_1 \succ y_2 \mid x$</td>
+                <td>Binary Relation</td>
+                <td>Binary preference event: "$y_1$ is preferred over $y_2$ given context $x$."</td>
+            </tr>
+            <tr>
+                <td>$r(x, y) \in \mathbb{R}$</td>
+                <td>Real Scalar</td>
+                <td>Latent (unobserved) scalar reward assigned to completion $y$ for prompt $x$.</td>
+            </tr>
+            <tr>
+                <td>$\sigma(z) = \frac{1}{1 + e^{-z}}$</td>
+                <td>Function $\mathbb{R} \to (0, 1)$</td>
+                <td>Standard logistic sigmoid link function.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{D}_{\text{pref}}$</td>
+                <td>Preference Dataset</td>
+                <td>Curated collection of preference tuples $(x, y_w, y_l)$.</td>
+            </tr>
+            <tr>
+                <td>$\Phi(z)$</td>
+                <td>CDF</td>
+                <td>Standard normal cumulative distribution function (Thurstonian model).</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{MLE}}(\mathbf{r})$</td>
+                <td>Objective Function</td>
+                <td>Log-likelihood of Bradley-Terry preference observations given latent rewards.</td>
+            </tr>
+            <tr>
+                <td>$K$</td>
+                <td>Integer</td>
+                <td>Number of ranked candidate completions in Plackett-Luce generalization.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. The Bradley-Terry Preference Model (1952)</h2>
+    <p>The Bradley-Terry model posits that every completion $y$ has a latent scalar reward $r(x, y) \in \mathbb{R}$. When presented with two candidate completions $y_1$ and $y_2$, the probability that an annotator prefers $y_1$ over $y_2$ is governed by the relative exponential strength of their respective rewards:</p>
+
+    $$P(y_1 \succ y_2 \mid x) = \frac{\exp(r(x, y_1))}{\exp(r(x, y_1)) + \exp(r(x, y_2))}$$
+
+    <p>Dividing both the numerator and the denominator by $\exp(r(x, y_1))$ reveals the famous logistic sigmoid relation:</p>
+
+    <div class="box">
+        $$P(y_1 \succ y_2 \mid x) = \sigma\left(r(x, y_1) - r(x, y_2)\right) = \frac{1}{1 + e^{-(r(x, y_1) - r(x, y_2))}}$$
+    </div>
+
+    <h3>Mathematical Invariance Properties:</h3>
+    <ul>
+        <li><strong>Symmetry:</strong> $P(y_2 \succ y_1 \mid x) = 1 - P(y_1 \succ y_2 \mid x) = \sigma(r_2 - r_1)$.</li>
+        <li><strong>Indifference:</strong> If $r_1 = r_2$, then $P(y_1 \succ y_2 \mid x) = \sigma(0) = 0.5$.</li>
+        <li><strong>Gauge Freedom (Translation Invariance):</strong> For any constant $c \in \mathbb{R}$, $\sigma((r_1 + c) - (r_2 + c)) = \sigma(r_1 - r_2)$. The model only depends on the <em>difference</em> between rewards.</li>
+    </ul>
+
+    <h2>3. Maximum Likelihood Estimation (MLE) of Latent Rewards</h2>
+    <p>Given a dataset of observed comparisons $\mathcal{D} = \{(x^{(k)}, y_w^{(k)}, y_l^{(k)})\}_{k=1}^N$, the log-likelihood of latent rewards $\mathbf{r}$ is:</p>
+
+    $$\mathcal{L}_{\text{MLE}}(\mathbf{r}) = \sum_{k=1}^N \log \sigma\left(r(x^{(k)}, y_w^{(k)}) - r(x^{(k)}, y_l^{(k)})\right)$$
+
+    <p>The first-order partial derivative with respect to the reward of the winning item is:</p>
+
+    $$\frac{\partial \mathcal{L}_{\text{MLE}}}{\partial r(y_w)} = 1 - \sigma(r(y_w) - r(y_l)) = \sigma(r(y_l) - r(y_w))$$
+
+    <p>Because the second derivative is strictly negative everywhere, the log-likelihood function is <strong>strictly concave</strong>, guaranteeing that gradient ascent will converge to a unique global optimum (up to the constant shift gauge freedom).</p>
+
+    <h2>4. Thurstonian Model vs. Bradley-Terry</h2>
+    <div class="card">
+        <p>In 1927, Louis Leon Thurstone proposed the Law of Comparative Judgment (Case V), where perceived reward follows a normal distribution: $R_i \sim \mathcal{N}(r_i, \sigma^2)$. The preference probability is governed by the Gaussian cumulative distribution function $\Phi(z)$:</p>
+        $$P_{\text{Thurstone}}(y_1 \succ y_2) = \Phi\left(\frac{r_1 - r_2}{\sqrt{2}\sigma}\right)$$
+        <p>In modern machine learning and LLM alignment, the <strong>Bradley-Terry model</strong> is universally preferred over the Thurstonian probit model due to its analytical closed-form gradient $\sigma(z)(1 - \sigma(z))$ and direct connection to cross-entropy loss.</p>
+    </div>
+
+    <h2>5. The Plackett-Luce Generalization ($K > 2$ Ranked Outputs)</h2>
+    <p>When human judges rank $K > 2$ candidate completions simultaneously ($y_{(1)} \succ y_{(2)} \succ \dots \succ y_{(K)}$), the Plackett-Luce formulation factorizes the choice as a sequence of independent multinomial selections:</p>
+
+    $$P(y_{(1)} \succ y_{(2)} \succ \dots \succ y_{(K)} \mid x) = \prod_{k=1}^{K-1} \frac{\exp(r(x, y_{(k)}))}{\sum_{j=k}^K \exp(r(x, y_{(j)}))}$$
+
+    <p>When $K = 2$, Plackett-Luce collapses exactly to the Bradley-Terry formula.</p>
+
+    <h2>6. Transitivity &amp; The Condorcet Paradox</h2>
+    <p>The Bradley-Terry model mathematically enforces <strong>Strong Stochastic Transitivity (SST)</strong>:</p>
+    $$P(A \succ B) \ge 0.5 \text{ and } P(B \succ C) \ge 0.5 \implies P(A \succ C) \ge \max(P(A \succ B), P(B \succ C))$$
+    <p>However, human annotators occasionally produce <strong>Condorcet cycles</strong> ($A \succ B \succ C \succ A$). When cycles occur in annotation datasets, Bradley-Terry finds the compromise reward vector that minimizes aggregate cross-entropy loss across the contradictory feedback.</p>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <span></span>
+        <a href="../02_reward_modeling_and_loss_derivation/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.2 — Reward Modeling &amp; Loss Derivation →</a>
+    </div>
+
+</body>
+</html>

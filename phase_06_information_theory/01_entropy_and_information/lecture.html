@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.1: Entropy & The Fundamental Currency of Information</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 6 Portal</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 6.1: Entropy & The Fundamental Currency of Information</h1>
+    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Discovering the mathematical nature of information: surprisal, Shannon entropy, the binary entropy function, and the ultimate speed limit of data compression.
+    </p>
+
+    <h2>1. Executive Summary & The 20 Questions Game</h2>
+    <p>
+        In 1948, Claude Shannon founded the digital age with a singular insight:
+        <strong>Information is mathematically identical to the reduction of uncertainty.</strong>
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The "20 Questions" Game</h3>
+        <p>Imagine playing "Guess Who?" with <strong>8 secret characters</strong> on the board:</p>
+        <ul>
+            <li><strong>Question 1:</strong> "Are they female?" $\to$ Cuts candidates from 8 to 4.</li>
+            <li><strong>Question 2:</strong> "Do they wear glasses?" $\to$ Cuts candidates from 4 to 2.</li>
+            <li><strong>Question 3:</strong> "Do they have red hair?" $\to$ Pins down the exact 1 winner!</li>
+        </ul>
+        <p>
+            You needed exactly <strong>3 questions</strong> to identify 1 out of 8 possibilities ($2^3 = 8 \iff \log_2(8) = 3$).
+            In information theory, <strong>one perfect yes/no question that halves uncertainty is defined as ONE BIT of information!</strong>
+        </p>
+    </div>
+
+    <h2>2. Surprisal (Self-Information)</h2>
+    <p>
+        Before calculating entropy for a system, we measure the information delivered by a single event $x$.
+        Shannon defined <strong>Surprisal</strong> as:
+    </p>
+    $$\mathbf{I(x) = -\log_2 P(x) = \log_2 \left( \frac{1}{P(x)} \right)}$$
+    <ul>
+        <li><strong>Certain event ($P = 1.0$):</strong> "The sun rose today." Surprisal is $-\log_2(1.0) = \mathbf{0 \text{ bits}}$. Zero surprise, zero news.</li>
+        <li><strong>Fair coin flip ($P = 0.5$):</strong> "Heads." Surprisal is $-\log_2(0.5) = \mathbf{1 \text{ bit}}$.</li>
+        <li><strong>Rare event ($P = 0.001$):</strong> "A major earthquake struck." Surprisal is $-\log_2(10^{-3}) \approx \mathbf{9.97 \text{ bits}}$.</li>
+    </ul>
+
+    <h2>3. Shannon Entropy Formula</h2>
+    <p>
+        The <strong>Shannon Entropy</strong> $H(X)$ is the expected surprisal across all possible outcomes:
+    </p>
+    $$\mathbf{H(X) = \mathbb{E}[I(X)] = -\sum_{x \in \mathcal{X}} P(x) \log_2 P(x)}$$
+
+    <h3>The Binary Entropy Function $H_b(p)$</h3>
+    <p>For a coin that lands Heads with probability $p$ and Tails with probability $1 - p$:</p>
+    $$H_b(p) = -p \log_2 p - (1 - p) \log_2(1 - p)$$
+    <div class="callout callout-success">
+        <strong>Key Properties:</strong>
+        <ul>
+            <li><strong>Maximum at $p = 0.5$:</strong> When a coin is fair, uncertainty is maximal ($H = 1.0 \text{ bit}$).</li>
+            <li><strong>Zero at $p = 0$ or $p = 1$:</strong> When the outcome is guaranteed in advance, uncertainty vanishes completely ($H = 0.0 \text{ bits}$).</li>
+        </ul>
+    </div>
+
+    <h2>4. Shannon's Source Coding Theorem</h2>
+    <p>
+        Shannon proved that entropy is not just an abstract idea—it is the <strong>physical speed limit of data compression</strong>:
+    </p>
+    $$\mathbf{L \ge H(X)}$$
+    <p>
+        No lossless compression algorithm (such as ZIP, gzip, or 7-Zip) can ever represent an information source with fewer than $H(X)$ bits per symbol on average without permanently corrupting data!
+    </p>
+
+    <h2>5. Deep Learning Connection: Language Models as Compressors</h2>
+    <p>
+        A large language model (like GPT-4) predicts the probability of the next token. If the model is exceptionally intelligent, its predicted probability for the actual token is high ($P \to 1.0$), meaning its surprisal $-\log_2 P$ is tiny.
+        <strong>Training an LLM to minimize cross-entropy is mathematically identical to building the ultimate data compression engine!</strong>
+    </p>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../index.html" class="back-link">← Phase 6 Portal</a>
+        <a href="exercises_and_solutions.html" class="back-link">6.1 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>
+

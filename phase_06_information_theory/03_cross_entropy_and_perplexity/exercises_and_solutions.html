@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.3: Exercises & Solutions — Cross-Entropy & Perplexity</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .exercise-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .difficulty-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .intro { background: #dbeafe; color: #1e40af; }
+        .intermediate { background: #fef3c7; color: #92400e; }
+        .advanced { background: #fee2e2; color: #991b1b; }
+        details {
+            margin-top: 1.25rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            background: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+        code {
+            background: var(--border);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.3: Exercises & Solutions</h1>
+    <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 2rem;">
+        Mastering Cross-Entropy Losses, LLM Perplexity, and Softmax Backpropagation Derivations.
+    </p>
+
+    <!-- Exercise 1 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intro">Introductory (Age 12+)</span>
+        <h3>Exercise 1: Cross-Entropy vs. Entropy on 3-Class Animal Classification</h3>
+        <p>Ground-truth reality $P = [0.50, 0.25, 0.25]$ for `[Dog, Cat, Bird]`.</p>
+        <p>Model 1: $Q_1 = [0.50, 0.25, 0.25]$</p>
+        <p>Model 2: $Q_2 = [0.25, 0.50, 0.25]$</p>
+        <p><strong>Tasks:</strong></p>
+        <ol>
+            <li>Compute $H(P)$, $H(P, Q_1)$, and $H(P, Q_2)$ in bits.</li>
+            <li>How many excess bits are wasted by Model 2?</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>1. Entropies:</strong></p>
+                $$H(P) = - [0.50 \log_2 0.50 + 2(0.25 \log_2 0.25)] = -[-0.50 - 1.00] = 1.50\text{ bits}$$
+                $$H(P, Q_1) = H(P) = 1.50\text{ bits}$$
+                $$H(P, Q_2) = - [0.50 \log_2 0.25 + 0.25 \log_2 0.50 + 0.25 \log_2 0.25] = -[-1.00 - 0.25 - 0.50] = 1.75\text{ bits}$$
+                <p><strong>2. Wasted Bits:</strong></p>
+                $$H(P, Q_2) - H(P) = 1.75 - 1.50 = 0.25\text{ bits}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intermediate">Intermediate (Applied NLP)</span>
+        <h3>Exercise 2: Perplexity of an LLM on a Test Sentence</h3>
+        <p>A language model generates `"AI changes the world"` with target probabilities:</p>
+        <p>$P(\text{"AI"}) = 0.50, \quad P(\text{"changes"}) = 0.25, \quad P(\text{"the"}) = 0.50, \quad P(\text{"world"}) = 0.125$.</p>
+        <ol>
+            <li>Compute average cross-entropy $\bar{\mathcal{L}}$ in bits/token.</li>
+            <li>Compute Perplexity $\text{PPL} = 2^{\bar{\mathcal{L}}}$ and interpret it.</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>1. Average Loss:</strong></p>
+                $$\mathcal{L}_1 = -\log_2(0.50) = 1.0\text{ bit}$$
+                $$\mathcal{L}_2 = -\log_2(0.25) = 2.0\text{ bits}$$
+                $$\mathcal{L}_3 = -\log_2(0.50) = 1.0\text{ bit}$$
+                $$\mathcal{L}_4 = -\log_2(0.125) = 3.0\text{ bits}$$
+                $$\bar{\mathcal{L}} = \frac{1 + 2 + 1 + 3}{4} = 1.75\text{ bits / token}$$
+                <p><strong>2. Perplexity:</strong></p>
+                $$\text{PPL} = 2^{1.75} \approx 3.36$$
+                <p><strong>Interpretation:</strong> The model generates each word with the uncertainty of randomly picking between roughly 3.36 equally likely alternatives.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge advanced">Advanced (Backprop Derivation)</span>
+        <h3>Exercise 3: Complete Softmax Cross-Entropy Gradient</h3>
+        <p>Prove that for logits $\mathbf{z}$ and Softmax probabilities $\mathbf{Q}$, the derivative of cross-entropy $\mathcal{L} = -\sum y_k \ln Q_k$ is:</p>
+        $$\frac{\partial \mathcal{L}}{\partial z_i} = Q_i - y_i$$
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p>Recall $\frac{\partial Q_i}{\partial z_i} = Q_i(1 - Q_i)$ and $\frac{\partial Q_k}{\partial z_i} = -Q_k Q_i$ ($k \ne i$).</p>
+                $$\frac{\partial \mathcal{L}}{\partial z_i} = -\sum_{k} \frac{y_k}{Q_k} \frac{\partial Q_k}{\partial z_i} = -\frac{y_i}{Q_i} [Q_i(1 - Q_i)] - \sum_{k \ne i} \frac{y_k}{Q_k} [-Q_k Q_i]$$
+                $$= -y_i(1 - Q_i) + \sum_{k \ne i} y_k Q_i = -y_i + y_i Q_i + Q_i \sum_{k \ne i} y_k$$
+                $$= -y_i + Q_i \left( y_i + \sum_{k \ne i} y_k \right) = -y_i + Q_i(1) = Q_i - y_i \quad \blacksquare$$
+                <p>The backpropagation gradient is simply <strong>(Predicted Probability - True Target)</strong>!</p>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

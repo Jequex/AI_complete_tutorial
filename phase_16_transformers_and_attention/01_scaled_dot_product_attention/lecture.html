@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 16.1: Scaled Dot-Product Attention — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            background-color: var(--card-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 16 Overview</a>
+    
+    <h1>Topic 16.1: Scaled Dot-Product Attention</h1>
+    <p><em>The fundamental core equation of the modern Transformer revolution.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        At the heart of modern AI—powering ChatGPT, Gemini, Claude, and LLaMA—lies a single elegant mathematical operation: <strong>Scaled Dot-Product Attention</strong>.
+    </p>
+    <p>
+        Before 2017, sequence models (RNNs, LSTMs, GRUs) processed information sequentially, token-by-token like reading a book through a keyhole. They suffered from <strong>vanishing memory</strong> over long contexts and a <strong>sequential computation bottleneck</strong> that prevented parallel GPU training.
+    </p>
+    <p>
+        Scaled Dot-Product Attention, introduced by Vaswani et al. in <em>"Attention Is All You Need"</em> (2017), shattered both barriers. It allows every token in a sequence to look across the entire sequence simultaneously in $\mathcal{O}(1)$ path length.
+    </p>
+
+    <pre>
+                    THE SCALED DOT-PRODUCT ATTENTION FLOW
+                    
+   Query (Q)           Key (K)                        Value (V)
+   [B, T, d_k]        [B, T, d_k]                    [B, T, d_v]
+        │                  │                              │
+        │             Transposed                          │
+        │             K^T: [B, d_k, T]                    │
+        ▼                  ▼                              │
+     ┌────────────────────────┐                           │
+     │ MatMul: Q @ K^T        │ ───> Logits [B, T, T]     │
+     └────────────────────────┘                           │
+                 │                                        │
+                 ▼                                        │
+     ┌────────────────────────┐                           │
+     │ Scale by 1 / sqrt(d_k) │ ───> Scaled Scores        │
+     └────────────────────────┘                           │
+                 │                                        │
+                 ▼                                        │
+     ┌────────────────────────┐                           │
+     │ Optional Mask (Causal) │ ───> (Future tokens -> -∞)│
+     └────────────────────────┘                           │
+                 │                                        │
+                 ▼                                        │
+     ┌────────────────────────┐                           │
+     │ Softmax (Row-wise)     │ ───> Weights A [B, T, T]  │
+     └────────────────────────┘                           │
+                 │                                        │
+                 └──────────────────┐  ┌──────────────────┘
+                                    ▼  ▼
+                         ┌────────────────────────┐
+                         │ MatMul: A @ V          │
+                         └────────────────────────┘
+                                    │
+                                    ▼
+                         Output Tensor [B, T, d_v]
+    </pre>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: The Classroom Library Catalog &amp; Flashlight</h3>
+        <p>Imagine walking into a school library researching: <em>"How do volcanoes erupt?"</em></p>
+        <ul>
+            <li><strong>The Query ($Q$ - Your Question):</strong> You write your question on a sticky note: <em>"Volcanoes, magma, explosions"</em>.</li>
+            <li><strong>The Keys ($K$ - The Book Spine Labels):</strong> Every book has a title: <em>"Cooking Italian Pasta"</em>, <em>"Plate Tectonics &amp; Magma Chambers"</em>, <em>"Space Exploration"</em>.</li>
+            <li><strong>The Dot Product ($Q \cdot K^T$ - The Relevance Match):</strong> You compare your note to each title. <em>"Volcanoes"</em> vs <em>"Pasta"</em> = score 0.02. <em>"Volcanoes"</em> vs <em>"Plate Tectonics"</em> = score 9.85!</li>
+            <li><strong>The Scaling Factor ($1 / \sqrt{d_k}$ - The Flashlight Dimmer):</strong> If books have thousands of details ($d_k = 2048$), match scores explode to $+150$. If a light is at 150 brightness, it blinds you so completely that you only see one word and miss all other helpful context. Dividing by $\sqrt{d_k}$ dims the light to a gentle, balanced glow between $-2$ and $+2$.</li>
+            <li><strong>The Softmax ($\text{softmax}$ - The Attention Percentages):</strong> You convert match scores into percentages that sum to 100%: Plate Tectonics (85%), Mountain Geography (12%), Pasta (0.01%).</li>
+            <li><strong>The Values ($V$ - The Content Inside the Books):</strong> The actual text printed inside the pages is the Value. You read 85% of the Tectonics book and 12% of Geography, combining them into your notes!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Tensor Shape</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$B$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Batch size (number of sequences processed in parallel)</td>
+            </tr>
+            <tr>
+                <td>$T$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Sequence length (number of tokens in context)</td>
+            </tr>
+            <tr>
+                <td>$d_{\text{model}}$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Token embedding hidden dimension (e.g. 768, 4096)</td>
+            </tr>
+            <tr>
+                <td>$d_k$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Query and Key feature projection dimension</td>
+            </tr>
+            <tr>
+                <td>$d_v$</td>
+                <td>Scalar</td>
+                <td>$\mathbb{N}$</td>
+                <td>Value feature projection dimension (usually $d_v = d_k$)</td>
+            </tr>
+            <tr>
+                <td>$Q \in \mathbb{R}^{B \times T_q \times d_k}$</td>
+                <td>3D Tensor</td>
+                <td>Real</td>
+                <td>Query tensor: what each token position is searching for</td>
+            </tr>
+            <tr>
+                <td>$K \in \mathbb{R}^{B \times T_k \times d_k}$</td>
+                <td>3D Tensor</td>
+                <td>Real</td>
+                <td>Key tensor: what each token position advertises</td>
+            </tr>
+            <tr>
+                <td>$V \in \mathbb{R}^{B \times T_k \times d_v}$</td>
+                <td>3D Tensor</td>
+                <td>Real</td>
+                <td>Value tensor: the actual content to be routed and retrieved</td>
+            </tr>
+            <tr>
+                <td>$Q K^T$</td>
+                <td>3D Tensor</td>
+                <td>$\mathbb{R}^{B \times T_q \times T_k}$</td>
+                <td>Pairwise inner products (affinity logits)</td>
+            </tr>
+            <tr>
+                <td>$\frac{QK^T}{\sqrt{d_k}}$</td>
+                <td>3D Tensor</td>
+                <td>$\mathbb{R}^{B \times T_q \times T_k}$</td>
+                <td>Variance-normalized attention logits</td>
+            </tr>
+            <tr>
+                <td>$A$</td>
+                <td>Stochastic Tensor</td>
+                <td>$[0, 1]^{B \times T_q \times T_k}$</td>
+                <td>Attention weights matrix: $\sum_j A_{ij} = 1.0$</td>
+            </tr>
+            <tr>
+                <td>$\text{Attention}(Q, K, V)$</td>
+                <td>3D Tensor</td>
+                <td>$\mathbb{R}^{B \times T_q \times d_v}$</td>
+                <td>Final dynamically contextualized token representations</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Search Engine Analogy: Query, Key, and Value</h2>
+    <p>
+        In traditional databases, key lookup is <em>discrete (hard)</em>:
+    </p>
+    $$\text{Output} = \begin{cases} V_i & \text{if } K_i == Q \\ 0 & \text{otherwise} \end{cases}$$
+    <p>
+        In neural attention, key lookup is <strong>soft, continuous, and differentiable</strong>. Every query matches every key to some degree between 0.0 and 1.0. The retrieved representation is a smooth convex combination of all values:
+    </p>
+    $$\mathbf{o}_i = \sum_{j=1}^{T_k} A_{ij} \mathbf{v}_j, \quad \text{where } \sum_{j=1}^{T_k} A_{ij} = 1.0, \quad A_{ij} \ge 0$$
+
+    <div class="box">
+        $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right) V$$
+    </div>
+
+    <h2>4. Complete Mathematical Proof: Why Scale by $\sqrt{d_k}$?</h2>
+    
+    <div class="callout">
+        <h3>Theorem: Variance of Vector Dot Products</h3>
+        <p>
+            Let $\mathbf{q}, \mathbf{k} \in \mathbb{R}^{d_k}$ be independent random vectors with components $q_m, k_m \sim \text{i.i.d.}(0, 1)$. Then:
+        </p>
+        $$\mathbb{E}[\mathbf{q}^T \mathbf{k}] = 0, \quad \operatorname{Var}(\mathbf{q}^T \mathbf{k}) = d_k, \quad \sigma(\mathbf{q}^T \mathbf{k}) = \sqrt{d_k}$$
+    </div>
+
+    <h3>Proof:</h3>
+    <p>Let $z = \mathbf{q}^T \mathbf{k} = \sum_{m=1}^{d_k} q_m k_m = \sum_{m=1}^{d_k} X_m$, where $X_m = q_m k_m$.</p>
+    <p><strong>1. Expectation:</strong></p>
+    $$\mathbb{E}[X_m] = \mathbb{E}[q_m k_m] = \mathbb{E}[q_m] \cdot \mathbb{E}[k_m] = 0 \cdot 0 = 0$$
+    $$\mathbb{E}[z] = \sum_{m=1}^{d_k} \mathbb{E}[X_m] = 0$$
+
+    <p><strong>2. Variance of Each Term:</strong></p>
+    $$\operatorname{Var}(X_m) = \mathbb{E}[X_m^2] - (\mathbb{E}[X_m])^2 = \mathbb{E}[q_m^2 k_m^2] - 0$$
+    <p>Since $q_m$ and $k_m$ are independent:</p>
+    $$\mathbb{E}[q_m^2 k_m^2] = \mathbb{E}[q_m^2] \cdot \mathbb{E}[k_m^2] = 1 \cdot 1 = 1$$
+    $$\implies \operatorname{Var}(X_m) = 1$$
+
+    <p><strong>3. Total Variance of the Dot Product:</strong></p>
+    <p>Because each component dimension $m \in \{1, \dots, d_k\}$ is independent:</p>
+    $$\operatorname{Var}(z) = \operatorname{Var}\left(\sum_{m=1}^{d_k} X_m\right) = \sum_{m=1}^{d_k} \operatorname{Var}(X_m) = \sum_{m=1}^{d_k} 1 = d_k$$
+    $$\sigma_z = \sqrt{\operatorname{Var}(z)} = \sqrt{d_k} \quad \blacksquare$$
+
+    <h3>The Gradient Saturation Disaster Without Scaling</h3>
+    <p>
+        As $d_k$ grows large (e.g. $d_k = 2048 \implies \sigma_z \approx 45.2$), the dot products grow very large in absolute magnitude. The softmax function is:
+    </p>
+    $$S_i = \frac{e^{z_i}}{\sum_j e^{z_j}}$$
+    <p>Its derivative with respect to any logit $z_j$ is:</p>
+    $$\frac{\partial S_i}{\partial z_j} = S_i (\delta_{ij} - S_j)$$
+    <p>
+        When logits differ by tens or hundreds, the maximum logit exponent explodes, causing $S_{\text{max}} \to 1.0$ and all other $S_j \to 0.0$.
+    </p>
+    <div class="callout callout-danger">
+        <strong>Softmax Derivative Collapses to Zero:</strong>
+        $$\lim_{S_i \to 1} S_i (1 - S_i) = 1(0) = 0$$
+        $$\lim_{S_j \to 0} S_j (1 - S_j) = 0(1) = 0$$
+        Gradients vanish completely! Backpropagation cannot adjust the projection weights, permanently paralyzing the Transformer model during training.
+    </div>
+
+    <h3>Variance Normalization via $1 / \sqrt{d_k}$</h3>
+    <p>Scaling the dot product by $1 / \sqrt{d_k}$ scales variance by its square:</p>
+    $$\operatorname{Var}\left(\frac{\mathbf{q}^T \mathbf{k}}{\sqrt{d_k}}\right) = \left(\frac{1}{\sqrt{d_k}}\right)^2 \operatorname{Var}(\mathbf{q}^T \mathbf{k}) = \frac{1}{d_k} \cdot d_k = 1.0$$
+    <p>
+        Thus, regardless of whether $d_k = 16$ or $d_k = 4096$, the scaled logits always maintain a stable unit standard deviation ($\sigma = 1$), keeping softmax in its active, high-gradient regime!
+    </p>
+
+    <h2>5. Numerically Stable Softmax Formulation</h2>
+    <p>To avoid IEEE 754 floating-point overflow (`+inf` resulting in `nan`), safe softmax subtracts the maximum logit before exponentiation:</p>
+    $$\text{softmax}(\mathbf{z})_i = \frac{e^{z_i - \max(\mathbf{z})}}{\sum_j e^{z_j - \max(\mathbf{z})}}$$
+    <p>Since the highest exponent is $e^0 = 1.0$, floating-point overflow is mathematically impossible.</p>
+
+    <h2>6. Architectural Takeaways</h2>
+    <ul>
+        <li><strong>Soft Lookup:</strong> Differentiable database retrieval replacing brittle hard indexing.</li>
+        <li><strong>Global Receptive Field:</strong> Every token connects to all tokens in $\mathcal{O}(1)$ operations.</li>
+        <li><strong>$\sqrt{d_k}$ Scaling:</strong> Prevents softmax saturation and preserves gradient flow across arbitrary embedding dimensions.</li>
+    </ul>
+</body>
+</html>

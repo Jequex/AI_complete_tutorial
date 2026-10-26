@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.1: Exercises & Solutions — Shannon Entropy & Information</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .exercise-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .difficulty-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .intro { background: #dbeafe; color: #1e40af; }
+        .intermediate { background: #fef3c7; color: #92400e; }
+        .advanced { background: #fee2e2; color: #991b1b; }
+        .applied { background: #dcfce7; color: #166534; }
+        details {
+            margin-top: 1.25rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            background: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.65rem 0.85rem;
+            text-align: left;
+        }
+        th { background: var(--primary-light); }
+        code {
+            background: var(--border);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.1: Exercises & Solutions</h1>
+    <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 2rem;">
+        Mastering Surprisal, Shannon Entropy, Jensen/Lagrange Uniformity Proofs, and Huffman Coding.
+    </p>
+
+    <!-- Exercise 1 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intro">Introductory (Age 12+)</span>
+        <h3>Exercise 1: Surprisal and Units of Information</h3>
+        <p>An AI agent receives three weather updates from three distinct stations:</p>
+        <ol>
+            <li><strong>Station A (Rain in the Sahara Desert):</strong> $P(\text{Rain}) = \frac{1}{64}$.</li>
+            <li><strong>Station B (Cloudy in Seattle):</strong> $P(\text{Cloudy}) = \frac{1}{2}$.</li>
+            <li><strong>Station C (Sun in Cairo):</strong> $P(\text{Sun}) = 1.0$.</li>
+        </ol>
+        <p><strong>Tasks:</strong></p>
+        <ol>
+            <li>Compute the self-information (surprisal) $I(x) = -\log_2 P(x)$ in bits for each report.</li>
+            <li>Convert Station A's surprisal from bits to nats ($\ln 2 \approx 0.69315$).</li>
+            <li>Why does Station C convey exactly $0$ bits of information?</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>1. Surprisal in Bits:</strong></p>
+                <ul>
+                    <li>Station A: $I(\text{Rain}) = -\log_2(2^{-6}) = 6\text{ bits}$.</li>
+                    <li>Station B: $I(\text{Cloudy}) = -\log_2(2^{-1}) = 1\text{ bit}$.</li>
+                    <li>Station C: $I(\text{Sun}) = -\log_2(1.0) = 0\text{ bits}$.</li>
+                </ul>
+                <p><strong>2. Conversion to Nats:</strong></p>
+                $$I_{\text{nats}}(\text{Rain}) = 6 \times \ln(2) \approx 6 \times 0.693147 = 4.1589\text{ nats}$$
+                <p><strong>3. Zero Information Explanation:</strong></p>
+                <p>
+                    Station C's sunny forecast has a probability of $1.0$ (complete certainty). Before the message arrives, the observer already knows with $100\%$ certainty that it is sunny. Zero uncertainty was resolved, no beliefs were updated, and therefore zero information was communicated.
+                </p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intermediate">Intermediate (Calculus)</span>
+        <h3>Exercise 2: Analytical Maximization of the Binary Entropy Function</h3>
+        <p>The binary entropy function is given by:</p>
+        $$H_b(p) = -p \log_2(p) - (1-p) \log_2(1-p), \quad p \in (0, 1)$$
+        <p><strong>Tasks:</strong></p>
+        <ol>
+            <li>Express $H_b(p)$ using the natural log $\ln$.</li>
+            <li>Compute $\frac{dH_b}{dp}$ and determine the critical point $p^*$.</li>
+            <li>Use the second derivative $\frac{d^2H_b}{dp^2}$ to prove that $p^*$ is a unique global maximum.</li>
+            <li>What is the value of $H_b(p^*)$?</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>Step 1: Change of Base</strong></p>
+                $$H_b(p) = -\frac{1}{\ln 2} \left[ p \ln p + (1-p) \ln(1-p) \right]$$
+                <p><strong>Step 2: First Derivative</strong></p>
+                $$\frac{d}{dp}[p \ln p] = \ln p + 1$$
+                $$\frac{d}{dp}[(1-p)\ln(1-p)] = -\ln(1-p) - 1$$
+                Combining:
+                $$\frac{dH_b}{dp} = -\frac{1}{\ln 2}\Big[ (\ln p + 1) - (\ln(1-p) + 1) \Big] = -\frac{1}{\ln 2} \ln\left(\frac{p}{1-p}\right)$$
+                Setting to zero:
+                $$\ln\left(\frac{p}{1-p}\right) = 0 \implies \frac{p}{1-p} = 1 \implies p^* = 0.5$$
+                <p><strong>Step 3: Second Derivative Test</strong></p>
+                $$\frac{d^2H_b}{dp^2} = -\frac{1}{\ln 2}\left[\frac{1}{p} + \frac{1}{1-p}\right] = -\frac{1}{\ln 2} \cdot \frac{1}{p(1-p)}$$
+                For $p = 0.5$:
+                $$\left.\frac{d^2H_b}{dp^2}\right|_{p=0.5} = -\frac{1}{\ln 2}\cdot \frac{1}{0.25} = -\frac{4}{\ln 2} \approx -5.77 < 0$$
+                Since the second derivative is strictly negative everywhere on $(0, 1)$, $p^* = 0.5$ is the unique global maximum.
+                <p><strong>Step 4: Maximum Value</strong></p>
+                $$H_b(0.5) = -0.5 \log_2(0.5) - 0.5 \log_2(0.5) = 1.0\text{ bit}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge advanced">Advanced (Lagrange Multipliers)</span>
+        <h3>Exercise 3: Maximum Entropy Distribution for a Discrete Alphabet</h3>
+        <p>Given a discrete random variable $X$ with $K$ states $\{x_1, \dots, x_K\}$ and probabilities $p_i$, find the distribution that maximizes Shannon entropy $H(X) = -\sum_{i=1}^K p_i \ln p_i$ subject to $\sum_{i=1}^K p_i = 1$.</p>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>Step 1: Formulate the Lagrangian</strong></p>
+                $$\mathcal{L}(p_1, \dots, p_K, \lambda) = -\sum_{i=1}^K p_i \ln p_i - \lambda\left(\sum_{i=1}^K p_i - 1\right)$$
+                <p><strong>Step 2: Differentiate & Solve</strong></p>
+                $$\frac{\partial \mathcal{L}}{\partial p_i} = -(\ln p_i + 1) - \lambda = 0 \implies \ln p_i = -(1 + \lambda) \implies p_i = e^{-(1+\lambda)}$$
+                Because the right side does not depend on index $i$, all $p_i$ must be equal to a constant $c$:
+                $$\sum_{i=1}^K c = K \cdot c = 1 \implies c = \frac{1}{K}$$
+                Thus, the uniform distribution $p_i^* = \frac{1}{K}$ maximizes entropy, yielding:
+                $$H_{\max}(X) = \log_2 K\text{ bits}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 4 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge applied">Applied & Algorithmic</span>
+        <h3>Exercise 4: Constructing an Optimal Huffman Code</h3>
+        <p>A vocabulary has 5 tokens with probabilities:</p>
+        <p>$P(A) = 0.40, \quad P(B) = 0.20, \quad P(C) = 0.15, \quad P(D) = 0.15, \quad P(E) = 0.10$</p>
+        <p><strong>Tasks:</strong></p>
+        <ol>
+            <li>Compute Shannon entropy $H(X)$ to 4 decimal places.</li>
+            <li>Construct the Huffman tree and determine binary prefix codes.</li>
+            <li>Compute average length $L = \sum P(x_i) l_i$ and check $H(X) \le L < H(X) + 1$.</li>
+            <li>Calculate coding efficiency $\eta = \frac{H(X)}{L} \times 100\%$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>1. Shannon Entropy:</strong></p>
+                $$H(X) = -(0.40 \log_2 0.40 + 0.20 \log_2 0.20 + 0.30 \log_2 0.15 + 0.10 \log_2 0.10) = 2.1464\text{ bits}$$
+                <p><strong>2. Codewords:</strong></p>
+                <table>
+                    <thead>
+                        <tr><th>Token</th><th>Probability</th><th>Codeword</th><th>Length</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>A</strong></td><td>0.40</td><td><code>0</code></td><td>1</td></tr>
+                        <tr><td><strong>B</strong></td><td>0.20</td><td><code>111</code></td><td>3</td></tr>
+                        <tr><td><strong>C</strong></td><td>0.15</td><td><code>110</code></td><td>3</td></tr>
+                        <tr><td><strong>D</strong></td><td>0.15</td><td><code>100</code></td><td>3</td></tr>
+                        <tr><td><strong>E</strong></td><td>0.10</td><td><code>101</code></td><td>3</td></tr>
+                    </tbody>
+                </table>
+                <p><strong>3. Expected Length & Shannon Bound:</strong></p>
+                $$L = 0.40(1) + 0.20(3) + 0.15(3) + 0.15(3) + 0.10(3) = 2.20\text{ bits}$$
+                $$2.1464 \le 2.20 < 3.1464 \quad \text{(Strictly Verified!)}$$
+                <p><strong>4. Coding Efficiency:</strong></p>
+                $$\eta = \frac{2.1464}{2.2000} \times 100\% = 97.56\%$$
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

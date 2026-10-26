@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 23: Embeddings &amp; Metric Learning — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    .overview-box {
+      background-color: var(--badge-bg);
+      border: 1px solid var(--primary);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overview-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    .overview-box p {
+      margin-bottom: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    pre.code-block {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 23</div>
+    <h1>Embeddings &amp; Metric Learning</h1>
+    <p class="lead">From Discrete Symbols to Continuous Metric Hyperspheres &amp; Multimodal Alignment</p>
+  </header>
+
+  <div class="overview-box">
+    <h3>Architectural Paradigm</h3>
+    <p>Early NLP and machine learning treated entities as discrete, orthogonal symbols with zero semantic overlap. Phase 23 establishes the foundations of continuous representation learning: Word2Vec (CBOW vs Skip-Gram) and Negative Sampling (SGNS), FastText subword character $n$-grams, resolving the BERT Anisotropy Cone with Sentence-BERT (SBERT) and Whitening, Metric Learning principles with Contrastive and Triplet losses, and InfoNCE Mutual Information optimization in OpenAI's Multimodal CLIP.</p>
+  </div>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Word Embeddings — From Word2Vec to FastText</h2>
+      <p>The Distributional Hypothesis (Firth 1957). Continuous Bag-of-Words (CBOW) vs Continuous Skip-Gram. The Negative Sampling Objective (SGNS) avoiding full softmax partition functions. Vector arithmetic ($\mathbf{v}_{\text{King}} - \mathbf{v}_{\text{Man}} + \mathbf{v}_{\text{Woman}} \approx \mathbf{v}_{\text{Queen}}$), Levy &amp; Goldberg's shifted PMI theorem, and FastText subword character $n$-grams for out-of-vocabulary and typo resilience.</p>
+      <div class="topic-links">
+        <a href="01_word_embeddings_word2vec_to_fasttext/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_word_embeddings_word2vec_to_fasttext/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_word_embeddings_word2vec_to_fasttext/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_word_embeddings_word2vec_to_fasttext/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_word_embeddings_word2vec_to_fasttext/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Sentence Embeddings &amp; Sentence-BERT (SBERT)</h2>
+      <p>The Cross-Encoder computational bottleneck ($\mathcal{O}(N^2)$). The Anisotropy Problem of BERT: why naive average pooling collapses into a narrow cone with cosine similarity $> 0.90$ for unrelated sentences. Sentence-BERT (SBERT) Siamese networks with tied weights, Mean-Pooling, NLI feature concatenation ($[\mathbf{u}, \mathbf{v}, |\mathbf{u} - \mathbf{v}|]$), cosine similarity regression, and unit hypersphere normalization $\mathbb{S}^{d-1}$.</p>
+      <div class="topic-links">
+        <a href="02_sentence_embeddings_and_sbert/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_sentence_embeddings_and_sbert/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_sentence_embeddings_and_sbert/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_sentence_embeddings_and_sbert/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_sentence_embeddings_and_sbert/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Metric Learning &amp; Contrastive Losses</h2>
+      <p>Principles of deep metric learning: learning isometric embedding spaces where semantic distance equals Euclidean distance. Contrastive Loss (Hadsell et al. 2006) with Hooke's attractive springs and electrostatic repulsion margins. Triplet Loss (FaceNet) relative rank optimization, and online negative mining regimes (Easy, Hard, and Semi-Hard negatives).</p>
+      <div class="topic-links">
+        <a href="03_metric_learning_and_contrastive_losses/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_metric_learning_and_contrastive_losses/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_metric_learning_and_contrastive_losses/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_metric_learning_and_contrastive_losses/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_metric_learning_and_contrastive_losses/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. InfoNCE Loss &amp; Multimodal CLIP</h2>
+      <p>The InfoNCE loss (van den Oord et al. 2018). Step-by-step mathematical proof that InfoNCE maximizes a lower bound on Mutual Information: $I(X; Y) \ge \log(K) - \mathcal{L}_{\text{InfoNCE}}$. Temperature $\tau$ as an automated hard-negative selector. OpenAI's CLIP architecture with dual vision and text encoders, $N \times N$ symmetric cross-entropy loss, and zero-shot transfer via text prompt prototypes.</p>
+      <div class="topic-links">
+        <a href="04_infonce_and_multimodal_clip/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_infonce_and_multimodal_clip/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_infonce_and_multimodal_clip/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_infonce_and_multimodal_clip/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_infonce_and_multimodal_clip/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 23 Experiments</h2>
+    <p>Every experiment runs independently in pure Python 3 without any external dependencies:</p>
+    <pre class="code-block">python3 phase_23_embeddings_and_metric_learning/01_word_embeddings_word2vec_to_fasttext/experiment.py
+python3 phase_23_embeddings_and_metric_learning/02_sentence_embeddings_and_sbert/experiment.py
+python3 phase_23_embeddings_and_metric_learning/03_metric_learning_and_contrastive_losses/experiment.py
+python3 phase_23_embeddings_and_metric_learning/04_infonce_and_multimodal_clip/experiment.py</pre>
+  </section>
+
+</body>
+</html>

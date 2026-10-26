@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 27: AI Agents &amp; Multi-Agent Systems — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; color: var(--text); }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="badge">Curriculum Module</span>
+    <h1>Phase 27: AI Agents &amp; Multi-Agent Systems</h1>
+    <p class="lead">From passive next-token prediction to cybernetic closed-loop agency, grammar-constrained tool use, strategic tree planning, cognitive memory systems, and multi-agent consensus societies.</p>
+  </header>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Agent Architectures &amp; Perception-Action Loops</h2>
+      <p>Model vs Agent paradigms, cybernetic Sense-Plan-Act loops, Ashby's Law of Requisite Variety, POMDP formalization $\langle \mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \Omega, \mathcal{O}, \gamma \rangle$, exact step-by-step derivation of the Bayesian belief state update $b'(s')$, Shannon entropy tracking, and the LLM context window as an empirical belief state.</p>
+      <div class="topic-links">
+        <a href="01_agent_architectures_and_perception_action_loops/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_agent_architectures_and_perception_action_loops/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_agent_architectures_and_perception_action_loops/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_agent_architectures_and_perception_action_loops/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_agent_architectures_and_perception_action_loops/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Tool Use &amp; Function Calling</h2>
+      <p>JSON Schema specifications (RFC 8927), parameter type constraints, Grammar-Constrained Decoding using Context-Free Grammars and Deterministic Finite Automata (DFA), logit masking $\tilde{z}_{t, v} = z_{t, v} + \log \mathbb{I}(v \in \mathcal{M}(q))$, sandboxed dispatch, and closed-loop self-correction error recovery.</p>
+      <div class="topic-links">
+        <a href="02_tool_use_and_function_calling/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_tool_use_and_function_calling/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_tool_use_and_function_calling/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_tool_use_and_function_calling/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_tool_use_and_function_calling/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Planning Strategies: ReAct, Chain-of-Thought &amp; Tree-of-Thoughts</h2>
+      <p>The taxonomy of agent deliberation: linear Chain-of-Thought (and its exponential error decay $\prod (1-\epsilon_t)$), interleaved ReAct (Thought-Action-Observation), Tree-of-Thoughts (ToT) with thought generation $G(s)$, heuristic state valuation $V(s)$, beam pruning, Depth-First Search with backtracking, and Reflexion verbal reinforcement learning.</p>
+      <div class="topic-links">
+        <a href="03_planning_strategies_react_cot_tot/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_planning_strategies_react_cot_tot/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_planning_strategies_react_cot_tot/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_planning_strategies_react_cot_tot/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_planning_strategies_react_cot_tot/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Agent Memory Systems</h2>
+      <p>Cognitive memory architecture: Working memory (context token buffer), Episodic memory (event log), Semantic memory (vector knowledge), Procedural memory (system prompts &amp; schemas). Tri-factor retrieval scoring $S = w_r R + w_i I + w_s \text{Sim}$, exponential recency decay half-life, Generative Reflection consolidation, and priority eviction.</p>
+      <div class="topic-links">
+        <a href="04_agent_memory_systems/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_agent_memory_systems/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_agent_memory_systems/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_agent_memory_systems/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_agent_memory_systems/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Multi-Agent Orchestration &amp; Communication Protocols</h2>
+      <p>Multi-agent coordination topologies (Centralized Router, Hierarchical Supervisor, Peer-to-Peer Blackboard), formal FIPA-ACL communication envelopes and speech act performatives (PROPOSE, CRITIQUE, REVISE, INFORM), multi-agent debate and error suppression, Condorcet's Jury Theorem accuracy amplification, and consensus verification.</p>
+      <div class="topic-links">
+        <a href="05_multi_agent_orchestration_and_protocols/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_multi_agent_orchestration_and_protocols/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_multi_agent_orchestration_and_protocols/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_multi_agent_orchestration_and_protocols/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_multi_agent_orchestration_and_protocols/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 27 Experiments</h2>
+    <p>Every experiment is implemented from first principles in pure Python 3 standard library with zero external dependencies (no Gym, no PyTorch, no NumPy, no LangChain):</p>
+    <pre class="code-block">python3 phase_27_ai_agents_and_multi_agent_systems/01_agent_architectures_and_perception_action_loops/experiment.py
+python3 phase_27_ai_agents_and_multi_agent_systems/02_tool_use_and_function_calling/experiment.py
+python3 phase_27_ai_agents_and_multi_agent_systems/03_planning_strategies_react_cot_tot/experiment.py
+python3 phase_27_ai_agents_and_multi_agent_systems/04_agent_memory_systems/experiment.py
+python3 phase_27_ai_agents_and_multi_agent_systems/05_multi_agent_orchestration_and_protocols/experiment.py</pre>
+  </section>
+
+</body>
+</html>

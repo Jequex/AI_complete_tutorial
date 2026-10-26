@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 17.1: Exercises &amp; Solutions — Byte-Pair Encoding Tokenizer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 17 Hub</a>
+    
+    <h1>Topic 17.1: Exercises &amp; Solutions</h1>
+    <p><em>Byte-Pair Encoding Tokenizer — Practice Problems &amp; Step-by-Step Derivations</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Manual Step-by-Step BPE Merge Tracing (Easy)</h3>
+        <p>Consider the toy corpus composed of words with character frequencies:</p>
+        <ul>
+            <li><code>l o w _</code> : 2 times</li>
+            <li><code>l o w e s t _</code> : 1 time</li>
+            <li><code>n e w e r _</code> : 1 time</li>
+            <li><code>w i d e r _</code> : 1 time</li>
+        </ul>
+        <ol>
+            <li>What is the initial base vocabulary $\mathcal{V}_0$?</li>
+            <li>Compute the frequencies of all adjacent character pairs.</li>
+            <li>Identify the very first pair selected for merging and update the vocabulary.</li>
+        </ol>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> Initial base vocabulary:<br>
+            $$\mathcal{V}_0 = \{ \text{'d', 'e', 'i', 'l', 'o', 'r', 's', 't', 'w', '\_'} \}, \quad |\mathcal{V}_0| = 10$$</p>
+            <p><strong>Step 2:</strong> Adjacent pairs count:<br>
+            <code>(l, o)</code>: 3x, <code>(o, w)</code>: 3x, <code>(w, _)</code>: 2x, <code>(w, e)</code>: 2x, <code>(e, r)</code>: 2x, <code>(r, _)</code>: 2x, all others 1x.</p>
+            <p><strong>Step 3:</strong> The highest count is 3. By alphabetical order, select <code>(l, o)</code> &rarr; <code>lo</code>.<br>
+            Updated vocabulary: $\mathcal{V}_1 = \mathcal{V}_0 \cup \{\text{'lo'}\}$.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Parameter Savings vs Quadratic Sequence Length Trade-off (Medium)</h3>
+        <p>Suppose an LLM has embedding dimension $d_{\text{model}} = 4096$, processing documents of average length $L = 2048$ characters.</p>
+        <ul>
+            <li><strong>System A (Character-level):</strong> $V_A = 256$, average token count $T_A = 2048$.</li>
+            <li><strong>System B (Subword BPE):</strong> $V_B = 50{,}000$, compression ratio $3.8$ chars/token ($T_B = 540$).</li>
+        </ul>
+        <p>Compute embedding parameter count and self-attention FLOPs ($2 \cdot T^2 \cdot d_{\text{model}}$) for both systems.</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>1. Embedding Parameters ($V \times d_{\text{model}}$):</strong><br>
+            System A: $256 \times 4096 = 1.05\text{ M parameters}$<br>
+            System B: $50{,}000 \times 4096 = 204.8\text{ M parameters}$</p>
+            <p><strong>2. Self-Attention FLOPs ($2 \cdot T^2 \cdot d_{\text{model}}$):</strong><br>
+            System A: $2 \times (2048)^2 \times 4096 = 34.36\text{ GFLOPs}$<br>
+            System B: $2 \times (540)^2 \times 4096 = 2.39\text{ GFLOPs}$</p>
+            <p><strong>Speedup ratio:</strong> $34.36 / 2.39 \approx 14.38\times$ faster self-attention in every Transformer block!</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Handling Emoji &amp; Foreign Scripts via Byte Fallback (Hard)</h3>
+        <p>The rocket emoji <code>🚀</code> is represented by 4 UTF-8 bytes: <code>[240, 159, 154, 128]</code>. Explain how byte-level BPE prevents Out-Of-Vocabulary failures on unseen emojis.</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>Unlike word-level models that collapse unknown strings into <code>&lt;UNK&gt;</code>, byte-level BPE initializes its vocabulary with all 256 individual byte values ($0 \dots 255$). If no merge rule has ever been learned for the rocket emoji, the tokenizer emits the 4 constituent byte IDs: $[240, 159, 154, 128]$. Upon decoding, the bytes are concatenated in order: <code>b'\xf0\x9f\x9a\x80'</code>, which reconstructs <code>🚀</code> losslessly!</p>
+        </details>
+    </div>
+</body>
+</html>

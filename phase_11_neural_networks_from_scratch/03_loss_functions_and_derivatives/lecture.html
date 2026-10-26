@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 11.3: Loss Functions &amp; Analytical Derivatives — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-warning {
+            background-color: #fffbeb;
+            border-left-color: #d97706;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 11 Portal</a>
+
+    <h1>Topic 11.3: Loss Functions &amp; Analytical Derivatives</h1>
+    <p><em>Formulating empirical risk, deriving initial backprop error signals, and mapping non-convex loss landscapes.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>The <strong>loss function</strong> $\mathcal{L}(y, \hat{y})$ measures how severely a neural network's predictions deviate from the truth. In backpropagation, it provides the vital seed gradient $\delta^{[L]} = \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{[L]}}$ that flows through all preceding layers.</p>
+
+    <div class="diagram">                 LOSS FUNCTIONS &amp; INITIAL ERROR GRADIENTS
+                 
+   Regression (Continuous y):                Classification (Discrete y):
+      Mean Squared Error (MSE)                   Categorical Cross-Entropy (Softmax)
+      
+          Loss: (1/2)||y - ŷ||²                      Loss: - Σ y_k ln(p_k)
+          Grad: (ŷ - y)                              Grad: (p - y)
+          
+      y ^            .---.                       y ^            .---.
+        │          .'     '.                       │          .'     '.
+      L │         /         \                    L │         /         \
+        │        /     ●     \                     │        /     ●     \
+        │       /   Global    \                    │       /   Saddle    \
+        │      /    Minimum    \                   │      /    Points     \
+        └─────┴─────────────────&gt; ŷ                └─────┴─────────────────&gt; z</div>
+
+    <div class="callout">
+        <strong>The 12-Year-Old Analogy: The Scoring Referee and the Penalty Box</strong>
+        <ul>
+            <li><strong>The Mild Tape-Measure Referee (MSE):</strong> You guess a building's height is 400m when it is 330m. The referee measures the distance missed ($400 - 330 = 70$), squares it ($70^2 = 4900$), and bills you. Perfect for smooth real numbers.</li>
+            <li><strong>The Confident Lie Detector (Cross-Entropy):</strong> On multiple-choice tests, you claim 99.9% certainty that an animal is a cat, but it's actually a dog! The referee severely penalizes your overconfident error ($-\ln(0.001) \approx 6.91$). Best of all, the gradient is simply <strong>(Guess) minus (Truth)</strong>.</li>
+            <li><strong>The Unfair Match Referee (Focal Loss):</strong> In datasets with 99 easy negatives and 1 hard positive, standard loss lets the 99 easy examples drown out the rare signal. Focal Loss uses a $(1 - p)^\gamma$ dampener to silence easy examples and highlight hard cases.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbf{y} \in \{0, 1\}^K$</td>
+                <td>Vector</td>
+                <td>Ground truth one-hot or binary vector</td>
+            </tr>
+            <tr>
+                <td>$\hat{\mathbf{y}} \equiv \mathbf{p}$</td>
+                <td>Vector</td>
+                <td>Predicted class probability distribution ($\sum p_k = 1$)</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{z} \in \mathbb{R}^K$</td>
+                <td>Vector</td>
+                <td>Raw pre-activation logits at the output layer</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{MSE}}$</td>
+                <td>$\mathbb{R}_{\ge 0}$</td>
+                <td>$\frac{1}{2N} \sum \|y - \hat{y}\|^2$, with gradient $\frac{1}{N}(\hat{y} - y)$</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{BCE}}$</td>
+                <td>$\mathbb{R}_{\ge 0}$</td>
+                <td>$-\frac{1}{N}\sum [y \ln \hat{y} + (1-y)\ln(1-\hat{y})]$, logit gradient is $\hat{y} - y$</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{CCE}}$</td>
+                <td>$\mathbb{R}_{\ge 0}$</td>
+                <td>$-\sum y_k \ln \hat{y}_k$, Softmax logit gradient is $\hat{\mathbf{y}} - \mathbf{y}$</td>
+            </tr>
+            <tr>
+                <td>$\gamma \ge 0$</td>
+                <td>Scalar</td>
+                <td>Focal loss focusing parameter, down-weighting easy samples</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Beautiful Cancellation: Cross-Entropy with Sigmoid/Softmax</h2>
+    <div class="callout callout-success">
+        <strong>The Universal Gradient Cancellation:</strong>
+        <p>When pairing Cross-Entropy with Sigmoid or Softmax, the denominator of the loss derivative cancels exactly with the activation derivative:</p>
+        $$\frac{\partial \mathcal{L}}{\partial \mathbf{z}} = \frac{\partial \mathcal{L}}{\partial \hat{\mathbf{y}}} \cdot \frac{\partial \hat{\mathbf{y}}}{\partial \mathbf{z}} = \left(\frac{\hat{\mathbf{y}} - \mathbf{y}}{\hat{\mathbf{y}}(1 - \hat{\mathbf{y}})}\right) \cdot \hat{\mathbf{y}}(1 - \hat{\mathbf{y}}) = \boxed{\hat{\mathbf{y}} - \mathbf{y}}$$
+    </div>
+    <p>This ensures linear gradient magnitude directly proportional to prediction error, avoiding saturation when predictions are confidently wrong.</p>
+
+    <h2>4. Loss Landscape Geometry in Deep Learning</h2>
+    <p>Unlike linear models where loss functions are strictly convex bowls, deep neural network loss landscapes are highly non-convex, featuring:</p>
+    <ul>
+        <li><strong>Saddle points:</strong> Stationary points where the Hessian has mixed positive and negative eigenvalues.</li>
+        <li><strong>Ravines:</strong> Narrow valleys with high curvature in some directions and flat trajectories along others.</li>
+        <li><strong>Plateaus:</strong> Vast flat regions where gradient norms approach zero.</li>
+    </ul>
+
+    <p style="margin-top: 3rem;"><a href="../index.html" class="back-link">← Back to Phase 11 Portal</a></p>
+</body>
+</html>

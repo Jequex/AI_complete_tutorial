@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 8.3: Exercises & Solutions — Decision Trees & Ensembles</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        details {
+            margin-top: 1.25rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution {
+            background-color: var(--solution-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 08 Hub</a>
+
+    <h1>Topic 8.3: Exercises & Solutions</h1>
+    <p><em>Gini Impurity, Information Gain, Random Forest variance decorrelation, and Gradient Boosting pseudo-residuals.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <h3>Exercise 1: Gini Impurity and Shannon Entropy Calculation</h3>
+        <p>A node $T$ contains 10 samples (4 positive, 6 negative). Calculate its Gini Impurity and Shannon Entropy.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p>Probabilities: $p_1 = 0.4, p_0 = 0.6$.</p>
+                <p><strong>Gini Impurity:</strong> $G(T) = 1 - (0.4^2 + 0.6^2) = 1 - 0.52 = 0.48$.</p>
+                <p><strong>Shannon Entropy:</strong> $H(T) = -[0.4 \log_2(0.4) + 0.6 \log_2(0.6)] \approx 0.9710\text{ bits}$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <h3>Exercise 2: Information Gain of a Candidate Split</h3>
+        <p>Parent node $T$ ($H(T) = 0.9710$ bits) is split into $T_L$ (3 pos, 1 neg) and $T_R$ (1 pos, 5 neg). Compute the Information Gain.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p>$H(T_L) \approx 0.8113\text{ bits}, \quad H(T_R) \approx 0.6500\text{ bits}$.</p>
+                <p>Weighted entropy: $H(T_L, T_R) = \frac{4}{10}(0.8113) + \frac{6}{10}(0.6500) = 0.7145\text{ bits}$.</p>
+                <p><strong>Information Gain:</strong> $IG = 0.9710 - 0.7145 = 0.2565\text{ bits}$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <h3>Exercise 3: Variance Reduction in Random Forests</h3>
+        <p>An ensemble of $M = 100$ trees has individual variance $\sigma^2 = 1.0$. Compare ensemble variance when $\rho = 0.40$ (Bagging) vs $\rho = 0.05$ (Random Forest).</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p>$\text{Var} = \rho \sigma^2 + \frac{1 - \rho}{M} \sigma^2$.</p>
+                <ul>
+                    <li>Bagging ($\rho = 0.40$): $0.40(1) + \frac{0.60}{100}(1) = 0.406$.</li>
+                    <li>Random Forest ($\rho = 0.05$): $0.05(1) + \frac{0.95}{100}(1) = 0.0595$.</li>
+                </ul>
+                <p>Random feature subsampling slashes variance by <strong>85.3%</strong>!</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <h3>Exercise 4: Gradient Boosting Pseudo-Residuals</h3>
+        <p>Given targets $y = [10, 20, 30]^T$, baseline mean $F_0 = 20$. Compute the pseudo-residuals $r_i$ and the updated predictions $F_1(x)$ when $h_1(x) = [-8, 0, 8]$ with learning rate $\nu = 0.1$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p>Pseudo-residuals: $r_1 = 10 - 20 = -10, r_2 = 20 - 20 = 0, r_3 = 30 - 20 = +10$.</p>
+                <p>Updated predictions: $F_1(x) = 20 + 0.1 \times h_1(x) = [19.2, 20.0, 20.8]^T$.</p>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>

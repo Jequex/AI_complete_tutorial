@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 30.2: Exercises &amp; Solutions — PagedAttention &amp; Continuous Batching</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 30.2 Lecture</a>
+    <h1>Topic 30.2: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problems on memory fragmentation, PagedAttention block tracking, Copy-on-Write forks, and continuous batching scheduling.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Quantitative Analysis of Memory Fragmentation</h3>
+      <p>
+        A 40 GB KV memory pool serves requests with average context length $\bar{L} = 600$ tokens, but the model supports $S_{\text{max}} = 4096$ tokens. Each token consumes 320 KB.
+      </p>
+      <ol>
+        <li>Compute memory waste and concurrent request capacity under contiguous pre-allocation.</li>
+        <li>Compute memory waste and concurrent capacity under PagedAttention with $\mathcal{B}_{\text{size}} = 16$.</li>
+        <li>Calculate the throughput capacity gain factor.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Contiguous Pre-allocation</h4>
+          <p>Allocated per sequence: $4096 \times 320 \text{ KB} = 1.31072 \text{ GB}$.</p>
+          <p>Used per sequence: $600 \times 320 \text{ KB} = 0.192 \text{ GB}$.</p>
+          $$\text{Waste} = 1 - \frac{600}{4096} = \mathbf{85.35\%}$$
+          $$\text{Capacity} = \lfloor 40 / 1.31072 \rfloor = \mathbf{30 \text{ concurrent requests}}$$
+
+          <h4>2. PagedAttention ($\mathcal{B}_{\text{size}} = 16$)</h4>
+          $$\mathbb{E}[\text{Wasted Tokens}] = \frac{15}{2} = 7.5 \text{ tokens} \implies \text{Waste} = \frac{7.5}{600} = \mathbf{1.25\%}$$
+          $$\text{Allocated per sequence} \approx (600 + 7.5) \times 320 \text{ KB} \approx 0.1944 \text{ GB}$$
+          $$\text{Capacity} = \lfloor 40 / 0.1944 \rfloor = \mathbf{205 \text{ concurrent requests}}$$
+
+          <h4>3. Capacity Gain</h4>
+          $$\text{Gain Factor} = \frac{205}{30} \approx \mathbf{6.83\times}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Copy-on-Write Physical Block Allocation Trace</h3>
+      <p>
+        A prompt of 35 tokens is submitted with parallel sampling $n=3$ using $\mathcal{B}_{\text{size}} = 16$. Trace physical block allocations and reference counts when Branch A generates 1 token and Branch B generates 15 tokens.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Prompt Ingestion</h4>
+          <p>Prompt requires $\lceil 35/16 \rceil = 3$ blocks: $P_1$ (tokens 0..15), $P_2$ (16..31), $P_3$ (32..34, partial). All three branches ($A, B, C$) point to $[P_1, P_2, P_3]$ with $\text{ref\_count} = 3$. Memory overhead is zero bytes.</p>
+
+          <h4>2. Branch A Generates 1 Token</h4>
+          <p>Block $P_3$ has $\text{ref\_count} = 3 > 1$. Copy-on-Write triggers: a new block $P_4$ is allocated, tokens 32..34 are copied, token 35 is appended. $\text{ref\_count}(P_3)$ decrements to 2; $\text{ref\_count}(P_4) = 1$.</p>
+
+          <h4>3. Branch B Generates 15 Tokens</h4>
+          <p>Branch B copies tokens 32..34 into new block $P_5$, filling it with 13 tokens (48 total). Its remaining 2 tokens allocate a new physical block $P_6$. Final block table for Branch B: $[P_1, P_2, P_5, P_6]$.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Throughput Comparison: Static vs. Continuous Batching</h3>
+      <p>
+        Compare execution time for 8 requests (4 running, 4 queued) whose generation lengths vary from 20 to 200 tokens under static batching vs. continuous iteration-level scheduling.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>Static Batching</strong>: Waits for the longest sequence (200 tokens) in Batch 1 before starting Batch 2: $2 \times (20 \text{ ms} + 200 \times 10 \text{ ms}) = \mathbf{4040 \text{ ms}}$.</p>
+          <p><strong>Continuous Batching</strong>: As soon as a sequence completes at step 20, 40, or 60, a queued request immediately takes its place. Total time drops to $\approx \mathbf{2400 \text{ ms}}$ (a $\mathbf{1.68\times}$ speedup with zero idle slot waste).</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

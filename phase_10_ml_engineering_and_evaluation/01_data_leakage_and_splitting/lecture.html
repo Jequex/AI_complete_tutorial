@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 10.1: Data Partitioning, Cross-Validation & Data Leakage Prevention — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 10 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 10.1: Data Partitioning, Cross-Validation & Data Leakage</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        The silent killer of production ML models: why testing on train data is cheating, taxonomy of data leakage, Freedman's paradox, and split-first engineering protocols.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        In production machine learning, over 80% of project failures are caused not by subpar model architectures, but by flawed dataset partitioning and subtle <strong>data leakage</strong>. A model trained on contaminated data will exhibit glowing offline validation metrics (95–99% accuracy) only to collapse instantly upon deployment to live traffic.
+    </p>
+
+    <div class="callout">
+        <h3>🧭 The 12-Year-Old Analogy: The Leaked Exam Answer Key</h3>
+        <p>
+            Imagine a student preparing for the statewide 8th-grade mathematics championship.
+        </p>
+        <ul>
+            <li><strong>Testing on Training Data (Memorizing the Textbook):</strong> If the teacher gives the student 50 practice problems with answers, and then hands them an exam containing the exact same 50 questions, a score of 100% proves nothing about problem-solving capability—it only proves memorization. Testing on training data is cheating.</li>
+            <li><strong>The Validation Split (Mock Practice Exams):</strong> The teacher holds back 20 unseen questions as a practice test. The student studies on the remaining problems, assesses their weaknesses on the practice test, and tunes their study strategies.</li>
+            <li><strong>The Test Set (The Sealed Championship Vault):</strong> The final championship exam is locked in a titanium vault. No one sees it until test day. It is administered once, providing an unbiased grade.</li>
+            <li><strong>Data Leakage (The Stolen Answer Key):</strong> If question #14's answer was accidentally photocopied onto the student's study notes, the student easily aces mock exams. But on championship day, question #14 has different numbers, the shortcut collapses, and the student flunks completely.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Meaning & Engineering Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{D} = \{(x_i, y_i)\}_{i=1}^N$</td>
+                <td>Dataset</td>
+                <td>Full raw dataset of $N$ instances with features $x_i \in \mathbb{R}^d$ and target $y_i$</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{D}_{\text{train}}$</td>
+                <td>Subset $\subset \mathcal{D}$</td>
+                <td>Training set used strictly to fit parameter weights $\theta$</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{D}_{\text{val}}$</td>
+                <td>Subset $\subset \mathcal{D}$</td>
+                <td>Validation set used to select model architectures and tune hyperparameters $\lambda$</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{D}_{\text{test}}$</td>
+                <td>Subset $\subset \mathcal{D}$</td>
+                <td>Holdout test set evaluated strictly once to report unbiased expected risk</td>
+            </tr>
+            <tr>
+                <td>$R(f)$</td>
+                <td>$\mathbb{R}_{\ge 0}$</td>
+                <td>True generalization risk: $\mathbb{E}_{(X,Y)\sim \mathcal{P}}[L(f(X), Y)]$</td>
+            </tr>
+            <tr>
+                <td>$\hat{R}_{\text{CV}}$</td>
+                <td>$\mathbb{R}_{\ge 0}$</td>
+                <td>Cross-validation estimator of generalization risk averaged across $K$ folds</td>
+            </tr>
+            <tr>
+                <td>$t_{\text{pred}}, t_{\text{event}}$</td>
+                <td>Time domain</td>
+                <td>Time of prediction inference vs. time when outcome event actually manifests</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Architecture of Dataset Splitting</h2>
+    <p>
+        Machine learning optimizes the empirical risk $R_{\text{emp}}(\theta) = \frac{1}{|\mathcal{D}|}\sum_{i=1}^N L(f(x_i; \theta), y_i)$ as a proxy for the true population risk $R(f) = \mathbb{E}[L(f(X), Y)]$. If evaluation is conducted on the same data used to compute parameter gradients, the empirical error systematically underestimates true error due to optimistic sample bias.
+    </p>
+
+    <div class="callout callout-danger">
+        <strong>The Cardinal Rule of ML Testing:</strong> Never use test set feedback to tune hyperparameters, pick feature subsets, or modify architectures. If you do, your test set becomes a validation set, invalidating its statistical independence.
+    </div>
+
+    <h2>4. Anatomy of Data Leakage</h2>
+    <p>
+        Data leakage arises whenever features contain information about the target variable that will not be realistically accessible at inference time.
+    </p>
+
+    <h3>4.1 Target Leakage (Post-Event Features)</h3>
+    <p>
+        Occurs when a predictor variable is updated or generated chronologically after the event being predicted has occurred.
+    </p>
+    <ul>
+        <li><strong>Hospital Readmission:</strong> Feature <code>discharge_medication_code</code> is populated only after the doctor decides to re-admit the patient.</li>
+        <li><strong>Fraud Detection:</strong> Column <code>chargeback_dispute_filed</code> appears 10 days after the fraudulent swipe occurred.</li>
+    </ul>
+
+    <h3>4.2 Preprocessing Leakage & Freedman's Paradox</h3>
+    <p>
+        If preprocessing operations—such as calculating feature means $\mu$, variances $\sigma^2$, imputing median values, or performing feature selection—are executed on the whole dataset prior to train/test partitioning, information about the validation/test fold leaks into the training pipeline.
+    </p>
+    <p>
+        In high dimensions ($D \gg N$), <strong>Freedman's Paradox</strong> proves that selecting the top correlated features on the full dataset before cross-validation produces models with 90%+ apparent accuracy on purely independent Gaussian noise where true predictive power is exactly 50%.
+    </p>
+
+    <h2>5. Cross-Validation Strategies</h2>
+    <p>
+        When working with finite datasets, a single train/validation split suffers from sample variance. $K$-Fold Cross Validation partitions the training data into $K$ disjoint partitions:
+    </p>
+    $$\hat{R}_{\text{CV}} = \frac{1}{K}\sum_{k=1}^K R_{\text{emp}}\left(f^{(-k)}; \mathcal{S}_k\right)$$
+
+    <h3>5.1 Stratified $K$-Fold</h3>
+    <p>
+        For datasets with severe class imbalance (e.g. 1% fraud), random sampling can result in validation folds containing zero positive samples. Stratified $K$-Fold guarantees that every fold contains the exact same label ratio as the global dataset.
+    </p>
+
+    <h3>5.2 Time-Series & Forward-Chaining CV</h3>
+    <p>
+        For temporal sequences, random shuffling leaks future events into past training. Forward-chaining splits train strictly on past intervals to forecast future intervals:
+    </p>
+    <pre><code>Split 1: Train [Week 1]       ──► Val [Week 2]
+Split 2: Train [Week 1-2]     ──► Val [Week 3]
+Split 3: Train [Week 1-3]     ──► Val [Week 4]</code></pre>
+
+    <h2>6. Production Leakage Prevention Checklist</h2>
+    <ul>
+        <li><strong>Split-First Doctrine:</strong> The very first line of code must partition the data before any transformations.</li>
+        <li><strong>Encapsulated Pipelines:</strong> Fit scalers and selectors exclusively on the training split using pipeline objects.</li>
+        <li><strong>Temporal Audit:</strong> Verify the database write timestamp of every single feature column against prediction time $t_{\text{pred}}$.</li>
+        <li><strong>Group-Aware Splitting:</strong> Ensure repeated measurements from the same patient, customer, or session are quarantined to a single fold using Group $K$-Fold.</li>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 14.3: Exercises &amp; Solutions — Classic CNNs &amp; ResNet</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-easy { background-color: #dcfce7; color: #15803d; }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: #fee2e2; color: #b91c1c; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 14 Portal</a>
+
+    <h1>Topic 14.3: Exercises &amp; Solutions — Classic CNNs &amp; ResNet</h1>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <span class="badge badge-easy">Problem 1: Easy</span>
+        <h3>Gradient Backpropagation Through a Single Residual Block</h3>
+        <p>Consider a 2-dimensional linear residual block $\mathbf{y} = W \mathbf{x} + \mathbf{x}$:</p>
+        $$W = \begin{bmatrix} 0.2 & -0.4 \\ 0.1 & -0.3 \end{bmatrix}, \quad \mathbf{x} = \begin{bmatrix} 1.0 \\ 2.0 \end{bmatrix}$$
+        <ol>
+            <li>Compute the output vector $\mathbf{y} \in \mathbb{R}^2$.</li>
+            <li>If the upstream loss gradient is $\frac{\partial \mathcal{L}}{\partial \mathbf{y}} = [3.0, -1.0]$, compute the gradient flowing through the residual branch ($\frac{\partial \mathcal{L}}{\partial \mathbf{y}} W$).</li>
+            <li>Compute the gradient flowing through the identity shortcut ($\frac{\partial \mathcal{L}}{\partial \mathbf{y}} \mathbf{I}$).</li>
+            <li>Compute the total downstream gradient $\frac{\partial \mathcal{L}}{\partial \mathbf{x}}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Part 1: Forward Pass:</strong></p>
+                $$W \mathbf{x} = \begin{bmatrix} 0.2(1.0) - 0.4(2.0) \\ 0.1(1.0) - 0.3(2.0) \end{bmatrix} = \begin{bmatrix} -0.6 \\ -0.5 \end{bmatrix}$$
+                $$\mathbf{y} = W \mathbf{x} + \mathbf{x} = \begin{bmatrix} -0.6 \\ -0.5 \end{bmatrix} + \begin{bmatrix} 1.0 \\ 2.0 \end{bmatrix} = \begin{bmatrix} 0.4 \\ 1.5 \end{bmatrix}$$
+
+                <p><strong>Part 2: Residual Branch Gradient:</strong></p>
+                $$\mathbf{g}_{\text{res}} = [3.0, -1.0] \begin{bmatrix} 0.2 & -0.4 \\ 0.1 & -0.3 \end{bmatrix} = [3.0(0.2) - 0.1, 3.0(-0.4) + 0.3] = [0.5, -0.9]$$
+
+                <p><strong>Part 3: Identity Shortcut Gradient:</strong></p>
+                $$\mathbf{g}_{\text{skip}} = \frac{\partial \mathcal{L}}{\partial \mathbf{y}} \mathbf{I} = [3.0, -1.0]$$
+
+                <p><strong>Part 4: Total Downstream Gradient:</strong></p>
+                $$\frac{\partial \mathcal{L}}{\partial \mathbf{x}} = \mathbf{g}_{\text{res}} + \mathbf{g}_{\text{skip}} = [0.5, -0.9] + [3.0, -1.0] = \mathbf{[3.5, -1.9]}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <span class="badge badge-medium">Problem 2: Medium</span>
+        <h3>Vanishing Gradient Decay Rate: Plain vs. ResNet</h3>
+        <p>Consider a network with $L$ sequential blocks where each Jacobian norm is bounded by $\gamma = 0.7 < 1.0$:</p>
+        $$\left\| \frac{\partial \mathcal{F}_l}{\partial \mathbf{x}_l} \right\| \le \gamma = 0.7$$
+        <ol>
+            <li>Derive an upper bound for the gradient ratio $\frac{\|\frac{\partial \mathcal{L}}{\partial \mathbf{x}_0}\|}{\|\frac{\partial \mathcal{L}}{\partial \mathbf{x}_L}\|}$ for a plain network ($\mathbf{x}_{l+1} = \mathcal{F}_l(\mathbf{x}_l)$).</li>
+            <li>Derive the gradient formula for a residual network ($\mathbf{x}_{l+1} = \mathbf{x}_l + \mathcal{F}_l(\mathbf{x}_l)$).</li>
+            <li>For $L = 34$ layers, calculate the numerical value of the plain network gradient attenuation and contrast it with ResNet.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Part 1: Plain Network Gradient Bound:</strong></p>
+                $$\frac{\partial \mathcal{L}}{\partial \mathbf{x}_0} = \frac{\partial \mathcal{L}}{\partial \mathbf{x}_L} \prod_{l=0}^{L-1} \frac{\partial \mathcal{F}_l}{\partial \mathbf{x}_l} \implies \frac{\|\frac{\partial \mathcal{L}}{\partial \mathbf{x}_0}\|}{\|\frac{\partial \mathcal{L}}{\partial \mathbf{x}_L}\|} \le \gamma^L$$
+
+                <p><strong>Part 2: ResNet Gradient Formula:</strong></p>
+                $$\frac{\partial \mathcal{L}}{\partial \mathbf{x}_0} = \frac{\partial \mathcal{L}}{\partial \mathbf{x}_L} \left( \mathbf{I} + \frac{\partial}{\partial \mathbf{x}_0} \sum_{l=0}^{L-1} \mathcal{F}_l(\mathbf{x}_l) \right)$$
+                <p>The identity matrix term $\mathbf{I}$ ensures gradient flow is not subject to multiplicative decay $\gamma^L$.</p>
+
+                <p><strong>Part 3: Evaluation for $L=34$:</strong></p>
+                $$\gamma^{34} = (0.7)^{34} \approx 5.41 \times 10^{-6}$$
+                <p>In the plain network, gradients are crushed by a factor of $180,000\times$, completely starving early layers of learning signals. ResNet's identity highway preserves the gradient magnitude unhindered.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <span class="badge badge-hard">Problem 3: Hard</span>
+        <h3>The Bottleneck Block: FLOPs &amp; Parameter Analysis</h3>
+        <p>Compare two residual block designs for processing an input feature volume $[C=256, H=56, W=56] \to [C=256, H=56, W=56]$:</p>
+        <ul>
+            <li><strong>Design A (Basic Residual Block):</strong> Two $3 \times 3$ conv layers with 256 channels each.</li>
+            <li><strong>Design B (Bottleneck Residual Block):</strong> $1 \times 1$ conv ($256 \to 64$), $3 \times 3$ conv ($64 \to 64$), $1 \times 1$ conv ($64 \to 256$).</li>
+        </ul>
+        <ol>
+            <li>Calculate total convolutional weights (excluding biases) for Design A and Design B.</li>
+            <li>Calculate total MAC operations for both designs on a $56 \times 56$ feature map.</li>
+            <li>Compute the parameter and FLOP reduction percentages.</li>
+            <li>Why is the Bottleneck Block essential for ResNet-101 and ResNet-152?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Part 1: Weights:</strong></p>
+                <ul>
+                    <li>Design A: $2 \times (256 \times 256 \times 3 \times 3) = \mathbf{1,179,648 \text{ weights}}$</li>
+                    <li>Design B: $(64 \times 256 \times 1) + (64 \times 64 \times 9) + (256 \times 64 \times 1) = 16,384 + 36,864 + 16,384 = \mathbf{69,632 \text{ weights}}$</li>
+                </ul>
+
+                <p><strong>Part 2: MACs ($56 \times 56 = 3,136$ locations):</strong></p>
+                <ul>
+                    <li>Design A: $3,136 \times 1,179,648 \approx \mathbf{3.70 \text{ GMACs}}$</li>
+                    <li>Design B: $3,136 \times 69,632 \approx \mathbf{0.218 \text{ GMACs}}$</li>
+                </ul>
+
+                <p><strong>Part 3: Reduction:</strong></p>
+                $$\text{Ratio} = \frac{69,632}{1,179,648} \approx 0.0590 \implies \mathbf{94.1\% \text{ reduction in parameters and compute!}}$$
+
+                <p><strong>Part 4: Deep ResNet Scaling:</strong></p>
+                <p>
+                    By reducing compute by $17\times$, the Bottleneck block makes scaling to 101 or 152 layers computationally tractable on modern GPUs.
+                </p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

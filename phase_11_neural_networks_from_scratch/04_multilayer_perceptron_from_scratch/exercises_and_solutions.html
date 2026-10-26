@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 11.4: Exercises &amp; Solutions — Multilayer Perceptron From Scratch</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-easy { background-color: #dcfce7; color: #15803d; }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: #fee2e2; color: #b91c1c; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            outline: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 11 Portal</a>
+
+    <h1>Topic 11.4: Exercises &amp; Solutions — Multilayer Perceptron From Scratch</h1>
+    <p><em>End-to-end backpropagation hand traces, Xavier initialization proofs, and geometric folding analysis.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <span class="badge badge-medium">Medium</span>
+        <h3>Problem 1: Manual Forward and Backward Pass on XOR</h3>
+        <p>Consider an MLP ($2 \to 2 \to 1$) with Tanh hidden activation and Sigmoid output, trained on sample $\mathbf{x} = [1, 0]^T$ with target $y = 1$:</p>
+        $$W^{[1]} = \begin{bmatrix} 0.5 & 0.5 \\ -0.5 & -0.5 \end{bmatrix}, \quad \mathbf{b}^{[1]} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \quad W^{[2]} = \begin{bmatrix} 1 & 1 \end{bmatrix}, \quad b^{[2]} = 0$$
+        <ol>
+            <li>Compute $\mathbf{z}^{[1]}$, $\mathbf{a}^{[1]}$, $z^{[2]}$, and prediction $\hat{y}$.</li>
+            <li>Compute output error $\delta^{[2]}$ and backpropagated hidden error $\boldsymbol{\delta}^{[1]}$.</li>
+            <li>Compute parameter gradients $\frac{\partial \mathcal{L}}{\partial W^{[2]}}$ and $\frac{\partial \mathcal{L}}{\partial W^{[1]}}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Forward Pass:</strong></p>
+                $$\mathbf{z}^{[1]} = [0.5, -0.5]^T \implies \mathbf{a}^{[1]} \approx [0.4621, -0.4621]^T$$
+                $$z^{[2]} = 1(0.4621) + 1(-0.4621) = 0 \implies \hat{y} = \sigma(0) = 0.5$$
+                <p><strong>2. Error Signals:</strong></p>
+                $$\delta^{[2]} = \hat{y} - y = 0.5 - 1.0 = -0.5$$
+                $$\boldsymbol{\delta}^{[1]} = (\delta^{[2]} W^{[2]}) \odot (1 - (\mathbf{a}^{[1]})^2) = [-0.5, -0.5] \times 0.7864 \approx [-0.3932, -0.3932]^T$$
+                <p><strong>3. Parameter Gradients:</strong></p>
+                $$\frac{\partial \mathcal{L}}{\partial W^{[2]}} = \delta^{[2]} (\mathbf{a}^{[1]})^T \approx [-0.2311, 0.2311]$$
+                $$\frac{\partial \mathcal{L}}{\partial W^{[1]}} = \boldsymbol{\delta}^{[1]} \mathbf{x}^T \approx \begin{bmatrix} -0.3932 & 0 \\ -0.3932 & 0 \end{bmatrix}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <span class="badge badge-medium">Medium</span>
+        <h3>Problem 2: Derivation of Xavier / Glorot Initialization</h3>
+        <p>Let $z = \sum_{i=1}^{n_{\text{in}}} w_i x_i$ with independent zero-mean weights and inputs.</p>
+        <ol>
+            <li>Prove that $\operatorname{Var}(z) = n_{\text{in}} \operatorname{Var}(w) \operatorname{Var}(x)$.</li>
+            <li>Derive the variance condition for forward stability and explain the harmonic mean compromise $\operatorname{Var}(w) = \frac{2}{n_{\text{in}} + n_{\text{out}}}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Variance derivation:</strong></p>
+                $$\operatorname{Var}(z) = \sum_{i=1}^{n_{\text{in}}} \operatorname{Var}(w_i x_i) = \sum_{i=1}^{n_{\text{in}}} \mathbb{E}[w_i^2]\mathbb{E}[x_i^2] = n_{\text{in}} \operatorname{Var}(w) \operatorname{Var}(x)$$
+                <p><strong>2. Stability compromise:</strong></p>
+                <p>Forward pass stability requires $\operatorname{Var}(w) = 1 / n_{\text{in}}$. Backward pass stability requires $\operatorname{Var}(w) = 1 / n_{\text{out}}$. Taking the harmonic mean yields $\operatorname{Var}(w) = \frac{2}{n_{\text{in}} + n_{\text{out}}}$, giving uniform bounds $\pm \sqrt{\frac{6}{n_{\text{in}} + n_{\text{out}}}}$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <span class="badge badge-hard">Hard</span>
+        <h3>Problem 3: Hidden Representation Geometry in XOR</h3>
+        <p>Let hidden neurons compute step functions $h_1 = \Theta(x_1 + x_2 - 0.5)$ and $h_2 = \Theta(x_1 + x_2 - 1.5)$.</p>
+        <ol>
+            <li>Map the four XOR input points into the 2D hidden space $(h_1, h_2)$.</li>
+            <li>Prove that the points are linearly separable in this hidden space.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Coordinate mapping:</strong></p>
+                <ul>
+                    <li>$(0, 0) \to (0, 0)$ (Class 0)</li>
+                    <li>$(0, 1) \to (1, 0)$ (Class 1)</li>
+                    <li>$(1, 0) \to (1, 0)$ (Class 1)</li>
+                    <li>$(1, 1) \to (1, 1)$ (Class 0)</li>
+                </ul>
+                <p><strong>2. Linear separability:</strong></p>
+                <p>The decision rule $h_1 - 2h_2 - 0.5 > 0$ yields $+0.5$ for $(1, 0)$ and $-0.5$ or $-1.5$ for $(0, 0)$ and $(1, 1)$. The hidden layer folds the space so the alternating corners collapse into a single cluster easily separated by a straight line.</p>
+            </div>
+        </details>
+    </div>
+
+    <p style="margin-top: 3rem;"><a href="../index.html" class="back-link">← Back to Phase 11 Portal</a></p>
+</body>
+</html>

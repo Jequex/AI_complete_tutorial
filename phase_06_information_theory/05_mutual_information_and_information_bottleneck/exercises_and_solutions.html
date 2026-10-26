@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.5: Exercises & Solutions — Mutual Information & Information Bottleneck</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .exercise-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .difficulty-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .intro { background: #dbeafe; color: #1e40af; }
+        .intermediate { background: #fef3c7; color: #92400e; }
+        .advanced { background: #fee2e2; color: #991b1b; }
+        details {
+            margin-top: 1.25rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            background: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.5: Exercises & Solutions</h1>
+    <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 2rem;">
+        Mastering Channel Capacity, Data Processing Inequality, Feature Selection, and the Information Bottleneck.
+    </p>
+
+    <!-- Exercise 1 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intro">Introductory (Age 12+)</span>
+        <h3>Exercise 1: Mutual Information of a Binary Symmetric Channel</h3>
+        <p>A channel flips bits with error rate $p = 0.10$. Inputs $0$ and $1$ are equally likely.</p>
+        <ol>
+            <li>Compute $H(X)$ and $H(Y \mid X)$.</li>
+            <li>Compute Mutual Information $I(X; Y) = H(Y) - H(Y \mid X)$ in bits.</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>1. Entropies:</strong></p>
+                $$H(X) = 1.0\text{ bit}$$
+                $$H(Y \mid X) = H_b(0.10) = -0.10 \log_2(0.10) - 0.90 \log_2(0.90) \approx 0.4690\text{ bits}$$
+                <p><strong>2. Mutual Information:</strong></p>
+                $$I(X; Y) = 1.0000 - 0.4690 = 0.5310\text{ bits}$$
+                <p>Each bit sent through this noisy channel transmits $0.5310$ bits of clean information.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intermediate">Intermediate (Proof)</span>
+        <h3>Exercise 2: The Data Processing Inequality</h3>
+        <p>For Markov chain $X \to Y \to Z$, prove that $I(X; Y) \ge I(X; Z)$.</p>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p>Expand mutual information by the chain rule:</p>
+                $$I(X; Y, Z) = I(X; Y) + I(X; Z \mid Y) = I(X; Z) + I(X; Y \mid Z)$$
+                <p>Since $X \to Y \to Z$ is Markov, $I(X; Z \mid Y) = 0$. Thus:</p>
+                $$I(X; Y) = I(X; Z) + I(X; Y \mid Z)$$
+                <p>Since $I(X; Y \mid Z) \ge 0$, we have:</p>
+                $$I(X; Y) \ge I(X; Z) \quad \blacksquare$$
+                <p><strong>AI Insight:</strong> Successive layers in a deep neural network cannot create information about the original input; they can only isolate and extract task-relevant signals!</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge applied">Applied (Feature Selection)</span>
+        <h3>Exercise 3: Ranking Features via Mutual Information</h3>
+        <p>Target $H(Y) = 0.80\text{ bits}$. Feature A has $H(Y \mid X_A) = 0.25$ bits. Feature B has $H(Y \mid X_B) = 0.70$ bits.</p>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                $$I(X_A; Y) = 0.80 - 0.25 = 0.55\text{ bits}$$
+                $$I(X_B; Y) = 0.80 - 0.70 = 0.10\text{ bits}$$
+                <p>Feature A shares $5.5\times$ more information with the target label and resolves $68.75\%$ of all uncertainty. It should be selected first.</p>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

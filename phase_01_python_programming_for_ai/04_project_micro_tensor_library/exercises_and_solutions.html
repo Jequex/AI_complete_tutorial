@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 1.4: Exercises & Solutions — Capstone Micro-Tensor Library</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 1.4</a>
+    <header>
+        <h1>Topic 1.4: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Capstone Practice: Stride Calculus, Reshaping, Broadcasting &amp; MSE Loss</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Stride Calculus &amp; Zero-Copy Reshaping</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>In PyTorch, calling <code>.view()</code> requires the underlying tensor to be C-contiguous in memory.</p>
+        <ol>
+            <li>State the general formula for C-contiguous strides $(S_0, \dots, S_{k-1})$.</li>
+            <li>Compute the strides for a 3D tensor of shape $(2, 3, 4)$.</li>
+            <li>Explain why a transposed matrix $A^T$ with shape $(3, 2)$ and strides $(1, 3)$ is non-contiguous.</li>
+            <li>Implement <code>reshape(new_shape)</code> that returns a zero-copy view if contiguous, or copies storage if non-contiguous.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Formula:</strong>
+                    $$S_{k-1} = 1, \quad S_{i} = S_{i+1} \times D_{i+1}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Shape (2, 3, 4) Strides:</strong>
+                    $$S_2 = 1, \quad S_1 = 4, \quad S_0 = 12 \implies (12, 4, 1)$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Contiguity Explanation:</strong>
+                    In a contiguous $3 \times 2$ matrix, adjacent columns must be 1 element apart in RAM (strides $(2, 1)$). In $A^T$, column step is 3, breaking memory continuity.
+                </div>
+                <div class="step-box">
+                    <strong>4. Code Implementation:</strong>
+                    <pre><code>def reshape(self, new_shape):
+    if self.is_contiguous():
+        return Tensor(None, shape=new_shape, storage=self.storage, strides=self._default_strides(new_shape))
+    return Tensor(None, shape=new_shape, storage=self._to_contiguous_list())</code></pre>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Broadcasting Mechanics for Bias Addition</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Calculate by hand the broadcasted addition of matrix $Z \in \mathbb{R}^{2 \times 3}$ and bias $b \in \mathbb{R}^3$:</p>
+        <p>$$Z = \begin{bmatrix} 1.0 & 2.0 & 3.0 \\ 4.0 & 5.0 & 6.0 \end{bmatrix}, \quad b = \begin{bmatrix} 0.5 \\ -0.5 \\ 1.0 \end{bmatrix}$$</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Hand Calculation:</strong>
+                    $$Z + b = \begin{bmatrix} 1.0 + 0.5 & 2.0 - 0.5 & 3.0 + 1.0 \\ 4.0 + 0.5 & 5.0 - 0.5 & 6.0 + 1.0 \end{bmatrix} = \begin{bmatrix} 1.5 & 1.5 & 4.0 \\ 4.5 & 4.5 & 7.0 \end{bmatrix}$$
+                    $$\text{Resulting Shape: } (2, 3)$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Mean Squared Error (MSE) Loss Function</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Implement <code>mse_loss(y_true, y_pred)</code> and compute the loss between:</p>
+        <p>$$y = \begin{bmatrix} 1.0 & 0.0 \\ 0.0 & 1.0 \end{bmatrix}, \quad \hat{y} = \begin{bmatrix} 0.8 & 0.1 \\ 0.2 & 0.9 \end{bmatrix}$$</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Hand Calculation:</strong>
+                    $$\text{Squared Errors} = (-0.2)^2 + (0.1)^2 + (0.2)^2 + (-0.1)^2 = 0.04 + 0.01 + 0.04 + 0.01 = 0.10$$
+                    $$\mathcal{L}_{\text{MSE}} = \frac{0.10}{4} = 0.0250$$
+                </div>
+                <div class="step-box">
+                    <pre><code>def mse_loss(y_true: Tensor, y_pred: Tensor) -> float:
+    diffs = [(yp - yt) ** 2 for yt, yp in zip(y_true._to_contiguous_list(), y_pred._to_contiguous_list())]
+    return sum(diffs) / len(diffs)
+
+# Exact match: mse_loss(y, y_hat) -> 0.0250</code></pre>
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

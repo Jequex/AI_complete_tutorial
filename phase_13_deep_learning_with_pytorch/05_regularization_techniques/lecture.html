@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 13.5: Regularization Techniques — Dropout, Weight Decay & Early Stopping</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 13 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 13.5: Regularization Techniques — Dropout, Weight Decay & Early Stopping</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Preventing memorization in overparameterized networks: Inverted Dropout scaling, Decoupled Weight Decay (AdamW), and validation-based early stopping monitors.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        Deep networks possess millions of parameters and can easily memorize random noise. Regularization constrains optimization to discover generalizable patterns.
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Random Obstacle Course & The Safety Harness</h3>
+        <p>
+            Think of coaching a soccer team:
+        </p>
+        <p>
+            <strong>Overfitting (Memorizing the Cones):</strong> If you run drills around fixed cones, players memorize the exact steps. On match day against a real team, they get confused and lose because real opponents don't stand still like cones!
+        </p>
+        <p>
+            <strong>Inverted Dropout:</strong> During practice, you randomly blindfold 3 out of 10 players. The squad cannot rely on a single superstar; every player learns teamwork. On match day, with blindfolds off, playing together is effortless!
+        </p>
+        <p>
+            <strong>Weight Decay:</strong> When a player tries reckless backflips instead of clean passes, you strap on a modest training vest. It discourages wild over-reactions and promotes smooth, controlled technique.
+        </p>
+        <p>
+            <strong>Early Stopping:</strong> When the team hits peak performance during practice, the coach blows the whistle and sends everyone home before exhaustion causes bad habits.
+        </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description & Engineering Interpretation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$p \in [0, 1)$</td>
+                <td>Probability</td>
+                <td>Dropout rate: probability of zeroing an activation during training.</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{m} \sim \text{Bernoulli}(1-p)$</td>
+                <td>Binary Mask</td>
+                <td>Vector of binary switches dynamically sampled each forward step.</td>
+            </tr>
+            <tr>
+                <td>$\lambda > 0$</td>
+                <td>Hyperparameter</td>
+                <td>Weight decay factor penalizing $L_2$ parameter norms.</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{w}(1 - \alpha \lambda)$</td>
+                <td>Weight Shrinkage</td>
+                <td>Multiplicative weight decay executed before gradient addition.</td>
+            </tr>
+            <tr>
+                <td>$k_{\text{patience}}$</td>
+                <td>$\mathbb{N}$</td>
+                <td>Number of validation epochs to wait before arresting training.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Inverted Dropout Expectation Preservation</h2>
+    <p>
+        PyTorch implements <strong>Inverted Dropout</strong>, which scales activations during training by $\frac{1}{1-p}$:
+    </p>
+    $$\mathbf{y}_{\text{train}} = \frac{1}{1-p} (\mathbf{m} \odot \mathbf{x}), \quad \text{where } m_j \sim \text{Bernoulli}(1-p)$$
+    $$\mathbf{y}_{\text{test}} = \mathbf{x}$$
+    <p>
+        Because $\mathbb{E}[m] = 1-p$, $\mathbb{E}[\mathbf{y}_{\text{train}}] = \frac{1}{1-p}(1-p)\mathbf{x} = \mathbf{x}$. The test-time inference forward pass is an exact identity mapping with zero compute overhead!
+    </p>
+
+    <h2>4. Decoupled Weight Decay (AdamW)</h2>
+    <p>
+        Loshchilov &amp; Hutter (2019) proved that adding $L_2$ penalties directly to Adam distorts regularization because adaptive scaling divides the decay term by $\sqrt{\mathbf{v}_t}$. <strong>AdamW</strong> decouples weight decay:
+    </p>
+    $$\mathbf{w}_{t+1} = \mathbf{w}_t (1 - \alpha \lambda) - \frac{\alpha}{\sqrt{\mathbf{v}_t} + \epsilon} \mathbf{m}_t$$
+
+    <h2>5. Hands-on Experiment Verification</h2>
+    <p>
+        Verify Inverted Dropout expectation preservation and Early Stopping recovery in pure Python:
+    </p>
+    <pre><code>python3 phase_13_deep_learning_with_pytorch/05_regularization_techniques/experiment.py</code></pre>
+</body>
+</html>

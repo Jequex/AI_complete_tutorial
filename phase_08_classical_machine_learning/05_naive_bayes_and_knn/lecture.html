@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 8.5: Naive Bayes & K-Nearest Neighbors (KNN) — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .highlight {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.25rem 0;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 08 Hub</a>
+
+    <h1>Topic 8.5: Naive Bayes & K-Nearest Neighbors (KNN)</h1>
+    <p><em>Generative conditional independence, Laplace smoothing, instance-based lazy learning, and the curse of dimensionality.</em></p>
+
+    <div class="analogy-box">
+        <h4>The 12-Year-Old Analogy: Spam Detective & The Lunch Table</h4>
+        <p><strong>Naive Bayes (The Mailroom Spam Detective):</strong> You count how often words like "FREE", "WINNER", and "PRIZE" appear in spam vs friendly emails. Naive Bayes pretends every word was rolled on independent dice. Even though that's "naive", it catches spam amazingly well! <em>Laplace smoothing</em> ensures you never multiply by zero when a brand-new word shows up.</p>
+        <p><strong>KNN ("Tell Me Who Your Neighbors Are"):</strong> Imagine walking into a new school cafeteria. You look at the $k=5$ closest students sitting at a table. If 4 are wearing soccer cleats and 1 has a violin, you decide it's the Soccer table! There is no studying or training phase beforehand: you simply measure physical distance to neighbors on demand.</p>
+    </div>
+
+    <h2>Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description & Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$P(y = c)$</td>
+                <td>Probability $[0, 1]$</td>
+                <td>Class prior probability based on training frequency</td>
+            </tr>
+            <tr>
+                <td>$P(x_j \mid y = c)$</td>
+                <td>Conditional Likelihood</td>
+                <td>Probability of feature $x_j$ occurring given class $c$</td>
+            </tr>
+            <tr>
+                <td>$\alpha$</td>
+                <td>$\mathbb{R}_{\ge 0}$</td>
+                <td>Laplace additive smoothing parameter (default $\alpha=1$)</td>
+            </tr>
+            <tr>
+                <td>$k \in \mathbb{N}$</td>
+                <td>Hyperparameter</td>
+                <td>Number of closest training instances to poll in voting</td>
+            </tr>
+            <tr>
+                <td>$d_2(u, v)$</td>
+                <td>Distance Metric</td>
+                <td>Euclidean $L_2$ distance: $\sqrt{\sum (u_j - v_j)^2}$</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{N}_k(x)$</td>
+                <td>Set of indices</td>
+                <td>The $k$ nearest neighbors of query vector $x$</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>1. Naive Bayes Formulation & Log-Space Inference</h2>
+    <p>By Bayes' Theorem, with the conditional independence assumption:</p>
+    $$P(y = c \mid x) \propto P(y = c) \prod_{j=1}^d P(x_j \mid y = c)$$
+
+    <p>To avoid numerical underflow, we perform the computation in log-space:</p>
+    <div class="highlight">
+        <strong>Log-Space Decision Rule:</strong>
+        $$\hat{y} = \arg\max_{c} \left[ \ln P(y = c) + \sum_{j=1}^d \ln P(x_j \mid y = c) \right]$$
+    </div>
+
+    <p>For discrete text/word counts, <strong>Laplace (Add-1) Smoothing</strong> prevents zero probabilities:</p>
+    $$P(w_j \mid y = c) = \frac{N_{jc} + 1}{N_c + |V|}$$
+
+    <h2>2. K-Nearest Neighbors (KNN) & Distance Metrics</h2>
+    <p>KNN is a non-parametric instance-based lazy learner with $\mathcal{O}(1)$ training and $\mathcal{O}(N d)$ inference time:</p>
+    $$\hat{y}(x_q) = \arg\max_{c} \sum_{i \in \mathcal{N}_k(x_q)} \mathbb{I}(y_i = c)$$
+
+    <p>Distance metrics:</p>
+    <ul>
+        <li><strong>Euclidean ($L_2$):</strong> $d(u, v) = \sqrt{\sum (u_j - v_j)^2}$</li>
+        <li><strong>Manhattan ($L_1$):</strong> $d(u, v) = \sum |u_j - v_j|$</li>
+        <li><strong>Minkowski ($L_p$):</strong> $d(u, v) = \left(\sum |u_j - v_j|^p\right)^{1/p}$</li>
+    </ul>
+
+    <h2>3. The Curse of Dimensionality</h2>
+    <p>As feature dimension $d \to \infty$, the volume of space expands exponentially. The ratio between the distance to the closest neighbor and the farthest neighbor approaches 1:</p>
+    $$\lim_{d \to \infty} \frac{\text{dist}_{\max} - \text{dist}_{\min}}{\text{dist}_{\min}} = 0$$
+    <p>In high dimensions, all points become roughly equidistant from each other, rendering proximity-based methods ineffective without dimensionality reduction!</p>
+
+</body>
+</html>

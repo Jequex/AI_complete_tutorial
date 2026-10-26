@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 2.2: Linear Transformations — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-callout: #f0fdf4;
+      --border-callout: #22c55e;
+      --bg-tech: #eff6ff;
+      --border-tech: #3b82f6;
+      --bg-warn: #fef2f2;
+      --border-warn: #ef4444;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-callout: #064e3b33;
+        --border-callout: #10b981;
+        --bg-tech: #1e3a8a33;
+        --border-tech: #60a5fa;
+        --bg-warn: #7f1d1d33;
+        --border-warn: #f87171;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
+
+    .callout {
+      border-left: 4px solid;
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-kid {
+      background-color: var(--bg-callout);
+      border-color: var(--border-callout);
+    }
+    .callout-tech {
+      background-color: var(--bg-tech);
+      border-color: var(--border-tech);
+    }
+    .callout-warn {
+      background-color: var(--bg-warn);
+      border-color: var(--border-warn);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    code {
+      background-color: var(--code-bg);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.9em;
+    }
+    pre code { background: none; padding: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.2</span>
+    </div>
+    <h1>Topic 2.2: Linear Transformations &amp; Determinants</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Viewing matrices as space-warping machines: rotations, scalings, shears, and the geometric area meaning of determinants.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. The 12-Year-Old Analogy: The Stretchy Rubber Sheet</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The Two Rules of Space Warping</div>
+        <p>Imagine drawing a grid on a sheet of stretchy rubber with origin $(0, 0)$ pinned in the center. Now stretch the rubber with your hands. For it to be a <strong>Linear Transformation</strong>:</p>
+        <ol>
+          <li><strong>Rule 1:</strong> The origin $(0, 0)$ can never move!</li>
+          <li><strong>Rule 2:</strong> All grid lines must remain straight and evenly spaced (no curves, bends, or tears).</li>
+        </ol>
+      </div>
+
+      <pre>
+      BEFORE (Standard Grid)                 AFTER (Transformed Grid: Stretched & Sheared)
+      
+          │   │   │   │                               /   /   /   /
+      ────┼───┼───┼───┼────                       ───/───/───/───/───
+          │   │   │   │                             /   /   /   /
+      ────┼───●───┼───┼────                       ─/───●───/───/───/─
+          │  (0,0)│   │                           /  (0,0)/   /   /
+      ────┼───┼───┼───┼────                       ───/───/───/───/───
+          │   │   │   │                             /   /   /   /
+      </pre>
+    </section>
+
+    <section>
+      <h2>2. Formal Definition: The Superposition Principle</h2>
+      <p>A mapping $T: \mathbb{R}^n \to \mathbb{R}^m$ is a linear transformation if and only if for all vectors $\mathbf{u}, \mathbf{v}$ and scalars $c_1, c_2 \in \mathbb{R}$:</p>
+      <p>$$\boxed{T(c_1 \mathbf{u} + c_2 \mathbf{v}) = c_1 T(\mathbf{u}) + c_2 T(\mathbf{v})}$$</p>
+      <p>Every linear transformation can be computed as matrix multiplication: $T(\mathbf{x}) = A\mathbf{x}$.</p>
+    </section>
+
+    <section>
+      <h2>3. Where do Basis Vectors $\hat{i}$ and $\hat{j}$ Land?</h2>
+      <p>You can understand what any matrix does by following where the two standard basis arrows land:</p>
+      <ul>
+        <li>$\hat{i} = [1, 0]^T$ (1 step right on $x$-axis)</li>
+        <li>$\hat{j} = [0, 1]^T$ (1 step up on $y$-axis)</li>
+      </ul>
+
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 The Columns of $A$ are Just the Landing Sites of $\hat{i}$ and $\hat{j}$!</div>
+        <p>$$A \hat{i} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \begin{bmatrix} 1 \\ 0 \end{bmatrix} = \begin{bmatrix} a \\ c \end{bmatrix} \longleftarrow \mathbf{\text{Column 1 of } A}$$</p>
+        <p>$$A \hat{j} = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \begin{bmatrix} 0 \\ 1 \end{bmatrix} = \begin{bmatrix} b \\ d \end{bmatrix} \longleftarrow \mathbf{\text{Column 2 of } A}$$</p>
+        <p>If $A = \begin{bmatrix} 3 & -2 \\ 1 & 4 \end{bmatrix}$, then $\hat{i}$ lands at $[3, 1]^T$ and $\hat{j}$ lands at $[-2, 4]^T$!</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. The Transformation Zoo</h2>
+      <ul>
+        <li><strong>Scaling:</strong> $\begin{bmatrix} s_x & 0 \\ 0 & s_y \end{bmatrix}$ expands or shrinks axes independently.</li>
+        <li><strong>Rotation ($R_\theta$):</strong>
+          $$\boxed{R_\theta = \begin{bmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{bmatrix}}$$
+          Rotates all 2D space counterclockwise by angle $\theta$.
+        </li>
+        <li><strong>Shear:</strong> $\begin{bmatrix} 1 & k \\ 0 & 1 \end{bmatrix}$ slides horizontal lines like a deck of playing cards.</li>
+        <li><strong>Projection:</strong> $\begin{bmatrix} 1 & 0 \\ 0 & 0 \end{bmatrix}$ squashes 2D space flat onto the 1D $x$-axis.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. The Determinant: The Area Scaling Factor</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 Parallelogram Area</div>
+        <p>Take a $1 \times 1$ square formed by $\hat{i}$ and $\hat{j}$ (original area = 1). When matrix $A$ stretches space, that square turns into a slanted parallelogram. <strong>The Determinant $\det(A)$ is the area of that new parallelogram!</strong></p>
+      </div>
+
+      <p>$$\boxed{\det(A) = ad - bc}$$</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Value of $\det(A)$</th>
+            <th>Geometric Space Effect</th>
+            <th>AI &amp; Neural Network Implication</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$\det(A) > 1$</td>
+            <td>Space <strong>expands</strong></td>
+            <td>Risk of exploding gradients across repeated layers</td>
+          </tr>
+          <tr>
+            <td>$0 < \det(A) < 1$</td>
+            <td>Space <strong>contracts</strong></td>
+            <td>Risk of vanishing gradients</td>
+          </tr>
+          <tr>
+            <td>$\det(A) = 1$</td>
+            <td>Area preserved (rigid rotation)</td>
+            <td>Orthogonal weights (stable representation flow)</td>
+          </tr>
+          <tr>
+            <td>$\det(A) = 0$</td>
+            <td>Space <strong>collapses</strong> to a line or point</td>
+            <td><strong>Irreversible information loss!</strong> Non-invertible ($A^{-1}$ does not exist).</td>
+          </tr>
+          <tr>
+            <td>$\det(A) < 0$</td>
+            <td>Space was <strong>flipped / inverted</strong></td>
+            <td>Orientation reversal (mirror reflection)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="nav-buttons">
+      <a href="../01_scalars_vectors_matrices/exercises_and_solutions.html" class="btn">← Topic 2.1</a>
+      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

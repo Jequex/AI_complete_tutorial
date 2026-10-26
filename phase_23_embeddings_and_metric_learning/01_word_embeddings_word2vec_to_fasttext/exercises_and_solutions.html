@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.1: Exercises &amp; Solutions — Word Embeddings</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.1: Exercises &amp; Solutions</h1>
+    <p><em>Analytical and numerical exercises on Word2Vec, SGNS gradients, FastText subwords, and the Shifted PMI Theorem.</em></p>
+
+    <h2>Problem 1: Softmax vs. Negative Sampling Computational Complexity (Easy)</h2>
+    <p>Given vocabulary size $|\mathcal{V}| = 500,000$ and embedding dimension $d = 300$, compare the computational burden of the full softmax against Skip-Gram with Negative Sampling ($k = 5$).</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Full Softmax:</strong> Requires dot product over all $V$ context vectors: $V \cdot d = 500,000 \times 300 = 150,000,000$ operations for denominator evaluation, plus another $150,000,000$ for probability-weighted gradient accumulation. Total $\approx 3 \times 10^8$ FLOPs per word.</p>
+        <p><strong>SGNS with $k = 5$:</strong> Evaluates $1$ positive dot product and $5$ negative dot products, plus $6$ sigmoid evaluations and gradient updates: $\approx 3 \times (k + 1) \times d = 3 \times 6 \times 300 = 5,400$ FLOPs.</p>
+        <p><strong>Speedup:</strong> $\frac{300,000,000}{5,400} \approx \mathbf{55,555\times}$ acceleration per gradient step.</p>
+    </details>
+
+    <h2>Problem 2: Step-by-Step Gradient Descent Update under SGNS (Medium)</h2>
+    <p>Walk through an exact numerical parameter update for target word <code>cat</code> ($\mathbf{v} = [0.5, -0.2]^\top$), positive context <code>purr</code> ($\mathbf{v}' = [0.8, 0.1]^\top$), and negative sample <code>tractor</code> ($\mathbf{v}' = [-0.4, 0.6]^\top$) with $\eta = 0.1$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Positive Logit:</strong> $z_O = 0.8(0.5) + 0.1(-0.2) = 0.38 \implies \sigma(z_O) \approx 0.5933$.</p>
+        <p><strong>Negative Logit:</strong> $z_1 = -0.4(0.5) + 0.6(-0.2) = -0.32 \implies \sigma(z_1) \approx 0.4207$.</p>
+        <p><strong>Loss:</strong> $\mathcal{J} = -\log(0.5933) - \log(1 - 0.4207) \approx 0.5220 + 0.5459 = 1.0679$.</p>
+        <p><strong>Gradient with respect to center vector:</strong></p>
+        $$\nabla_{\mathbf{v}_{\text{cat}}} \mathcal{J} = -(1 - \sigma(z_O))\mathbf{v}_{\text{purr}}' + \sigma(z_1)\mathbf{v}_{\text{tractor}}' = \begin{bmatrix} -0.49364 \\ 0.21175 \end{bmatrix}$$
+        <p><strong>Updated Vector:</strong> $\mathbf{v}_{\text{cat}}^{(\text{new})} = \begin{bmatrix} 0.5 \\ -0.2 \end{bmatrix} - 0.1 \begin{bmatrix} -0.49364 \\ 0.21175 \end{bmatrix} = \begin{bmatrix} 0.54936 \\ -0.22118 \end{bmatrix}$.</p>
+    </details>
+
+    <h2>Problem 3: FastText Subword Decomposition &amp; Typo Handling (Medium)</h2>
+    <p>Extract 3-grams and 4-grams for <code>learning</code> and typo <code>leraing</code>. Demonstrate how shared subwords preserve semantic retrieval where Word2Vec returns <code>&lt;UNK&gt;</code>.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Bounded string: <code>&lt;learning&gt;</code> yields 3-grams: <code>&lt;le</code>, <code>lea</code>, <code>ear</code>, <code>arn</code>, <code>rni</code>, <code>nin</code>, <code>ing</code>, <code>ng&gt;</code>.</p>
+        <p>Misspelling <code>&lt;leraing&gt;</code> shares prefix <code>&lt;le</code> and suffixes <code>ing</code>, <code>ng&gt;</code>. Because FastText constructs representations via $\mathbf{u}_w = \sum_{g \in \mathcal{G}_w} \mathbf{z}_g$, the learned subword vectors project the misspelled token into the same neighborhood as <code>learning</code>.</p>
+    </details>
+
+    <h2>Problem 4: Levy &amp; Goldberg's Implicit Shifted PMI Theorem (Hard)</h2>
+    <p>Prove that Skip-Gram with Negative Sampling implicitly factorizes the Pointwise Mutual Information matrix shifted by $\log k$:</p>
+    $$\mathbf{v}_w^\top \mathbf{v}_c' = \text{PMI}(w, c) - \log k$$
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Setting the derivative of the local pair objective $\ell(x) = N(w, c) \log \sigma(x) + k \frac{N(w) N(c)}{D} \log \sigma(-x)$ with respect to scalar $x = \mathbf{v}_w^\top \mathbf{v}_c'$ to zero:</p>
+        $$N(w, c)(1 - \sigma(x)) = k \frac{N(w) N(c)}{D} \sigma(x) \implies e^{-x} = \frac{k N(w) N(c)}{N(w, c) D}$$
+        <p>Taking logarithms yields:</p>
+        $$x^* = \log \frac{N(w, c) D}{N(w) N(c)} - \log k = \text{PMI}(w, c) - \log k$$
+    </details>
+
+</body>
+</html>

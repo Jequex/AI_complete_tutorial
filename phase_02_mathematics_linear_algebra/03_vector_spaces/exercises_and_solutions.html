@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 2.3 Exercises & Solutions — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-solution: #f0fdf4;
+      --border-solution: #16a34a;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-solution: #064e3b2e;
+        --border-solution: #10b981;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2.5rem; }
+
+    .problem-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    details.solution {
+      background-color: var(--bg-solution);
+      border: 1px solid var(--border-solution);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    details.solution summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--border-solution);
+      user-select: none;
+      font-size: 1.05rem;
+    }
+    details.solution[open] summary {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 02</a> &gt; <a href="./lecture.html">Topic 2.3</a> &gt; <span>Exercises &amp; Solutions</span>
+    </div>
+    <h1>Topic 2.3: Practice Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Testing linear independence, null space dimensions, solution uniqueness, and LoRA parameter math.</p>
+  </header>
+
+  <main>
+    <!-- PROBLEM 1 -->
+    <div class="problem-box">
+      <h2>Problem 1: Testing Linear Independence &amp; Redundancy</h2>
+      <p>Given $\mathbf{v}_1 = [1, 2, 3]^T$, $\mathbf{v}_2 = [0, 1, 2]^T$, and $\mathbf{v}_3 = [2, 5, 8]^T$ in $\mathbb{R}^3$:</p>
+      <ul>
+        <li><strong>Part A:</strong> Form the linear system $c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + c_3 \mathbf{v}_3 = \mathbf{0}$.</li>
+        <li><strong>Part B:</strong> Solve for $c_1, c_2, c_3$. Are the vectors independent?</li>
+        <li><strong>Part C:</strong> What is the dimension and geometric shape of $\text{Span}(\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3)$?</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A &amp; B: Solving the System</strong></p>
+        <ol>
+          <li>$c_1 + 2c_3 = 0 \implies c_1 = -2c_3$</li>
+          <li>$2c_1 + c_2 + 5c_3 = 0 \implies 2(-2c_3) + c_2 + 5c_3 = 0 \implies c_2 = -c_3$</li>
+          <li>$3c_1 + 2c_2 + 8c_3 = 3(-2c_3) + 2(-c_3) + 8c_3 = 0$ (Consistent!)</li>
+        </ol>
+        <p>Setting $c_3 = 1$ yields non-trivial solution $(c_1, c_2, c_3) = (-2, -1, 1) \neq (0, 0, 0)$. Thus, the vectors are <strong>Linearly Dependent</strong>! In fact, $\mathbf{v}_3 = 2\mathbf{v}_1 + \mathbf{v}_2$.</p>
+
+        <p><strong>Part C: Dimension &amp; Geometric Shape</strong></p>
+        <p>Since $\mathbf{v}_3$ is redundant, the basis consists of $\{\mathbf{v}_1, \mathbf{v}_2\}$.</p>
+        <p>$$\text{Dimension} = \mathbf{2} \quad (\text{A flat 2D plane passing through } (0,0,0) \text{ in } \mathbb{R}^3)$$</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-box">
+      <h2>Problem 2: The Rank-Nullity Theorem &amp; Solution Uniqueness</h2>
+      <p>A matrix $A \in \mathbb{R}^{5 \times 8}$ has $\text{Rank}(A) = 4$.</p>
+      <ul>
+        <li><strong>Part A:</strong> What is the dimension of input space $n$?</li>
+        <li><strong>Part B:</strong> Calculate $\text{Nullity}(A)$.</li>
+        <li><strong>Part C:</strong> Can any solution to $A\mathbf{x} = \mathbf{b}$ be unique?</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A:</strong> $n = 8$ (number of columns).</p>
+        <p><strong>Part B:</strong> $\text{Rank}(A) + \text{Nullity}(A) = n \implies 4 + \text{Nullity} = 8 \implies \mathbf{\text{Nullity}(A) = 4}$.</p>
+        <p><strong>Part C:</strong> No solution can ever be unique! For any solution $\mathbf{x}_0$, adding any of the infinite vectors $\mathbf{z} \in \mathcal{N}(A)$ gives another valid solution: $A(\mathbf{x}_0 + \mathbf{z}) = A\mathbf{x}_0 + \mathbf{0} = \mathbf{b}$.</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-box">
+      <h2>Problem 3: LoRA Parameter Reduction Calculation</h2>
+      <p>A Transformer query matrix $W_Q \in \mathbb{R}^{4096 \times 4096}$ is fine-tuned via LoRA ($\Delta W = B A$) with rank $r = 8$.</p>
+      <ul>
+        <li><strong>Part A:</strong> Count parameters in full fine-tuning.</li>
+        <li><strong>Part B:</strong> Count parameters in LoRA ($r = 8$).</li>
+        <li><strong>Part C:</strong> Calculate the percentage reduction.</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A: Full:</strong> $4096 \times 4096 = \mathbf{16,777,216}$ parameters.</p>
+        <p><strong>Part B: LoRA:</strong> $(4096 \times 8) + (8 \times 4096) = 32,768 + 32,768 = \mathbf{65,536}$ parameters.</p>
+        <p><strong>Part C: Reduction:</strong> $1 - \frac{65,536}{16,777,216} = 1 - 0.0039 = \mathbf{99.61\% \text{ reduction}}$!</p>
+      </details>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="./lecture.html" class="btn">← Back to Lecture</a>
+      <a href="../04_eigenvalues_eigenvectors/lecture.html" class="btn btn-primary">Next Topic: 2.4 Eigenvalues &amp; Eigenvectors →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

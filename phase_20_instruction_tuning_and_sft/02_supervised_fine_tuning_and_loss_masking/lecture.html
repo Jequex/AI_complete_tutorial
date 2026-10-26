@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 20.2: Supervised Fine-Tuning &amp; Loss Masking — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 20 Hub</a>
+    
+    <h1>Topic 20.2: Supervised Fine-Tuning &amp; Loss Masking</h1>
+    <p><em>Conditioning on Questions While Restricting Optimization Exclusively to Answers</em></p>
+
+    <div class="card">
+        <h3>Executive Summary</h3>
+        <p>In Supervised Fine-Tuning (SFT), models are trained on prompt-response pairs $(\mathbf{x}, \mathbf{y})$. However, calculating loss over the entire sequence creates a catastrophic pathology: the model expends gradients memorizing the user's questions rather than learning how to answer them. <strong>Loss Masking</strong> sets target labels on all prompt tokens to $-100$, guaranteeing that $\nabla_\theta \mathcal{L}_{\text{prompt}} = \mathbf{0}$ while computing gradients strictly over response tokens:
+        $$\mathcal{L}_{\text{SFT}}(\theta) = -\frac{1}{|\mathcal{T}_{\text{resp}}|} \sum_{t \in \mathcal{T}_{\text{resp}}} \log P_\theta(w_t \mid w_{<t})$$</p>
+    </div>
+
+    <div class="analogy">
+        <h3>The 12-Year-Old Analogy: Grading the Student's Answers, Not the Exam Questions</h3>
+        <p>Imagine taking a History test. The exam paper has printed questions in bold: <em>"Who was the first President of the United States?"</em> In the blank line below, you write: <em>"George Washington."</em></p>
+        <ul>
+            <li><strong>The Crazy Teacher (Unmasked Training):</strong> Grades you on whether you wrote out the entire printed question from memory! You lose points if you don't predict every word in the question prompt. You end up memorizing how questions are phrased instead of studying history!</li>
+            <li><strong>The Sensible Teacher (Masked SFT):</strong> Only grades what you wrote in the answer blank: <em>"George Washington" &rarr; 100%</em>. The printed question was given to you for free!</li>
+        </ul>
+        <p>Loss masking instructs the neural network: <em>"The prompt is already provided by the user. Do not waste capacity trying to predict it!"</em></p>
+    </div>
+
+    <h2>Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>$\mathbf{x} = (x_1, \dots, x_M)$</td><td>Sequence</td><td>Prompt tokens (system instruction, user query, context).</td></tr>
+            <tr><td>$\mathbf{y} = (y_1, \dots, y_K)$</td><td>Sequence</td><td>Ground-truth assistant response tokens.</td></tr>
+            <tr><td>$\mathbf{w} = [\mathbf{x} \,\|\, \mathbf{y}]$</td><td>Sequence</td><td>Full concatenated sequence of length $T = M + K$.</td></tr>
+            <tr><td>$\mathcal{T}_{\text{prompt}}$</td><td>Index Set</td><td>Indices $\{1, \dots, M\}$ corresponding to prompt tokens.</td></tr>
+            <tr><td>$\mathcal{T}_{\text{resp}}$</td><td>Index Set</td><td>Indices $\{M+1, \dots, M+K\}$ corresponding to response tokens.</td></tr>
+            <tr><td>$\mathcal{L}_{\text{SFT}}$</td><td>$\mathbb{R}^+$</td><td>Masked cross-entropy loss evaluated on $\mathcal{T}_{\text{resp}}$.</td></tr>
+            <tr><td>$\text{ignore\_index} = -100$</td><td>Index</td><td>PyTorch standard label convention for zero-loss tokens.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>Loss Masking Architecture &amp; Shift Mechanics</h2>
+    <pre><code>Full Sequence: [ &lt;|im_start|&gt; user \n What is 2+2? &lt;|im_end|&gt; \n &lt;|im_start|&gt; assistant \n 4 &lt;|im_end|&gt; ]
+Target Labels: [   -100       -100 -100   -100     -100   -100 -100     -100        -100   '4' &lt;|im_end|&gt; ]
+Gradient:      [     0          0    0       0        0      0    0        0           0     dL/dz   dL/dz  ]
+                     └─────────────────────┬────────────────────┘  └─────────────┬────────────┘
+                                   PROMPT (MASKED)                       RESPONSE (ACTIVE)</code></pre>
+
+    <div class="card">
+        <h3>Mathematical Derivation of Zero Gradient</h3>
+        <p>For cross-entropy loss with target label $t_i$:
+        $$\ell_i = \begin{cases} -\log p_{i, t_i} & t_i \ne -100 \\ 0 & t_i = -100 \end{cases}$$
+        Differentiating with respect to the output logit $z_{i, v}$:
+        $$\frac{\partial \ell_i}{\partial z_{i, v}} = \begin{cases} p_{i, v} - \mathbb{I}[v = t_i] & t_i \ne -100 \\ 0 & t_i = -100 \end{cases}$$
+        Because the derivative is identically zero for all prompt positions $t \in \mathcal{T}_{\text{prompt}}$, no gradients are backpropagated into the weights from the question tokens, completely eliminating prompt memorization.</p>
+    </div>
+
+</body>
+</html>

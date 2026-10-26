@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.2: Exercises &amp; Solutions — Sentence Embeddings &amp; SBERT</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.2: Exercises &amp; Solutions</h1>
+    <p><em>Analytical derivations of the anisotropy cosine floor, SBERT Siamese gradients with difference vectors, BERT-whitening proofs, and retrieval scalability.</em></p>
+
+    <h2>Problem 1: Mathematical Proof of the Anisotropy Cosine Floor (Easy)</h2>
+    <p>Given unrelated representations $\mathbf{u} = \boldsymbol{\mu} + \boldsymbol{\epsilon}_u$ and $\mathbf{v} = \boldsymbol{\mu} + \boldsymbol{\epsilon}_v$ with $\|\boldsymbol{\mu}\|_2 = 10.0$ and $\mathbb{E}[\|\boldsymbol{\epsilon}\|^2] = 4.0$, show that expected cosine similarity is $\approx 0.96$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>The inner product expectation is $\mathbb{E}[\mathbf{u}^\top \mathbf{v}] = \|\boldsymbol{\mu}\|_2^2 = M^2$.</p>
+        <p>The expected norm is $\mathbb{E}[\|\mathbf{u}\|_2^2] = M^2 + \sigma^2$. Hence:</p>
+        $$\mathbb{E}[\cos(\mathbf{u}, \mathbf{v})] \approx \frac{M^2}{M^2 + \sigma^2} = \frac{100}{100 + 4} \approx \mathbf{0.9615}$$
+        <p>In contrast, an isotropic space ($M = 0$) yields $\mathbb{E}[\cos] = 0.0$.</p>
+    </details>
+
+    <h2>Problem 2: SBERT NLI Head Gradient with Absolute Difference (Medium)</h2>
+    <p>Derive the gradient of cross-entropy loss with respect to sentence embedding $\mathbf{u}$ when passed through the feature vector $[\mathbf{u}, \mathbf{v}, |\mathbf{u} - \mathbf{v}|]$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Using the chain rule with block weight decomposition $\mathbf{W} = [\mathbf{W}_u; \mathbf{W}_v; \mathbf{W}_d]$:</p>
+        $$\nabla_{\mathbf{u}} \mathcal{L} = \mathbf{W}_u \mathbf{g} + \text{sgn}(\mathbf{u} - \mathbf{v}) \odot (\mathbf{W}_d \mathbf{g})$$
+        <p>The term $\text{sgn}(\mathbf{u} - \mathbf{v})$ acts as an attractive force for entailment pairs and a repulsive force for contradictions.</p>
+    </details>
+
+    <h2>Problem 3: Derivation of BERT-Whitening (Hard)</h2>
+    <p>Prove that $\tilde{\mathbf{u}} = (\mathbf{u} - \boldsymbol{\mu})\mathbf{U}\boldsymbol{\Lambda}^{-1/2}$ transforms arbitrary sentence embeddings into an isotropic distribution with covariance $\mathbf{I}_d$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Covariance computation:</p>
+        $$\text{Cov}(\tilde{\mathbf{u}}) = \mathbf{W}^\top \boldsymbol{\Sigma} \mathbf{W} = (\mathbf{U} \boldsymbol{\Lambda}^{-1/2})^\top (\mathbf{U} \boldsymbol{\Lambda} \mathbf{U}^\top) (\mathbf{U} \boldsymbol{\Lambda}^{-1/2})$$
+        <p>Applying orthogonality $\mathbf{U}^\top \mathbf{U} = \mathbf{I}$:</p>
+        $$\text{Cov}(\tilde{\mathbf{u}}) = \boldsymbol{\Lambda}^{-1/2} \mathbf{I} \boldsymbol{\Lambda} \mathbf{I} \boldsymbol{\Lambda}^{-1/2} = \boldsymbol{\Lambda}^{-1/2} \boldsymbol{\Lambda} \boldsymbol{\Lambda}^{-1/2} = \mathbf{I}_d$$
+        <p>This stretches the narrow squashed cone back into a uniform hypersphere.</p>
+    </details>
+
+    <h2>Problem 4: Retrieval Scalability Analysis (Medium)</h2>
+    <p>Compare Cross-Encoder vs Bi-Encoder (SBERT) latency on searching $1,000,000$ documents.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Cross-Encoder:</strong> $1,000,000 \times 25 \text{ ms} = 25,000 \text{ s} \approx 6.94 \text{ hours}$.</p>
+        <p><strong>Bi-Encoder:</strong> $10 \text{ ms (encode query)} + 2.5 \text{ ms (cosine dot products)} = \mathbf{12.5 \text{ ms}}$.</p>
+        <p><strong>Speedup:</strong> $2,000,000\times$ faster, making real-time search viable.</p>
+    </details>
+
+</body>
+</html>

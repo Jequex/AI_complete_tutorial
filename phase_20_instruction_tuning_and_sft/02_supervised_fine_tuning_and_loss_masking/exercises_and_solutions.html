@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 20.2: Exercises &amp; Solutions — Supervised Fine-Tuning &amp; Loss Masking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 20 Hub</a>
+    
+    <h1>Topic 20.2: Exercises &amp; Solutions</h1>
+    <p><em>Supervised Fine-Tuning &amp; Loss Masking — Practice Problems &amp; Step-by-Step Derivations</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Numerical Calculation of Masked vs. Unmasked Cross-Entropy (Easy)</h3>
+        <p>A sequence of 4 tokens comprises 2 prompt tokens and 2 response tokens. Output probabilities at each transition step are provided.</p>
+        <ol>
+            <li>Identify the target label sequence under unmasked vs masked SFT training.</li>
+            <li>Compute the exact loss values for both modes.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Targets:</strong><br>
+            - Unmasked: $\mathbf{t}_{\text{unmasked}} = [1, 3, 0]$<br>
+            - Masked: $\mathbf{t}_{\text{masked}} = [-100, 3, 0]$ (prompt transition masked out).</p>
+
+            <p><strong>Step 2: Loss Calculations:</strong><br>
+            - $\mathcal{L}_{\text{unmasked}} = \frac{-\ln(0.4) - \ln(0.6) - \ln(0.8)}{3} \approx 0.5501$<br>
+            - $\mathcal{L}_{\text{SFT}} = \frac{-\ln(0.6) - \ln(0.8)}{2} \approx 0.3670$<br>
+            Masked loss measures strictly the answer prediction performance without penalty from the question.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Gradient Flow Analysis on Masked Positions (Medium)</h3>
+        <p>Derive the weight update gradient $\frac{\partial \mathcal{L}}{\partial W}$ and prove that prompt positions contribute identically zero gradient.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Derivation:</strong><br>
+            For any active position $t$, $\frac{\partial \ell_t}{\partial \mathbf{z}_t} = \mathbf{p}_t - \mathbf{e}_{y_t}$. For masked positions where $y_t = -100$, $\ell_t \equiv 0 \implies \frac{\partial \ell_t}{\partial \mathbf{z}_t} = \mathbf{0}$.<br>
+            $$\frac{\partial \mathcal{L}}{\partial W} = \frac{1}{N_{\text{active}}} \sum_{t=1}^T \mathbb{I}[y_t \ne -100] \mathbf{h}_t^T (\mathbf{p}_t - \mathbf{e}_{y_t}) = \frac{1}{N_{\text{active}}} \sum_{t \in \mathcal{T}_{\text{resp}}} \mathbf{h}_t^T (\mathbf{p}_t - \mathbf{e}_{y_t})$$
+            All terms from $t \in \mathcal{T}_{\text{prompt}}$ evaluate to zero.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Gradient Dilution &amp; Effective Sample Efficiency (Hard)</h3>
+        <p>Analyze an LLM trained on 3,600-token documents summarized into 400-token summaries.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Active Supervision Ratio:</strong><br>
+            In unmasked training, only $10\%$ of tokens correspond to the actual task. In masked SFT, $100\%$ of active tokens correspond to target responses.<br>
+            <strong>Gradient Dilution:</strong> $90\%$ of parameter updates in unmasked training are driven by document text memorization ($\alpha = 0.90$). This causes capacity stealing and destructive gradient interference against instruction following.</p>
+        </details>
+    </div>
+
+</body>
+</html>

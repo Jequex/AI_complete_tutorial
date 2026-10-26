@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9.2: Exercises & Solutions — Dimensionality Reduction (PCA & SVD)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .solution-content {
+            padding: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 9.2</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">Phase 9 Portal</a>
+
+    <h1>Topic 9.2: Exercises &amp; Solutions</h1>
+    <p><em>Rigorous problems covering 2D covariance calculation, Lagrange multiplier orthogonality proofs, SVD singular values, and Eckart-Young reconstruction error.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: 2D Hand Calculation of PCA</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>Consider three centered 2D data points: $X_c = \begin{pmatrix} -2 & -1 \\ 0 & 0 \\ 2 & 1 \end{pmatrix}$.</p>
+        <ol>
+            <li>Compute the sample covariance matrix $C = \frac{1}{N-1} X_c^T X_c$ ($N = 3$).</li>
+            <li>Compute eigenvalues $\lambda_1, \lambda_2$ of $C$.</li>
+            <li>Compute the normalized first principal component $w_1$.</li>
+            <li>What percentage of total variance is captured by $w_1$?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Step 1: Compute covariance matrix:</strong></p>
+                $$X_c^T X_c = \begin{pmatrix} 8 & 4 \\ 4 & 2 \end{pmatrix} \implies C = \frac{1}{2} \begin{pmatrix} 8 & 4 \\ 4 & 2 \end{pmatrix} = \begin{pmatrix} 4 & 2 \\ 2 & 1 \end{pmatrix}$$
+
+                <p><strong>Step 2: Characteristic equation:</strong></p>
+                $$\det(C - \lambda I) = (4 - \lambda)(1 - \lambda) - 4 = \lambda^2 - 5\lambda = 0 \implies \lambda_1 = 5, \; \lambda_2 = 0$$
+
+                <p><strong>Step 3: First eigenvector:</strong></p>
+                $$(C - 5I) w_1 = 0 \implies \begin{pmatrix} -1 & 2 \\ 2 & -4 \end{pmatrix} \begin{pmatrix} w_{11} \\ w_{12} \end{pmatrix} = 0 \implies w_{11} = 2w_{12}$$
+                <p>Normalizing: $w_1 = \begin{pmatrix} 2/\sqrt{5} \\ 1/\sqrt{5} \end{pmatrix} \approx \begin{pmatrix} 0.8944 \\ 0.4472 \end{pmatrix}$.</p>
+
+                <p><strong>Step 4: Explained Variance Ratio:</strong></p>
+                $$\text{EVR}_1 = \frac{5}{5 + 0} = 1.0 \quad (100\%)$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Lagrange Multiplier Proof of Orthogonality</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>When finding the second component $w_2$, we maximize $w_2^T C w_2$ subject to $\|w_2\|_2 = 1$ and $w_1^T w_2 = 0$. Prove that the multiplier for the orthogonality constraint must equal zero.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Form the Lagrangian:</strong></p>
+                $$\mathcal{L}(w_2, \lambda_2, \phi) = w_2^T C w_2 - \lambda_2 (w_2^T w_2 - 1) - \phi (w_1^T w_2)$$
+                <p><strong>Differentiate and set to zero:</strong></p>
+                $$\nabla_{w_2} \mathcal{L} = 2 C w_2 - 2 \lambda_2 w_2 - \phi w_1 = 0$$
+                <p><strong>Pre-multiply by $w_1^T$:</strong></p>
+                $$2 w_1^T C w_2 - 2 \lambda_2 (w_1^T w_2) - \phi (w_1^T w_1) = 0$$
+                <p>Since $C w_1 = \lambda_1 w_1$ and $w_1^T w_2 = 0$, $w_1^T C w_2 = \lambda_1 (w_1^T w_2) = 0$. Because $w_1^T w_1 = 1$:</p>
+                $$0 - 0 - \phi(1) = 0 \implies \phi = 0$$
+                <p>Thus $C w_2 = \lambda_2 w_2$. Subsequent principal components are simply the remaining orthogonal eigenvectors of $C$. $\blacksquare$</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: SVD Singular Values vs Covariance Eigenvalues</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>A centered dataset $X_c \in \mathbb{R}^{101 \times 4}$ has singular values $\sigma = (20.0, 10.0, 4.0, 1.0)$. Compute the eigenvalues $\lambda_j$ of the covariance matrix and determine how many components are needed to capture $\ge 95\%$ of the variance.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Using $\lambda_j = \frac{\sigma_j^2}{N - 1} = \frac{\sigma_j^2}{100}$:</p>
+                <ul>
+                    <li>$\lambda_1 = 400 / 100 = 4.0$ (EVR: $4.0 / 5.17 \approx 77.37\%$)</li>
+                    <li>$\lambda_2 = 100 / 100 = 1.0$ (EVR: $1.0 / 5.17 \approx 19.34\%$)</li>
+                    <li>$\lambda_3 = 16 / 100 = 0.16$ (EVR: $0.16 / 5.17 \approx 3.09\%$)</li>
+                    <li>$\lambda_4 = 1 / 100 = 0.01$ (EVR: $0.01 / 5.17 \approx 0.19\%$)</li>
+                </ul>
+                <p>Cumulative variance with 2 components: $77.37\% + 19.34\% = 96.71\% \ge 95\%$. Retaining 2 components is sufficient.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 4: Frobenius Norm Reconstruction Error</h3>
+            <span class="badge badge-hard">Hard</span>
+        </div>
+        <p>State the Eckart-Young-Mirsky Theorem. If centered data has singular values $\sigma = (10, 6, 2)$, compute the exact Frobenius norm error $\|X_c - \hat{X}_2\|_F$ when truncating to rank 2.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Eckart-Young-Mirsky Theorem:</strong> The truncated SVD $\hat{X}_k = \sum_{j=1}^k \sigma_j u_j v_j^T$ achieves the minimum reconstruction error among all rank-$k$ matrices: $\min_{\text{rank}(A) \le k} \|X - A\|_F = \sqrt{\sum_{j=k+1}^r \sigma_j^2}$.</p>
+                <p><strong>Calculation:</strong> Discarding the 3rd component ($\sigma_3 = 2$):</p>
+                $$\|X_c - \hat{X}_2\|_F^2 = \sigma_3^2 = 2^2 = 4 \implies \|X_c - \hat{X}_2\|_F = \sqrt{4} = 2.0$$
+            </div>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" class="back-link">← Back to Lecture 9.2</a>
+        <a href="../index.html" class="back-link">Phase 9 Portal →</a>
+    </div>
+</body>
+</html>

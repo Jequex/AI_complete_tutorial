@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 5.4: Exercises & Solutions — MAP Estimation & Regularization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+            transition: background 0.2s;
+        }
+        summary:hover {
+            opacity: 0.9;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .takeaway {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
+    <a href="lecture.html" class="back-link" style="margin-left: 1.5rem;">📖 Read Lecture 5.4</a>
+
+    <h1>Topic 5.4: Exercises & Solutions</h1>
+    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Master precision-weighted MAP estimation, closed-form Ridge matrix inversion, and the subgradient calculus of L1 Lasso sparsity.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3 style="margin: 0;">Problem 1: Precision-Weighted 1D Gaussian Mean MAP Estimation</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>Let $X_1, \dots, X_n \sim \mathcal{N}(\mu, \sigma^2)$ with known noise $\sigma^2$. We place a Gaussian prior $\mu \sim \mathcal{N}(\mu_0, \sigma_0^2)$.</p>
+        <ol>
+            <li>Write the log-posterior $J(\mu) = \ln P(D \mid \mu) + \ln P(\mu)$.</li>
+            <li>Differentiate with respect to $\mu$ and solve for $\hat{\mu}_{\text{MAP}}$.</li>
+            <li>Express $\hat{\mu}_{\text{MAP}}$ using precision $\tau = 1/\text{Var}$, with $\tau_{\text{data}} = \frac{n}{\sigma^2}$ and $\tau_{\text{prior}} = \frac{1}{\sigma_0^2}$.</li>
+            <li>Evaluate what happens as $n \to \infty$ or $\sigma_0^2 \to \infty$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>1. Log-Posterior</h4>
+                $$J(\mu) = -\frac{1}{2\sigma^2}\sum_{i=1}^n(X_i - \mu)^2 - \frac{1}{2\sigma_0^2}(\mu - \mu_0)^2 + C$$
+
+                <h4>2. Derivative & Solution</h4>
+                $$\frac{dJ}{d\mu} = \frac{n}{\sigma^2}(\bar{X} - \mu) - \frac{1}{\sigma_0^2}(\mu - \mu_0) = 0$$
+                $$\mathbf{\hat{\mu}_{\text{MAP}} = \frac{\frac{n}{\sigma^2}\bar{X} + \frac{1}{\sigma_0^2}\mu_0}{\frac{n}{\sigma^2} + \frac{1}{\sigma_0^2}}}$$
+
+                <h4>3. Precision-Weighted Form</h4>
+                $$\mathbf{\hat{\mu}_{\text{MAP}} = \frac{\tau_{\text{data}}\bar{X} + \tau_{\text{prior}}\mu_0}{\tau_{\text{data}} + \tau_{\text{prior}}}} \quad \blacksquare$$
+
+                <div class="takeaway">
+                    <strong>Interpretation:</strong> The MAP estimate is a weighted compromise between sample evidence and prior belief. As $n \to \infty$, data precision $\tau_{\text{data}} \to \infty$, causing $\hat{\mu}_{\text{MAP}} \to \bar{X} = \hat{\mu}_{\text{MLE}}$!
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3 style="margin: 0;">Problem 2: Closed-Form Ridge Regression Matrix MAP Derivation</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>In linear regression, $\mathbf{y} \sim \mathcal{N}(X\mathbf{w}, \sigma^2 I_n)$ with Gaussian prior $\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \sigma_0^2 I_d)$.</p>
+        <ol>
+            <li>Write the vector log-posterior $J(\mathbf{w})$.</li>
+            <li>Compute the vector gradient $\nabla_{\mathbf{w}} J(\mathbf{w})$.</li>
+            <li>Set the gradient to zero and derive $\hat{\mathbf{w}}_{\text{MAP}} = (X^T X + \lambda I_d)^{-1} X^T \mathbf{y}$ where $\lambda = \frac{\sigma^2}{\sigma_0^2}$.</li>
+            <li>Explain why $(X^T X + \lambda I_d)$ is guaranteed invertible even when features exceed samples ($d > n$).</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>1. Matrix Log-Posterior</h4>
+                $$J(\mathbf{w}) = -\frac{1}{2\sigma^2}(\mathbf{y} - X\mathbf{w})^T(\mathbf{y} - X\mathbf{w}) - \frac{1}{2\sigma_0^2}\mathbf{w}^T\mathbf{w}$$
+
+                <h4>2. Vector Gradient</h4>
+                $$\nabla_{\mathbf{w}} J(\mathbf{w}) = \frac{1}{\sigma^2} X^T(\mathbf{y} - X\mathbf{w}) - \frac{1}{\sigma_0^2}\mathbf{w} = 0$$
+
+                <h4>3. Deriving the Solution</h4>
+                $$\frac{1}{\sigma^2} X^T X \mathbf{w} + \frac{1}{\sigma_0^2}\mathbf{w} = \frac{1}{\sigma^2} X^T \mathbf{y} \implies \left(X^T X + \frac{\sigma^2}{\sigma_0^2}I_d\right)\mathbf{w} = X^T \mathbf{y}$$
+                $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = (X^T X + \lambda I_d)^{-1} X^T \mathbf{y}} \quad \blacksquare$$
+
+                <div class="takeaway">
+                    <strong>Numerical Stability:</strong> When $d > n$, $X^T X$ is singular. Adding $\lambda I$ shifts all eigenvalues by $+\lambda > 0$, guaranteeing positive definiteness and full invertibility!
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3 style="margin: 0;">Problem 3: The Subgradient Calculus of L1 Sparsity (Soft-Thresholding)</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Consider the 1D Lasso objective: $f(w) = \frac{1}{2}(w - a)^2 + \lambda |w|$. Its subgradient is $\partial |w| = \{+1\}$ if $w > 0$, $[-1, 1]$ if $w = 0$, and $\{-1\}$ if $w < 0$.</p>
+        <ol>
+            <li>Find $w^*$ for $w > 0$.</li>
+            <li>Find $w^*$ for $w < 0$.</li>
+            <li>Using $0 \in \partial f(0)$, prove that $w^* = 0$ if and only if $|a| \le \lambda$.</li>
+            <li>State the unified soft-thresholding operator: $w^* = \operatorname{sign}(a)\max(0, |a| - \lambda)$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>1. Positive Branch ($w > 0$)</h4>
+                $$f'(w) = (w - a) + \lambda = 0 \implies \mathbf{w^* = a - \lambda} \quad (\text{Valid when } a > \lambda)$$
+
+                <h4>2. Negative Branch ($w < 0$)</h4>
+                $$f'(w) = (w - a) - \lambda = 0 \implies \mathbf{w^* = a + \lambda} \quad (\text{Valid when } a < -\lambda)$$
+
+                <h4>3. Zero Branch ($w = 0$)</h4>
+                $$\partial f(0) = -a + [-\lambda, \lambda] = [-a - \lambda, \, -a + \lambda]$$
+                $$0 \in [-a - \lambda, \, -a + \lambda] \iff -\lambda \le a \le \lambda \iff \mathbf{|a| \le \lambda}$$
+
+                <h4>4. Unified Soft-Thresholding Operator</h4>
+                $$\mathbf{w^* = \operatorname{sign}(a) \max(0, \, |a| - \lambda)} \quad \blacksquare$$
+
+                <div class="takeaway">
+                    <strong>The Origin of L1 Sparsity:</strong> Any feature whose unregularized correlation $|a|$ is below threshold $\lambda$ is forced to <strong>exact zero</strong>!
+                </div>
+            </div>
+        </details>
+    </div>
+</body>
+</html>
+

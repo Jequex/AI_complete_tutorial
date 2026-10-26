@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 12: Backpropagation From First Principles — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--badge-bg);
+      border-color: var(--primary);
+    }
+
+    .quickstart {
+      margin-top: 3.5rem;
+      padding: 1.75rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+    .quickstart h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    pre {
+      background-color: #0b0f19;
+      color: #e2e8f0;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+    .pillar-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+    }
+    .pillar-card h3 {
+      font-size: 1.05rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .pillar-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" style="color:var(--primary); text-decoration:none; font-weight:600; display:inline-block; margin-bottom:1rem;">&larr; Back to Full Course Hub</a>
+    <div>
+      <span class="badge">Phase 12</span>
+      <h1>Backpropagation From First Principles</h1>
+      <p class="lead">From Directed Acyclic Graphs and Dual Numbers to Micrograd-Style Scalar Autograd and Vectorized Matrix Backpropagation with Rigorous Gradient Checking.</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- Topic 12.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="01_computational_graphs_and_chain_rule/lecture.html" class="topic-title">12.1 Computational Graphs &amp; the Multivariable Chain Rule</a>
+        <span class="badge">Topic 12.1</span>
+      </div>
+      <p class="topic-desc">Representing mathematical algorithms as Directed Acyclic Graphs (DAGs). Deriving the graph-theoretic multivariable chain rule, branch fan-out summation, and proving why gradient accumulation (+=) is mathematically mandatory over assignment.</p>
+      <div class="topic-links">
+        <a href="01_computational_graphs_and_chain_rule/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_computational_graphs_and_chain_rule/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="01_computational_graphs_and_chain_rule/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="01_computational_graphs_and_chain_rule/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 12.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="02_reverse_mode_vs_forward_mode_autodiff/lecture.html" class="topic-title">12.2 Reverse-Mode vs. Forward-Mode Automatic Differentiation</a>
+        <span class="badge">Topic 12.2</span>
+      </div>
+      <p class="topic-desc">Dual numbers and nilpotent algebra (&epsilon;<sup>2</sup> = 0) for forward-mode JVPs. Tape-based reverse-mode VJPs. The fundamental reason deep learning uses reverse-mode (d_out = 1 vs d_in &gt;&gt; 1), and the memory-compute trade-off of activation checkpointing.</p>
+      <div class="topic-links">
+        <a href="02_reverse_mode_vs_forward_mode_autodiff/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_reverse_mode_vs_forward_mode_autodiff/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="02_reverse_mode_vs_forward_mode_autodiff/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="02_reverse_mode_vs_forward_mode_autodiff/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 12.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="03_scalar_autograd_engine_from_scratch/lecture.html" class="topic-title">12.3 Scalar Autograd Engine From Scratch</a>
+        <span class="badge">Topic 12.3</span>
+      </div>
+      <p class="topic-desc">Constructing a complete micrograd-style Value class in pure Python. Differentiable arithmetic and transcendental closures, recursive post-order DFS topological sorting, and training a 2-layer neural network with verified finite difference GradCheck (< 1e-7).</p>
+      <div class="topic-links">
+        <a href="03_scalar_autograd_engine_from_scratch/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_scalar_autograd_engine_from_scratch/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="03_scalar_autograd_engine_from_scratch/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="03_scalar_autograd_engine_from_scratch/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 12.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="04_tensor_backprop_and_gradient_checking/lecture.html" class="topic-title">12.4 Matrix/Tensor Backpropagation &amp; Gradient Checking</a>
+        <span class="badge">Topic 12.4</span>
+      </div>
+      <p class="topic-desc">Vectorizing backpropagation for modern tensor hardware. Complete matrix calculus derivations for Y = XW + b, dimension bookkeeping heuristics, two-sided central difference GradCheck (O(&epsilon;<sup>2</sup>)), and scale-invariant relative error tolerance bands.</p>
+      <div class="topic-links">
+        <a href="04_tensor_backprop_and_gradient_checking/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_tensor_backprop_and_gradient_checking/lecture.md" class="btn btn-secondary">Lecture (MD)</a>
+        <a href="04_tensor_backprop_and_gradient_checking/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="04_tensor_backprop_and_gradient_checking/experiment.py" class="btn btn-secondary">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Core Pillars -->
+    <div style="margin-top: 3.5rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Core Mathematical Pillars Mastered</h2>
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <h3>Multivariable Graph Chain Rule</h3>
+          <p>Branch fan-out requires sum over all children: dL/dx = &sum; dL/dy &middot; dy/dx.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>Dual Numbers &amp; Nilpotent Algebra</h3>
+          <p>x + &xdot;&epsilon; where &epsilon;<sup>2</sup> = 0 carries exact first-order tangents forward.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>The Deep Learning Asymmetry</h3>
+          <p>Reverse-mode maps R<sup>billions</sup> &rarr; R<sup>1</sup> in a single backward pass, saving millennia of compute.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>DFS Topological Sorting</h3>
+          <p>Post-order reversal guarantees causal dependency resolution before adjoint distribution.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>Tensor Matrix Calculus</h3>
+          <p>Vectorized affine layers: dL/dW = X<sup>T</sup> dL/dY and dL/dX = dL/dY W<sup>T</sup>.</p>
+        </div>
+        <div class="pillar-card">
+          <h3>Two-Sided Central GradCheck</h3>
+          <p>Cancels even Taylor terms to achieve O(&epsilon;<sup>2</sup>) numerical validation to &lt; 10<sup>-7</sup>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quickstart Execution -->
+    <div class="quickstart">
+      <h2>⚡ Quickstart: Executing Phase 12 Labs</h2>
+      <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.95rem;">All experiments run in pure Python 3 with zero external dependencies (no PyTorch, no NumPy):</p>
+      <pre><code># Topic 12.1: Computational Graph & Chain Rule
+python3 phase_12_backpropagation_from_first_principles/01_computational_graphs_and_chain_rule/experiment.py
+
+# Topic 12.2: Dual Numbers vs Reverse Tape Benchmark
+python3 phase_12_backpropagation_from_first_principles/02_reverse_mode_vs_forward_mode_autodiff/experiment.py
+
+# Topic 12.3: Scalar Autograd Engine (2-Layer MLP & GradCheck < 1e-7)
+python3 phase_12_backpropagation_from_first_principles/03_scalar_autograd_engine_from_scratch/experiment.py
+
+# Topic 12.4: Tensor Backprop (Y = XW + b) & Automated GradCheck (< 1e-7)
+python3 phase_12_backpropagation_from_first_principles/04_tensor_backprop_and_gradient_checking/experiment.py</code></pre>
+    </div>
+  </main>
+
+</body>
+</html>

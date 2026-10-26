@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 2.6: Exercises & Solutions — Tensors, Stride Memory & Capstone PCA Engine</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 {
+            color: var(--text);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        summary:hover {
+            opacity: 0.95;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .takeaway {
+            background-color: var(--accent-bg);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th { background: var(--primary-light); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 2.6</a>
+    <header>
+        <h1>Topic 2.6: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Tensors, Stride Memory Offsets, and Step-by-Step PCA by Hand</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Tensor Shape Tracking in Conv2D &amp; Transformer Attention</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>In deep learning, every layer transforms tensor shapes. Accurately tracking dimension transformations is critical to designing neural network architectures without shape mismatch bugs.</p>
+
+        <h4>Part A: Convolutional Feature Map</h4>
+        <p>A computer vision model receives an input batch of RGB images with shape:</p>
+        <p>$$X \in \mathbb{R}^{B \times C_{\text{in}} \times H_{\text{in}} \times W_{\text{in}}}$$</p>
+        <p>Where $B = 8$, $C_{\text{in}} = 3$, $H_{\text{in}} = 64$, and $W_{\text{in}} = 64$. The tensor is passed into a 2D convolution layer with:</p>
+        <ul>
+            <li>Output channels: $C_{\text{out}} = 16$</li>
+            <li>Kernel filter size: $K = 5 \times 5$</li>
+            <li>Stride: $S = 2$</li>
+            <li>Padding: $P = 2$</li>
+        </ul>
+        <ol>
+            <li>State the formula for output spatial dimension $H_{\text{out}}$.</li>
+            <li>Calculate the exact resulting tensor shape $Y$.</li>
+            <li>Calculate the total number of learnable parameters (weights + biases).</li>
+        </ol>
+
+        <h4>Part B: Transformer Multi-Head Attention</h4>
+        <p>A language model processes an input sequence tensor $X \in \mathbb{R}^{B \times T \times d_{\text{model}}}$ with batch size $B = 4$, sequence length $T = 512$, embedding dimension $d_{\text{model}} = 768$, and $h = 12$ attention heads ($d_k = 64$).</p>
+        <ol>
+            <li>$X$ is projected to $Q = X W_Q$ where $W_Q \in \mathbb{R}^{768 \times 768}$. What is the shape of $Q$?</li>
+            <li>$Q$ is reshaped and transposed to split heads into shape $(B, h, T, d_k)$. Write the exact dimensions.</li>
+            <li>In attention score computation $A = Q K^T$ where $K^T$ transposes the last two dimensions of $(B, h, T, d_k)$, what is the shape of $A$?</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Part A Solution: Convolutional Shapes</h4>
+                <div class="step-box">
+                    <strong>1. Spatial Dimension Formula:</strong>
+                    $$D_{\text{out}} = \left\lfloor \frac{D_{\text{in}} + 2P - K}{S} \right\rfloor + 1$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Spatial Calculation:</strong>
+                    $$H_{\text{out}} = \left\lfloor \frac{64 + 2(2) - 5}{2} \right\rfloor + 1 = \left\lfloor \frac{63}{2} \right\rfloor + 1 = 31 + 1 = 32$$
+                    $$W_{\text{out}} = 32$$
+                    Therefore, the resulting 4D tensor shape is:
+                    $$Y \in \mathbb{R}^{8 \times 16 \times 32 \times 32}$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Parameter Count:</strong>
+                    $$\text{Weights} = C_{\text{out}} \times C_{\text{in}} \times K \times K = 16 \times 3 \times 5 \times 5 = 1{,}200$$
+                    $$\text{Biases} = C_{\text{out}} = 16$$
+                    $$\text{Total Parameters} = 1{,}200 + 16 = 1{,}216$$
+                </div>
+
+                <h4>Part B Solution: Transformer Attention Shapes</h4>
+                <div class="step-box">
+                    <strong>1. Query Projection:</strong>
+                    $$\text{Shape}(Q) = (4, 512, 768)$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Multi-Head Reshape:</strong>
+                    $$\text{Shape}(Q_{\text{heads}}) = (4, 12, 512, 64)$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Attention Score Matrix:</strong>
+                    Transposing the last two dimensions of $K$ yields $(4, 12, 64, 512)$. Multiplying $(512 \times 64) \times (64 \times 512)$ yields:
+                    $$\text{Shape}(A) = (4, 12, 512, 512)$$
+                </div>
+                <div class="takeaway">
+                    <strong>Architectural Insight:</strong> The $512 \times 512$ matrix in each head represents the quadratic attention grid where token $i$ computes its relevance score with token $j$.
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Memory Footprint &amp; Physical Stride Offsets</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Physical hardware stores all multi-dimensional tensors as a 1D sequence of bytes. Managing memory sizing and understanding row-major strides prevents Out-Of-Memory (OOM) failures.</p>
+
+        <h4>Part A: 7B LLM Precision Sizing</h4>
+        <p>Consider a 7 Billion ($7 \times 10^9$) parameter neural network.</p>
+        <ol>
+            <li>Compute the memory required to load the model weights in Gigabytes ($1 \text{ GB} = 10^9 \text{ bytes}$) under:
+                <ul>
+                    <li>FP32 (32-bit float, 4 bytes/param)</li>
+                    <li>FP16 / BF16 (16-bit float, 2 bytes/param)</li>
+                    <li>INT8 (8-bit quantized, 1 byte/param)</li>
+                    <li>INT4 (4-bit quantized, 0.5 bytes/param)</li>
+                </ul>
+            </li>
+            <li>If an NVIDIA RTX 4090 GPU has 24 GB VRAM, which formats can run inference comfortably?</li>
+        </ol>
+
+        <h4>Part B: Row-Major Memory Strides</h4>
+        <p>A 3D tensor $T$ has shape $(D_0, D_1, D_2) = (3, 4, 5)$ in C-contiguous order.</p>
+        <ol>
+            <li>Compute total elements $N$.</li>
+            <li>Compute the stride tuple $(S_0, S_1, S_2)$.</li>
+            <li>Write the formula mapping $(i, j, k)$ to 1D index $idx$.</li>
+            <li>Find the flat memory index for coordinate $(2, 1, 4)$.</li>
+            <li>Find the 3D coordinate for flat index $idx = 37$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Part A Solution: Memory Sizing</h4>
+                <div class="step-box">
+                    <strong>1. Model Weight Memory:</strong>
+                    <ul>
+                        <li><strong>FP32:</strong> $7 \times 10^9 \times 4 \text{ B} = 28.0 \text{ GB}$</li>
+                        <li><strong>FP16 / BF16:</strong> $7 \times 10^9 \times 2 \text{ B} = 14.0 \text{ GB}$</li>
+                        <li><strong>INT8:</strong> $7 \times 10^9 \times 1 \text{ B} = 7.0 \text{ GB}$</li>
+                        <li><strong>INT4:</strong> $7 \times 10^9 \times 0.5 \text{ B} = 3.5 \text{ GB}$</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <strong>2. Hardware Feasibility on 24 GB GPU:</strong>
+                    <ul>
+                        <li><strong>FP32:</strong> Cannot run (28 GB &gt; 24 GB $\to$ Instant OOM).</li>
+                        <li><strong>FP16:</strong> Fits with 10 GB headroom for KV cache and activations.</li>
+                        <li><strong>INT8 / INT4:</strong> Fits effortlessly with massive headroom for 32k+ context lengths and larger batch sizes.</li>
+                    </ul>
+                </div>
+
+                <h4>Part B Solution: Row-Major Strides</h4>
+                <div class="step-box">
+                    <strong>1. Total Elements:</strong>
+                    $$N = 3 \times 4 \times 5 = 60 \text{ elements}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Stride Tuple:</strong>
+                    $$S_2 = 1, \quad S_1 = D_2 = 5, \quad S_0 = D_1 \times D_2 = 20 \implies (20, 5, 1)$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Index Formula:</strong>
+                    $$idx(i, j, k) = 20i + 5j + k$$
+                </div>
+                <div class="step-box">
+                    <strong>4. Coordinate $(2, 1, 4)$ Flat Index:</strong>
+                    $$idx(2, 1, 4) = 2(20) + 1(5) + 4(1) = 40 + 5 + 4 = 49$$
+                </div>
+                <div class="step-box">
+                    <strong>5. Inverse Mapping for $idx = 37$:</strong>
+                    $$i = \lfloor 37 / 20 \rfloor = 1 \quad (\text{rem } 17)$$
+                    $$j = \lfloor 17 / 5 \rfloor = 3 \quad (\text{rem } 2)$$
+                    $$k = 2 / 1 = 2$$
+                    $$\text{Coordinate} = (1, 3, 2)$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Broadcasting Rules &amp; Step-by-Step PCA by Hand</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>This problem tests both multi-dimensional tensor broadcasting and an end-to-end mathematical derivation of Principal Component Analysis (PCA).</p>
+
+        <h4>Part A: Broadcasting Feasibility</h4>
+        <p>Determine whether each pair is broadcast-compatible according to standard rules. State resulting shape or explain incompatibility:</p>
+        <ol>
+            <li>$A: (8, 1, 64)$ and $B: (8, 32, 64)$</li>
+            <li>$A: (5, 3)$ and $B: (3,)$</li>
+            <li>$A: (4, 3, 2)$ and $B: (4, 2)$</li>
+        </ol>
+
+        <h4>Part B: Complete PCA by Hand</h4>
+        <p>Given 3 data points in $\mathbb{R}^2$:</p>
+        <p>$$x_1 = \begin{bmatrix} 2 \\ 4 \end{bmatrix}, \quad x_2 = \begin{bmatrix} 4 \\ 6 \end{bmatrix}, \quad x_3 = \begin{bmatrix} 6 \\ 8 \end{bmatrix}$$</p>
+        <ol>
+            <li>Find data centroid (mean vector $\mu$).</li>
+            <li>Compute mean-centered matrix $X_c$.</li>
+            <li>Compute sample covariance matrix $\Sigma = \frac{1}{N-1} X_c^T X_c$.</li>
+            <li>Solve the characteristic equation $\det(\Sigma - \lambda I) = 0$ to find eigenvalues $\lambda_1, \lambda_2$ and unit eigenvector $v_1$.</li>
+            <li>Project each centered point onto $v_1$ to find 1D coordinates $z_1, z_2, z_3$.</li>
+            <li>What percentage of total variance is explained by $v_1$?</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Part A Solution: Broadcasting Rules</h4>
+                <div class="step-box">
+                    <ol>
+                        <li><strong>$(8, 1, 64)$ and $(8, 32, 64)$:</strong> Compatible. Dim 1 expands from $1 \to 32$. Result: <code>(8, 32, 64)</code>.</li>
+                        <li><strong>$(5, 3)$ and $(3,)$:</strong> Compatible. Align right: $3 == 3$, $B$ expands to $(1, 3) \to (5, 3)$. Result: <code>(5, 3)</code>.</li>
+                        <li><strong>$(4, 3, 2)$ and $(4, 2)$:</strong> Incompatible. Align right: Dim 2 matches ($2 == 2$), but Dim 1 compares $3$ vs $4$. Neither is 1, so broadcasting fails!</li>
+                    </ol>
+                </div>
+
+                <h4>Part B Solution: End-to-End PCA Calculation</h4>
+                <div class="step-box">
+                    <strong>1. Centroid (Mean Vector $\mu$):</strong>
+                    $$\mu = \frac{1}{3} \begin{bmatrix} 2 + 4 + 6 \\ 4 + 6 + 8 \end{bmatrix} = \begin{bmatrix} 4 \\ 6 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Mean-Centered Matrix $X_c$:</strong>
+                    $$x_{c, 1} = \begin{bmatrix} 2-4 \\ 4-6 \end{bmatrix} = \begin{bmatrix} -2 \\ -2 \end{bmatrix}, \quad x_{c, 2} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}, \quad x_{c, 3} = \begin{bmatrix} 2 \\ 2 \end{bmatrix}$$
+                    $$X_c = \begin{bmatrix} -2 & -2 \\ 0 & 0 \\ 2 & 2 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Sample Covariance Matrix $\Sigma$:</strong>
+                    $$\Sigma = \frac{1}{2} X_c^T X_c = \frac{1}{2} \begin{bmatrix} 8 & 8 \\ 8 & 8 \end{bmatrix} = \begin{bmatrix} 4 & 4 \\ 4 & 4 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>4. Eigenvalues &amp; Eigenvectors:</strong>
+                    $$\det \begin{bmatrix} 4-\lambda & 4 \\ 4 & 4-\lambda \end{bmatrix} = (4-\lambda)^2 - 16 = \lambda^2 - 8\lambda = 0$$
+                    $$\lambda_1 = 8, \quad \lambda_2 = 0$$
+                    For $\lambda_1 = 8$:
+                    $$\begin{bmatrix} -4 & 4 \\ 4 & -4 \end{bmatrix} \begin{bmatrix} v_x \\ v_y \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies v_x = v_y$$
+                    Normalized unit eigenvector:
+                    $$v_1 = \begin{bmatrix} \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \end{bmatrix} \approx \begin{bmatrix} 0.7071 \\ 0.7071 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>5. 1D Projected Coordinates:</strong>
+                    $$z_1 = \begin{bmatrix} -2 & -2 \end{bmatrix} \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix} = -2\sqrt{2} \approx -2.8284$$
+                    $$z_2 = 0$$
+                    $$z_3 = 2\sqrt{2} \approx +2.8284$$
+                </div>
+                <div class="step-box">
+                    <strong>6. Variance Explained:</strong>
+                    $$\text{Variance Ratio} = \frac{\lambda_1}{\lambda_1 + \lambda_2} = \frac{8}{8 + 0} = 100\%$$
+                </div>
+                <div class="takeaway">
+                    <strong>Intuition Check:</strong> Because all three original points lie in a straight line ($y = x + 2$), 1D projection preserves 100% of the dataset variance with zero reconstruction loss!
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

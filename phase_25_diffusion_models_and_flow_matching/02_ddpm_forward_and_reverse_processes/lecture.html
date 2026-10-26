@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.2: DDPM Forward and Reverse Processes — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.2: DDPM Forward and Reverse Processes</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Thermodynamic Markov chains, the closed-form shortcut jump, and the Bayesian posterior derivation.
+    </p>
+
+    <div class="analogy-box">
+        <h3 style="margin-top: 0; color: var(--primary);">The 12-Year-Old Analogy: Ink Dissolving in Water</h3>
+        <p>Imagine dropping an ink droplet into water:</p>
+        <ul>
+            <li><strong>Forward Diffusion ($q$):</strong> At $t=0$, you have a sharp droplet. As seconds tick by ($t=1, \dots, T$), water molecules collide with the ink until the liquid is a uniform grey mist ($x_T \sim \mathcal{N}(0, \mathbf{I})$).</li>
+            <li><strong>The Closed Shortcut ($q(x_t \mid x_0)$):</strong> You do not need to calculate every microsecond collision. A simple mathematical formula lets you calculate the exact appearance at second 50 in one step!</li>
+            <li><strong>Reverse Generative Film ($p_\theta$):</strong> To create new art from scratch, you start with grey noise and run the film in reverse. By knowing how to clean up one tiny collision at a time, the noise sharpens into a brand new crystal-clear painting.</li>
+        </ul>
+    </div>
+
+    <h2>1. The Forward Markov Chain</h2>
+    <p>
+        Given data $x_0 \sim q(x_0)$, the forward diffusion process adds Gaussian noise according to variance schedule $\beta_1, \dots, \beta_T$:
+    </p>
+    $$q(x_t \mid x_{t-1}) = \mathcal{N}\left(x_t; \sqrt{1 - \beta_t} x_{t-1}, \beta_t \mathbf{I}\right)$$
+    <p>
+        Letting $\alpha_t = 1 - \beta_t$ and $\bar{\alpha}_t = \prod_{s=1}^t \alpha_s$, recursive substitution reveals the <strong>closed-form marginal shortcut</strong>:
+    </p>
+    $$q(x_t \mid x_0) = \mathcal{N}\left(x_t; \sqrt{\bar{\alpha}_t} x_0, (1 - \bar{\alpha}_t)\mathbf{I}\right)$$
+    $$x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim \mathcal{N}(0, \mathbf{I})$$
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$x_0$</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>Clean ground-truth data sample.</td>
+            </tr>
+            <tr>
+                <td>$x_t$</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>Noisy latent state at timestep $t$.</td>
+            </tr>
+            <tr>
+                <td>$\beta_t \in (0, 1)$</td>
+                <td>Scalar Schedule</td>
+                <td>Variance of noise added at step $t$.</td>
+            </tr>
+            <tr>
+                <td>$\alpha_t = 1 - \beta_t$</td>
+                <td>Scalar</td>
+                <td>Signal coefficient retained at step $t$.</td>
+            </tr>
+            <tr>
+                <td>$\bar{\alpha}_t = \prod_{s=1}^t \alpha_s$</td>
+                <td>Scalar</td>
+                <td>Cumulative signal retention from step 0 to step $t$.</td>
+            </tr>
+            <tr>
+                <td>$\tilde{\boldsymbol{\mu}}_t(x_t, x_0)$</td>
+                <td>Vector Mean</td>
+                <td>Mean of the true posterior $q(x_{t-1} \mid x_t, x_0)$.</td>
+            </tr>
+            <tr>
+                <td>$\tilde{\beta}_t$</td>
+                <td>Scalar Variance</td>
+                <td>Variance of the true posterior $q(x_{t-1} \mid x_t, x_0)$.</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{\epsilon}_\theta(x_t, t)$</td>
+                <td>Neural Network</td>
+                <td>Network trained to predict injected Gaussian perturbation $\boldsymbol{\epsilon}$.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The True Tractable Posterior $q(x_{t-1} \mid x_t, x_0)$</h2>
+    <p>
+        Conditioning on $x_0$ allows computing the exact posterior by Bayes' rule:
+    </p>
+    $$q(x_{t-1} \mid x_t, x_0) = \frac{q(x_t \mid x_{t-1}, x_0) q(x_{t-1} \mid x_0)}{q(x_t \mid x_0)} = \mathcal{N}\left(x_{t-1}; \tilde{\boldsymbol{\mu}}_t(x_t, x_0), \tilde{\beta}_t \mathbf{I}\right)$$
+    <p>
+        Completing the square in the exponent gives:
+    </p>
+    $$\tilde{\boldsymbol{\mu}}_t(x_t, x_0) = \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} x_0 + \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} x_t$$
+    $$\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \beta_t$$
+
+    <h2>4. Denoising Reparameterization</h2>
+    <p>
+        Substituting $x_0 = \frac{x_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}}{\sqrt{\bar{\alpha}_t}}$ into the posterior mean yields:
+    </p>
+    $$\tilde{\boldsymbol{\mu}}_t(x_t, \boldsymbol{\epsilon}) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1 - \bar{\alpha}_t}} \boldsymbol{\epsilon} \right)$$
+    <div class="callout">
+        <strong>Takeaway:</strong> Predicting the injected noise $\boldsymbol{\epsilon}$ via neural network $\boldsymbol{\epsilon}_\theta(x_t, t)$ is equivalent to predicting the posterior mean step!
+    </div>
+
+    <pre><code># Run the self-contained pure Python simulation:
+python3 phase_25_diffusion_models_and_flow_matching/02_ddpm_forward_and_reverse_processes/experiment.py</code></pre>
+
+</body>
+</html>

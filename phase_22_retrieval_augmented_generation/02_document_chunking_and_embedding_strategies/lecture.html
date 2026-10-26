@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 22.2: Document Chunking &amp; Embedding Strategies — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 22 Hub</a>
+    
+    <h1>Topic 22.2: Document Chunking &amp; Embedding Strategies</h1>
+    <p><em>The Science of Text Partitioning, Overlap Invariants, and Semantic Boundary Detection</em></p>
+
+    <div class="card">
+        <h3>Executive Summary</h3>
+        <p>A document cannot simply be indexed as an unpartitioned blob. Huge texts suffer from <strong>semantic dilution</strong>, while overly aggressive slicing produces <strong>context fragmentation</strong>. Document Chunking is the algorithmic art of decomposing raw text into optimal semantic units that balance retrieval precision with contextual grounding.</p>
+    </div>
+
+    <div class="analogy">
+        <h3>💡 The 12-Year-Old Analogy: Chopping an Encyclopedia into Index Cards</h3>
+        <p>Imagine organizing a 1,000-page encyclopedia onto index cards so you can instantly answer trivia questions.</p>
+        <p>If you cut it into <strong>single sentences</strong>, you find a card saying: <em>"It traveled at 24,791 miles per hour."</em> But what is "It"? A cheetah? A rocket? A comet? Because the sentence is isolated, you lost the context!</p>
+        <p>If you paste <strong>entire 50-page chapters</strong> onto massive posters, you have to read 30,000 words just to find one number. The <strong>Goldilocks Strategy</strong> divides the book into clean 250-word cards focused on one topic, overlapping by 50 words so no idea gets severed at the edge.</p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formal Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{T} = (w_1, \dots, w_T)$</td>
+                <td>Token Sequence</td>
+                <td>Raw document consisting of $T$ subword tokens.</td>
+            </tr>
+            <tr>
+                <td>$N$</td>
+                <td>Integer ($\mathbb{N}$)</td>
+                <td>Chunk length (target tokens or characters).</td>
+            </tr>
+            <tr>
+                <td>$K$</td>
+                <td>Integer ($\mathbb{N}$)</td>
+                <td>Overlap size ($K < N$) shared between consecutive chunks.</td>
+            </tr>
+            <tr>
+                <td>$S = N - K$</td>
+                <td>Integer ($\mathbb{N}$)</td>
+                <td>Sliding window stride (number of new tokens per step).</td>
+            </tr>
+            <tr>
+                <td>$\Delta_{\text{delim}}$</td>
+                <td>Ordered List</td>
+                <td>Delimiter hierarchy: <code>["\n\n", "\n", ". ", " ", ""]</code>.</td>
+            </tr>
+            <tr>
+                <td>$\cos(\mathbf{s}_i, \mathbf{s}_{i+1})$</td>
+                <td>Scalar ($[-1, 1]$)</td>
+                <td>Cosine similarity between sentence $i$ and adjacent sentence $i+1$.</td>
+            </tr>
+            <tr>
+                <td>$\tau_{\text{sem}}$</td>
+                <td>Scalar Threshold</td>
+                <td>Similarity cutoff below which a semantic chunk boundary is triggered.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Modern Chunking Taxonomy</h2>
+    <pre>
+                              +---------------------------------------+
+                              |          CHUNKING STRATEGIES          |
+                              +---------------------------------------+
+                                                  │
+         ┌─────────────────────────┬──────────────┴──────────────┬─────────────────────────┐
+         ▼                         ▼                             ▼                         ▼
+   [Fixed-Size Overlap]       [Recursive Split]        [Document-Structure]       [Semantic Chunking]
+   Window of N tokens         Hierarchical delimiters   Markdown headings,        Cosine drop between
+   with K overlap tokens      (\n\n -> \n -> . -> space) HTML tags, JSON keys     adjacent sentences
+    </pre>
+
+    <h3>1. Fixed-Size Sliding Window</h3>
+    <p>Given token sequence $\mathcal{T} = (w_1, \dots, w_T)$, window $N$, and overlap $K$:</p>
+    $$c_m = (w_{(m-1)S + 1}, \dots, w_{(m-1)S + N}), \quad \text{where } S = N - K$$
+    <p>Guarantees uniform token counts and simple indexing, but can cut sentences or equations in half.</p>
+
+    <h3>2. Recursive Character Splitting</h3>
+    <p>Iterates through a hierarchy of delimiters: paragraphs (<code>\n\n</code>), sentences (<code>\n</code>, <code>. </code>), and words (<code> </code>). It never splits a paragraph unless the paragraph itself exceeds the maximum chunk length.</p>
+
+    <h3>3. Semantic Similarity Boundary Chunking</h3>
+    <p>Dynamically detects topical transitions using sentence embeddings:</p>
+    <ol>
+        <li>Split text into sentences: $(s_1, s_2, \dots, s_L)$.</li>
+        <li>Compute embeddings: $\mathbf{s}_i = E(s_i)$.</li>
+        <li>Compute cosine distances: $d_i = 1 - \cos(\mathbf{s}_i, \mathbf{s}_{i+1})$.</li>
+        <li>Place a split at index $i$ if $d_i > \tau_{\text{sem}}$.</li>
+    </ol>
+
+    <h2>3. The Chunk Size Dilemma: Precision vs. Retention</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Attribute</th>
+                <th>Small Chunks (100–250 tokens)</th>
+                <th>Large Chunks (800–2000 tokens)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Retrieval Precision</td>
+                <td>High (exact match to user query)</td>
+                <td>Low (diffuse average of many topics)</td>
+            </tr>
+            <tr>
+                <td>Context Retention</td>
+                <td>Low (risk of severed pronouns)</td>
+                <td>High (self-contained reasoning)</td>
+            </tr>
+            <tr>
+                <td>Context Window Packing</td>
+                <td>Pack 10–20 diverse chunks</td>
+                <td>Only 1–3 chunks fit</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Summary Checklist</h2>
+    <ul>
+        <li>&#9745; Sliding window overlap prevents facts spanning chunk borders from being lost.</li>
+        <li>&#9745; Recursive splitting preserves structural paragraphs before falling back to sentence breaks.</li>
+        <li>&#9745; Semantic chunking groups sentences by conceptual continuity rather than fixed length counts.</li>
+        <li>&#9745; Balancing chunk size avoids both context fragmentation and semantic dilution.</li>
+    </ul>
+</body>
+</html>

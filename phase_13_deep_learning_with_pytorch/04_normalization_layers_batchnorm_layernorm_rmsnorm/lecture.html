@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 13.4: Modern Normalization — BatchNorm, LayerNorm & RMSNorm</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 13 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 13.4: Modern Normalization Dynamics — BatchNorm, LayerNorm & RMSNorm</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Re-conditioning the optimization landscape: batch-wise vs channel-wise reduction, scale invariance, and the rise of RMSNorm in modern large language models.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        In deep networks, weight updates in early layers alter the statistical distribution received by later layers. Normalization techniques standardize activation distributions, smoothing the optimization landscape and enabling large learning rates.
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Audio Equalizer and Leveler</h3>
+        <p>
+            Picture an audio mixer recording a panel of podcasters.
+        </p>
+        <p>
+            <strong>Batch Normalization:</strong> The soundboard calculates the average volume of everyone talking at that second and normalizes the entire group. But if a podcaster speaks alone in a solo episode (batch size 1), the system has no group statistics and fails!
+        </p>
+        <p>
+            <strong>Layer Normalization:</strong> Each speaker gets their own dedicated digital limiter that listens to all frequencies (bass, mids, treble) and standardizes their own voice to zero-mean unit volume. It works identically whether there is 1 person or 100 people.
+        </p>
+        <p>
+            <strong>RMSNorm (Modern LLM Leveler):</strong> The engineer notices that zero-centering the audio doesn't improve clarity—it just burns battery. The mixer drops mean-centering and simply scales by the <em>Root Mean Square</em> volume. It runs 20% faster while keeping speech perfectly balanced!
+        </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description & Engineering Interpretation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbf{X} \in \mathbb{R}^{B \times D}$</td>
+                <td>Activation Tensor</td>
+                <td>Mini-batch activations of $B$ samples with $D$ features.</td>
+            </tr>
+            <tr>
+                <td>$\mu_B, \sigma_B^2$</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>Mini-batch statistics computed across samples in BatchNorm.</td>
+            </tr>
+            <tr>
+                <td>$\mu_i, \sigma_i^2$</td>
+                <td>$\mathbb{R}$</td>
+                <td>Sample-level statistics computed across features in LayerNorm.</td>
+            </tr>
+            <tr>
+                <td>$\text{RMS}(\mathbf{x})$</td>
+                <td>$\mathbb{R}$</td>
+                <td>Root Mean Square scalar: $\sqrt{\frac{1}{D}\sum_{j=1}^D x_j^2 + \epsilon}$.</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{\gamma}, \boldsymbol{\beta}$</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>Affine scale (gain) and shift (bias) parameters.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Normalization Taxonomy</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Feature</th>
+                <th>BatchNorm</th>
+                <th>LayerNorm</th>
+                <th>RMSNorm</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Reduction Axis</strong></td>
+                <td>Across Batch ($B$)</td>
+                <td>Across Features ($D$)</td>
+                <td>Across Features ($D$)</td>
+            </tr>
+            <tr>
+                <td><strong>Zero-Centered?</strong></td>
+                <td>Yes ($\mu_B$)</td>
+                <td>Yes ($\mu_i$)</td>
+                <td><strong>No</strong> (RMS scaling)</td>
+            </tr>
+            <tr>
+                <td><strong>Batch Size = 1</strong></td>
+                <td>Fails / Frozen Stats</td>
+                <td>Works Flawlessly</td>
+                <td>Works Flawlessly</td>
+            </tr>
+            <tr>
+                <td><strong>Primary Domain</strong></td>
+                <td>ResNets / ConvNets</td>
+                <td>Transformers / BERT</td>
+                <td>LLaMA 3 / Mistral / Gemma</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Mathematical Derivation of RMSNorm</h2>
+    <p>
+        Zhang &amp; Sennrich (2019) demonstrated that the regularizing power of LayerNorm comes from scaling inputs rather than mean-shifting. RMSNorm discards mean subtraction:
+    </p>
+    $$\bar{\mathbf{x}} = \frac{\mathbf{x}}{\sqrt{\frac{1}{D} \sum_{j=1}^D x_j^2 + \epsilon}} \odot \boldsymbol{\gamma}$$
+    <p>
+        Because RMSNorm requires only a single GPU reduction kernel pass and eliminates loading the bias vector $\boldsymbol{\beta}$, it accelerates training and inference by 10%–50% in memory-bandwidth-bound LLMs.
+    </p>
+
+    <h2>5. Hands-on Experiment Verification</h2>
+    <p>
+        Verify analytical backward passes and scale invariance in pure Python:
+    </p>
+    <pre><code>python3 phase_13_deep_learning_with_pytorch/04_normalization_layers_batchnorm_layernorm_rmsnorm/experiment.py</code></pre>
+</body>
+</html>

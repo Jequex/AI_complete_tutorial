@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 22.3: Exercises &amp; Solutions — Vector Databases &amp; Approximate Nearest Neighbors</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 22 Hub</a>
+    
+    <h1>Topic 22.3: Exercises &amp; Solutions</h1>
+    <p><em>Metric Equivalence Proofs, HNSW Skip-List Analysis &amp; Product Quantization Mathematics</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Distance Metric Equivalence &amp; Query FLOP Scaling (Easy)</h3>
+        <p>1. Prove algebraically that minimizing Euclidean distance $\|\mathbf{u} - \mathbf{v}\|_2$ produces identical rank-ordering to minimizing Cosine distance on the unit hypersphere.<br>
+           2. Calculate the FLOPs for an exact brute-force scan over $10^7$ vectors ($d=1536$) vs an HNSW traversal inspecting 300 candidates.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Algebraic Equivalence:</strong><br>
+            $$\|\mathbf{u} - \mathbf{v}\|_2^2 = \sum (u_i - v_i)^2 = 2 - 2(\mathbf{u} \cdot \mathbf{v}) = 2(1 - \mathbf{u} \cdot \mathbf{v}) = 2 \cdot d_{\text{cos}}(\mathbf{u}, \mathbf{v})$$
+            Since $\sqrt{2x}$ is strictly monotonic for $x \ge 0$, rankings under Euclidean distance, Cosine distance, and Dot product are identical.</p>
+
+            <p><strong>Step 2: FLOP Scaling:</strong><br>
+            Brute force: $10^7 \times 2(1536) = 30.72 \text{ GFLOPs}$.<br>
+            HNSW: $300 \times 2(1536) = 0.92 \text{ MFLOPs}$.<br>
+            Speedup factor: $\approx 33,333\times$ faster.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: HNSW Hierarchy &amp; Level Distribution Derivation (Medium)</h3>
+        <p>In HNSW, maximum layer $l = \lfloor -\ln(U) \cdot m_L \rfloor$ where $m_L = 1 / \ln(M)$.</p>
+        <p>1. Derive the CDF $P(l \ge k)$ for level $k \ge 0$.<br>
+           2. For $N = 10^6$ vectors and $M = 16$, calculate expected nodes at levels 0 through 3.<br>
+           3. Compute the expected maximum height $L_{\max}$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Geometric CDF:</strong><br>
+            $-\ln(U) / \ln(M) \ge k \iff \ln(U) \le \ln(M^{-k}) \iff U \le M^{-k}$.<br>
+            Since $U \sim \text{Uniform}(0, 1]$, $P(l \ge k) = M^{-k} = (1/M)^k$.</p>
+
+            <p><strong>Step 2: Expected Nodes ($M=16, N=10^6$):</strong><br>
+            Level 0: $1,000,000$ (100%). Level 1: $62,500$. Level 2: $3,906$. Level 3: $244$.</p>
+
+            <p><strong>Step 3: Maximum Height:</strong><br>
+            $L_{\max} \approx \frac{\ln(N)}{\ln(M)} = \frac{\ln(10^6)}{\ln(16)} \approx 4.98 \approx 5 \text{ levels}$.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Product Quantization (PQ) Compression &amp; Asymmetric Distance (Hard)</h3>
+        <p>A database holds $N = 5 \times 10^7$ vectors ($d=1024$, <code>float32</code>). It applies PQ with $m=8$ sub-vectors and $k^*=256$ centroids.</p>
+        <p>1. Calculate uncompressed size vs PQ compressed size.<br>
+           2. Explain how Asymmetric Distance Computation (ADC) works without decompressing vectors.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Compression:</strong><br>
+            Uncompressed: $5 \times 10^7 \times 4096 \text{ bytes} \approx 204.8 \text{ GB}$.<br>
+            PQ Compressed ($8$ bytes per vector): $5 \times 10^7 \times 8 \text{ bytes} = 400 \text{ MB}$.<br>
+            Compression ratio: $\approx 512\times$ reduction.</p>
+
+            <p><strong>Step 2: ADC Mechanics:</strong><br>
+            The system builds an $m \times k^*$ ($8 \times 256 = 2048$) distance table between query sub-vectors and codebook centroids. Evaluating a database vector takes only 8 array lookups and additions—zero decompression needed.</p>
+        </details>
+    </div>
+</body>
+</html>

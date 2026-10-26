@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.2: Exercises &amp; Solutions — DDPM Forward &amp; Reverse Processes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.2: Exercises &amp; Solutions — DDPM Forward &amp; Reverse</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Closed-form marginal proofs, Bayesian posterior derivations, and Tweedie's formula connections.
+    </p>
+
+    <h2>Problem 1: Closed-Form Marginal Calculation <span class="badge">Easy</span></h2>
+    <p>
+        For a 3-step schedule $\beta_1 = 0.10, \beta_2 = 0.20, \beta_3 = 0.30$ and $x_0 = 5.0$:
+    </p>
+    <ol>
+        <li>Compute $\alpha_1, \alpha_2, \alpha_3$ and $\bar{\alpha}_1, \bar{\alpha}_2, \bar{\alpha}_3$.</li>
+        <li>Write down the marginal Gaussian $q(x_3 \mid x_0)$.</li>
+        <li>Calculate $x_3$ given injected perturbation $\epsilon = -1.2$.</li>
+    </ol>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Step 1: Retention factors:</strong></p>
+        $$\alpha_1 = 0.90 \implies \bar{\alpha}_1 = 0.900$$
+        $$\alpha_2 = 0.80 \implies \bar{\alpha}_2 = 0.720$$
+        $$\alpha_3 = 0.70 \implies \bar{\alpha}_3 = 0.504$$
+        <p><strong>Step 2: Distribution:</strong></p>
+        $$q(x_3 \mid x_0) = \mathcal{N}\left(\sqrt{0.504} \times 5.0, 1 - 0.504\right) = \mathcal{N}(3.5496, 0.496)$$
+        <p><strong>Step 3: Sampling:</strong></p>
+        $$x_3 = 3.5496 + \sqrt{0.496} \times (-1.2) = 3.5496 - 0.8451 = 2.7045$$
+    </details>
+
+    <h2>Problem 2: Posterior Mean Completing the Square <span class="badge">Medium</span></h2>
+    <p>
+        Derive algebraically how the linear cross-term of $x_{t-1}$ in Bayes' rule combines with $\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \beta_t$ to give:
+    </p>
+    $$\tilde{\boldsymbol{\mu}}_t(x_t, x_0) = \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} x_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} x_0$$
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>In standard Gaussian expansion $-\frac{1}{2\sigma^2}(x - \mu)^2 = -\frac{x^2}{2\sigma^2} + \frac{\mu}{\sigma^2}x - \frac{\mu^2}{2\sigma^2}$:</p>
+        $$\frac{\tilde{\boldsymbol{\mu}}_t}{\tilde{\beta}_t} = \frac{\sqrt{\alpha_t}}{\beta_t} x_t + \frac{\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} x_0$$
+        <p>Multiplying both sides by $\tilde{\beta}_t = \frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t} \beta_t$:</p>
+        $$\tilde{\boldsymbol{\mu}}_t = \left(\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\beta_t\right)\frac{\sqrt{\alpha_t}}{\beta_t} x_t + \left(\frac{1 - \bar{\alpha}_{t-1}}{1 - \bar{\alpha}_t}\beta_t\right)\frac{\sqrt{\bar{\alpha}_{t-1}}}{1 - \bar{\alpha}_{t-1}} x_0$$
+        <p>Terms cancel directly to yield:</p>
+        $$\tilde{\boldsymbol{\mu}}_t = \frac{\sqrt{\alpha_t}(1 - \bar{\alpha}_{t-1})}{1 - \bar{\alpha}_t} x_t + \frac{\sqrt{\bar{\alpha}_{t-1}}\beta_t}{1 - \bar{\alpha}_t} x_0$$
+    </details>
+
+    <h2>Problem 3: Tweedie's Formula &amp; Score Equivalence <span class="badge">Hard</span></h2>
+    <p>
+        Use Tweedie's formula $\mathbb{E}[x \mid y] = y + \sigma^2 \nabla_y \log p(y)$ to prove that predicting DDPM noise $\boldsymbol{\epsilon}_\theta(x_t, t)$ is equivalent to predicting the score vector field:
+    </p>
+    $$\nabla_{x_t} \log q(x_t) = -\frac{\boldsymbol{\epsilon}_\theta(x_t, t)}{\sqrt{1 - \bar{\alpha}_t}}$$
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Dividing $x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}$ by $\sqrt{\bar{\alpha}_t}$:</p>
+        $$\frac{x_t}{\sqrt{\bar{\alpha}_t}} = x_0 + \sqrt{\frac{1 - \bar{\alpha}_t}{\bar{\alpha}_t}} \boldsymbol{\epsilon}$$
+        <p>Applying Tweedie's formula with observation $y = \frac{x_t}{\sqrt{\bar{\alpha}_t}}$ and variance $\sigma^2 = \frac{1 - \bar{\alpha}_t}{\bar{\alpha}_t}$:</p>
+        $$\hat{x}_0 = \frac{x_t}{\sqrt{\bar{\alpha}_t}} + \left(\frac{1 - \bar{\alpha}_t}{\bar{\alpha}_t}\right)\sqrt{\bar{\alpha}_t} \nabla_{x_t}\log q(x_t) = \frac{x_t + (1 - \bar{\alpha}_t)\nabla_{x_t}\log q(x_t)}{\sqrt{\bar{\alpha}_t}}$$
+        <p>In DDPM, the denoised estimate is $\hat{x}_0 = \frac{x_t - \sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_\theta}{\sqrt{\bar{\alpha}_t}}$. Equating numerators:</p>
+        $$(1 - \bar{\alpha}_t)\nabla_{x_t}\log q(x_t) = -\sqrt{1 - \bar{\alpha}_t}\boldsymbol{\epsilon}_\theta \implies \nabla_{x_t}\log q(x_t) = -\frac{\boldsymbol{\epsilon}_\theta(x_t, t)}{\sqrt{1 - \bar{\alpha}_t}}$$
+    </details>
+
+</body>
+</html>

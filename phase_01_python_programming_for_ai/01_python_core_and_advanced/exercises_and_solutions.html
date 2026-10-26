@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 1.1: Exercises & Solutions — Core and Advanced Python for AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 1.1</a>
+    <header>
+        <h1>Topic 1.1: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Mutability, Generators, OOP Datasets, and Latency Decorators</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Memory Mutability, Reference Aliasing &amp; Default Arguments</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>In AI training scripts, subtle bugs often emerge from unintended reference aliasing or default mutable arguments accumulating state across epochs.</p>
+        
+        <h4>Part A: Default Argument Output Prediction</h4>
+        <pre><code>def train_model(epoch_data, training_history=[]):
+    training_history.append(epoch_data)
+    return training_history
+
+run_1 = train_model("loss: 0.85")
+run_2 = train_model("loss: 0.62")
+print("run_1 is run_2:", run_1 is run_2)</code></pre>
+        <ol>
+            <li>What does <code>run_1</code> contain after both calls?</li>
+            <li>What does <code>run_2</code> contain?</li>
+            <li>Why does <code>run_1 is run_2</code> return <code>True</code>?</li>
+            <li>Rewrite the function so that calling it without a history always creates a fresh, independent list.</li>
+        </ol>
+
+        <h4>Part B: The Shallow List Multiplication Trap</h4>
+        <pre><code>row = [0.0, 0.0, 0.0]
+matrix = [row] * 3
+matrix[0][1] = 5.0</code></pre>
+        <p>What is printed by <code>print(matrix)</code>? Explain why, and write the proper list comprehension.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>Part A Solution:</strong>
+                    <ul>
+                        <li><code>run_1</code> is <code>['loss: 0.85', 'loss: 0.62']</code></li>
+                        <li><code>run_2</code> is <code>['loss: 0.85', 'loss: 0.62']</code></li>
+                        <li><code>run_1 is run_2</code> is <strong>True</strong> because Python creates default arguments once at definition time. Both variables point to the exact same list in RAM!</li>
+                    </ul>
+                    <strong>Corrected Code:</strong>
+                    <pre><code>def train_model(epoch_data, training_history=None):
+    if training_history is None:
+        training_history = []
+    training_history.append(epoch_data)
+    return training_history</code></pre>
+                </div>
+
+                <div class="step-box">
+                    <strong>Part B Solution:</strong>
+                    <p>Printed Output: <code>[[0.0, 5.0, 0.0], [0.0, 5.0, 0.0], [0.0, 5.0, 0.0]]</code></p>
+                    <p><em>Reason:</em> The <code>* 3</code> syntax replicates the <em>pointer</em> to <code>row</code> three times. All rows share the same memory address.</p>
+                    <strong>Correct Idiom:</strong>
+                    <pre><code>matrix = [[0.0 for _ in range(3)] for _ in range(3)]
+matrix[0][1] = 5.0  # Only changes row 0!</code></pre>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Custom PyTorch-style Dataset &amp; Lazy Batch Streamer</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Build an OOP data pipeline with lazy streaming for text datasets.</p>
+        <ol>
+            <li>Create a class <code>TextClassificationDataset</code> implementing <code>__len__</code> and <code>__getitem__</code>.</li>
+            <li>Create a generator function <code>stream_batches(dataset, batch_size, drop_last=False)</code> that yields mini-batches without allocating memory for the entire dataset.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <pre><code>class TextClassificationDataset:
+    def __init__(self, texts: list[str], labels: list[int]):
+        if len(texts) != len(labels):
+            raise ValueError("Length mismatch between texts and labels.")
+        self.texts = texts
+        self.labels = labels
+
+    def __len__(self) -> int:
+        return len(self.texts)
+
+    def __getitem__(self, idx: int) -> dict:
+        return {
+            "text": self.texts[idx],
+            "label": self.labels[idx],
+            "word_count": len(self.texts[idx].split())
+        }
+
+def stream_batches(dataset, batch_size: int, drop_last: bool = False):
+    """Lazily yields mini-batches from a dataset."""
+    batch = []
+    for i in range(len(dataset)):
+        batch.append(dataset[i])
+        if len(batch) == batch_size:
+            yield batch
+            batch = []
+    if batch and not drop_last:
+        yield batch</code></pre>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Production AI Decorator: Shape Validation</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Write a decorator <code>@validate_input_dim(expected_dim)</code> that inspects the 2D matrix input <code>x</code>, checks that the number of columns matches <code>expected_dim</code>, and raises a custom <code>ShapeMismatchError</code> if mismatched.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <pre><code>import functools
+
+class ShapeMismatchError(Exception):
+    pass
+
+def validate_input_dim(expected_dim: int):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(x, *args, **kwargs):
+            if not isinstance(x, list) or not x or not isinstance(x[0], list):
+                raise TypeError("Input must be a 2D list matrix.")
+            actual_dim = len(x[0])
+            if actual_dim != expected_dim:
+                raise ShapeMismatchError(
+                    f"Expected {expected_dim} features, but got {actual_dim}."
+                )
+            return func(x, *args, **kwargs)
+        return wrapper
+    return decorator
+
+# Usage
+@validate_input_dim(expected_dim=4)
+def forward_pass(x: list[list[float]]):
+    return [sum(row) for row in x]
+
+# Verified:
+# forward_pass([[1, 2, 3, 4]]) -> Valid!
+# forward_pass([[1, 2]])       -> Raises ShapeMismatchError!</code></pre>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

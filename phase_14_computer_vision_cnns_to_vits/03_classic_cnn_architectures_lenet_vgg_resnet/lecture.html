@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 14.3: Classic CNN Architectures: LeNet, VGG, and ResNet — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 14 Portal</a>
+
+    <h1>Topic 14.3: Classic CNN Architectures: LeNet, VGG, and ResNet</h1>
+
+    <div class="callout">
+        <strong>Core Thesis:</strong> As plain convolutional networks grow deeper, they suffer from optimization degradation rather than overfitting. <strong>Residual Networks (ResNet)</strong> solve this by introducing <em>identity skip connections</em>, creating a gradient highway that enables successful training of networks with 100+ layers.
+    </div>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        The trajectory of computer vision from LeNet-5 (1998) to AlexNet (2012) and VGGNet (2014) demonstrated the power of depth. However, vanilla networks beyond 20 layers suffered from the <em>Degradation Problem</em>: deeper models had higher training error. ResNet reformulated the problem into learning residual corrections $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$, unlocking deep architectures with hundreds of layers.
+    </p>
+
+    <div class="diagram">
+                      THE RESIDUAL BLOCK GRADIENT HIGHWAY
+                      
+                                Identity Shortcut
+                     ┌──────────────────────────────────────┐
+                     │                                      ▼
+             x ──────┴───>[ Weight ]───> ReLU ───>[ Weight ]───(+)───> ReLU ───> y
+                                F(x) Residual Branch
+    </div>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: The High-Speed Highway Bypassing City Traffic Jams</h3>
+        <p>Imagine a cross-country message delivery across 100 cities:</p>
+        <ul>
+            <li><strong>Plain Deep Network (City Gridlock):</strong> Your van must drive through downtown streets in every single city. In each city, red lights and traffic jams slow down the van. By city 20, the van is completely stuck—messages from the destination never make it back!</li>
+            <li><strong>The Residual Block (The Elevated Highway):</strong> ResNet builds an elevated expressway directly over each city ($\mathbf{I}$, the identity shortcut). Your van zooms down the open highway at full speed.</li>
+            <li><strong>The Residual Workshop ($\mathcal{F}(\mathbf{x})$):</strong> In each city, there is an optional side exit. If the workshop has a useful modification, it adds it to the van. If not, it adds nothing ($\mathcal{F}(\mathbf{x}) \approx 0$).</li>
+            <li><strong>Backpropagation Miracle:</strong> During the return trip (backpropagation), training gradients travel down the unhindered expressway with zero traffic jams, reaching the very first layer intact!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Type / Domain</th>
+                <th>Mathematical Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbf{x} \in \mathbb{R}^d$</td>
+                <td>Vector / Tensor</td>
+                <td>Input representation to a residual block</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{H}(\mathbf{x})$</td>
+                <td>Mapping Function</td>
+                <td>Underlying true function to be learned</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{F}(\mathbf{x}, \{\mathcal{W}_i\})$</td>
+                <td>Parameterized Function</td>
+                <td>Residual mapping function to be fitted by stacked layers</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{y} \in \mathbb{R}^d$</td>
+                <td>Vector / Tensor</td>
+                <td>Output of residual block: $\mathbf{y} = \mathcal{F}(\mathbf{x}) + \mathbf{x}$</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{I} \in \mathbb{R}^{d \times d}$</td>
+                <td>Identity Matrix</td>
+                <td>Identity matrix: derivative of the shortcut $\frac{\partial \mathbf{x}}{\partial \mathbf{x}}$</td>
+            </tr>
+            <tr>
+                <td>$\frac{\partial \mathcal{L}}{\partial \mathbf{x}}, \frac{\partial \mathcal{L}}{\partial \mathbf{y}}$</td>
+                <td>Gradients</td>
+                <td>Downstream and upstream loss gradients</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Architecture Evolution: LeNet-5 to VGGNet</h2>
+    <ul>
+        <li><strong>LeNet-5 (1998):</strong> $5 \times 5$ convolutions, Average Pooling, Sigmoid/Tanh activations. Introduced the template of convolutional feature extraction followed by classification.</li>
+        <li><strong>AlexNet (2012):</strong> 8 layers, ImageNet breakthrough. First to use <strong>ReLU</strong> non-linearities, GPU parallel computing, and Dropout ($p = 0.5$).</li>
+        <li><strong>VGGNet (2014):</strong> Proved that large filters are obsolete. Factorized large kernels into homogeneous stacks of $3 \times 3$ convolutions:
+            <ul>
+                <li>Two stacked $3 \times 3$ convs equal one $5 \times 5$ receptive field with <strong>28% fewer weights</strong> ($18 C^2$ vs $25 C^2$).</li>
+                <li>Three stacked $3 \times 3$ convs equal one $7 \times 7$ receptive field with <strong>44.9% fewer weights</strong> ($27 C^2$ vs $49 C^2$).</li>
+                <li>Incorporates three non-linear ReLUs instead of one, dramatically increasing expressivity.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>4. The Degradation Problem</h2>
+    <div class="callout callout-danger">
+        <strong>The Paradox:</strong> When vanilla CNNs are scaled from 20 to 56 layers, <em>training error increases</em>. This cannot be explained by overfitting, because an overfitted model would achieve near-zero training error. Instead, it is an optimization bottleneck: vanishing gradients and ill-conditioned loss surfaces prevent stochastic gradient descent from optimizing deep stacks of plain layers.
+    </div>
+
+    <h2>5. Mathematical Proof: The Gradient Highway</h2>
+    <p>
+        In a Residual Network, each block computes:
+    </p>
+    $$\mathbf{x}_{l+1} = \mathbf{x}_l + \mathcal{F}(\mathbf{x}_l, \mathcal{W}_l)$$
+    <p>
+        By mathematical induction, the representation at any deep layer $L$ is:
+    </p>
+    $$\mathbf{x}_L = \mathbf{x}_l + \sum_{i=l}^{L-1} \mathcal{F}(\mathbf{x}_i, \mathcal{W}_i)$$
+    <p>
+        Applying the multivariate chain rule to compute the loss gradient $\frac{\partial \mathcal{L}}{\partial \mathbf{x}_l}$:
+    </p>
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{x}_l} = \frac{\partial \mathcal{L}}{\partial \mathbf{x}_L} \frac{\partial \mathbf{x}_L}{\partial \mathbf{x}_l} = \frac{\partial \mathcal{L}}{\partial \mathbf{x}_L} \left( \mathbf{I} + \frac{\partial}{\partial \mathbf{x}_l} \sum_{i=l}^{L-1} \mathcal{F}(\mathbf{x}_i, \mathcal{W}_i) \right)$$
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{x}_l} = \underbrace{\frac{\partial \mathcal{L}}{\partial \mathbf{x}_L}}_{\text{Direct Highway Term}} + \underbrace{\frac{\partial \mathcal{L}}{\partial \mathbf{x}_L} \left( \frac{\partial}{\partial \mathbf{x}_l} \sum_{i=l}^{L-1} \mathcal{F}(\mathbf{x}_i, \mathcal{W}_i) \right)}_{\text{Residual Correction Term}}$$
+    <p>
+        Even if the weight Jacobians along the residual branch vanish completely ($\frac{\partial \mathcal{F}}{\partial \mathbf{x}} \to 0$), the term $\frac{\partial \mathcal{L}}{\partial \mathbf{x}_L} \cdot \mathbf{I}$ guarantees that gradients flow directly back through the identity shortcut with <strong>zero attenuation</strong>.
+    </p>
+
+    <h2>6. The Bottleneck Residual Block</h2>
+    <p>
+        To scale ResNet to 50, 101, and 152 layers efficiently, He et al. introduced the 3-layer <strong>Bottleneck Block</strong>:
+    </p>
+    <div class="diagram">
+                 [ 1x1 Conv, 64 channels ]   <-- Squeeze / Channel Compression
+                            │
+                 [ 3x3 Conv, 64 channels ]   <-- Efficient Spatial Filtering
+                            │
+                 [ 1x1 Conv, 256 channels]   <-- Expansion back to input width
+                            │
+                           (+) <─── [ Identity Shortcut ]
+    </div>
+</body>
+</html>

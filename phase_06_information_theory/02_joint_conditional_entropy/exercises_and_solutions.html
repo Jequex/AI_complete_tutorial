@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 6.2: Exercises & Solutions — Joint & Conditional Entropy</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        .back-link:hover { transform: translateX(-4px); }
+        .exercise-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .difficulty-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .intro { background: #dbeafe; color: #1e40af; }
+        .intermediate { background: #fef3c7; color: #92400e; }
+        .applied { background: #dcfce7; color: #166534; }
+        details {
+            margin-top: 1.25rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            background: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.25rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.65rem 0.85rem;
+            text-align: left;
+        }
+        th { background: var(--primary-light); }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 06 Overview</a>
+    <h1>Topic 6.2: Exercises & Solutions</h1>
+    <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 2rem;">
+        Rigorous Practice on Joint Entropy, Conditional Uncertainty, Chain Rules, and Markov Sequences.
+    </p>
+
+    <!-- Exercise 1 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intro">Introductory (Age 12+)</span>
+        <h3>Exercise 1: Joint & Conditional Entropy from a Contingency Table</h3>
+        <p>A delivery robot tracks Weather $X \in \{\text{Sunny}, \text{Rainy}\}$ and Delay $Y \in \{\text{On Time}, \text{Delayed}\}$:</p>
+        <table>
+            <thead>
+                <tr><th></th><th>$Y = \text{On Time}$</th><th>$Y = \text{Delayed}$</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>$X = \text{Sunny}$</strong></td><td>0.40</td><td>0.10</td></tr>
+                <tr><td><strong>$X = \text{Rainy}$</strong></td><td>0.10</td><td>0.40</td></tr>
+            </tbody>
+        </table>
+        <p><strong>Tasks:</strong></p>
+        <ol>
+            <li>Compute the marginal entropies $H(X)$ and $H(Y)$.</li>
+            <li>Compute the joint entropy $H(X, Y)$.</li>
+            <li>Compute the conditional entropy $H(Y \mid X)$ and verify the Chain Rule.</li>
+            <li>How much does knowing the weather reduce uncertainty about delay?</li>
+        </ol>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p><strong>1. Marginal Entropies:</strong></p>
+                <p>$P(X=\text{Sunny}) = 0.50, \quad P(X=\text{Rainy}) = 0.50 \implies H(X) = 1.0\text{ bit}$.</p>
+                <p>$P(Y=\text{On Time}) = 0.50, \quad P(Y=\text{Delayed}) = 0.50 \implies H(Y) = 1.0\text{ bit}$.</p>
+
+                <p><strong>2. Joint Entropy:</strong></p>
+                $$H(X, Y) = -2(0.40 \log_2 0.40) - 2(0.10 \log_2 0.10) \approx 1.0575 + 0.6644 = 1.7219\text{ bits}$$
+
+                <p><strong>3. Conditional Entropy & Chain Rule:</strong></p>
+                <p>For both weather conditions, the distribution over delay is $(0.80, 0.20)$, with entropy:</p>
+                $$H_b(0.80) = -0.80\log_2 0.80 - 0.20\log_2 0.20 \approx 0.7219\text{ bits}$$
+                $$H(Y \mid X) = 0.50(0.7219) + 0.50(0.7219) = 0.7219\text{ bits}$$
+                $$H(X) + H(Y \mid X) = 1.0000 + 0.7219 = 1.7219\text{ bits} = H(X, Y) \quad \text{(Verified!)}$$
+
+                <p><strong>4. Uncertainty Reduction:</strong></p>
+                $$\Delta H = H(Y) - H(Y \mid X) = 1.0000 - 0.7219 = 0.2781\text{ bits}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge intermediate">Intermediate (Derivation)</span>
+        <h3>Exercise 2: The Three-Variable Chain Rule</h3>
+        <p>Using the two-variable rule $H(A, B) = H(A) + H(B \mid A)$, prove:</p>
+        $$H(X, Y, Z) = H(X) + H(Y \mid X) + H(Z \mid X, Y)$$
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p>Group $(X, Y)$ into a composite variable $W = (X, Y)$.</p>
+                $$H(X, Y, Z) = H(W, Z) = H(W) + H(Z \mid W)$$
+                <p>Substitute $W = (X, Y)$:</p>
+                $$H(X, Y, Z) = H(X, Y) + H(Z \mid X, Y)$$
+                <p>Expand $H(X, Y) = H(X) + H(Y \mid X)$:</p>
+                $$H(X, Y, Z) = H(X) + H(Y \mid X) + H(Z \mid X, Y) \quad \blacksquare$$
+                <p><strong>Autoregressive LLM Interpretation:</strong> Each word's uncertainty is added to the sum, conditioned on all words generated before it.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="exercise-card">
+        <span class="difficulty-badge applied">Applied (NLP & Markov Chains)</span>
+        <h3>Exercise 3: Markov Chains and Entropy Rate</h3>
+        <p>For a first-order Markov sequence $P(X_t \mid X_{<t}) = P(X_t \mid X_{t-1})$, show how the joint entropy simplifies and find its entropy rate.</p>
+
+        <details>
+            <summary>Click to reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>Solution:</h4>
+                <p>By the Markov property, tokens prior to $t-1$ carry no extra predictive power:</p>
+                $$H(X_1, \dots, X_T) = H(X_1) + \sum_{t=2}^T H(X_t \mid X_{t-1})$$
+                <p>For a stationary process, each step has identical conditional entropy $H(X_2 \mid X_1)$. The asymptotic entropy rate is:</p>
+                $$\mathcal{H} = \lim_{T \to \infty} \frac{1}{T} H(X_1, \dots, X_T) = H(X_2 \mid X_1)$$
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

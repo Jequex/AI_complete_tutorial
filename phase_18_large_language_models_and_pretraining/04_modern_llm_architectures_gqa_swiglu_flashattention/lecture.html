@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 18.4: Modern LLM Architectures — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 700;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code, li code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: 0.88em;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 18 Overview</a>
+
+    <h1>Topic 18.4: Modern LLM Architectures</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: -0.25rem;">
+        Grouped-Query Attention (GQA), SwiGLU Gated Feedforward Networks, and FlashAttention IO-Aware Tiling.
+    </p>
+
+    <div class="analogy-box">
+        <div class="analogy-title">👨‍🍳 12-Year-Old Analogy: The Chef's High-Speed Cutting Board & The Shared Kitchen Tools</div>
+        <p>In a 64-chef Michelin-star banquet kitchen:</p>
+        <ul>
+            <li><strong>Grouped-Query Attention (Shared Kitchen Tools):</strong> Instead of giving all 64 chefs their own individual pepper grinder (cluttering the counter with 64 grinders), we group the chefs into 8 teams of 8 chefs. Each team shares 1 pepper grinder. Clutter drops by $8\times$, cooking speeds up, and the food tastes just as delicious!</li>
+            <li><strong>SwiGLU (The Smart Valve):</strong> Rather than a crude on/off blender switch, SwiGLU is a continuous sensor valve that lets through exactly the right amount of sweetness while dynamically filtering out bitterness.</li>
+            <li><strong>FlashAttention (The Cutting Board vs. The Cold Basement):</strong> Instead of walking down two flights of stairs to the cold basement (GPU HBM memory) to write on a giant $10,000 \times 10,000$ whiteboard after every carrot slice, the chef keeps the vegetables right on the cutting board (on-chip SRAM), computes running totals in their head (online softmax), and finishes $4\times$ faster!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Mathematical Definition</th>
+                    <th>Concrete Physical Meaning</th>
+                    <th>Typical Values</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$H_Q$</td>
+                    <td>Query head count</td>
+                    <td>Number of attention heads attending to tokens</td>
+                    <td>$32, 64, \text{ or } 128$</td>
+                </tr>
+                <tr>
+                    <td>$H_{KV}$</td>
+                    <td>Key/Value head count</td>
+                    <td>Number of stored Key/Value heads in the KV-cache</td>
+                    <td>$8 \text{ (GQA-8)}$</td>
+                </tr>
+                <tr>
+                    <td>$G$</td>
+                    <td>$H_Q / H_{KV}$</td>
+                    <td>Group size (Query heads per KV head)</td>
+                    <td>$4, 8, \text{ or } 16$</td>
+                </tr>
+                <tr>
+                    <td>$d_{ffn}$</td>
+                    <td>$\approx \frac{8}{3} d_{model}$</td>
+                    <td>Intermediate hidden dimension of SwiGLU MLP</td>
+                    <td>$11,008 \text{ for } 4096$</td>
+                </tr>
+                <tr>
+                    <td>$\text{SiLU}(z)$</td>
+                    <td>$z \cdot \sigma(z) = \frac{z}{1 + e^{-z}}$</td>
+                    <td>Sigmoid Linear Unit (Swish-1) activation</td>
+                    <td>Smooth non-monotonic</td>
+                </tr>
+                <tr>
+                    <td>$B_r, B_c$</td>
+                    <td>Tile block dimensions</td>
+                    <td>SRAM block sizes in FlashAttention</td>
+                    <td>$64 \times 128$</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>2. Grouped-Query Attention (GQA) & The KV-Cache</h2>
+    <p>
+        Autoregressive generation stores past keys and values in memory:
+        $$\text{KV-Cache Size} = 2 \times L \times T \times H_{KV} \times d_{head} \times 2 \text{ bytes}$$
+    </p>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Architecture</th>
+                    <th>$H_{KV}$</th>
+                    <th>KV Cache at 32k Context</th>
+                    <th>KV Cache at 128k Context</th>
+                    <th>Speedup Factor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Multi-Head Attention (MHA)</td>
+                    <td>64 heads</td>
+                    <td>85.90 GB</td>
+                    <td>343.60 GB</td>
+                    <td>1.0x (Baseline)</td>
+                </tr>
+                <tr>
+                    <td><strong>Grouped-Query Attention (GQA-8)</strong></td>
+                    <td><strong>8 heads</strong></td>
+                    <td><strong>10.74 GB</strong></td>
+                    <td><strong>42.95 GB</strong></td>
+                    <td><strong>8.0x reduction</strong></td>
+                </tr>
+                <tr>
+                    <td>Multi-Query Attention (MQA-1)</td>
+                    <td>1 head</td>
+                    <td>1.34 GB</td>
+                    <td>5.37 GB</td>
+                    <td>64.0x reduction</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>3. SwiGLU Activation & Dimension Scaling</h2>
+    <p>
+        SwiGLU replaces traditional linear activations with multiplicative gating:
+        $$\text{SwiGLU}(x) = \left( (x W_{gate}) \odot \text{SiLU}(x W_{up}) \right) W_{down}$$
+    </p>
+    <p>
+        Because SwiGLU uses 3 projection matrices instead of 2, parameter parity with a standard $4 d_{model}$ MLP requires scaling the intermediate dimension:
+        $$3 \cdot d_{model} \cdot d_{ffn} = 8 d_{model}^2 \implies d_{ffn} = \frac{8}{3} d_{model} \approx 2.667 d_{model}$$
+        For $d_{model} = 4096$, rounding to the nearest multiple of 256 yields $d_{ffn} = \mathbf{11,008}$.
+    </p>
+
+    <h2>4. FlashAttention & Online Softmax Normalization</h2>
+    <p>
+        Standard attention incurs $\mathcal{O}(T^2)$ memory reads and writes by materializing the full attention matrix $P \in \mathbb{R}^{T \times T}$ in GPU HBM.
+    </p>
+    <p>
+        FlashAttention eliminates this bottleneck by tiling computation inside fast SRAM using <strong>Online Softmax</strong>:
+    </p>
+    $$m^{\text{new}} = \max(m^{(1)}, m^{(2)})$$
+    $$d^{\text{new}} = d^{(1)} e^{m^{(1)} - m^{\text{new}}} + d^{(2)} e^{m^{(2)} - m^{\text{new}}}$$
+    $$O^{\text{new}} = O^{(1)} e^{m^{(1)} - m^{\text{new}}} + \left(\sum_j e^{x_j^{(2)} - m^{\text{new}}} V_j^{(2)}\right)$$
+    <p>
+        HBM memory traffic drops from $\mathcal{O}(T^2)$ to $\mathcal{O}(T)$, achieving an exact mathematical result with $2\times - 4\times$ speedup.
+    </p>
+
+    <div class="nav-links">
+        <a href="../03_distributed_training_and_parallelism_strategies/lecture.html">← Previous Topic: Distributed Training</a>
+        <a href="exercises_and_solutions.html">Proceed to Topic 18.4 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>

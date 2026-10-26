@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.4: Exercises &amp; Solutions — InfoNCE &amp; Multimodal CLIP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.4: Exercises &amp; Solutions</h1>
+    <p><em>Analytical proofs of the InfoNCE Mutual Information bound, gradient derivations with temperature scaling, CLIP batch scaling, and zero-shot prompt engineering.</em></p>
+
+    <h2>Problem 1: InfoNCE Mutual Information Lower Bound Proof (Hard)</h2>
+    <p>Prove that minimizing InfoNCE over $K$ negative samples bounds mutual information:</p>
+    $$I(X; Y) \ge \log(K) - \mathcal{L}_{\text{InfoNCE}}$$
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>By Bayes' rule with uniform prior $P(C = 0) = \frac{1}{K+1}$, the true posterior is $\frac{\frac{p(y_0|x)}{p(y_0)}}{\sum_m \frac{p(y_m|x)}{p(y_m)}}$.</p>
+        <p>Applying Jensen's inequality to concave $-\log(1 + z)$ and computing expectation over marginal negatives $\mathbb{E}_{p(y)}[\frac{p(y|x)}{p(y)}] = 1$, the sum over $K$ negatives evaluates to $K$:</p>
+        $$\mathcal{L}_{\text{InfoNCE}} \ge \log(K) - \mathbb{E}_{p(x, y)} \left[ \log \frac{p(y \mid x)}{p(y)} \right] = \log(K) - I(X; Y)$$
+    </details>
+
+    <h2>Problem 2: InfoNCE Analytical Gradients with Temperature (Medium)</h2>
+    <p>Derive the gradient of InfoNCE loss with respect to query vector $q \in \mathbb{R}^d$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Using softmax probabilities $p_j = \frac{e^{s_j/\tau}}{\sum_m e^{s_m/\tau}}$:</p>
+        $$\nabla_q \mathcal{L} = \frac{1}{\tau} \left( \sum_{j=0}^K p_j k_j - k_0 \right)$$
+        <p>Query $q$ is pulled directly toward the positive key $k_0$ and pushed away from the probability-weighted mass of negative keys $\sum_{j=1}^K p_j k_j$.</p>
+    </details>
+
+    <h2>Problem 3: CLIP Batch Scaling &amp; Memory Footprint (Medium)</h2>
+    <p>For batch size $N = 32,768$, calculate total pairs and matrix memory overhead.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Total Matrix Elements:</strong> $N^2 = 32,768^2 = 1,073,741,824$ elements (~1.07 billion pairs).</p>
+        <p><strong>Memory Footprint:</strong> $1.07 \times 10^9 \times 4 \text{ bytes} = \mathbf{4.0 \text{ GiB}}$ VRAM.</p>
+        <p>Each image is contrasted against $K = 32,767$ negatives, tightening the MI bound to $\log(32,767) \approx 10.40$ nats.</p>
+    </details>
+
+    <h2>Problem 4: Zero-Shot Prompt Engineering (Medium)</h2>
+    <p>Contrast raw label prompting (`"weapon"`) vs contextualized prompting (`"a photo of a deadly dangerous metallic weapon"` vs `"a photo of a plastic colorful toy"`).</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Raw labels suffer from polysemy and lack domain grounding. Contextualized prompt templates project text into visual sub-regions that match texture, color, and scene attributes. Prompt ensembling averages out stylistic templates, boosting zero-shot accuracy by 3–5% without retraining.</p>
+    </details>
+
+</body>
+</html>

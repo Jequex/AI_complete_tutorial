@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 11.1: Exercises &amp; Solutions — Forward Propagation &amp; Architectures</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-easy { background-color: #dcfce7; color: #15803d; }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: #fee2e2; color: #b91c1c; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            outline: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 11 Portal</a>
+
+    <h1>Topic 11.1: Exercises &amp; Solutions — Forward Propagation &amp; Architectures</h1>
+    <p><em>Rigorous practice problems covering batch tensor algebra, parameter counting, and the depth vs width expressivity theorem.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <span class="badge badge-easy">Easy</span>
+        <h3>Problem 1: Manual Forward Pass for a Single Layer</h3>
+        <p>Consider a batch of two input vectors $X \in \mathbb{R}^{2 \times 3}$:</p>
+        $$X = \begin{bmatrix} 2.0 & -1.0 & 0.5 \\ 0.0 & 3.0 & -2.0 \end{bmatrix}$$
+        <p>Fed into a linear layer with weights $W \in \mathbb{R}^{2 \times 3}$ and bias $\mathbf{b} \in \mathbb{R}^2$:</p>
+        $$W = \begin{bmatrix} 1.0 & 0.5 & -2.0 \\ -0.5 & 1.0 & 1.0 \end{bmatrix}, \quad \mathbf{b} = \begin{bmatrix} 0.5 \\ -1.0 \end{bmatrix}$$
+        <ol>
+            <li>State the shape of $W^T$, $X W^T$, and the final pre-activation matrix $Z$.</li>
+            <li>Compute the exact numerical values of the matrix $Z \in \mathbb{R}^{2 \times 2}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Step 1: Tensor shapes:</strong></p>
+                <ul>
+                    <li>$W^T$ has shape $[3, 2]$.</li>
+                    <li>$X W^T$ has shape $[2, 3] \times [3, 2] = [2, 2]$.</li>
+                    <li>Adding broadcast bias $\mathbf{b}^T$ results in $Z$ of shape $[2, 2]$.</li>
+                </ul>
+                <p><strong>Step 2: Linear product calculation:</strong></p>
+                $$X W^T = \begin{bmatrix} 2(1.0) - 1(0.5) + 0.5(-2.0) & 2(-0.5) - 1(1.0) + 0.5(1.0) \\ 0(1.0) + 3(0.5) - 2(-2.0) & 0(-0.5) + 3(1.0) - 2(1.0) \end{bmatrix} = \begin{bmatrix} 0.5 & -1.5 \\ 5.5 & 1.0 \end{bmatrix}$$
+                <p>Adding bias vector $\mathbf{b} = [0.5, -1.0]$ across rows:</p>
+                $$Z = \begin{bmatrix} 0.5 + 0.5 & -1.5 - 1.0 \\ 5.5 + 0.5 & 1.0 - 1.0 \end{bmatrix} = \begin{bmatrix} 1.0 & -2.5 \\ 6.0 & 0.0 \end{bmatrix}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <span class="badge badge-medium">Medium</span>
+        <h3>Problem 2: Deep Network Parameter Counting &amp; Memory Bookkeeping</h3>
+        <p>Consider an audio network with architecture $[128] \to [256] \to [128] \to [64] \to [10]$ operating on batch size $B = 32$ with IEEE 754 32-bit floats (4 bytes each).</p>
+        <ol>
+            <li>Compute the total number of trainable parameters in the network.</li>
+            <li>List the tensor shapes for $W^{[l]}$, $\mathbf{b}^{[l]}$, and $Z^{[l]}$ at each layer $l \in \{1, 2, 3, 4\}$.</li>
+            <li>Calculate the total memory required to store the activation cache $\{A^{[0]}, \dots, A^{[4]}\}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Trainable Parameter Count:</strong></p>
+                <ul>
+                    <li>Layer 1: $256 \times 128 + 256 = 33,024$</li>
+                    <li>Layer 2: $128 \times 256 + 128 = 32,896$</li>
+                    <li>Layer 3: $64 \times 128 + 64 = 8,256$</li>
+                    <li>Layer 4: $10 \times 64 + 10 = 650$</li>
+                </ul>
+                <p>$$\text{Total Parameters} = 33,024 + 32,896 + 8,256 + 650 = 74,826$$</p>
+                <p><strong>2. Tensor Shapes:</strong></p>
+                <ul>
+                    <li>Layer 1: $W^{[1]}: [256, 128]$, $\mathbf{b}^{[1]}: [256]$, $Z^{[1]}: [32, 256]$</li>
+                    <li>Layer 2: $W^{[2]}: [128, 256]$, $\mathbf{b}^{[2]}: [128]$, $Z^{[2]}: [32, 128]$</li>
+                    <li>Layer 3: $W^{[3]}: [64, 128]$, $\mathbf{b}^{[3]}: [64]$, $Z^{[3]}: [32, 64]$</li>
+                    <li>Layer 4: $W^{[4]}: [10, 64]$, $\mathbf{b}^{[4]}: [10]$, $Z^{[4]}: [32, 10]$</li>
+                </ul>
+                <p><strong>3. Activation Memory:</strong></p>
+                <p>Total floats: $32 \times (128 + 256 + 128 + 64 + 10) = 32 \times 586 = 18,752\text{ floats}$.</p>
+                <p>Memory: $18,752 \times 4\text{ bytes} = 75,008\text{ bytes} \approx 73.25\text{ KB}$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <span class="badge badge-hard">Hard</span>
+        <h3>Problem 3: Expressivity Analysis — Depth vs. Width</h3>
+        <p>Let $g(x) = 2x - 4\max(0, x - 0.5)$ be a triangle sawtooth function on $[0, 1]$ having 2 linear segments.</p>
+        <ol>
+            <li>Prove that composing $g$ with itself $k$ times ($f_k = g \circ g \circ \dots \circ g$) produces $2^k$ linear pieces.</li>
+            <li>How many layers and neurons are needed for a deep ReLU network to compute $f_k$?</li>
+            <li>How many hidden neurons are required by a shallow 1-hidden-layer network to compute $f_k$?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Composing Sawtooth Pieces:</strong></p>
+                <p>On each monotonic half-interval $[0, 0.5]$ and $[0.5, 1]$, $g(x)$ sweeps across the full range $[0, 1]$. Composing $g$ applies the two-piece fold to each half, doubling the linear pieces. By induction, $k$ compositions yield $2^k$ linear segments.</p>
+                <p><strong>2. Deep Network Construction:</strong></p>
+                <p>Each fold requires one 2-neuron ReLU layer. Thus, chaining $k$ layers uses $k$ layers and $2k$ total neurons ($\mathcal{O}(k)$ parameters).</p>
+                <p><strong>3. Shallow Network Requirements:</strong></p>
+                <p>A single hidden layer ReLU network $F(x) = c_0 + \sum_{i=1}^M c_i \max(0, w_i x + b_i)$ has at most $M$ breakpoints. To generate $2^k$ linear pieces, the function must have $2^k - 1$ breakpoints, requiring $M \ge 2^k - 1$ neurons ($\mathcal{O}(2^k)$ parameters). This proves that deep architectures are <strong>exponentially more efficient</strong> than shallow networks.</p>
+            </div>
+        </details>
+    </div>
+
+    <p style="margin-top: 3rem;"><a href="../index.html" class="back-link">← Back to Phase 11 Portal</a></p>
+</body>
+</html>

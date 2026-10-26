@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 19.1: Full Fine-Tuning vs. PEFT &amp; Catastrophic Forgetting — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --warning: #fbbf24;
+                --warning-bg: #451a03;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        .callout-warning {
+            background-color: var(--warning-bg);
+            border-left-color: var(--warning);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code, li code, td code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 19 Overview</a>
+
+    <h1>Topic 19.1: Full Fine-Tuning vs. PEFT &amp; Catastrophic Forgetting</h1>
+    <p><em>Pre-training vs. fine-tuning paradigm, the 16 bytes/param memory wall, and the mathematics of representation drift.</em></p>
+
+    <div class="callout">
+        <strong>Core Question:</strong> Why does updating an 8-billion parameter model require over 100 GB of GPU memory, and why does training a pre-trained model on specialized tasks erase its general intelligence?
+    </div>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+
+    <p>Pre-trained Large Language Models (LLMs) acquire general-purpose world representations by ingesting trillions of tokens during self-supervised pre-training. However, deploying a raw pre-trained model directly to production tasks—such as medical diagnosis, SQL generation, or legal contract analysis—often yields uncalibrated results.</p>
+
+    <p>Historically, adapting a neural network meant <strong>Full Fine-Tuning (FFT)</strong>: updating every single weight parameter across every layer using standard backpropagation and optimizers like AdamW. As models scaled from millions of parameters to hundreds of billions, Full Fine-Tuning encountered two critical bottlenecks:</p>
+    <ol>
+        <li><strong>The FFT Memory Wall:</strong> Mixed-precision training requires approximately <strong>16 bytes of static GPU RAM per model parameter</strong> ($16 \times N$), requiring multi-GPU server clusters just to update a modest 7-billion parameter model.</li>
+        <li><strong>Catastrophic Forgetting:</strong> Unconstrained gradient descent on a specialized dataset overwrites critical pre-trained representations, destroying general reasoning, linguistic coherence, and safety guardrails.</li>
+    </ol>
+
+    <p><strong>Parameter-Efficient Fine-Tuning (PEFT)</strong> resolves both crises by freezing the pre-trained weights ($\theta_0$) in place and injecting a tiny fraction of modular, trainable parameters ($\Delta \theta$).</p>
+
+    <pre>
+                      FULL FINE-TUNING VS. PEFT PARADIGM
+                      
+      FULL FINE-TUNING (FFT)                      PARAMETER-EFFICIENT (PEFT)
+      
+   Input x ───> [ Layer 1 ] ───> ...          Input x ───┬───> [ Frozen W_0 ] ───┐
+                      │                                  │        (No Grads)     │
+                   (Update)                              │                       ▼
+               All Weights Drift                         └───> [ Trainable ΔW ] ─(+)──> Output y
+            Cost: 16N bytes memory                              (&lt; 1% parameters)
+           Risk: Catastrophic Forgetting                        Zero Base Degradation
+    </pre>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: Brain Surgery vs. Putting on Reading Glasses</h3>
+        <p>Imagine you have a world-class polymath who has read every encyclopedia in the world and speaks 30 languages fluently. You want them to become an expert at filing modern corporate tax returns in California.</p>
+        <ul>
+            <li><strong>Full Fine-Tuning (The Brain Surgery Approach):</strong> You put the polymath into an operating room, crack open their skull, and use electric probes to rewire all their brain synapses until they know California tax codes inside out. What happens? They might calculate tax deductions, but you accidentally severed the neural pathways that remembered how to speak Spanish, how to solve calculus, and how to tell right from wrong. You modified the original brain directly, causing <strong>Catastrophic Forgetting</strong>, and you needed a multimillion-dollar hospital operating room (<strong>The Memory Wall</strong>) just to do it.</li>
+            <li><strong>PEFT / LoRA (The Reading Glasses Approach):</strong> Instead of touching a single neuron in their brain, you leave their original intellect completely untouched and frozen. You hand them a specialized pair of <strong>California Tax Reading Glasses</strong> (or a transparent cheat sheet overlay). When looking through the glasses, the tax numbers fall into place effortlessly. Their original linguistic, factual, and reasoning abilities remain 100% intact. Better yet, if tomorrow you want them to practice pediatric medicine, you simply swap the glasses for a pair of <strong>Medical Diagnosis Glasses</strong> without retraining their brain!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description &amp; Engineering Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\theta_0$</td>
+                <td>$\mathbb{R}^N$</td>
+                <td>Vector of pre-trained frozen base model weights ($N$ total parameters)</td>
+            </tr>
+            <tr>
+                <td>$\Delta \theta$</td>
+                <td>$\mathbb{R}^N$ or $\mathbb{R}^M$</td>
+                <td>Parameter delta update vector ($M \ll N$ under PEFT)</td>
+            </tr>
+            <tr>
+                <td>$\theta^* = \theta_0 + \Delta \theta$</td>
+                <td>$\mathbb{R}^N$</td>
+                <td>Effective adapted model weights deployed during inference</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{pretrain}}(\theta)$</td>
+                <td>Scalar Loss $\in \mathbb{R}^+$</td>
+                <td>Self-supervised next-token cross-entropy objective over internet-scale corpora</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}_{\text{task}}(\theta)$</td>
+                <td>Scalar Loss $\in \mathbb{R}^+$</td>
+                <td>Supervised task-specific downstream objective</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{g}_t$</td>
+                <td>$\mathbb{R}^N$</td>
+                <td>Stochastic gradient vector at step $t$: $\nabla_\theta \mathcal{L}(\theta_t)$</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{m}_t, \mathbf{v}_t$</td>
+                <td>$\mathbb{R}^N$</td>
+                <td>AdamW first moment (momentum) and second moment (uncentered variance) vectors</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{H}_A$</td>
+                <td>$\mathbb{R}^{N \times N}$</td>
+                <td>Hessian matrix of second-order partial derivatives on Task A: $\nabla^2_\theta \mathcal{L}_A(\theta)$</td>
+            </tr>
+            <tr>
+                <td>$M_{\text{static}}$</td>
+                <td>Bytes $\in \mathbb{N}$</td>
+                <td>Static GPU VRAM footprint required by parameters, gradients, and optimizer states</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Full Fine-Tuning (FFT) Memory Wall</h2>
+
+    <p>Under standard mixed-precision training (FP16 or BF16 computation with 32-bit master weights and AdamW):</p>
+
+    <ol>
+        <li><strong>Model Weights (FP16/BF16):</strong> $2 \text{ bytes per parameter}$</li>
+        <li><strong>Weight Gradients (FP16/BF16):</strong> $2 \text{ bytes per parameter}$</li>
+        <li><strong>Master Weights (FP32):</strong> FP16 has only a 5-bit exponent and 10-bit mantissa (subnormal minimum $\approx 5.96 \times 10^{-8}$). Tiny gradient steps $\eta \cdot g_t$ underflow if accumulated directly in FP16. Hence, an FP32 copy must be retained: $4 \text{ bytes per parameter}$.</li>
+        <li><strong>AdamW First Moment Vector $m_t$ (FP32):</strong> $m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t \implies 4 \text{ bytes per parameter}$.</li>
+        <li><strong>AdamW Second Moment Vector $v_t$ (FP32):</strong> $v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2 \implies 4 \text{ bytes per parameter}$.</li>
+    </ol>
+
+    <div class="callout callout-danger">
+        <h3>The Canonical Static Memory Formula</h3>
+        $$M_{\text{static}} = 2N + 2N + 4N + 4N + 4N = \mathbf{16N \text{ bytes}}$$
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Model Class</th>
+                <th>Parameter Count ($N$)</th>
+                <th>Pure Weights (FP16)</th>
+                <th>Optimizer + Gradients</th>
+                <th>Total Static Memory ($M_{\text{static}}$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Llama-3-8B</strong></td>
+                <td>$8.03 \times 10^9$</td>
+                <td>$14.95\text{ GB}$</td>
+                <td>$104.69\text{ GB}$</td>
+                <td><strong>$119.64\text{ GB}$</strong> (Requires $\ge 2 \times 80\text{GB}$)</td>
+            </tr>
+            <tr>
+                <td><strong>Llama-3-70B</strong></td>
+                <td>$70.6 \times 10^9$</td>
+                <td>$131.50\text{ GB}$</td>
+                <td>$920.50\text{ GB}$</td>
+                <td><strong>$1,052.00\text{ GB}$</strong> (Requires $\ge 14 \times 80\text{GB}$)</td>
+            </tr>
+            <tr>
+                <td><strong>DeepSeek-V3</strong></td>
+                <td>$671 \times 10^9$</td>
+                <td>$1,249.8\text{ GB}$</td>
+                <td>$8,748.8\text{ GB}$</td>
+                <td><strong>$9,998.6\text{ GB}$</strong> (Requires cluster $\ge 125 \times 80\text{GB}$)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. The Catastrophic Forgetting Phenomenon</h2>
+
+    <p>Catastrophic forgetting (McCloskey &amp; Cohen 1989; French 1999) describes the abrupt and drastic loss of previously acquired knowledge when a connectionist network is sequentially trained on a new task.</p>
+
+    <h3>Mathematical Derivation via Taylor Expansion</h3>
+    <p>Consider a model parameter vector $\theta$ trained on Task A to local optimality: $\nabla_\theta \mathcal{L}_A(\theta^*) \approx \mathbf{0}$. Now, update $\theta$ sequentially on Task B using stochastic gradient descent:</p>
+    $$\theta_{t+1} = \theta_t - \eta \mathbf{g}_B, \quad \text{where } \mathbf{g}_B = \nabla_\theta \mathcal{L}_B(\theta_t)$$
+
+    <p>Expanding the loss on original Task A using a second-order Taylor series around $\theta_t$:</p>
+    $$\mathcal{L}_A(\theta_{t+1}) = \mathcal{L}_A(\theta_t + \Delta \theta) \approx \mathcal{L}_A(\theta_t) + \nabla_\theta \mathcal{L}_A(\theta_t)^T \Delta \theta + \frac{1}{2} \Delta \theta^T \mathbf{H}_A \Delta \theta$$
+
+    <p>Substituting $\Delta \theta = -\eta \mathbf{g}_B$:</p>
+    $$\mathcal{L}_A(\theta_{t+1}) - \mathcal{L}_A(\theta_t) \approx \underbrace{-\eta \langle \mathbf{g}_A, \mathbf{g}_B \rangle}_{\text{First-Order Gradient Interference}} + \underbrace{\frac{\eta^2}{2} \mathbf{g}_B^T \mathbf{H}_A \mathbf{g}_B}_{\text{Second-Order Curvature Penalty}}$$
+
+    <div class="callout callout-warning">
+        <strong>The Gradient Interference Mechanism:</strong>
+        <ul>
+            <li><strong>Destructive Interference:</strong> In specialized fine-tuning, the task gradient $\mathbf{g}_B$ is frequently opposed to general reasoning: $\langle \mathbf{g}_A, \mathbf{g}_B \rangle &lt; 0$. Hence, $-\eta \langle \mathbf{g}_A, \mathbf{g}_B \rangle &gt; 0$. Both the first-order and second-order terms are strictly positive, causing $\mathcal{L}_A$ to explode exponentially!</li>
+            <li><strong>PEFT Protection:</strong> PEFT freezes $\theta_0$, ensuring $\Delta \theta_{\text{base}} = \mathbf{0}$, guaranteeing exact numerical preservation of base representations.</li>
+        </ul>
+    </div>
+
+    <h2>5. Comparative Architecture Matrix</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Dimension</th>
+                <th>Full Fine-Tuning (FFT)</th>
+                <th>Parameter-Efficient Fine-Tuning (PEFT)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Trainable Parameter Ratio</strong></td>
+                <td>$100\%$ ($N$ params)</td>
+                <td>$0.01\% - 1.0\%$ ($M \ll N$)</td>
+            </tr>
+            <tr>
+                <td><strong>Static Memory per Param</strong></td>
+                <td>$\approx 16\text{ bytes}$ for all $N$ params</td>
+                <td>$\approx 2\text{ bytes}$ base + $16\text{ bytes}$ for $\phi$</td>
+            </tr>
+            <tr>
+                <td><strong>Disk Storage per Checkpoint</strong></td>
+                <td>Full model copy ($16\text{ GB}$ per 8B)</td>
+                <td>Adapter weights only ($10 - 50\text{ MB}$ per task)</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-Tenant Serving</strong></td>
+                <td>Requires independent model per customer</td>
+                <td>Single frozen base model + dynamic adapter swap</td>
+            </tr>
+            <tr>
+                <td><strong>Risk of Catastrophic Forgetting</strong></td>
+                <td><strong>Extreme</strong> (overwrites general reasoning)</td>
+                <td><strong>Zero to Minimal</strong> (base weights bitwise immutable)</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

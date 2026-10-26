@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 19.4: Exercises &amp; Solutions — PEFT Adapters, Prompt &amp; Prefix Tuning — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 19 Overview</a>
+
+    <h1>Topic 19.4: Exercises &amp; Solutions — PEFT Adapters &amp; Continuous Prompting</h1>
+    <p><em>Prefix attention derivations, comparative parameter counting, and context window length trade-offs.</em></p>
+
+    <div class="problem-card">
+        <h3>Problem 1: Manual Prefix-Tuning Attention Allocation (Easy)</h3>
+        <p>Given $\mathbf{q} = [1.0, 0.0]^T$, sequence key $\mathbf{k}_{\text{seq}} = [0.0, 1.0]^T$, prefix key $\mathbf{p}_K = [1.0, 1.0]^T$, prefix value $\mathbf{p}_V = [5.0, 5.0]^T$, and sequence value $\mathbf{v}_{\text{seq}} = [1.0, 0.0]^T$ with $d_k = 2$:</p>
+        <ol>
+            <li>Compute raw dot-product scores for prefix key and sequence key.</li>
+            <li>Compute scaled logits $z = \mathbf{q}^T \mathbf{k} / \sqrt{2}$.</li>
+            <li>Compute softmax probabilities and contextual output $\mathbf{h}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <h4>Calculations:</h4>
+            $$\mathbf{q} \cdot \mathbf{p}_K = 1.0, \quad \mathbf{q} \cdot \mathbf{k}_{\text{seq}} = 0.0$$
+            $$z_{\text{prefix}} = \frac{1}{\sqrt{2}} \approx 0.7071, \quad z_{\text{seq}} = 0.0$$
+            $$a_{\text{prefix}} = \frac{e^{0.7071}}{e^{0.7071} + 1.0} \approx \mathbf{66.98\%}, \quad a_{\text{seq}} \approx \mathbf{33.02\%}$$
+            $$\mathbf{h} = 0.6698 \begin{bmatrix} 5.0 \\ 5.0 \end{bmatrix} + 0.3302 \begin{bmatrix} 1.0 \\ 0.0 \end{bmatrix} = \begin{bmatrix} \mathbf{3.6792} \\ \mathbf{3.3490} \end{bmatrix}$$
+            <p>The learnable prefix captures two-thirds of the attention mass, steering the output vector without modifying sequence weights.</p>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <h3>Problem 2: Context Budget &amp; FLOPs Penalty of Prompt Tuning vs. LoRA (Hard)</h3>
+        <p>Compare LoRA (which merges weights and adds $0$ virtual tokens) with Prompt Tuning ($L_p = 64$ virtual tokens) for sequence length $T = 2048$ with $T_{\max} = 2048$:</p>
+        <ol>
+            <li>Compute the quadratic attention FLOPs increase $((T + L_p)/T)^2$.</li>
+            <li>For an input query of 2000 tokens, determine available generation room under LoRA vs. Prompt Tuning.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <h4>1. FLOPs Increase:</h4>
+            $$\text{Ratio} = \left(\frac{2112}{2048}\right)^2 \approx (1.03125)^2 \approx 1.0635 \implies \mathbf{+6.35\% \text{ FLOPs increase across every layer}}.$$
+
+            <h4>2. Generation Budget:</h4>
+            <ul>
+                <li><strong>LoRA:</strong> $2048 - 2000 = \mathbf{48 \text{ tokens}}$ of response generation.</li>
+                <li><strong>Prompt Tuning:</strong> $2048 - (2000 + 64) = \mathbf{-16 \text{ tokens (Context Overflow Error!)}}$.</li>
+            </ul>
+            <p>Prompt tuning imposes a permanent runtime context length tax on every single inference request, whereas LoRA leaves the context window completely untouched.</p>
+        </details>
+    </div>
+
+</body>
+</html>

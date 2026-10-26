@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 7.2: Momentum & Nesterov Accelerated Gradient — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 7 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 7.2: Momentum & Nesterov Accelerated Gradient</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Physics-inspired optimization: escaping ill-conditioned ravines, velocity accumulation, and Nesterov lookahead braking.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        Standard Gradient Descent behaves like a mass-less speck of dust in thick syrup: the moment the slope levels off or changes direction, it stops or jerks perpendicularly. In ravines—narrow canyons where walls are thousands of times steeper than the gentle floor—GD wastes all its energy oscillating between the walls. Momentum endows optimization with <strong>physical inertia</strong>.
+    </p>
+
+    <div class="callout">
+        <h3>🛷 The 12-Year-Old Analogy: The Bobsled on an Icy Half-Pipe</h3>
+        <ul>
+            <li><strong>Standard SGD (The Feather):</strong> Blown violently left-and-right across the steep walls. 99% of its energy is spent bouncing sideways, barely moving forward along the floor.</li>
+            <li><strong>Polyak Heavy-Ball (The Heavy Iron Sled):</strong> An 800-pound iron sled. The leftward bounce is cancelled out by the rightward bounce on the next step. But down the floor, the gentle push acts in the same forward direction every time, rocketing the sled forward!</li>
+            <li><strong>Nesterov Accelerated Gradient (The Sled Pilot with Binoculars):</strong> The sled is so fast it risks crashing when the canyon takes a sharp turn. The pilot looks ahead with binoculars at where the sled will land next, measures the slope there, and taps the brakes <em>before</em> overshooting.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\theta_t \in \mathbb{R}^d$</td>
+                <td>Parameter vector</td>
+                <td>Model weights at time step $t$</td>
+            </tr>
+            <tr>
+                <td>$v_t \in \mathbb{R}^d$</td>
+                <td>Velocity vector</td>
+                <td>Accumulated momentum history</td>
+            </tr>
+            <tr>
+                <td>$\beta \in [0, 1)$</td>
+                <td>Scalar decay factor</td>
+                <td>Momentum coefficient (typically $0.9$)</td>
+            </tr>
+            <tr>
+                <td>$\eta$</td>
+                <td>Positive scalar</td>
+                <td>Learning rate</td>
+            </tr>
+            <tr>
+                <td>$\kappa = \lambda_{\max} / \lambda_{\min}$</td>
+                <td>$\ge 1$ scalar</td>
+                <td>Hessian condition number (ratio of steep to shallow curvature)</td>
+            </tr>
+            <tr>
+                <td>$\theta_t + \beta v_t$</td>
+                <td>Parameter space</td>
+                <td>Nesterov projected lookahead position</td>
+            </tr>
+            <tr>
+                <td>$\tau = \frac{1}{1 - \beta}$</td>
+                <td>Effective horizon</td>
+                <td>For $\beta = 0.9$, effectively averages over 10 steps</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Ravine Problem & Condition Number</h2>
+    <p>
+        Consider a canyon modeled by the quadratic objective:
+        $$f(x, y) = \frac{1}{2} L x^2 + \frac{1}{2} \mu y^2, \quad \text{with } L \gg \mu > 0$$
+        The condition number is $\kappa = \frac{L}{\mu}$.
+    </p>
+    <p>
+        Standard Gradient Descent requires step size $\eta < \frac{2}{L}$ to prevent divergence along $x$. Under optimal step size $\eta = \frac{2}{L + \mu}$, the rate of convergence along the slow floor direction $y$ is:
+        $$1 - \eta \mu = \frac{\kappa - 1}{\kappa + 1}$$
+        When $\kappa = 10,000$, the convergence requires $\mathcal{O}(\kappa \ln(1/\epsilon))$ steps, rendering optimization painfully slow.
+    </p>
+
+    <h2>4. Polyak Heavy-Ball Momentum Formulation</h2>
+    <p>
+        Polyak (1964) introduced the physical equation of a damped oscillator:
+        $$v_{t+1} = \beta v_t - \eta \nabla f(\theta_t)$$
+        $$\theta_{t+1} = \theta_t + v_{t+1}$$
+    </p>
+    <p>
+        In a consistent direction with constant gradient $g$, the steady-state velocity is:
+        $$v_\infty = -\frac{\eta}{1 - \beta} g$$
+        For $\beta = 0.9$, the effective step size is amplified by a factor of $\frac{1}{1 - 0.9} = 10\times$! In an alternating direction, consecutive terms cancel, suppressing transverse oscillations.
+    </p>
+    <p>
+        Optimal momentum tuning $\beta^* = \left(\frac{\sqrt{\kappa} - 1}{\sqrt{\kappa} + 1}\right)^2$ improves convergence from $\mathcal{O}(\kappa)$ to <strong>$\mathcal{O}(\sqrt{\kappa})$</strong>, delivering a 100-fold theoretical speedup when $\kappa = 10,000$.
+    </p>
+
+    <h2>5. Nesterov Accelerated Gradient (NAG)</h2>
+    <p>
+        Polyak momentum often overshoots the minimum due to excess kinetic energy. Nesterov (1983) evaluates the gradient at the <strong>lookahead position</strong> $\theta_t + \beta v_t$:
+        $$\theta_{\text{lookahead}} = \theta_t + \beta v_t$$
+        $$v_{t+1} = \beta v_t - \eta \nabla f(\theta_{\text{lookahead}})$$
+        $$\theta_{t+1} = \theta_t + v_{t+1}$$
+    </p>
+    <div class="callout callout-success">
+        <strong>Adaptive Braking Mechanism:</strong> When velocity carries the parameter toward an ascending slope, $\nabla f(\theta_{\text{lookahead}})$ points backward before the parameter actually reaches that position, directly subtracting from velocity and preventing catastrophic overshooting.
+    </div>
+
+    <h2>6. Summary Comparison Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Gradient Evaluated At</th>
+                <th>Convex Convergence</th>
+                <th>Ravine Handling</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Standard GD</strong></td>
+                <td>$\theta_t$</td>
+                <td>$\mathcal{O}(1/T)$</td>
+                <td>Severe bouncing, slow creep</td>
+            </tr>
+            <tr>
+                <td><strong>Polyak Momentum</strong></td>
+                <td>$\theta_t$</td>
+                <td>$\mathcal{O}(1/T)$</td>
+                <td>Cancels oscillations, high overshoot</td>
+            </tr>
+            <tr>
+                <td><strong>Nesterov (NAG)</strong></td>
+                <td>$\theta_t + \beta v_t$</td>
+                <td>$\mathcal{O}(1/T^2)$ (Optimal!)</td>
+                <td>Cancels oscillations, brakes overshoot</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

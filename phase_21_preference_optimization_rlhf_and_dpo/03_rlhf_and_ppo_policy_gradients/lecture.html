@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.3: RLHF &amp; PPO Policy Gradients — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--text); }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.3: RLHF &amp; PPO Policy Gradients</h1>
+
+    <div class="analogy">
+        <h3>🤸 The 12-Year-Old Analogy: The Gymnastics Coach with a Safety Bungee Cord</h3>
+        <p>Imagine you are an elite gymnast practicing for the Olympics:</p>
+        <ul>
+            <li><strong>The Gymnast (The Policy Model $\pi_\theta$):</strong> You want to invent wild flips to get a perfect 10.0 score from the judges.</li>
+            <li><strong>The Judge (The Reward Model $r_\phi$):</strong> Watches your moves and flashes a score.</li>
+            <li><strong>The Danger (Reward Hacking):</strong> Left alone, you might bounce out the window onto a trampoline to avoid touching the floor. Technically you didn't fall, but you broke the sport!</li>
+            <li><strong>The Coach's Bungee Cord (The Reference Model $\pi_{\text{ref}}$ &amp; KL Penalty $\beta$):</strong> The coach hooks you to a bungee harness. You can leap high and improve your routine, but if you drift too far from proper gymnastics form, the bungee pulls you safely back. The KL penalty keeps the model coherent and prevents catastrophic drift.</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formal Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\pi_\theta(y \mid x)$</td>
+                <td>Policy Model</td>
+                <td>Trainable autoregressive language model generating completions.</td>
+            </tr>
+            <tr>
+                <td>$\pi_{\text{ref}}(y \mid x)$</td>
+                <td>Reference Model</td>
+                <td>Frozen SFT model providing baseline log-probabilities for KL penalty.</td>
+            </tr>
+            <tr>
+                <td>$r_\phi(x, y)$</td>
+                <td>Reward Model</td>
+                <td>Frozen scoring network evaluating complete prompt-response pairs.</td>
+            </tr>
+            <tr>
+                <td>$V_\psi(s_t)$</td>
+                <td>Critic / Value Model</td>
+                <td>Trainable network predicting expected cumulative return from prefix $s_t$.</td>
+            </tr>
+            <tr>
+                <td>$D_{\text{KL}}(\pi_\theta \parallel \pi_{\text{ref}})$</td>
+                <td>Divergence $\ge 0$</td>
+                <td>Kullback-Leibler divergence between policy and reference distributions.</td>
+            </tr>
+            <tr>
+                <td>$\beta > 0$</td>
+                <td>Hyperparameter</td>
+                <td>KL penalty coefficient controlling reference tether strength.</td>
+            </tr>
+            <tr>
+                <td>$r_t(\theta)$</td>
+                <td>Ratio</td>
+                <td>Probability ratio $\frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}$.</td>
+            </tr>
+            <tr>
+                <td>$\hat{A}_t$</td>
+                <td>Advantage</td>
+                <td>Generalized Advantage Estimation (GAE) return over baseline.</td>
+            </tr>
+            <tr>
+                <td>$\epsilon \in (0, 0.3)$</td>
+                <td>Hyperparameter</td>
+                <td>PPO surrogate clipping parameter (typically $0.1$ or $0.2$).</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. The RLHF Optimization Objective with KL Penalty</h2>
+    <p>The global objective balances maximizing human preference reward with staying close to the initial SFT reference distribution:</p>
+
+    <div class="box">
+        $$\max_\theta \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta} \left[ r_\phi(x, y) \right] - \beta D_{\text{KL}}(\pi_\theta(y \mid x) \parallel \pi_{\text{ref}}(y \mid x))$$
+    </div>
+
+    <p>In practice, this is implemented as a per-token reward signal:</p>
+    $$R_t = \begin{cases} 
+    -\beta \left( \log \pi_\theta(y_t \mid s_t) - \log \pi_{\text{ref}}(y_t \mid s_t) \right) & \text{for } 1 \le t < T \\
+    r_\phi(x, y) - \beta \left( \log \pi_\theta(y_T \mid s_T) - \log \pi_{\text{ref}}(y_T \mid s_T) \right) & \text{for } t = T 
+    \end{cases}$$
+
+    <h2>3. The 4-Model System in Memory</h2>
+    <div class="card">
+        <p>PPO training requires coordinating four large language models in GPU VRAM concurrently:</p>
+        <ol>
+            <li><strong>Actor Policy ($\pi_\theta$):</strong> Generates text, gradients enabled.</li>
+            <li><strong>Critic Value Network ($V_\psi$):</strong> Predicts state values, gradients enabled.</li>
+            <li><strong>Reference Model ($\pi_{\text{ref}}$):</strong> Computes baseline log-probs, frozen.</li>
+            <li><strong>Reward Model ($r_\phi$):</strong> Evaluates complete outputs, frozen.</li>
+        </ol>
+        <p>For an 8B model, this memory footprint easily exceeds 160 GB VRAM, requiring heavy tensor parallelism and distributed infrastructure.</p>
+    </div>
+
+    <h2>4. Proximal Policy Optimization (PPO) Clipped Surrogate Objective</h2>
+    <p>To prevent destructive gradient steps from destabilizing the policy, PPO limits policy drift using the clipped surrogate loss:</p>
+
+    <div class="box">
+        $$\mathcal{L}^{\text{CLIP}}(\theta) = \hat{\mathbb{E}}_t \left[ \min\left( r_t(\theta) \hat{A}_t, \, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon) \hat{A}_t \right) \right]$$
+    </div>
+
+    <p>Where $r_t(\theta) = \frac{\pi_\theta(a_t \mid s_t)}{\pi_{\text{old}}(a_t \mid s_t)}$. If a token was highly advantageous ($\hat{A}_t > 0$), probability can increase at most by a factor of $1 + \epsilon$ before the gradient is zeroed out.</p>
+
+    <h2>5. Generalized Advantage Estimation (GAE)</h2>
+    <p>GAE combines multi-step temporal difference residuals to balance bias and variance:</p>
+    $$\delta_t^V = R_t + \gamma V(s_{t+1}) - V(s_t), \quad \hat{A}_t = \delta_t^V + (\gamma \lambda) \hat{A}_{t+1}$$
+    <p>In language models, $\gamma = 1.0$ and $\lambda \approx 0.95$ provides smooth advantage estimates across conversational tokens.</p>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../02_reward_modeling_and_loss_derivation/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Topic 21.2: Reward Modeling</a>
+        <a href="../04_direct_preference_optimization_dpo/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.4 — Direct Preference Optimization (DPO) →</a>
+    </div>
+
+</body>
+</html>

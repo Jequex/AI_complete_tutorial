@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 15.1: Recurrent Neural Networks & BPTT — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        pre code { background-color: transparent; padding: 0; }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        svg { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 15 Overview</a>
+
+    <h1>Topic 15.1: Recurrent Neural Networks & Backpropagation Through Time (BPTT)</h1>
+    <p><em>Mastering parameter sharing over temporal sequences, unrolling computational graphs, and diagnosing the vanishing and exploding gradient dilemma.</em></p>
+
+    <div class="callout">
+        <h3>Executive Summary</h3>
+        <p>
+            Standard feedforward networks require fixed-size inputs and treat all tokens independently. To model sequential, variable-length data (text, time-series, audio), <strong>Recurrent Neural Networks (RNNs)</strong> share weights across time steps and maintain an internal hidden memory vector $h_t$. Training an unrolled RNN across $T$ timesteps via <strong>Backpropagation Through Time (BPTT)</strong> reveals a profound mathematical challenge: the repeated product of transition Jacobians causes gradients to either exponentially vanish or explode.
+        </p>
+    </div>
+
+    <h2>1. The 12-Year-Old Analogy: The Conveyor Belt with a Fading Notepad</h2>
+    <p>
+        Imagine you are an inspector standing next to a fast-moving factory conveyor belt:
+    </p>
+    <ul>
+        <li>Boxes roll past you one per second ($x_1, x_2, x_3, \dots$).</li>
+        <li>You carry a pocket notepad with space for only <strong>one single sentence</strong> ($h_t$).</li>
+        <li>You follow an exact rulebook: <em>"Read the new box ($x_t$), read your prior notepad summary ($h_{t-1}$), erase the notepad, and write a new updated 1-sentence note ($h_t$)."</em></li>
+        <li>At every second, your supervisor looks at your notepad and demands a classification ($y_t$).</li>
+    </ul>
+    <p>
+        <strong>The Backward Pass (Blame Assignment):</strong> At second 20, you make a severe error on Box 20 ($L_{20}$). Your supervisor traces backwards: <em>"Why was note 20 wrong? Because note 19 was wrong! Why was note 19 wrong? Because note 18 was wrong..."</em>
+    </p>
+    <div class="callout callout-danger">
+        <h3>The Fading Ink Dilemma</h3>
+        <p>
+            Every time you rewrite your notepad, your marker fades by 10% ($0.9$). After 20 steps, only $0.9^{20} \approx 12\%$ of the original signal remains; after 50 steps, just $0.5\%$. The ink has vanished, making it impossible to assign blame to Box 1! Conversely, if your marker magnified ink intensity by 2x per step, after 20 steps the ink would explode into a massive black blob ($2^{20} > 1,000,000$), tearing the paper. This is the <strong>Vanishing and Exploding Gradient Dilemma</strong>.
+        </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description & Dimensions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$x_t \in \mathbb{R}^{d_x}$</td>
+                <td>Vector Space</td>
+                <td>Input feature vector at temporal step $t \in \{1, \dots, T\}$</td>
+            </tr>
+            <tr>
+                <td>$h_t \in \mathbb{R}^{d_h}$</td>
+                <td>Vector Space</td>
+                <td>Hidden activation vector (internal memory state) at time $t$</td>
+            </tr>
+            <tr>
+                <td>$W_{xh} \in \mathbb{R}^{d_h \times d_x}$</td>
+                <td>Matrix</td>
+                <td>Input-to-hidden transition weight matrix (shared across all $t$)</td>
+            </tr>
+            <tr>
+                <td>$W_{hh} \in \mathbb{R}^{d_h \times d_h}$</td>
+                <td>Matrix</td>
+                <td>Hidden-to-hidden recurrent weight matrix (shared across all $t$)</td>
+            </tr>
+            <tr>
+                <td>$W_{hy} \in \mathbb{R}^{d_y \times d_h}$</td>
+                <td>Matrix</td>
+                <td>Hidden-to-output emission weight matrix (shared across all $t$)</td>
+            </tr>
+            <tr>
+                <td>$L = \sum_{t=1}^T L_t$</td>
+                <td>Scalar</td>
+                <td>Total sequence loss aggregated over all $T$ timesteps</td>
+            </tr>
+            <tr>
+                <td>$\rho(W_{hh})$</td>
+                <td>Spectral Norm</td>
+                <td>Spectral radius (magnitude of largest eigenvalue of $W_{hh}$)</td>
+            </tr>
+            <tr>
+                <td>$\tau \in \mathbb{R}^+$</td>
+                <td>Scalar Threshold</td>
+                <td>L2 norm threshold for global gradient clipping</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Elman RNN Cell Architecture</h2>
+    <div style="text-align: center; margin: 2rem 0;">
+        <svg viewBox="0 0 720 220" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+            <rect x="20" y="80" width="80" height="50" rx="8" fill="#eef2ff" stroke="#4338ca" stroke-width="2"/>
+            <text x="60" y="110" fill="#4338ca" font-weight="bold" text-anchor="middle">h_0 (Init)</text>
+
+            <path d="M 100 105 L 155 105" stroke="#4338ca" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="127" y="95" fill="#4338ca" font-size="12" text-anchor="middle">W_hh</text>
+
+            <rect x="160" y="80" width="90" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+            <text x="205" y="110" fill="#059669" font-weight="bold" text-anchor="middle">h_1 (Cell)</text>
+
+            <rect x="165" y="165" width="80" height="40" rx="6" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
+            <text x="205" y="190" fill="#334155" font-size="13" text-anchor="middle">x_1</text>
+            <path d="M 205 165 L 205 135" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="220" y="152" fill="#64748b" font-size="11">W_xh</text>
+
+            <rect x="165" y="15" width="80" height="40" rx="6" fill="#f8fafc" stroke="#4338ca" stroke-width="1.5"/>
+            <text x="205" y="40" fill="#4338ca" font-size="13" text-anchor="middle">y_hat_1</text>
+            <path d="M 205 80 L 205 58" stroke="#4338ca" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="220" y="70" fill="#4338ca" font-size="11">W_hy</text>
+
+            <path d="M 250 105 L 305 105" stroke="#4338ca" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="277" y="95" fill="#4338ca" font-size="12" text-anchor="middle">W_hh</text>
+
+            <rect x="310" y="80" width="90" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+            <text x="355" y="110" fill="#059669" font-weight="bold" text-anchor="middle">h_2 (Cell)</text>
+
+            <path d="M 400 105 L 455 105" stroke="#4338ca" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow)"/>
+
+            <rect x="460" y="80" width="90" height="50" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+            <text x="505" y="110" fill="#059669" font-weight="bold" text-anchor="middle">h_T (Cell)</text>
+
+            <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#4338ca"/>
+                </marker>
+            </defs>
+        </svg>
+    </div>
+
+    <p>The standard Elman cell updates at timestep $t$ via:</p>
+    $$a_t = W_{xh} x_t + W_{hh} h_{t-1} + b_h$$
+    $$h_t = \tanh(a_t)$$
+    $$\hat{y}_t = \text{softmax}(W_{hy} h_t + b_y)$$
+
+    <h2>4. Backpropagation Through Time (BPTT) Derivation</h2>
+    <p>
+        Because the recurrent weights $W_{hh}$ and $W_{xh}$ participate in every single timestep $t=1, \dots, T$, the total gradient of sequence loss $L = \sum_{t=1}^T L_t$ accumulates contributions across all unrolled nodes:
+    </p>
+
+    $$\frac{\partial L}{\partial W_{hh}} = \sum_{t=1}^T \sum_{k=1}^t \frac{\partial L_t}{\partial h_k} \frac{\partial h_k}{\partial W_{hh}}$$
+
+    <p>Using reverse-mode adjoint recursion, the gradient arriving at hidden state $h_t$ is:</p>
+    $$\boxed{\frac{\partial L}{\partial h_t} = W_{hy}^T (\hat{y}_t - y_t) + W_{hh}^T \left( \frac{\partial L}{\partial h_{t+1}} \odot (1 - h_{t+1}^2) \right)}$$
+
+    <h2>5. The Mathematical Root of Vanishing & Exploding Gradients</h2>
+    <p>
+        Traced back from timestep $t$ to early step $k$, the sensitivity factor is the product of intermediate Jacobians:
+    </p>
+    $$\frac{\partial L_t}{\partial h_k} = \frac{\partial L_t}{\partial h_t} \prod_{j=k+1}^t \frac{\partial h_j}{\partial h_{j-1}} = \frac{\partial L_t}{\partial h_t} \prod_{j=k+1}^t \left( \text{diag}(1 - h_j^2) \cdot W_{hh} \right)$$
+
+    <p>Taking matrix norms where $\|D_j\|_2 \le 1.0$ and $\|W_{hh}\|_2 \le \gamma$:</p>
+    $$\left\| \frac{\partial h_t}{\partial h_k} \right\|_2 \le \gamma^{t-k}$$
+
+    <ul>
+        <li><strong>When $\gamma < 1$:</strong> The gradient decays exponentially as $\mathcal{O}(\gamma^{\Delta t}) \to 0$. Long-term context is lost!</li>
+        <li><strong>When $\gamma > 1$:</strong> The gradient grows exponentially as $\mathcal{O}(\gamma^{\Delta t}) \to \infty$. Exploding gradients cause numerical overflow.</li>
+    </ul>
+
+    <h2>6. Gradient Clipping</h2>
+    <div class="callout callout-success">
+        <h3>Direction-Preserving L2 Norm Clipping</h3>
+        <p>If the Euclidean norm of parameter gradients exceeds threshold $\tau$, scale the entire vector proportionally:</p>
+        $$\mathbf{g} \leftarrow \frac{\tau}{\max(\tau, \|\mathbf{g}\|_2)} \mathbf{g}$$
+        <p>This bounds update magnitudes ($\|\Delta \theta\|_2 \le \eta \tau$) while maintaining a cosine similarity of strictly $1.000000$.</p>
+    </div>
+
+    <h2>7. Verified Python Implementation Output</h2>
+    <pre><code>TEST 1: BPTT Analytical vs. Finite Difference GradCheck
+Max Relative Error on W_hh across 16 entries: 6.86e-09
+=> SUCCESS: Analytical BPTT gradients match finite differences perfectly (&lt; 1e-5)!
+
+TEST 2: Vanishing Gradient Across 20 Timesteps
+t = 19   Temporal Distance: 0    Norm: 2.561618e-01
+t = 15   Temporal Distance: 4    Norm: 1.779403e-02
+t = 10   Temporal Distance: 9    Norm: 4.025468e-04
+t = 5    Temporal Distance: 14   Norm: 1.606737e-05
+t = 0    Temporal Distance: 19   Norm: 3.488835e-07
+Gradient decay ratio ||dL/dh_0|| / ||dL/dh_19||: 1.36e-06
+=> SUCCESS: Exponential vanishing gradient mathematically verified!
+
+TEST 3: Exploding Gradient &amp; Gradient Clipping Stabilization
+Unclipped ||dW_hh|| Norm: 57.9954
+Global Norm Before Clipping:     798.9420
+Global Norm After Clipping:      5.0000
+Cosine Similarity:               1.000000
+=&gt; SUCCESS: Gradient clipping strictly bounds norm while preserving direction!</code></pre>
+
+    <div class="nav-links">
+        <span></span>
+        <a href="../02_long_short_term_memory_lstm/lecture.html" style="color: var(--primary); font-weight: 600;">Next: Topic 15.2 Long Short-Term Memory (LSTM) &rarr;</a>
+    </div>
+
+</body>
+</html>

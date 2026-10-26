@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 28.5: Memory Optimization &amp; Activation Checkpointing — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 28 Overview</a>
+
+    <h1>Topic 28.5: Memory Optimization &amp; Activation Checkpointing</h1>
+    <p>A comprehensive examination of dynamic activation memory bottlenecks, the $\mathcal{O}(\sqrt{L})$ mathematical derivation of Activation Checkpointing, and FlashAttention IO-awareness.</p>
+
+    <div class="analogy">
+        <h3>12-Year-Old Intuition: The Bookmark Strategy</h3>
+        <p>Imagine solving a 100-step math exam on a tiny desk that only fits 10 sheets of paper at once. At the end, the teacher asks you to grade your answers in reverse:</p>
+        <ul>
+            <li><strong>Standard Backpropagation</strong>: You try to hoard all 100 sheets on your desk. By step 20, papers spill onto the floor, causing chaos (<strong>Out-Of-Memory Crash</strong>).</li>
+            <li><strong>Activation Checkpointing</strong>: You only keep <strong>1 bookmark sheet every 10 steps</strong> (Step 0, 10, 20... 90), needing only 10 sheets! When grading, you quickly re-solve the 10 scratch steps on the spot, grade them, and crumple them up. Your desk only ever holds at most 20 sheets (an $80\%$ reduction!), with only 33% extra math work!</li>
+        </ul>
+    </div>
+
+    <h2>The Dynamic Activation Memory Crisis</h2>
+    <p>Activation memory grows with layer depth, batch size, and sequence length:</p>
+    $$M_{\text{act}} = \mathcal{O}(L \cdot B \cdot S \cdot D + L \cdot B \cdot S^2)$$
+    <p>For LLaMA-70B ($L = 80, D = 8{,}192$) with batch size $1$:</p>
+    <ul>
+        <li>Context $S = 2{,}048$: Activations $\approx \mathbf{56\text{ GB}}$.</li>
+        <li>Context $S = 32{,}768$: Activations $\approx \mathbf{1{,}280\text{ GB}}$!</li>
+        <li>Context $S = 128{,}000$: Activations $\approx \mathbf{18{,}400\text{ GB}}$!</li>
+    </ul>
+    <p>For long contexts, <strong>activation memory completely dwarfs static model weights</strong>.</p>
+
+    <h2>Mathematical Derivation of Activation Checkpointing</h2>
+    <p>By saving activations every $k$ layers during the forward pass:</p>
+    <ul>
+        <li>Stored checkpoints: $\frac{L}{k}$</li>
+        <li>Transient scratch activations during backward recomputation: $k$</li>
+    </ul>
+    $$M(k) = \frac{L}{k} + k$$
+    <p>Minimizing with respect to $k$:</p>
+    $$\frac{dM}{dk} = -\frac{L}{k^2} + 1 = 0 \implies \mathbf{k^* = \sqrt{L}}$$
+    $$\text{Optimal Peak Memory} = \frac{L}{\sqrt{L}} + \sqrt{L} = \mathbf{2\sqrt{L} \in \mathcal{O}(\sqrt{L})}$$
+    <p>For a 64-layer model, peak memory drops from 64 to $2\sqrt{64} = 16$ units (a **$75\%$ memory reduction**!).</p>
+
+    <h2>Mathematical Proof: The 33.3% Compute Overhead</h2>
+    <p>Let $F_{\text{fwd}}$ be the forward compute of one layer. In backpropagation, each layer computes gradients for both weights and inputs, so $F_{\text{bwd}} = 2 F_{\text{fwd}}$.</p>
+    <ul>
+        <li><strong>Standard Work</strong>: $W_{\text{std}} = F_{\text{fwd}} + F_{\text{bwd}} = F_{\text{fwd}} + 2 F_{\text{fwd}} = \mathbf{3 F_{\text{fwd}}}$</li>
+        <li><strong>Checkpointed Work</strong>: $W_{\text{chkpt}} = F_{\text{fwd}} + F_{\text{recompute}} + F_{\text{bwd}} = F_{\text{fwd}} + F_{\text{fwd}} + 2 F_{\text{fwd}} = \mathbf{4 F_{\text{fwd}}}$</li>
+    </ul>
+    $$\text{Overhead} = \frac{4 F_{\text{fwd}} - 3 F_{\text{fwd}}}{3 F_{\text{fwd}}} = \frac{1}{3} = \mathbf{33.33\%}$$
+    <p>A modest $33\%$ compute overhead cuts activation memory from $\mathcal{O}(L)$ to $\mathcal{O}(\sqrt{L})$.</p>
+
+    <h2>FlashAttention: IO-Awareness &amp; Online Softmax</h2>
+    <div class="card">
+        <h3>The Memory Bottleneck: SRAM vs. HBM</h3>
+        <p>Standard attention writes the $S \times S$ attention matrix to off-chip HBM ($2\text{ TB/s}$), reads it back for Softmax, and writes it back again. At $S = 64\text{k}$, this generates over $25\text{ GB}$ of slow HBM traffic per layer.</p>
+        <p><strong>FlashAttention</strong> solves this through <strong>Tiling</strong> and <strong>Online Softmax</strong>:</p>
+        <ul>
+            <li>Loads small blocks of $Q, K, V$ into ultra-fast on-chip SRAM ($15\text{ TB/s}$).</li>
+            <li>Maintains running Softmax statistics ($m, d$) without materializing the full $S \times S$ matrix.</li>
+            <li>Directly accumulates into Output matrix $\mathbf{O}$ in SRAM before writing to HBM.</li>
+        </ul>
+        <p>Memory IO drops from **$\mathcal{O}(S^2)$ to $\mathcal{O}(S)$**, yielding a $2\times$ to $4\times$ real wall-clock speedup and enabling $128\text{k}+$ context lengths!</p>
+    </div>
+
+</body>
+</html>

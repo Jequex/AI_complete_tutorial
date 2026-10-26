@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 11.4: Multilayer Perceptrons From Scratch — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 11 Portal</a>
+
+    <h1>Topic 11.4: Multilayer Perceptrons From Scratch</h1>
+    <p><em>Constructing complete neural networks from scratch, solving the historic XOR problem, and unlocking non-linear boundaries.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>In 1969, Minsky and Papert proved that single-layer perceptrons could never solve the non-linear XOR problem, launching the first AI Winter. In 1986, Rumelhart, Hinton, and Williams revived the field by demonstrating that <strong>Multi-Layer Perceptrons (MLPs)</strong> with non-linear hidden layers and backpropagation solve XOR with 100% precision.</p>
+
+    <div class="diagram">                THE XOR PROBLEM: SINGLE-LAYER FAILURE VS MLP TRIUMPH
+                
+     Single-Layer Perceptron (FAIL):             Multi-Layer Perceptron (TRIUMPH):
+     No single line can separate (0,1)&amp;(1,0)     Two hidden hyperplanes warp the space,
+     from (0,0)&amp;(1,1)! Max accuracy: 75%         isolating classes with 100% accuracy!
+     
+     x₂ ^                                        x₂ ^
+      1 ┼   ● (1)       ○ (0)                     1 ┼   ● (1)  \    ○ (0)
+        │      \                                    │     \     \
+        │   Impossible                              │      \  ● (1)\
+        │    Separator                              │       \       \
+      0 ┼   ○ (0)       ● (1)                     0 ┼   ○ (0)\       \ ○ (0)
+        └───────┴───────────&gt; x₁                    └─────────┴───────┴───&gt; x₁
+        0                   1                       0                     1</div>
+
+    <div class="callout">
+        <strong>The 12-Year-Old Analogy: The Origami Brain</strong>
+        <ul>
+            <li><strong>The Single Ruler (Single Layer):</strong> On a flat sheet of paper, you can only make one straight slice with a ruler. If red and blue dots are in alternating corners (XOR), no straight line can ever separate them. You are permanently capped at 50% to 75% accuracy.</li>
+            <li><strong>Origami Creases (Hidden Layers):</strong> Instead of slicing the paper flat, hidden layers fold the paper diagonally! By folding the paper, the two red dots touch each other on one side, allowing a single straight cut from the output layer to separate them completely.</li>
+            <li><strong>The Analytical Loop:</strong> Forward pass calculates guesses, loss checks errors, backward chain rule whispers adjustments to every crease, and weights update until the paper folds into perfection.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$W^{[l]} \in \mathbb{R}^{n^{[l]} \times n^{[l-1]}}$</td>
+                <td>Matrix</td>
+                <td>Weight matrix of layer $l$</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{b}^{[l]} \in \mathbb{R}^{n^{[l]}}$</td>
+                <td>Vector</td>
+                <td>Bias vector of layer $l$</td>
+            </tr>
+            <tr>
+                <td>$Z^{[l]} \in \mathbb{R}^{B \times n^{[l]}}$</td>
+                <td>Matrix</td>
+                <td>Pre-activation batch matrix: $A^{[l-1]} (W^{[l]})^T + \mathbf{b}^{[l]}$</td>
+            </tr>
+            <tr>
+                <td>$A^{[l]} \in \mathbb{R}^{B \times n^{[l]}}$</td>
+                <td>Matrix</td>
+                <td>Post-activation batch matrix: $g^{[l]}(Z^{[l]})$</td>
+            </tr>
+            <tr>
+                <td>$\delta^{[l]} \in \mathbb{R}^{B \times n^{[l]}}$</td>
+                <td>Matrix</td>
+                <td>Error sensitivity tensor: $\frac{\partial \mathcal{L}}{\partial Z^{[l]}}$</td>
+            </tr>
+            <tr>
+                <td>$\odot$</td>
+                <td>Operator</td>
+                <td>Hadamard (element-wise) multiplication</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The XOR Inseparability Proof</h2>
+    <p>A single linear perceptron requires weights $(w_1, w_2, b)$ to satisfy:</p>
+    $$b \le 0 \quad (\text{from } 0,0 \to 0)$$
+    $$w_2 + b > 0 \quad (\text{from } 0,1 \to 1)$$
+    $$w_1 + b > 0 \quad (\text{from } 1,0 \to 1)$$
+    $$w_1 + w_2 + b \le 0 \quad (\text{from } 1,1 \to 0)$$
+    <p>Adding the second and third inequalities yields $w_1 + w_2 + 2b > 0$. Since $w_1 + w_2 \le -b$, this implies $-b + 2b > 0 \implies b > 0$. This contradicts $b \le 0$. Hence, <strong>no single linear hyperplane can solve XOR</strong>.</p>
+
+    <h2>4. Analytical Backpropagation Equations</h2>
+    <div class="callout callout-success">
+        <strong>The Analytical Backward Pass:</strong>
+        <p>1. Output Layer Error:</p>
+        $$\delta^{[L]} = A^{[L]} - Y$$
+        <p>2. Hidden Layer Error Recursion ($l = L-1, \dots, 1$):</p>
+        $$\delta^{[l]} = (\delta^{[l+1]} W^{[l+1]}) \odot g'\left(A^{[l]}\right)$$
+        <p>3. Parameter Gradients:</p>
+        $$\frac{\partial \mathcal{L}}{\partial W^{[l]}} = \frac{1}{B} (\delta^{[l]})^T A^{[l-1]}, \quad \frac{\partial \mathcal{L}}{\partial \mathbf{b}^{[l]}} = \frac{1}{B} \sum_{i=1}^B \delta_i^{[l]}$$
+    </div>
+
+    <p style="margin-top: 3rem;"><a href="../index.html" class="back-link">← Back to Phase 11 Portal</a></p>
+</body>
+</html>

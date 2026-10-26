@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 5.1: Exercises & Solutions — Populations, Samples & Estimators</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+            transition: background 0.2s;
+        }
+        summary:hover {
+            opacity: 0.9;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .takeaway {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
+    <a href="lecture.html" class="back-link" style="margin-left: 1.5rem;">📖 Read Lecture 5.1</a>
+
+    <h1>Topic 5.1: Exercises & Solutions</h1>
+    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Master sample statistics, Bessel's correction calculations, standard error scaling in AI benchmarks, and the Gauss-Markov optimality theorem.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3 style="margin: 0;">Problem 1: Sample Statistics & The Bessel Ratio on Numerical Data</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>An AI engineer logs the inference latency (in milliseconds) of 4 consecutive requests to a neural model:</p>
+        $$X = \{ 4.0, \, 7.0, \, 10.0, \, 15.0 \}$$
+        <ol>
+            <li>Calculate the sample mean $\bar{X}$.</li>
+            <li>Compute the sum of squared deviations $\sum_{i=1}^4 (X_i - \bar{X})^2$.</li>
+            <li>Compute the naive sample variance $S_n^2$ (dividing by $n = 4$).</li>
+            <li>Compute the unbiased Bessel-corrected sample variance $S^2$ (dividing by $n - 1 = 3$).</li>
+            <li>Confirm that $\frac{S_n^2}{S^2} = \frac{n - 1}{n}$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>1. Sample Mean</h4>
+                $$\bar{X} = \frac{4.0 + 7.0 + 10.0 + 15.0}{4} = \frac{36.0}{4} = \mathbf{9.0 \text{ ms}}$$
+
+                <h4>2. Squared Deviations</h4>
+                <ul>
+                    <li>$(4.0 - 9.0)^2 = (-5.0)^2 = 25.0$</li>
+                    <li>$(7.0 - 9.0)^2 = (-2.0)^2 = 4.0$</li>
+                    <li>$(10.0 - 9.0)^2 = (+1.0)^2 = 1.0$</li>
+                    <li>$(15.0 - 9.0)^2 = (+6.0)^2 = 36.0$</li>
+                </ul>
+                $$\sum_{i=1}^4 (X_i - \bar{X})^2 = 25.0 + 4.0 + 1.0 + 36.0 = \mathbf{66.0}$$
+
+                <h4>3. Naive Sample Variance ($S_n^2$)</h4>
+                $$S_n^2 = \frac{66.0}{4} = \mathbf{16.5 \text{ ms}^2}$$
+
+                <h4>4. Unbiased Sample Variance ($S^2$)</h4>
+                $$S^2 = \frac{66.0}{4 - 1} = \frac{66.0}{3} = \mathbf{22.0 \text{ ms}^2}$$
+
+                <h4>5. Verification of the Ratio</h4>
+                $$\frac{S_n^2}{S^2} = \frac{16.5}{22.0} = 0.75 = \mathbf{\frac{3}{4} = \frac{n - 1}{n}} \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3 style="margin: 0;">Problem 2: Standard Error Scaling in LLM Benchmark Evaluation</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>An AI evaluation engineer tests an LLM on a reasoning benchmark (MMLU). Each test prompt is scored binary: $1$ if correct, $0$ if wrong. The population standard deviation of binary success is $\sigma \approx 0.50$.</p>
+        <ol>
+            <li>If the engineer tests the model on $n = 100$ prompts, what is the Standard Error $\text{SE}(\bar{X})$ of the accuracy score?</li>
+            <li>If the engineer wants to report benchmark accuracy with uncertainty of no more than $\pm 1\%$ ($\text{SE} \le 0.01$), what is the minimum number of evaluation prompts $n$ required?</li>
+            <li>Why does this make comparing models that differ by only $0.5\%$ on 500 prompts statistically meaningless?</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>1. Standard Error for $n = 100$</h4>
+                $$\text{SE}(\bar{X}) = \frac{\sigma}{\sqrt{n}} = \frac{0.50}{\sqrt{100}} = \frac{0.50}{10} = \mathbf{0.05 \quad (5.0\%)}$$
+
+                <h4>2. Minimum Sample Size for $\text{SE} \le 0.01$</h4>
+                $$\frac{0.50}{\sqrt{n}} \le 0.01 \implies \sqrt{n} \ge \frac{0.50}{0.01} = 50 \implies n \ge 50^2 = \mathbf{2{,}500 \text{ prompts}}$$
+
+                <h4>3. Leaderboard Implication</h4>
+                <div class="takeaway">
+                    <strong>Statistical Significance in AI:</strong>
+                    On 500 prompts, the standard error is $\frac{0.50}{\sqrt{500}} \approx 2.24\%$.
+                    Because the measurement noise ($2.24\%$) is more than 4 times larger than the observed difference ($0.50\%$), the difference is within random chance!
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3 style="margin: 0;">Problem 3: Optimal Weighting Proof & The Gauss-Markov Theorem</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>Let $X_1, \dots, X_n$ be independent observations with mean $\mu$ and variance $\sigma^2$. Consider a general linear estimator:</p>
+        $$\hat{\mu} = \sum_{i=1}^n w_i X_i$$
+        <ol>
+            <li>Find the condition on weights $w_i$ such that $\hat{\mu}$ is an unbiased estimator of $\mu$.</li>
+            <li>Write the formula for $\operatorname{Var}(\hat{\mu})$.</li>
+            <li>Prove using the Cauchy-Schwarz inequality that the variance is strictly minimized when all weights are equal: $w_i = \frac{1}{n}$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <h4>1. Unbiasedness Condition</h4>
+                $$\mathbb{E}[\hat{\mu}] = \sum_{i=1}^n w_i \mathbb{E}[X_i] = \mu \sum_{i=1}^n w_i \implies \mathbf{\sum_{i=1}^n w_i = 1}$$
+
+                <h4>2. Variance Formula</h4>
+                $$\operatorname{Var}(\hat{\mu}) = \sum_{i=1}^n w_i^2 \operatorname{Var}(X_i) = \mathbf{\sigma^2 \sum_{i=1}^n w_i^2}$$
+
+                <h4>3. Cauchy-Schwarz Proof</h4>
+                <p>Apply Cauchy-Schwarz to $\mathbf{u} = [w_1, \dots, w_n]^T$ and $\mathbf{v} = [1, \dots, 1]^T$:</p>
+                $$\left(\sum_{i=1}^n w_i \cdot 1\right)^2 \le \left(\sum_{i=1}^n w_i^2\right) \left(\sum_{i=1}^n 1^2\right)$$
+                $$1^2 \le \left(\sum_{i=1}^n w_i^2\right) \cdot n \implies \sum_{i=1}^n w_i^2 \ge \mathbf{\frac{1}{n}}$$
+                <p>Equality holds if and only if $w_1 = w_2 = \dots = w_n = \frac{1}{n} \quad \blacksquare$</p>
+
+                <div class="takeaway">
+                    <strong>The Gauss-Markov Theorem:</strong>
+                    The simple arithmetic mean $\bar{X} = \frac{1}{n}\sum_{i=1}^n X_i$ is proven to be the <strong>Best Linear Unbiased Estimator (BLUE)</strong>, possessing the lowest possible variance among all linear unbiased estimators!
+                </div>
+            </div>
+        </details>
+    </div>
+</body>
+</html>
+

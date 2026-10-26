@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 4.3: Exercises & Solutions — Core Distributions in AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+            --solution-bg: #f8fafc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        @media (prefers-color-scheme: dark) {
+            .badge-medium { background-color: #78350f; color: #fde68a; }
+        }
+        details {
+            background-color: var(--solution-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+        summary {
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            user-select: none;
+        }
+        .solution-content {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .step-box {
+            background: var(--bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 4.3</a>
+    <header>
+        <h1>Topic 4.3: Exercises &amp; Solutions</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Bernoulli MLE, Multivariate Gaussians &amp; VAE Reparameterization</p>
+    </header>
+
+    <!-- PROBLEM 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Bernoulli MLE &amp; Binary Cross-Entropy (BCE) Loss</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Derive the Maximum Likelihood Estimator $\hat{p}$ for $N$ independent Bernoulli samples by maximizing $\ell(p) = \sum y_i \ln p + (1-y_i) \ln(1-p)$, and explain its equivalence to BCE loss.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Differentiating Log-Likelihood:</strong>
+                    $$\frac{d\ell}{dp} = \sum_{i=1}^N \left(\frac{y_i}{p} - \frac{1-y_i}{1-p}\right) = 0$$
+                    $$\frac{\sum y_i}{p} = \frac{N - \sum y_i}{1 - p} \implies \hat{p}_{\text{MLE}} = \frac{1}{N} \sum_{i=1}^N y_i$$
+                </div>
+                <div class="step-box">
+                    <strong>2. BCE Equivalence:</strong>
+                    $$\mathcal{L}_{\text{BCE}} = -\frac{1}{N} \ell(p) = -\frac{1}{N} \sum_{i=1}^N [y_i \ln(p) + (1-y_i) \ln(1-p)]$$
+                    Minimizing BCE loss directly maximizes the Bernoulli target likelihood.
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: 2D Multivariate Gaussian Density by Hand</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Given $\mu = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$ and $\Sigma = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$:</p>
+        <ol>
+            <li>Compute $|\Sigma|$ and $\Sigma^{-1}$.</li>
+            <li>Compute the Mahalanobis distance squared $D_M^2$ for $\mathbf{x} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$.</li>
+            <li>Compute density $f(\mathbf{x})$.</li>
+        </ol>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Determinant &amp; Inverse:</strong>
+                    $$|\Sigma| = 4 - 1 = 3, \quad \Sigma^{-1} = \frac{1}{3} \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Mahalanobis Distance:</strong>
+                    $$D_M^2 = \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 1/3 \\ 1/3 \end{bmatrix} = \frac{2}{3} \approx 0.6667$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Probability Density:</strong>
+                    $$f(\mathbf{x}) = \frac{1}{2\pi \sqrt{3}} e^{-1/3} \approx \mathbf{0.0658}$$
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: The VAE Reparameterization Trick</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>In a VAE, a latent code is parameterized as $z = \mu + \sigma \epsilon$ where $\epsilon \sim \mathcal{N}(0, 1)$. Compute $\frac{\partial z}{\partial \mu}$, $\frac{\partial z}{\partial \sigma}$, and show how backpropagation flows through the loss $\mathcal{L}(z)$.</p>
+
+        <details>
+            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <div class="solution-content">
+                <div class="step-box">
+                    <strong>1. Partial Derivatives:</strong>
+                    $$\frac{\partial z}{\partial \mu} = 1, \quad \frac{\partial z}{\partial \sigma} = \epsilon$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Chain Rule Gradient Flow:</strong>
+                    $$\frac{\partial \mathcal{L}}{\partial \mu} = \frac{\partial \mathcal{L}}{\partial z} \times 1 = \frac{\partial \mathcal{L}}{\partial z}$$
+                    $$\frac{\partial \mathcal{L}}{\partial \sigma} = \frac{\partial \mathcal{L}}{\partial z} \times \epsilon$$
+                    This isolates stochasticity to $\epsilon$, allowing backpropagation to compute deterministic gradients for $\mu$ and $\sigma$.
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
+

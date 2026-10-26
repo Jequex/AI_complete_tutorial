@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 28.2: Exercises &amp; Solutions — Distributed Communication Primitives</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 28 Overview</a>
+
+    <h1>Topic 28.2: Exercises &amp; Solutions</h1>
+    <p>Quantitative problems on Ring All-Reduce vs Parameter Server scaling, Hockney latency crossover models, and step-by-step state traces.</p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Ring All-Reduce vs. Parameter Server for LLaMA-70B</h3>
+        <p>You synchronize gradients for a 70B parameter model in FP16 ($M = 140\text{ GB}$) across $N = 128\text{ GPUs}$ connected via $400\text{ Gbps}$ InfiniBand ($B = 50\text{ GB/s}$ sustained).</p>
+        <ol>
+            <li>Compute total volume handled by the server in Parameter Server and its execution time.</li>
+            <li>Compute volume transferred per GPU in Ring All-Reduce and its execution time.</li>
+            <li>Calculate the speedup of Ring All-Reduce.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Parameter Server:</strong></p>
+            <p>The server receives $(N-1)M$ and transmits $(N-1)M \implies 2(127) \times 140\text{ GB} = \mathbf{35{,}560\text{ GB}}$.</p>
+            $$T_{\text{PS}} = \frac{35{,}560\text{ GB}}{50\text{ GB/s}} = \mathbf{711.2\text{ seconds}} \approx \mathbf{11.85\text{ minutes/step}}$$
+            <p><strong>2. Ring All-Reduce:</strong></p>
+            <p>Each GPU sends $2 \cdot \frac{N-1}{N} M = 2 \cdot \frac{127}{128} \times 140\text{ GB} \approx \mathbf{277.81\text{ GB}}$.</p>
+            $$T_{\text{ring}} = \frac{277.81\text{ GB}}{50\text{ GB/s}} = \mathbf{5.556\text{ seconds}}$$
+            <p><strong>3. Speedup:</strong></p>
+            $$\text{Speedup} = \frac{711.2\text{ s}}{5.556\text{ s}} \approx \mathbf{128\times}$$
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Hockney Model &amp; Ring vs. Tree Crossover</h3>
+        <p>For $N = 64\text{ GPUs}$, latency $\alpha = 5\ \mu\text{s}$, bandwidth $\beta = 50\text{ GB/s}$:</p>
+        $$T_{\text{ring}}(M) = 2(N - 1)\alpha + 2\frac{N - 1}{N}\frac{M}{\beta}$$
+        $$T_{\text{tree\_contention}}(M) = 2\log_2(N)\alpha + 4\frac{N - 1}{N}\frac{M}{\beta}$$
+        <p>Derive the crossover message size $M^*$ where Ring All-Reduce overtakes Tree All-Reduce.</p>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p>Equating $T_{\text{ring}}(M^*) = T_{\text{tree}}(M^*)$:</p>
+            $$2(63)\alpha + 2\frac{63}{64}\frac{M^*}{\beta} = 2(6)\alpha + 4\frac{63}{64}\frac{M^*}{\beta}$$
+            $$2(57)\alpha = 2\frac{63}{64}\frac{M^*}{\beta} \implies M^* = \frac{57 \times 64 \times \beta \cdot \alpha}{63}$$
+            $$M^* = \frac{57 \times 64 \times (50 \times 10^9) \times (5 \times 10^{-6})}{63} \approx \mathbf{14.48\text{ MB}}$$
+            <p>For tensors $< 14.5\text{ MB}$, Tree is faster; for tensors $> 14.5\text{ MB}$ (standard gradient buckets), Ring achieves optimal bandwidth.</p>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Step-by-Step 4-GPU State Trace</h3>
+        <p>Trace 4 GPUs synchronizing 4 scalars $M = 4$ through Scatter-Reduce:</p>
+        <p>GPU 0: <code>[1, 2, 3, 4]</code>, GPU 1: <code>[10, 20, 30, 40]</code>, GPU 2: <code>[100, 200, 300, 400]</code>, GPU 3: <code>[1000, 2000, 3000, 4000]</code>.</p>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p>At step $k$, rank $i$ transmits chunk $(i - k) \pmod 4$ to rank $(i + 1) \pmod 4$.</p>
+            <ul>
+                <li><strong>Step 1 ($k=0$)</strong>: GPU 0 sends chunk 0 to 1 ($10+1=11$), GPU 1 sends chunk 1 to 2 ($200+20=220$), GPU 2 sends chunk 2 to 3 ($3000+300=3300$), GPU 3 sends chunk 3 to 0 ($4+4000=4004$).</li>
+                <li><strong>Step 2 ($k=1$)</strong>: GPU 0 sends chunk 3 to 1 ($40+4004=4044$), GPU 1 sends chunk 0 to 2 ($100+11=111$), GPU 2 sends chunk 1 to 3 ($2000+220=2220$), GPU 3 sends chunk 2 to 0 ($3+3300=3303$).</li>
+                <li><strong>Step 3 ($k=2$)</strong>: GPU 0 sends chunk 2 to 1 ($30+3303=3333$), GPU 1 sends chunk 3 to 2 ($400+4044=4444$), GPU 2 sends chunk 0 to 3 ($1000+111=1111$), GPU 3 sends chunk 1 to 0 ($2+2220=2222$).</li>
+            </ul>
+            <p>Each GPU holds one complete global sum: GPU 3 has chunk 0 ($1111$), GPU 0 has chunk 1 ($2222$), GPU 1 has chunk 2 ($3333$), GPU 2 has chunk 3 ($4444$).</p>
+        </details>
+    </div>
+
+</body>
+</html>

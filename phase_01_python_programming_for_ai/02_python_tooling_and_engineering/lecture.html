@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 1.2: AI Software Engineering, Tooling, and Reproducibility</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .concept-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .tip-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning-box {
+            background-color: var(--danger-bg);
+            border-left: 4px solid var(--danger);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 1rem 0;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+        p code, li code {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 1 Index</a>
+    <header>
+        <h1>Topic 1.2: AI Software Engineering &amp; Reproducibility</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Type Hints, Unit Testing Invariants, Profiling Bottlenecks, Logging, and Seeds</p>
+    </header>
+
+    <section>
+        <h2>1. The Mental Model: The Chemistry Laboratory Sandbox</h2>
+        <div class="concept-card">
+            <h3>Why Software Engineering Matters for AI</h3>
+            <p>Training multi-GPU models costs thousands of dollars per run. If your data loader crashes with an untyped <code>TypeError</code> after 12 hours of training, that compute budget is completely vaporized.</p>
+            <p>Modern AI engineering treats models like critical software systems: isolated with <strong>Virtual Environments</strong>, verified by <strong>Automated Unit Tests</strong>, typed with <strong>Type Hints</strong>, and locked with <strong>Random Seeds</strong> for absolute scientific reproducibility.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Type Hints &amp; Protocols in Modern AI</h2>
+        <p>Type hints clarify expected matrix shapes and function signatures, allowing static analyzers like <code>mypy</code> to catch bugs before hitting expensive GPUs.</p>
+        <pre><code>from typing import Union, Optional, Callable, Protocol
+
+# Model Hyperparameters Dict
+Config = dict[str, Union[float, int, str]]
+
+# Structural Typing (Protocol) for Any Trainable Architecture
+class NeuralModule(Protocol):
+    def forward(self, x: list[float]) -> list[float]: ...
+    def compute_loss(self, pred: list[float], target: list[float]) -> float: ...</code></pre>
+    </section>
+
+    <section>
+        <h2>3. Automated Unit Testing for Machine Learning</h2>
+        <p>In web development, unit tests verify exact string outputs. In machine learning, unit tests verify <strong>dimensions, mathematical invariants, and numerical tolerances</strong>.</p>
+
+        <div class="tip-box">
+            <strong>Key ML Testing Rules:</strong>
+            <ul>
+                <li><strong>Floating Point Tolerance:</strong> Never use <code>assertEqual(a, b)</code> for float math; use <code>assertAlmostEqual</code> or <code>math.isclose</code>.</li>
+                <li><strong>Initial Loss Check:</strong> For a $K$-class classifier, the initial random cross-entropy loss must be approximately $\ln(K)$.</li>
+                <li><strong>Gradient Flow Check:</strong> Ensure that no trainable layer has zero gradients during backprop.</li>
+            </ul>
+        </div>
+
+        <pre><code>import unittest
+import math
+
+class TestNeuralLayer(unittest.TestCase):
+    def test_numerical_tolerance(self):
+        # 0.1 + 0.2 in IEEE 754 float is 0.30000000000000004
+        self.assertAlmostEqual(0.1 + 0.2, 0.3, places=7)
+
+    def test_cross_entropy_baseline(self):
+        # Random guessing over 10 classes has loss -ln(1/10) = ln(10) ≈ 2.3026
+        expected_random_loss = math.log(10)
+        simulated_loss = 2.3015
+        self.assertAlmostEqual(simulated_loss, expected_random_loss, delta=0.05)</code></pre>
+    </section>
+
+    <section>
+        <h2>4. Performance Profiling: Locating GPU Starvation</h2>
+        <p>If your training data loader is slow, the GPU sits idle at 0% compute while consuming full power. Profiling with <code>cProfile</code> pinpoints the bottleneck function.</p>
+        <pre><code>import cProfile
+import pstats
+import io
+
+def train_iteration():
+    # Simulated workload
+    return sum(x ** 0.5 for x in range(200_000))
+
+profiler = cProfile.Profile()
+profiler.enable()
+train_iteration()
+profiler.disable()
+
+stream = io.StringIO()
+ps = pstats.Stats(profiler, stream=stream).sort_stats("cumulative")
+ps.print_stats(5)
+print(stream.getvalue())</code></pre>
+    </section>
+
+    <section>
+        <h2>5. Ironclad Scientific Reproducibility</h2>
+        <p>Random numbers in computers are generated by deterministic mathematical recurrence formulas seeded by an initial integer.</p>
+        <div class="warning-box">
+            <strong>⚠️ The Non-Determinism Disaster:</strong> If you don't pin your random seeds, you cannot distinguish whether an accuracy bump came from a better architecture or just a lucky coin toss!
+        </div>
+        <pre><code>import random
+
+def fix_all_seeds(seed: int = 42):
+    random.seed(seed)
+    # np.random.seed(seed)
+    # torch.manual_seed(seed)
+    print(f"🔒 Deterministic random seed locked to: {seed}")
+
+fix_all_seeds(42)
+print("Roll:", [random.randint(1, 100) for _ in range(3)])  # Always [82, 15, 4]!</code></pre>
+    </section>
+
+</body>
+</html>
+

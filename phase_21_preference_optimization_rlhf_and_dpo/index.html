@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 21: Preference Optimization (RLHF &amp; DPO) — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    .overview-box {
+      background-color: var(--badge-bg);
+      border: 1px solid var(--primary);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .overview-box h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+    .overview-box p {
+      margin-bottom: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    pre.code-block {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 1rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 21</div>
+    <h1>Preference Optimization (RLHF &amp; DPO)</h1>
+    <p class="lead">From Supervised Next-Token Prediction to Human-Aligned Value Optimization</p>
+  </header>
+
+  <div class="overview-box">
+    <h3>Architectural Paradigm</h3>
+    <p>Supervised Fine-Tuning teaches language models format and conversational turn-taking, but treats all demonstrations as equally optimal. Phase 21 covers the mathematics, algorithms, and engineering of aligning LLMs with nuanced human values: the Bradley-Terry pairwise preference model, neural Reward Modeling $[d_{\text{model}} \to 1]$, classic 4-model RLHF with PPO and GAE, Direct Preference Optimization (DPO) eliminating middleman models, Kahneman-Tversky Optimization (KTO) for unpaired feedback, and Online Iterative alignment.</p>
+  </div>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Human Preference Modeling &amp; The Bradley-Terry Framework</h2>
+      <p>Why human scalar rating (1-10) is noisy and uncalibrated, and why pairwise comparison ($y_w \succ y_l \mid x$) is mathematically robust. The Bradley-Terry logistic model (1952), Thurstonian probit comparison, Plackett-Luce ranking generalization for $K > 2$ outputs, and transitivity proofs.</p>
+      <div class="topic-links">
+        <a href="01_human_preference_and_bradley_terry/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_human_preference_and_bradley_terry/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_human_preference_and_bradley_terry/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_human_preference_and_bradley_terry/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_human_preference_and_bradley_terry/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Reward Modeling Architecture &amp; Pairwise Loss Derivation</h2>
+      <p>Replacing the causal LM vocabulary head with a scalar regression head $[d_{\text{model}} \to 1]$. Pairwise ranking loss derivation, terminal token causal extraction, score normalization and centering, and diagnosing Reward Hacking / Goodhart's Law (length bias, sycophancy).</p>
+      <div class="topic-links">
+        <a href="02_reward_modeling_and_loss_derivation/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_reward_modeling_and_loss_derivation/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_reward_modeling_and_loss_derivation/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_reward_modeling_and_loss_derivation/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_reward_modeling_and_loss_derivation/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. RLHF &amp; PPO Policy Gradients</h2>
+      <p>The complete 4-model memory topology ($\pi_\theta, \pi_{\text{ref}}, r_\phi, V_\psi$), VRAM arithmetic, token-level KL divergence penalties preventing policy collapse, Proximal Policy Optimization (PPO) clipped surrogate objective, and Generalized Advantage Estimation (GAE).</p>
+      <div class="topic-links">
+        <a href="03_rlhf_and_ppo_policy_gradients/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_rlhf_and_ppo_policy_gradients/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_rlhf_and_ppo_policy_gradients/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_rlhf_and_ppo_policy_gradients/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_rlhf_and_ppo_policy_gradients/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Direct Preference Optimization (DPO)</h2>
+      <p>The Rafailov et al. breakthrough: analytical closed-form mapping between optimal policy and reward, algebraic cancellation of the intractable partition function $Z(x)$, eliminating Reward and Critic models, and dynamic error-weighting gradient dynamics.</p>
+      <div class="topic-links">
+        <a href="04_direct_preference_optimization_dpo/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_direct_preference_optimization_dpo/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_direct_preference_optimization_dpo/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_direct_preference_optimization_dpo/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_direct_preference_optimization_dpo/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. KTO (Kahneman-Tversky Optimization) &amp; Online Preference Alignment</h2>
+      <p>Moving beyond paired datasets: optimizing from unpaired binary telemetry (thumbs-up / thumbs-down) using Prospect Theory loss aversion. Reference point $z_{\text{ref}}$ dynamics, and overcoming offline distribution shift with Online / Iterative DPO loops.</p>
+      <div class="topic-links">
+        <a href="05_kto_and_online_preference_optimization/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_kto_and_online_preference_optimization/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_kto_and_online_preference_optimization/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_kto_and_online_preference_optimization/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_kto_and_online_preference_optimization/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 21 Experiments</h2>
+    <p>Every experiment is implemented from first principles in pure Python 3 with zero external dependencies:</p>
+    <pre class="code-block">python3 phase_21_preference_optimization_rlhf_and_dpo/01_human_preference_and_bradley_terry/experiment.py
+python3 phase_21_preference_optimization_rlhf_and_dpo/02_reward_modeling_and_loss_derivation/experiment.py
+python3 phase_21_preference_optimization_rlhf_and_dpo/03_rlhf_and_ppo_policy_gradients/experiment.py
+python3 phase_21_preference_optimization_rlhf_and_dpo/04_direct_preference_optimization_dpo/experiment.py
+python3 phase_21_preference_optimization_rlhf_and_dpo/05_kto_and_online_preference_optimization/experiment.py</pre>
+  </section>
+
+</body>
+</html>

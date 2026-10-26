@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.1: Exercises &amp; Solutions — Markov Decision Processes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .solution-content {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.1: Exercises &amp; Solutions</h1>
+    <p><em>Rigorous analytical proofs and computational problems for Markov Decision Processes.</em></p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Geometric Discounting as a Constant Termination Hazard</h3>
+        <p>Suppose an environment terminates at every discrete time step with a fixed probability $p \in (0, 1)$, independent of history. If the process does not terminate, the agent receives reward $R_t$. If the process terminates, it transitions to an absorbing terminal state with reward 0 forever.</p>
+        <p>Show that evaluating the undiscounted expected return in this terminating environment is mathematically equivalent to evaluating the discounted return with discount factor $\gamma = 1 - p$ in an infinite-horizon non-terminating environment.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Let $T \in \{1, 2, 3, \dots\}$ be the random time step at which the process terminates. At each step, survival occurs with probability $1 - p$.</p>
+                <p>The probability that the agent survives for at least $k$ steps is:</p>
+                $$\mathbb{P}(T \ge k) = (1 - p)^{k-1}$$
+                <p>The expected undiscounted return across the stochastic lifetime $T$ is:</p>
+                $$\mathbb{E}\left[ \sum_{t=1}^T R_t \right] = \mathbb{E}\left[ \sum_{t=1}^\infty R_t \cdot \mathbb{I}(T \ge t) \right]$$
+                <p>By linearity of expectation and independence:</p>
+                $$= \sum_{t=1}^\infty R_t \cdot \mathbb{P}(T \ge t) = \sum_{t=1}^\infty R_t (1 - p)^{t-1}$$
+                <p>Letting $k = t - 1$ and defining $\gamma \triangleq 1 - p \in (0, 1)$:</p>
+                $$= \sum_{k=0}^\infty \gamma^k R_{k+1}$$
+                <p>This is precisely the definition of the discounted return $G_0$ with discount factor $\gamma = 1 - p$. Geometric discounting is therefore mathematically isomorphic to an ongoing survival process with constant failure rate $p = 1 - \gamma$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Strict Invertibility of $(\mathbf{I} - \gamma \mathbf{P}^\pi)$ via Gershgorin Circle Theorem</h3>
+        <p>Let $\mathbf{P}^\pi \in \mathbb{R}^{N \times N}$ be a valid row-stochastic transition matrix (i.e. $\sum_{j=1}^N P_{ij} = 1$ and $P_{ij} \ge 0$). Let $\gamma \in [0, 1)$.</p>
+        <p>Prove that the matrix $\mathbf{A} = \mathbf{I} - \gamma \mathbf{P}^\pi$ is strictly diagonally dominant and therefore invertible.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>A square matrix $\mathbf{A}$ is strictly diagonally dominant if for every row $i$:</p>
+                $$|A_{ii}| > \sum_{j \neq i} |A_{ij}|$$
+                <p>Evaluating $\mathbf{A} = \mathbf{I} - \gamma \mathbf{P}^\pi$:</p>
+                <ul>
+                    <li>Diagonal elements: $A_{ii} = 1 - \gamma P_{ii} > 0$</li>
+                    <li>Off-diagonal elements: $A_{ij} = -\gamma P_{ij}$ for $j \neq i$</li>
+                </ul>
+                <p>Summing the off-diagonal elements in row $i$:</p>
+                $$\sum_{j \neq i} |A_{ij}| = \sum_{j \neq i} \gamma P_{ij} = \gamma \sum_{j \neq i} P_{ij} = \gamma (1 - P_{ii})$$
+                <p>Subtracting from the diagonal term:</p>
+                $$|A_{ii}| - \sum_{j \neq i} |A_{ij}| = (1 - \gamma P_{ii}) - \gamma (1 - P_{ii}) = 1 - \gamma$$
+                <p>Since $\gamma < 1$, $1 - \gamma > 0$ strictly for every row $i$.</p>
+                <p>By the <strong>Levy-Desplanques Theorem</strong> (corollary of the Gershgorin Circle Theorem), every strictly diagonally dominant matrix has zero in no Gershgorin disc and is strictly non-singular. Hence $(\mathbf{I} - \gamma \mathbf{P}^\pi)^{-1}$ exists, guaranteeing a unique solution $\mathbf{v}^\pi$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Exact Value Computation on a 3-State World</h3>
+        <p>Consider a 3-state environment $\mathcal{S} = \{s_1, s_2, s_3\}$:</p>
+        <ul>
+            <li>State $s_1$: transition to $s_2$ with probability 1.0, reward $R(s_1) = 0$.</li>
+            <li>State $s_2$: transition to $s_3$ with prob $0.8$, transition to $s_1$ with prob $0.2$, reward $R(s_2) = +1$.</li>
+            <li>State $s_3$: absorbing terminal state with reward 0 forever ($P(s_3 \mid s_3) = 1, R(s_3) = 0$).</li>
+        </ul>
+        <p>With $\gamma = 0.9$, compute exact values $V(s_1), V(s_2), V(s_3)$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Terminal state: $V(s_3) = 0$.</p>
+                <p>Bellman equations for states $s_1, s_2$:</p>
+                $$V(s_1) = 0 + 0.9 V(s_2) = 0.9 V(s_2)$$
+                $$V(s_2) = 1 + 0.9 [ 0.2 V(s_1) + 0.8 V(s_3) ] = 1 + 0.18 V(s_1)$$
+                <p>Substituting $V(s_1)$:</p>
+                $$V(s_2) = 1 + 0.18 (0.9 V(s_2)) = 1 + 0.162 V(s_2)$$
+                $$(1 - 0.162) V(s_2) = 1 \implies 0.838 V(s_2) = 1 \implies V(s_2) = \frac{1}{0.838} \approx 1.1933$$
+                $$V(s_1) = 0.9 \times 1.193317 \approx 1.0740$$
+                <p><strong>Result:</strong> $V(s_1) \approx 1.0740$, $V(s_2) \approx 1.1933$, $V(s_3) = 0.0$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 4 -->
+    <div class="card">
+        <h3>Exercise 4: Markovian State Augmentation</h3>
+        <p>A physical system has position $x_t \in \mathbb{R}$ governed by $x_{t+1} = 2x_t - x_{t-1} + \Delta t^2 a_t + \epsilon_t$. Explain why $S_t = x_t$ violates the Markov property, and show how state augmentation restores it.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Non-Markovian nature:</strong> $P(x_{t+1} \mid x_t, a_t, x_{t-1}) \neq P(x_{t+1} \mid x_t, a_t)$ because position alone omits velocity $v_t \approx (x_t - x_{t-1})/\Delta t$.</p>
+                <p><strong>Augmentation:</strong> Define $\tilde{S}_t = [x_t, \, x_{t-1}]^T$. Then:</p>
+                $$\tilde{S}_{t+1} = \begin{bmatrix} x_{t+1} \\ x_t \end{bmatrix} = \begin{bmatrix} 2 & -1 \\ 1 & 0 \end{bmatrix} \begin{bmatrix} x_t \\ x_{t-1} \end{bmatrix} + \begin{bmatrix} \Delta t^2 \\ 0 \end{bmatrix} a_t + \begin{bmatrix} \epsilon_t \\ 0 \end{bmatrix}$$
+                <p>The conditional probability $P(\tilde{S}_{t+1} \mid \tilde{S}_t, a_t)$ is fully self-contained, restoring the Markov property.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

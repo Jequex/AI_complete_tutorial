@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 3.1: Functions, Limits, Continuity & Derivatives — Complete AI Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .concept-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .tip-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1rem 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 3 Index</a>
+    <header>
+        <h1>Topic 3.1: Functions, Limits, Continuity &amp; Derivatives</h1>
+        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Instantaneous Rate of Change, Derivative Rules, Sigmoid Derivation &amp; Finite Differences</p>
+    </header>
+
+    <section>
+        <h2>1. Symbol Decoder Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Formal Meaning</th>
+                    <th>Child-Friendly Analogy</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$f(x)$</td>
+                    <td>Function</td>
+                    <td>Maps input $x$ to output $y$</td>
+                    <td>A vending machine dropping a snack when coins are inserted</td>
+                </tr>
+                <tr>
+                    <td>$\lim_{x \to c} f(x)$</td>
+                    <td>Limit</td>
+                    <td>The value $f(x)$ approaches as $x \to c$</td>
+                    <td>Walking toward a doorway to see where it leads</td>
+                </tr>
+                <tr>
+                    <td>$\frac{df}{dx}$ or $f'(x)$</td>
+                    <td>Derivative</td>
+                    <td>Instantaneous rate of change of $f$ w.r.t $x$</td>
+                    <td>The speedometer needle showing exact speed at this instant</td>
+                </tr>
+                <tr>
+                    <td>$\sigma(x)$</td>
+                    <td>Sigmoid Function</td>
+                    <td>$1 / (1 + e^{-x})$ squashing into $(0, 1)$</td>
+                    <td>A smooth dimmer switch turning light from off (0) to on (1)</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>2. The Limit Definition of the Derivative</h2>
+        <div class="concept-card">
+            <h3>From Secant to Tangent Line</h3>
+            <p>The derivative measures the slope of the curve when zoomed in under a microscope:</p>
+            <p>$$f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}$$</p>
+            <p><strong>Sensitivity Interpretation:</strong> If you nudge $x$ by a tiny hair $\Delta x$, the output changes by $\Delta f \approx f'(x) \cdot \Delta x$.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. The Sigmoid Activation Derivative</h2>
+        <p>In neural networks, the Sigmoid activation has a uniquely elegant derivative:</p>
+        <p>$$\sigma(x) = \frac{1}{1 + e^{-x}} \implies \mathbf{\sigma'(x) = \sigma(x) \cdot (1 - \sigma(x))}$$</p>
+        <div class="tip-box">
+            <strong>Computational Efficiency in Deep Learning:</strong><br>
+            If a neuron cached forward output $y = \sigma(x)$, backpropagation computes the gradient without evaluating exponentials:
+            $$dy = y \cdot (1 - y)$$
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Numerical Differentiation: Finite Differences</h2>
+        <p>To verify that analytical gradient code in PyTorch is free of bugs, we perform numerical gradient checks:</p>
+        <ul>
+            <li><strong>Forward Difference:</strong> $\frac{f(x + h) - f(x)}{h} \quad (\text{Error: } \mathcal{O}(h))$</li>
+            <li><strong>Central Difference:</strong> $\frac{f(x + h) - f(x - h)}{2h} \quad (\text{Error: } \mathcal{O}(h^2))$</li>
+        </ul>
+        <p>Central difference cancels first-order error terms, yielding $100{,}000\times$ higher precision for $h = 10^{-5}$!</p>
+    </section>
+
+</body>
+</html>

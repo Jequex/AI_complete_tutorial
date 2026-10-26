@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 06: Information Theory — Complete AI Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff !important;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+
+    .nav-phases {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .nav-phases a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .nav-phases a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="badge">Mathematical Foundations</span>
+    <h1>Phase 06: Information Theory</h1>
+    <p class="lead">The fundamental currency of modern AI: quantifying uncertainty, compression limits, cross-entropy training objectives, KL divergence, and neural representation bottlenecks.</p>
+  </header>
+
+  <main>
+    <!-- Topic 6.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="01_entropy_and_information/lecture.html" class="topic-title">6.1 Entropy & Information</a>
+        <span class="badge">Foundational</span>
+      </div>
+      <p class="topic-desc">Surprisal, Shannon entropy, bits vs. nats, the 20-questions game, Jensen/Lagrange uniformity proofs, and Shannon's Source Coding Theorem.</p>
+      <div class="topic-links">
+        <a href="01_entropy_and_information/lecture.html" class="btn btn-primary">📖 Lecture</a>
+        <a href="01_entropy_and_information/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises & Solutions</a>
+        <a href="01_entropy_and_information/experiment.py" class="btn btn-secondary">🧪 Python Lab</a>
+      </div>
+    </div>
+
+    <!-- Topic 6.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="02_joint_conditional_entropy/lecture.html" class="topic-title">6.2 Joint & Conditional Entropy</a>
+        <span class="badge">Probability & AI</span>
+      </div>
+      <p class="topic-desc">Joint entropy, conditional entropy, the Chain Rule of Entropy, proof that conditioning never increases entropy, and autoregressive sequence factorization.</p>
+      <div class="topic-links">
+        <a href="02_joint_conditional_entropy/lecture.html" class="btn btn-primary">📖 Lecture</a>
+        <a href="02_joint_conditional_entropy/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises & Solutions</a>
+        <a href="02_joint_conditional_entropy/experiment.py" class="btn btn-secondary">🧪 Python Lab</a>
+      </div>
+    </div>
+
+    <!-- Topic 6.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="03_cross_entropy_and_perplexity/lecture.html" class="topic-title">6.3 Cross-Entropy & Perplexity</a>
+        <span class="badge">Deep Learning Core</span>
+      </div>
+      <p class="topic-desc">The universal loss engine of deep learning: cross-entropy, negative log-likelihood (NLL), equivalence to MLE, language model perplexity, and temperature scaling.</p>
+      <div class="topic-links">
+        <a href="03_cross_entropy_and_perplexity/lecture.html" class="btn btn-primary">📖 Lecture</a>
+        <a href="03_cross_entropy_and_perplexity/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises & Solutions</a>
+        <a href="03_cross_entropy_and_perplexity/experiment.py" class="btn btn-secondary">🧪 Python Lab</a>
+      </div>
+    </div>
+
+    <!-- Topic 6.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="04_kl_divergence/lecture.html" class="topic-title">6.4 Kullback-Leibler (KL) Divergence</a>
+        <span class="badge">Modern AI Alignment</span>
+      </div>
+      <p class="topic-desc">Measuring distribution divergence, Gibbs' inequality, statistical asymmetry, mode-covering vs. mode-seeking (Forward vs. Reverse KL), VAE latent loss, and RLHF alignment.</p>
+      <div class="topic-links">
+        <a href="04_kl_divergence/lecture.html" class="btn btn-primary">📖 Lecture</a>
+        <a href="04_kl_divergence/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises & Solutions</a>
+        <a href="04_kl_divergence/experiment.py" class="btn btn-secondary">🧪 Python Lab</a>
+      </div>
+    </div>
+
+    <!-- Topic 6.5 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="05_mutual_information_and_information_bottleneck/lecture.html" class="topic-title">6.5 Mutual Information & Information Bottleneck</a>
+        <span class="badge">Theory & Representation</span>
+      </div>
+      <p class="topic-desc">Quantifying shared knowledge, information Venn diagrams, channel capacity, Data Processing Inequality, and Naftali Tishby's Information Bottleneck in deep networks.</p>
+      <div class="topic-links">
+        <a href="05_mutual_information_and_information_bottleneck/lecture.html" class="btn btn-primary">📖 Lecture</a>
+        <a href="05_mutual_information_and_information_bottleneck/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises & Solutions</a>
+        <a href="05_mutual_information_and_information_bottleneck/experiment.py" class="btn btn-secondary">🧪 Python Lab</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="nav-phases">
+    <a href="../phase_05_statistics_and_estimation/index.html">← Phase 05: Statistics & Estimation</a>
+    <a href="../phase_07_optimization_and_gradient_descent/index.html">Phase 07: Optimization →</a>
+  </footer>
+
+</body>
+</html>
+

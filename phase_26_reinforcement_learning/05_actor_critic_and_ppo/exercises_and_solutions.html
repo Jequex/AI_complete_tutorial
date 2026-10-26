@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.5: Exercises &amp; Solutions — Actor-Critic &amp; PPO</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .solution-content {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.5: Exercises &amp; Solutions</h1>
+    <p><em>Analytical proofs and subgradient derivations for Actor-Critic, GAE, and PPO.</em></p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Algebraic Equivalence of GAE</h3>
+        <p>Prove that $(1 - \lambda) \sum_{k=1}^\infty \lambda^{k-1} \hat{A}_t^{(k)}$ where $\hat{A}_t^{(k)} = \sum_{l=0}^{k-1} \gamma^l \delta_{t+l}^V$ is identically equal to:</p>
+        $$\hat{A}_t^{\text{GAE}(\gamma, \lambda)} = \sum_{l=0}^\infty (\gamma \lambda)^l \delta_{t+l}^V$$
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Expanding and swapping sums with $k \ge l + 1$:</p>
+                $$\hat{A}_t^{\text{GAE}} = (1 - \lambda) \sum_{l=0}^\infty \gamma^l \delta_{t+l}^V \left( \sum_{k=l+1}^\infty \lambda^{k-1} \right)$$
+                <p>Using the geometric sum $\sum_{m=l}^\infty \lambda^m = \frac{\lambda^l}{1 - \lambda}$:</p>
+                $$= (1 - \lambda) \sum_{l=0}^\infty \gamma^l \delta_{t+l}^V \left( \frac{\lambda^l}{1 - \lambda} \right) = \sum_{l=0}^\infty (\gamma \lambda)^l \delta_{t+l}^V \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: Subgradient Analysis of the PPO Clipped Objective</h3>
+        <p>For $L(r) = \min(r \hat{A}, \text{clip}(r, 1 - \epsilon, 1 + \epsilon)\hat{A})$, derive $\frac{\partial L}{\partial r}$ and identify where the gradient vanishes.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Case 1 ($\hat{A} > 0$):</strong></p>
+                $$L(r) = \begin{cases} r \hat{A} & \text{if } r \le 1 + \epsilon \\ (1 + \epsilon)\hat{A} & \text{if } r > 1 + \epsilon \end{cases} \implies \frac{\partial L}{\partial r} = \begin{cases} \hat{A} & \text{if } r < 1 + \epsilon \\ 0 & \text{if } r > 1 + \epsilon \end{cases}$$
+                <p><strong>Case 2 ($\hat{A} < 0$):</strong></p>
+                $$L(r) = \begin{cases} (1 - \epsilon)\hat{A} & \text{if } r < 1 - \epsilon \\ r \hat{A} & \text{if } r \ge 1 - \epsilon \end{cases} \implies \frac{\partial L}{\partial r} = \begin{cases} 0 & \text{if } r < 1 - \epsilon \\ \hat{A} & \text{if } r > 1 - \epsilon \end{cases}$$
+                <p>The gradient is zeroed out whenever $r > 1 + \epsilon$ (with positive advantage) or $r < 1 - \epsilon$ (with negative advantage), safeguarding the policy against explosive shifts.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Analytical Entropy Gradient</h3>
+        <p>Derive $\nabla_\theta \mathcal{H}(\pi_\theta)$ for Shannon entropy $\mathcal{H} = -\sum_a \pi(a) \log \pi(a)$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                $$\nabla_\theta \mathcal{H} = -\sum_a \nabla_\theta \pi(a) \log \pi(a) - \sum_a \pi(a) \frac{\nabla_\theta \pi(a)}{\pi(a)}$$
+                <p>Since $\sum_a \nabla_\theta \pi(a) = \nabla_\theta(1) = 0$, the second sum drops out:</p>
+                $$\nabla_\theta \mathcal{H}(\pi_\theta) = -\sum_{a \in \mathcal{A}} \nabla_\theta \pi_\theta(a \mid s) \log \pi_\theta(a \mid s) = -\mathbb{E}_{a \sim \pi} [\nabla_\theta \log \pi_\theta(a \mid s) \log \pi_\theta(a \mid s)] \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+</body>
+</html>

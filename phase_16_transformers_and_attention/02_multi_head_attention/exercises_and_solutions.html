@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 16.2: Exercises &amp; Solutions — Multi-Head Attention</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin: 1.25rem 0 2rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        .solution-content {
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 16 Overview</a>
+
+    <h1>Topic 16.2: Exercises &amp; Solutions</h1>
+    <p><em>Multi-Head Attention: Dimensionality Bookkeeping, Manual Forward Passes, and Subspace Proofs.</em></p>
+
+    <h2>Problem 1: Parameter Counting &amp; Tensor Shapes in MHA (Easy)</h2>
+    <p>
+        For $d_{\text{model}} = 512, h = 8, d_k = d_v = 64, B = 16, T = 128$:
+    </p>
+    <ol>
+        <li>Compute the total parameter count in projection layers $W^Q, W^K, W^V, W^O$.</li>
+        <li>Trace the tensor shapes along the entire reshaping and permutation pipeline.</li>
+    </ol>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+            <p><strong>Step 1: Parameters:</strong></p>
+            <p>Each matrix $W^Q, W^K, W^V, W^O$ maps $\mathbb{R}^{512} \to \mathbb{R}^{512}$. Each has $512 \times 512 = 262,144$ weights plus 512 biases = 262,656 parameters.</p>
+            <p>$$\text{Total Parameters} = 4 \times 262,656 = 1,050,624 \quad (\approx 1.05\text{M})$$</p>
+
+            <p><strong>Step 2: Shapes:</strong></p>
+            <ul>
+                <li>Input $X$: $[16, 128, 512]$</li>
+                <li>Projected $Q$: $[16, 128, 512]$</li>
+                <li>4D Reshaped: $[16, 128, 8, 64]$</li>
+                <li>Permuted: $[16, 8, 128, 64]$</li>
+                <li>Attention Scores ($Q @ K^T$): $[16, 8, 128, 128]$</li>
+                <li>Context ($A @ V$): $[16, 8, 128, 64]$</li>
+                <li>Transposed Context: $[16, 128, 8, 64]$</li>
+                <li>Concatenated: $[16, 128, 512]$</li>
+                <li>Projected Output: $[16, 128, 512]$</li>
+            </ul>
+        </div>
+    </details>
+
+    <h2>Problem 2: Manual 2-Head Attention Walkthrough (Medium)</h2>
+    <p>
+        For $T = 2, d_{\text{model}} = 4, h = 2, d_k = 2$:
+        $$X = \begin{bmatrix} 1.0 & 0.0 & 0.0 & 1.0 \\ 0.0 & 1.0 & 1.0 & 0.0 \end{bmatrix}$$
+        Compute the attention weights for each head, the concatenated head outputs, and verify that the two heads focus on distinct patterns simultaneously.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+            <p>With $\sqrt{2} \approx 1.4142$, both heads yield scaled attention weights:</p>
+            $$A^{(1)} = A^{(2)} = \begin{bmatrix} 0.6698 & 0.3302 \\ 0.3302 & 0.6698 \end{bmatrix}$$
+            <p>Applying the values for each head:</p>
+            $$\text{head}_1 = \begin{bmatrix} 0.6698 & 0.3302 \\ 0.3302 & 0.6698 \end{bmatrix}, \quad \text{head}_2 = \begin{bmatrix} 0.3302 & 0.6698 \\ 0.6698 & 0.3302 \end{bmatrix}$$
+            $$\mathbf{H} = [\text{head}_1 \; \text{head}_2] = \begin{bmatrix} 0.6698 & 0.3302 & 0.3302 & 0.6698 \\ 0.3302 & 0.6698 & 0.6698 & 0.3302 \end{bmatrix}$$
+            <p>Both feature subspaces are preserved without mutual dilution.</p>
+        </div>
+    </details>
+
+    <h2>Problem 3: Expressive Subspace Diversity Proof (Hard)</h2>
+    <p>
+        Prove that a single head cannot attend strongly to two distinct tokens simultaneously due to the probability simplex constraint $\sum_j A_{ij} = 1$, whereas Multi-Head Attention decouples this restriction.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <div class="solution-content">
+            <p>In single-head attention, if $A_{1j} = 0.95$, the remaining mass for all other tokens is $\le 0.05$, attenuating secondary relationships by $\ge 19\times$.</p>
+            <p>In Multi-Head Attention, Head 1 can set $A_{1j}^{(1)} = 0.95$ while Head 2 sets $A_{1k}^{(2)} = 0.95$ independently. The output projection $W^O$ subsequently recombines both strong signals without loss of information.</p>
+        </div>
+    </details>
+</body>
+</html>

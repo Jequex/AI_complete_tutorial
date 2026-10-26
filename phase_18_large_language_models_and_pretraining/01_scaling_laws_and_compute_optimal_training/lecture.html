@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 18.1: Scaling Laws & Compute-Optimal Training — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 700;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code, li code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: 0.88em;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 18 Overview</a>
+
+    <h1>Topic 18.1: Scaling Laws & Compute-Optimal Training</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: -0.25rem;">
+        From Kaplan's Under-trained Giants to Chinchilla Optimality and the LLaMA Over-Training Paradigm.
+    </p>
+
+    <div class="analogy-box">
+        <div class="analogy-title">🏎️ 12-Year-Old Analogy: The Engine Size vs. Fuel in a Race Car</div>
+        <p>Imagine you have a strict $1,000,000 budget to build and race a championship car:</p>
+        <ul>
+            <li><strong>Model Parameters ($N$):</strong> The size and weight of your engine (number of cylinders and valves).</li>
+            <li><strong>Training Tokens ($D$):</strong> The gallons of high-octane rocket fuel you buy to test the car on the track.</li>
+            <li><strong>Compute Budget ($C$):</strong> Your total bank account. Every cylinder costs metal, and every gallon costs money.</li>
+        </ul>
+        <p><strong>The Kaplan Mistake (2020):</strong> Engineers built a giant 16-cylinder monster engine that filled the entire chassis, but had only $10 left over for fuel. The car started, sputtered for 10 feet, and stalled. The engine had immense potential, but starved for fuel.</p>
+        <p><strong>The Chinchilla Breakthrough (2022):</strong> DeepMind realized the error: with your budget, build an engine half the size, but buy twice as much fuel! By running the smaller engine through thousands of practice laps, the engine tunes up, the parts seat smoothly, and the car zooms right past the giant, fuel-starved monster.</p>
+        <p><strong>The LLaMA Strategy (2023):</strong> Meta engineers said: <em>"Wait! This car will be a daily taxi for millions of passengers. If the engine is huge, every single ride costs a fortune in gas. Let's build a compact, ultra-efficient engine, test it with a colossal ocean of fuel once during pretraining, and then every passenger gets lightning-fast, cheap rides forever!"</em></p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Mathematical Definition</th>
+                    <th>Concrete Physical Meaning</th>
+                    <th>Typical Values</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$C$</td>
+                    <td>$C \approx 6 N D$</td>
+                    <td>Total pretraining floating-point operations (FLOPs)</td>
+                    <td>$10^{21} - 10^{25}$ FLOPs</td>
+                </tr>
+                <tr>
+                    <td>$N$</td>
+                    <td>Non-embedding parameters</td>
+                    <td>Model representation capacity / weight count</td>
+                    <td>$10^9 - 10^{12}$ parameters</td>
+                </tr>
+                <tr>
+                    <td>$D$</td>
+                    <td>Token sequence count</td>
+                    <td>Total language tokens consumed during pretraining</td>
+                    <td>$10^{11} - 1.5 \times 10^{13}$ tokens</td>
+                </tr>
+                <tr>
+                    <td>$L(N, D)$</td>
+                    <td>Cross-entropy loss</td>
+                    <td>Average prediction error per token</td>
+                    <td>$1.7 - 2.5$ nats/token</td>
+                </tr>
+                <tr>
+                    <td>$E$ or $L_\infty$</td>
+                    <td>$\lim_{N, D \to \infty} L(N, D)$</td>
+                    <td>Irreducible loss (entropy lower bound of natural text)</td>
+                    <td>$\approx 1.6934$ nats</td>
+                </tr>
+                <tr>
+                    <td>$A, B$</td>
+                    <td>Scaling amplitudes</td>
+                    <td>Baseline loss contribution of parameter/token bounds</td>
+                    <td>$A \approx 406.4, B \approx 410.7$</td>
+                </tr>
+                <tr>
+                    <td>$\alpha, \beta$</td>
+                    <td>Power-law exponents</td>
+                    <td>Diminishing return exponents for $N$ and $D$</td>
+                    <td>$\alpha \approx 0.34, \beta \approx 0.28$</td>
+                </tr>
+                <tr>
+                    <td>$a, b$</td>
+                    <td>$a = \frac{\beta}{\alpha+\beta}, b = \frac{\alpha}{\alpha+\beta}$</td>
+                    <td>Optimal compute scaling exponents ($N^* \propto C^a, D^* \propto C^b$)</td>
+                    <td>$a \approx 0.46, b \approx 0.54$</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>2. Derivation of the Compute-Optimal Frontier</h2>
+    <p>
+        The total computational cost of a Transformer pretraining run scales as:
+        $$C \approx 6 N D$$
+        where $2N$ FLOPs/token are required in the forward pass, and $4N$ FLOPs/token in the backward pass.
+    </p>
+    <p>
+        Hoffmann et al. (2022) formulated the joint cross-entropy loss surface as:
+        $$L(N, D) = E + \frac{A}{N^\alpha} + \frac{B}{D^\beta}$$
+    </p>
+    <p>
+        To find the optimal parameter allocation $N^*$ and token count $D^*$ for a fixed compute budget $C$, we formulate the constrained optimization problem:
+        $$\min_{N, D} \left( E + A N^{-\alpha} + B D^{-\beta} \right) \quad \text{subject to} \quad 6 N D = C$$
+    </p>
+    <p>
+        Applying the method of Lagrange multipliers with Lagrangian $\mathcal{L}(N, D, \lambda) = A N^{-\alpha} + B D^{-\beta} + \lambda (6ND - C)$:
+        $$\frac{\partial \mathcal{L}}{\partial N} = -\alpha A N^{-\alpha - 1} + 6 \lambda D = 0 \implies 6 \lambda N D = \alpha A N^{-\alpha}$$
+        $$\frac{\partial \mathcal{L}}{\partial D} = -\beta B D^{-\beta - 1} + 6 \lambda N = 0 \implies 6 \lambda N D = \beta B D^{-\beta}$$
+    </p>
+    <p>
+        Equating both expressions yields the fundamental equi-marginal principle:
+        $$\alpha A N^{-\alpha} = \beta B D^{-\beta}$$
+        Solving for $D$:
+        $$D = \left( \frac{\beta B}{\alpha A} \right)^{\frac{1}{\beta}} N^{\frac{\alpha}{\beta}}$$
+    </p>
+    <p>
+        Substituting $D = \frac{C}{6N}$ and isolating $N$:
+        $$N^* = \left( \frac{\alpha A}{\beta B} \right)^{\frac{1}{\alpha + \beta}} \left( \frac{C}{6} \right)^{\frac{\beta}{\alpha + \beta}} = G \left( \frac{C}{6} \right)^a$$
+        $$D^* = G^{-1} \left( \frac{C}{6} \right)^b$$
+        where $a = \frac{\beta}{\alpha+\beta} \approx 0.46$, $b = \frac{\alpha}{\alpha+\beta} \approx 0.54$, and $a + b = 1.0$.
+    </p>
+
+    <h2>3. The Historical Shift: Kaplan vs Chinchilla</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Model</th>
+                    <th>Parameters ($N$)</th>
+                    <th>Tokens ($D$)</th>
+                    <th>FLOPs ($6ND$)</th>
+                    <th>Tokens/Param</th>
+                    <th>Evaluation Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>GPT-3 (2020)</strong></td>
+                    <td>175 Billion</td>
+                    <td>300 Billion</td>
+                    <td>$3.15 \times 10^{23}$</td>
+                    <td>1.71</td>
+                    <td>Severely undertrained ($5.7\times$ oversized)</td>
+                </tr>
+                <tr>
+                    <td><strong>Gopher (2021)</strong></td>
+                    <td>280 Billion</td>
+                    <td>300 Billion</td>
+                    <td>$5.04 \times 10^{23}$</td>
+                    <td>1.07</td>
+                    <td>Severely undertrained ($7.4\times$ oversized)</td>
+                </tr>
+                <tr>
+                    <td><strong>Chinchilla (2022)</strong></td>
+                    <td>70 Billion</td>
+                    <td>1.40 Trillion</td>
+                    <td>$5.88 \times 10^{23}$</td>
+                    <td>20.0</td>
+                    <td>Compute-optimal; outperforms Gopher & GPT-3</td>
+                </tr>
+                <tr>
+                    <td><strong>LLaMA-1 7B (2023)</strong></td>
+                    <td>7 Billion</td>
+                    <td>1.00 Trillion</td>
+                    <td>$4.20 \times 10^{22}$</td>
+                    <td>142.8</td>
+                    <td>Intentionally over-trained for low serving latency</td>
+                </tr>
+                <tr>
+                    <td><strong>LLaMA-3 8B (2024)</strong></td>
+                    <td>8 Billion</td>
+                    <td>15.0 Trillion</td>
+                    <td>$7.20 \times 10^{23}$</td>
+                    <td>1875.0</td>
+                    <td>Extreme over-training; competitive with 70B models</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>4. The LLaMA Serving Economics Trade-off</h2>
+    <p>
+        The total lifecycle cost of an enterprise foundation model combines pretraining and lifetime serving:
+        $$C_{\text{lifecycle}} = C_{\text{pretrain}} + C_{\text{infer}} \approx 6 N D + 2 N Q$$
+        where $Q$ is the lifetime volume of inference tokens served to users.
+    </p>
+    <p>
+        Because serving cost scales directly as $2N$, each parameter adds an ongoing variable cost to every single generated token. When $Q \gg D$, serving costs dwarf pretraining costs, making a heavily over-trained smaller model vastly cheaper in total infrastructure expenditure.
+    </p>
+
+    <div class="nav-links">
+        <span></span>
+        <a href="exercises_and_solutions.html">Proceed to Topic 18.1 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>

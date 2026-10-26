@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 16.3: Positional Encodings — Sinusoidal to RoPE — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            background-color: var(--card-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .box {
+            border: 2px solid var(--primary);
+            background-color: var(--primary-light);
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 16 Overview</a>
+
+    <h1>Topic 16.3: Positional Encodings: Sinusoidal to RoPE</h1>
+    <p><em>From permutation-invariant sets to relative rotational geometry in the complex plane.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        Self-attention is mathematically <strong>permutation equivariant</strong>. If you shuffle the input words, the attention outputs are identical (just shuffled in the same order).
+        A vanilla Transformer cannot tell <em>"dog bites man"</em> from <em>"man bites dog"</em>!
+    </p>
+    <p>
+        To teach the model word order, we assign each token a mathematical timestamp. This lecture explores the transition from <strong>Vaswani Sinusoidal Positional Encodings</strong> (2017) to <strong>Rotary Position Embeddings (RoPE)</strong> (Su et al. 2021) powering modern open-weight LLMs like LLaMA 3, Mistral, and Gemma.
+    </p>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: Clocks Ticking at Different Speeds &amp; Spinning Dancers</h3>
+        <ul>
+            <li><strong>The Grandfather Clock Gearbox (Sinusoidal Encodings):</strong> Imagine giving each student in line a watch with 128 hands. The 1st hand spins in 2 seconds; the 2nd hand in 10 seconds; the last hand takes 10,000 hours. The exact collection of angles is a unique signature for position 45 that never repeats.</li>
+            <li><strong>The Spinning Dancers (Rotary Position Embedding - RoPE):</strong> Instead of adding heavy clock numbers to each dancer, each dancer spins by angle $m \times \theta$. When dancer $m$ and dancer $n$ reach out, the angle between their hands depends <em>strictly on the relative distance $(m - n)$</em>!</li>
+        </ul>
+    </div>
+
+    <h2>2. Vaswani Sinusoidal Positional Encodings (2017)</h2>
+    <div class="box">
+        $$PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d}}\right), \quad PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d}}\right)$$
+    </div>
+
+    <h3>The Relative Position Shift Property &amp; Proof</h3>
+    <p>Using the trigonometric angle addition identities:</p>
+    $$\sin(\alpha + \beta) = \sin\alpha \cos\beta + \cos\alpha \sin\beta$$
+    $$\cos(\alpha + \beta) = \cos\alpha \cos\beta - \sin\alpha \sin\beta$$
+    <p>Letting $\alpha = pos \cdot \omega_i$ and $\beta = k \cdot \omega_i$:</p>
+    $$\begin{bmatrix} PE_{(pos + k, 2i)} \\ PE_{(pos + k, 2i+1)} \end{bmatrix} = \begin{bmatrix} \cos(k\omega_i) & \sin(k\omega_i) \\ -\sin(k\omega_i) & \cos(k\omega_i) \end{bmatrix} \begin{bmatrix} PE_{(pos, 2i)} \\ PE_{(pos, 2i+1)} \end{bmatrix}$$
+    <p>
+        The matrix $M(k)$ is a 2D rotation matrix depending <strong>strictly on offset $k$</strong> and frequency $\omega_i$, with zero dependence on the absolute coordinate $pos$.
+    </p>
+
+    <h2>3. Rotary Position Embedding (RoPE) (Su et al. 2021)</h2>
+    <p>
+        In modern LLMs (LLaMA 3, Gemma, Mistral), instead of adding positional noise to embeddings at the input layer, RoPE multiplies Queries and Keys by orthogonal 2D rotation matrices:
+    </p>
+    $$\tilde{\mathbf{q}}_m = R_{\theta, m} \mathbf{q}, \quad \tilde{\mathbf{k}}_n = R_{\theta, n} \mathbf{k}$$
+    <p>In the complex plane ($q e^{i m \theta}$ and $k e^{i n \theta}$):</p>
+    $$\langle \tilde{\mathbf{q}}_m, \tilde{\mathbf{k}}_n \rangle = \operatorname{Re}\left( (q e^{i m \theta})(k e^{i n \theta})^* \right) = \operatorname{Re}\left( (q k^*) e^{i (m - n)\theta} \right)$$
+    <div class="box">
+        $$\langle R_{\theta, m} \mathbf{q}, R_{\theta, n} \mathbf{k} \rangle = g(\mathbf{q}, \mathbf{k}, m - n)$$
+    </div>
+    <p>
+        The attention score between query $m$ and key $n$ depends purely on the relative distance $(m - n)$, preserving vector norm ($\|R x\| = \|x\|$) and generalizing smoothly to long contexts.
+    </p>
+
+    <h2>4. Architectural Comparison</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Property</th>
+                <th>Learned Absolute (BERT, GPT-2)</th>
+                <th>Sinusoidal (Vaswani 2017)</th>
+                <th>RoPE (LLaMA 3, Mistral)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Application</strong></td>
+                <td>Additive at input</td>
+                <td>Additive at input</td>
+                <td>Multiplicative rotation on Q &amp; K</td>
+            </tr>
+            <tr>
+                <td><strong>Relative Distance</strong></td>
+                <td>No mathematical guarantee</td>
+                <td>Linear shift property</td>
+                <td>Exact inner product dependence $\langle q_m, k_n \rangle = g(m-n)$</td>
+            </tr>
+            <tr>
+                <td><strong>Norm Preservation</strong></td>
+                <td>Distorts $\|x\|$</td>
+                <td>Distorts $\|x\|$</td>
+                <td>Exact ($\|Rx\|_2 = \|x\|_2$)</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

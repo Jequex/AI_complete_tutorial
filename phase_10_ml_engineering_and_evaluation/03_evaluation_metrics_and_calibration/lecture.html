@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 10.3: Evaluation Metrics, Trade-offs & Probability Calibration — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 10 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 10.3: Evaluation Metrics, Trade-offs & Probability Calibration</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Rigorous quantification of model efficacy: precision vs recall, harmonic mean proofs, ROC vs PR curves in extreme imbalance, and Platt probability calibration.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        Accuracy is deeply misleading when classes are imbalanced. In fraud detection with 99.9% legitimate traffic, predicting that every transaction is honest produces 99.9% accuracy while catching zero criminals. Production ML requires multidimensional evaluation.
+    </p>
+
+    <div class="callout">
+        <h3>🧭 The 12-Year-Old Analogy: The Rare Disease Medical Test</h3>
+        <p>
+            Imagine a rare condition that affects only 1 out of 1,000 students in a school:
+        </p>
+        <ul>
+            <li><strong>The Lazy Doctor (Accuracy = 99.9%):</strong> He says "You're fine!" to everyone without looking. He scores 99.9%, but the sick child gets no treatment.</li>
+            <li><strong>Precision (Confidence in Alarms):</strong> When the alarm sounds, how likely is it real? High precision means low false alarms.</li>
+            <li><strong>Recall (Catching Sick Children):</strong> Out of all genuinely sick children, how many were caught? High recall means no sick child is missed.</li>
+            <li><strong>Probability Calibration:</strong> If a weather reporter predicts a 70% chance of rain on 100 days, it should rain on roughly 70 of those days.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Formula</th>
+                <th>Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Precision</strong></td>
+                <td>$\frac{\text{TP}}{\text{TP} + \text{FP}}$</td>
+                <td>Positive Predictive Value: fraction of positive predictions that are true.</td>
+            </tr>
+            <tr>
+                <td><strong>Recall</strong></td>
+                <td>$\frac{\text{TP}}{\text{TP} + \text{FN}}$</td>
+                <td>Sensitivity / TPR: fraction of actual positives captured.</td>
+            </tr>
+            <tr>
+                <td><strong>Specificity</strong></td>
+                <td>$\frac{\text{TN}}{\text{TN} + \text{FP}}$</td>
+                <td>True Negative Rate: fraction of actual negatives correctly identified.</td>
+            </tr>
+            <tr>
+                <td><strong>F1-Score</strong></td>
+                <td>$\frac{2 P R}{P + R}$</td>
+                <td>Harmonic mean of Precision and Recall.</td>
+            </tr>
+            <tr>
+                <td><strong>MCC</strong></td>
+                <td>$\frac{\text{TP}\cdot\text{TN} - \text{FP}\cdot\text{FN}}{\sqrt{(\text{TP}+\text{FP})(\text{TP}+\text{FN})(\text{TN}+\text{FP})(\text{TN}+\text{FN})}}$</td>
+                <td>Matthews Correlation Coefficient (ranges $[-1, +1]$).</td>
+            </tr>
+            <tr>
+                <td><strong>Brier Score</strong></td>
+                <td>$\frac{1}{N}\sum (\hat{p}_i - y_i)^2$</td>
+                <td>Mean squared error of probabilistic predictions against binary truth.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Mathematical Analysis: Why the Harmonic Mean for $F_1$?</h2>
+    <p>
+        The arithmetic mean $A(P, R) = \frac{P + R}{2}$ allows a model with $100\%$ Recall and $1\%$ Precision to score an apparently respectable $50.5\%$. 
+    </p>
+    <p>
+        In contrast, the harmonic mean:
+    </p>
+    $$F_1 = \left(\frac{P^{-1} + R^{-1}}{2}\right)^{-1} = \frac{2 P R}{P + R}$$
+    <p>
+        heavily penalizes extreme disparities. For $P=0.01$ and $R=1.0$, $F_1 = \frac{0.02}{1.01} \approx 0.0198$ ($1.9\%$). It approaches zero if <em>either</em> precision or recall collapses.
+    </p>
+
+    <h2>4. ROC Curves vs. Precision-Recall Curves</h2>
+    <p>
+        The <strong>ROC curve</strong> plots TPR against FPR across all decision thresholds $\tau$. The area under the ROC curve represents:
+    </p>
+    $$\text{AUC-ROC} = P(\hat{s}(X^+) > \hat{s}(X^-))$$
+    <p>
+        However, when $N_{\text{neg}} \gg N_{\text{pos}}$ (e.g. 1,000,000 negatives and 100 positives), False Positive Rate $\frac{\text{FP}}{\text{TN} + \text{FP}}$ stays near 0 even with 1,000 false alarms. The ROC curve deceptively appears near-perfect ($\text{AUC} > 0.98$).
+    </p>
+    <p>
+        The <strong>Precision-Recall (PR) curve</strong> exposes this flaw because Precision $\frac{\text{TP}}{\text{TP} + \text{FP}}$ directly reflects that 1,000 false alarms reduce precision to under 9%.
+    </p>
+
+    <h2>5. Probability Calibration & Platt Scaling</h2>
+    <p>
+        Many high-performance classifiers (such as gradient boosted trees, SVMs, and Naive Bayes) provide uncalibrated confidence scores.
+    </p>
+    <p>
+        <strong>Platt Scaling</strong> fits a scalar logistic sigmoid on validation scores:
+    </p>
+    $$P(Y=1 \mid s) = \frac{1}{1 + \exp(A \cdot s + B)}$$
+    <p>
+        This aligns prediction probabilities with empirical true frequency, minimizing the <strong>Brier Score</strong>.
+    </p>
+</body>
+</html>

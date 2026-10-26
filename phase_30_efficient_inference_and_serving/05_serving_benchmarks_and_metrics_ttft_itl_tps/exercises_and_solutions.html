@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 30.5: Exercises &amp; Solutions — Serving Benchmarks &amp; Telemetry</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --badge-bg: #fef3c7;
+      --badge-text: #b45309;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #fbbf24;
+        --primary-hover: #fcd34d;
+        --badge-bg: #78350f;
+        --badge-text: #fde68a;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 30.5 Lecture</a>
+    <h1>Topic 30.5: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets on Little's Law, tail latency percentiles ($p50, p90, p99$), and Poisson queue stability.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Little's Law Applied to Cluster VRAM Sizing</h3>
+      <p>
+        An API experiences arrival rate $\lambda = 25 \text{ req/s}$, average $\text{TTFT} = 0.20 \text{ s}$, average $150 \text{ generated tokens}$, and $\text{ITL} = 40 \text{ ms/tok}$. Average context uses 575 tokens at 320 KB/token.
+      </p>
+      <ol>
+        <li>Compute total turnaround time $W$.</li>
+        <li>Compute average concurrent requests $L$ using Little's Law.</li>
+        <li>Compute the total cluster VRAM required for KV caching in steady state.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Turnaround Time $W$</h4>
+          $$W = \text{TTFT} + (150 \times 0.040) = 0.20 + 6.00 = \mathbf{6.20 \text{ seconds}}$$
+
+          <h4>2. Average Concurrency $L$</h4>
+          $$L = \lambda \cdot W = 25 \times 6.20 = \mathbf{155 \text{ concurrent requests}}$$
+
+          <h4>3. Steady-State KV Memory Footprint</h4>
+          $$\text{Per-request memory} = 575 \times 320 \text{ KB} = 184 \text{ MB} = 0.184 \text{ GB}$$
+          $$\text{Total VRAM} = 155 \times 0.184 \text{ GB} = \mathbf{28.52 \text{ GB}}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Diagnosing Tail Latency Outliers ($p50, p90, p99$)</h3>
+      <p>
+        A benchmark of 20 requests has median $p50 = 139 \text{ ms}$ and mean $536 \text{ ms}$, but the worst 3 requests take 850 ms, 2400 ms, and 5200 ms. Evaluate contractual compliance against an SLA of $p90 \le 200 \text{ ms}$.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p>For $N = 20$ samples, the 90th percentile corresponds to the 18th value ($p90 = \mathbf{850 \text{ ms}}$).</p>
+          <p>Since $850 \text{ ms} > 200 \text{ ms}$, the service <strong>fails the SLA</strong>. The mean of 536 ms was pulled up by extreme outliers ($p99 = 5200 \text{ ms}$), demonstrating why tracking tail percentiles is mandatory in real-time inference.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Queue Stability Under Poisson Traffic</h3>
+      <p>
+        For service rate $\mu = 10 \text{ req/s}$, compute average waiting time $W_q$ for $\lambda = 5$ vs $\lambda = 9$, and find the maximum load to guarantee $W_q \le 100 \text{ ms}$.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p>Queue wait formula: $W_q = \frac{\lambda}{\mu(\mu - \lambda)}$.</p>
+          <ul>
+            <li>$\lambda = 5$: $W_q = \frac{5}{10(5)} = \mathbf{0.10 \text{ s}} \quad (100 \text{ ms})$</li>
+            <li>$\lambda = 9$: $W_q = \frac{9}{10(1)} = \mathbf{0.90 \text{ s}} \quad (900 \text{ ms})$ ($9\times$ surge!)</li>
+          </ul>
+          <p>To ensure $W_q \le 0.10 \text{ s}$, the maximum arrival rate is $\lambda^* = \mathbf{5.0 \text{ req/s}}$ ($\rho \le 50\%$).</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

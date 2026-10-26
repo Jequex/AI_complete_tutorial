@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 18.3: Distributed Training & Parallelism Strategies — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 700;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code, li code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: 0.88em;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 18 Overview</a>
+
+    <h1>Topic 18.3: Distributed Training & Parallelism Strategies</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: -0.25rem;">
+        Scaling Beyond the Memory Wall with 3D Parallelism, ZeRO Sharding, and Megatron-LM Tensor Slicing.
+    </p>
+
+    <div class="analogy-box">
+        <div class="analogy-title">🏗️ 12-Year-Old Analogy: The Giant Construction Crew Splitting a Skyscraper</div>
+        <p>You must construct a 100-story mega-skyscraper in one week. The blueprints, concrete mixers, steel beams, and inspection logbooks weigh 1,000 tons. A single worker carrying 1,000 tons will be crushed instantly.</p>
+        <ul>
+            <li><strong>Data Parallelism (ZeRO Sharding):</strong> Instead of giving all 16 workers a redundant 1,000-ton backpack, you tear the blueprint into 16 slips, give each worker one tiny tool, and when someone needs to pour concrete, they radio a teammate, borrow the tool for 2 seconds, and return it!</li>
+            <li><strong>Tensor Parallelism (Megatron-LM):</strong> A single 40-foot steel girder is too heavy for one person. Four workers stand side-by-side, each lifting a 10-foot section simultaneously in perfect unison over high-speed headsets (NVLink).</li>
+            <li><strong>Pipeline Parallelism (1F1B):</strong> Worker A builds floors 1–25, then hands off to Worker B for floors 26–50. Rather than waiting for the entire building to finish, work flows in a continuous, smooth conveyor belt!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Mathematical Definition</th>
+                    <th>Concrete Physical Meaning</th>
+                    <th>Typical Values</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$N$</td>
+                    <td>Parameter count</td>
+                    <td>Total learnable weights in the model</td>
+                    <td>$7\text{B} - 405\text{B}$</td>
+                </tr>
+                <tr>
+                    <td>$M_{\text{static}}$</td>
+                    <td>$2N + 2N + 12N = 16N$ bytes</td>
+                    <td>Total static memory for weights, gradients, and AdamW</td>
+                    <td>1,120 GB for 70B</td>
+                </tr>
+                <tr>
+                    <td>$N_d$</td>
+                    <td>Data parallel world size</td>
+                    <td>Number of GPUs sharing ZeRO data shards</td>
+                    <td>$8 - 16,384$ GPUs</td>
+                </tr>
+                <tr>
+                    <td>$TP$</td>
+                    <td>Tensor parallel world size</td>
+                    <td>Number of intra-node GPUs splitting weight matrices</td>
+                    <td>$2, 4, \text{ or } 8$</td>
+                </tr>
+                <tr>
+                    <td>$PP$</td>
+                    <td>Pipeline parallel stages</td>
+                    <td>Number of sequential layer stages across nodes</td>
+                    <td>$4, 8, \text{ or } 16$</td>
+                </tr>
+                <tr>
+                    <td>$F_{\text{bubble}}$</td>
+                    <td>$\frac{PP - 1}{m + PP - 1}$</td>
+                    <td>Fractional idle time spent in pipeline bubbles</td>
+                    <td>$5\% - 15\%$</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>2. The Memory Wall: 16N Bytes Accounting</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Memory Component</th>
+                    <th>Precision</th>
+                    <th>Bytes/Param</th>
+                    <th>7B Model</th>
+                    <th>70B Model</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Model Parameters ($W$)</td>
+                    <td>FP16/BF16</td>
+                    <td>2 bytes</td>
+                    <td>14.0 GB</td>
+                    <td>140.0 GB</td>
+                </tr>
+                <tr>
+                    <td>Gradients ($\nabla_W L$)</td>
+                    <td>FP16/BF16</td>
+                    <td>2 bytes</td>
+                    <td>14.0 GB</td>
+                    <td>140.0 GB</td>
+                </tr>
+                <tr>
+                    <td>AdamW Master Weights ($W^*$)</td>
+                    <td>FP32</td>
+                    <td>4 bytes</td>
+                    <td>28.0 GB</td>
+                    <td>280.0 GB</td>
+                </tr>
+                <tr>
+                    <td>AdamW 1st Momentum ($m_t$)</td>
+                    <td>FP32</td>
+                    <td>4 bytes</td>
+                    <td>28.0 GB</td>
+                    <td>280.0 GB</td>
+                </tr>
+                <tr>
+                    <td>AdamW 2nd Momentum ($v_t$)</td>
+                    <td>FP32</td>
+                    <td>4 bytes</td>
+                    <td>28.0 GB</td>
+                    <td>280.0 GB</td>
+                </tr>
+                <tr>
+                    <td><strong>Total Static Memory</strong></td>
+                    <td>Mixed</td>
+                    <td><strong>16 bytes</strong></td>
+                    <td><strong>112.0 GB</strong></td>
+                    <td><strong>1,120.0 GB</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>3. ZeRO Stage Memory Formulas</h2>
+    <p>
+        The ZeRO memory hierarchy eliminates redundant state across $N_d$ data-parallel GPUs:
+    </p>
+    <ul>
+        <li><strong>DDP (ZeRO-0):</strong> Replicates everything:
+            $$M_{\text{DDP}} = 16N$$
+        </li>
+        <li><strong>ZeRO-1 ($P_{os}$):</strong> Shards optimizer states:
+            $$M_{\text{ZeRO-1}} = 4N + \frac{12N}{N_d}$$
+        </li>
+        <li><strong>ZeRO-2 ($P_{os+g}$):</strong> Shards optimizer states and gradients:
+            $$M_{\text{ZeRO-2}} = 2N + \frac{14N}{N_d}$$
+        </li>
+        <li><strong>ZeRO-3 (FSDP):</strong> Shards parameters, gradients, and optimizer:
+            $$M_{\text{ZeRO-3}} = \frac{16N}{N_d}$$
+        </li>
+    </ul>
+
+    <h2>4. Megatron-LM Tensor Parallelism</h2>
+    <p>
+        Megatron-LM eliminates communication between layers by interleaving Column-Parallel and Row-Parallel GEMMs:
+    </p>
+    <ul>
+        <li><strong>Column-Parallel Linear:</strong> $W = [W_1 \mid W_2]$. Forward pass $Y_i = X W_i$ requires <strong>zero communication</strong>. Non-linear activation $\text{GELU}(Y_i)$ executes locally.</li>
+        <li><strong>Row-Parallel Linear:</strong> $V = \begin{bmatrix} V_1 \\ V_2 \end{bmatrix}$. Forward pass computes local partial sum $Z_i = Y_i V_i$, followed by an <code>All-Reduce (SUM)</code>:
+            $$Z = \sum_{i=1}^K Z_i$$
+        </li>
+    </ul>
+    <p>
+        This requires only <strong>2 All-Reduces per Transformer block</strong> (1 for self-attention and 1 for MLP).
+    </p>
+
+    <div class="nav-links">
+        <a href="../02_data_curation_deduplication_and_filtering/lecture.html">← Previous Topic: Data Curation</a>
+        <a href="exercises_and_solutions.html">Proceed to Topic 18.3 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>

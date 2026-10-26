@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9.3: Exercises & Solutions — Manifold Learning (t-SNE & UMAP)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-easy { background-color: var(--accent-bg); color: var(--accent); }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
+        details {
+            margin-top: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--solution-bg);
+        }
+        summary {
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .solution-content {
+            padding: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 9.3</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">Phase 9 Portal</a>
+
+    <h1>Topic 9.3: Exercises &amp; Solutions</h1>
+    <p><em>Deep calculations verifying Gaussian conditional probabilities, Student-t derivatives, gradient mechanics, and UMAP cross-entropy penalties.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: High-Dimensional Gaussian Affinities Hand Calculation</h3>
+            <span class="badge badge-easy">Easy</span>
+        </div>
+        <p>Consider three points on a 1D line: $x_1 = 0.0, x_2 = 1.0, x_3 = 4.0$ with fixed variance $\sigma^2 = 2.0$ ($2\sigma^2 = 4.0$). Compute the normalized conditional probabilities $p_{2|1}$ and $p_{3|1}$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>Unnormalized weights $w_{j|1} = \exp(-d^2 / 4.0)$:</strong></p>
+                <ul>
+                    <li>$x_2 = 1.0$: $d^2 = 1.0 \implies w_{2|1} = e^{-0.25} \approx 0.7788$</li>
+                    <li>$x_3 = 4.0$: $d^2 = 16.0 \implies w_{3|1} = e^{-4.0} \approx 0.0183$</li>
+                </ul>
+                <p>Sum: $0.7788 + 0.0183 = 0.7971$.</p>
+                <p><strong>Normalized probabilities:</strong></p>
+                <ul>
+                    <li>$p_{2|1} = 0.7788 / 0.7971 \approx 97.7\%$</li>
+                    <li>$p_{3|1} = 0.0183 / 0.7971 \approx 2.3\%$</li>
+                </ul>
+                <p>Due to exponential decay, distant points have near-zero influence, focusing t-SNE on local neighborhoods.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Derivative of the Student-t Kernel</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Let $w_{ij} = (1 + \|y_i - y_j\|_2^2)^{-1}$. Prove that $\frac{\partial w_{ij}}{\partial y_i} = -2 w_{ij}^2 (y_i - y_j)$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Let $u = 1 + \|y_i - y_j\|_2^2$. Then $w_{ij} = u^{-1}$.</p>
+                <p>By the chain rule:</p>
+                $$\frac{\partial w_{ij}}{\partial y_i} = \frac{d(u^{-1})}{du} \nabla_{y_i} u = (-u^{-2})(2(y_i - y_j)) = -2 w_{ij}^2 (y_i - y_j) \quad \blacksquare$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Two-Point 1D t-SNE Gradient Hand Calculation</h3>
+            <span class="badge badge-medium">Medium</span>
+        </div>
+        <p>Suppose $y_1 = 0.0, y_2 = 2.0$, and $p_{12} = 0.5$. Compute the analytical gradient $\frac{\partial \mathcal{L}}{\partial y_1}$ and interpret whether coordinates move.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>Squared distance: $d^2 = (0 - 2)^2 = 4 \implies w_{12} = \frac{1}{1 + 4} = 0.2$.</p>
+                <p>Partition function: $Z = w_{12} + w_{21} = 0.4 \implies q_{12} = \frac{0.2}{0.4} = 0.5$.</p>
+                <p>Gradient:</p>
+                $$\frac{\partial \mathcal{L}}{\partial y_1} = 4 (p_{12} - q_{12})(1 + d^2)^{-1} (y_1 - y_2) = 4 (0.5 - 0.5)(0.2)(-2.0) = 0.0$$
+                <p>The system is in equilibrium because the embedded probability $q_{12}$ matches target $p_{12}$ perfectly.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 4: t-SNE vs UMAP Objective Comparison</h3>
+            <span class="badge badge-hard">Hard</span>
+        </div>
+        <p>Why does UMAP preserve global structure significantly better than t-SNE when distinct clusters are placed near each other?</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p>When two distant points ($p_{ij} \approx 0$) are placed close in 2D ($q_{ij} > 0$):</p>
+                <ul>
+                    <li><strong>In t-SNE:</strong> $\text{Loss} = p_{ij} \ln \frac{p_{ij}}{q_{ij}} \approx 0 \cdot \ln(0) = 0$. t-SNE suffers almost no penalty for placing non-neighbors close to each other.</li>
+                    <li><strong>In UMAP:</strong> The second cross-entropy term is $(1 - p_{ij}) \ln \frac{1 - p_{ij}}{1 - q_{ij}} = -\ln(1 - q_{ij})$. As $q_{ij} \to 1$, $-\ln(1 - q_{ij}) \to \infty$.</li>
+                </ul>
+                <p>This explicit global repulsion penalizes false attractions and forces entire distinct clusters apart, preserving global macro-topology.</p>
+            </div>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" class="back-link">← Back to Lecture 9.3</a>
+        <a href="../index.html" class="back-link">Phase 9 Portal →</a>
+    </div>
+</body>
+</html>

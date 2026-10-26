@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 11.1: Forward Propagation &amp; Neural Network Architectures — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 11 Portal</a>
+
+    <h1>Topic 11.1: Forward Propagation &amp; Neural Network Architectures</h1>
+    <p><em>Mastering the artificial neuron, batch tensor transformations, and the mathematical foundations of deep learning architectures.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>A <strong>neural network</strong> is not a magical black box; at its exact mathematical core, it is a <strong>composition of parameterized affine transformations interleaved with non-linear activation functions</strong>. Before using deep learning frameworks, we must master the precise tensor transformations and dimensional algebra of the forward pass.</p>
+
+    <div class="diagram">                  THE FEEDFORWARD NEURAL NETWORK ARCHITECTURE
+                  
+  Input Layer          Hidden Layer 1         Hidden Layer 2         Output Layer
+   (Features)           (d_1 neurons)          (d_2 neurons)          (Predictions)
+     A^[0]                  A^[1]                  A^[2]                  A^[3]
+    ┌────┐                 ┌────┐                 ┌────┐                 ┌────┐
+    │ x₁ │ ───────────────>│ a₁ │ ───────────────>│ a₁ │ ───────────────>│ ŷ₁ │
+    ├────┤      W^[1]      ├────┤      W^[2]      ├────┤      W^[3]      ├────┤
+    │ x₂ │ ───────────────>│ a₂ │ ───────────────>│ a₂ │ ───────────────>│ ŷ₂ │
+    ├────┤      b^[1]      ├────┤      b^[2]      ├────┤      b^[3]      └────┘
+    │ x₃ │ ───────────────>│ a₃ │ ───────────────>│ a₃ │
+    └────┘                 └────┘                 └────┘
+    [B, d_in]            [B, d_1]               [B, d_2]               [B, d_out]</div>
+
+    <div class="callout">
+        <strong>The 12-Year-Old Analogy: The Relay Race of Brain Cells</strong>
+        <p>Imagine a massive school relay race where messages travel across stadium lanes:</p>
+        <ul>
+            <li><strong>The Sensory Observers (Input Layer):</strong> Three runners report current weather conditions: temperature (85°F), clouds (80%), and wind (20 mph).</li>
+            <li><strong>The Committee of Listeners (Hidden Layer):</strong> In the next row, five students listen. Each has volume knobs for each runner: Listener 1 listens closely to clouds ($w = 0.9$) but ignores wind ($w = 0.05$). Each listener also has a personal stubbornness score called a <strong>bias ($b$)</strong>: some speak with just a whisper, others require huge total excitement before uttering a sound.</li>
+            <li><strong>The Baton Pass (Weighted Sum &amp; Activation):</strong> Each runner multiplies inputs by weights, adds their bias ($z = \sum w_i x_i + b$), and tests if the sum passes an activation threshold. If excited, they shout their message forward.</li>
+            <li><strong>The Final Call (Output Layer):</strong> The podium runners combine the hidden messages into a final forecast: <em>"92% chance of rain!"</em></li>
+            <li><strong>Batching (Parallel Lanes):</strong> Running 100 days of weather simultaneously across 100 side-by-side tracks is <strong>batch vectorization</strong> ($[B, d_{\text{in}}] \to [B, d_{\text{out}}]$).</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbf{x} \in \mathbb{R}^{d_{\text{in}}}$</td>
+                <td>Vector</td>
+                <td>Single input sample with $d_{\text{in}}$ numerical features</td>
+            </tr>
+            <tr>
+                <td>$X \in \mathbb{R}^{B \times d_{\text{in}}}$</td>
+                <td>Matrix</td>
+                <td>Batch of $B$ training samples stacked as row vectors</td>
+            </tr>
+            <tr>
+                <td>$B \in \mathbb{Z}_{\ge 1}$</td>
+                <td>Integer</td>
+                <td>Batch size (number of parallel observations processed)</td>
+            </tr>
+            <tr>
+                <td>$W^{[l]} \in \mathbb{R}^{n^{[l]} \times n^{[l-1]}}$</td>
+                <td>Matrix</td>
+                <td>Weight tensor of layer $l$ connecting $n^{[l-1]}$ inputs to $n^{[l]}$ neurons</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{b}^{[l]} \in \mathbb{R}^{n^{[l]}}$</td>
+                <td>Vector</td>
+                <td>Bias vector of layer $l$ providing threshold offsets</td>
+            </tr>
+            <tr>
+                <td>$Z^{[l]} \in \mathbb{R}^{B \times n^{[l]}}$</td>
+                <td>Matrix</td>
+                <td>Batch pre-activation tensor: $Z^{[l]} = A^{[l-1]} (W^{[l]})^T + \mathbf{b}^{[l]}$</td>
+            </tr>
+            <tr>
+                <td>$A^{[l]} \in \mathbb{R}^{B \times n^{[l]}}$</td>
+                <td>Matrix</td>
+                <td>Batch post-activation tensor: $A^{[l]} = g^{[l]}(Z^{[l]})$, with $A^{[0]} \equiv X$</td>
+            </tr>
+            <tr>
+                <td>$\hat{Y} \equiv A^{[L]} \in \mathbb{R}^{B \times n^{[L]}}$</td>
+                <td>Matrix</td>
+                <td>Final predictions of the network for all $B$ samples</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Artificial Neuron: Biology vs. Mathematical Reality</h2>
+    <p>While biological neurons communicate via complex biochemical action potentials, an artificial neuron is an affine map followed by a scalar squashing function:</p>
+    $$z = \sum_{j=1}^{d_{\text{in}}} w_j x_j + b = \mathbf{w}^T \mathbf{x} + b$$
+    $$a = g(z) = g(\mathbf{w}^T \mathbf{x} + b)$$
+    <p>The affine transformation $\mathbf{w}^T \mathbf{x} + b$ rotates, scales, and translates the coordinate frame, while $g(\cdot)$ breaks linearity to permit non-linear decision boundaries.</p>
+
+    <h2>4. Batch Vectorization &amp; Tensor Bookkeeping</h2>
+    <p>In modern deep learning, batching replaces slow scalar for-loops with hardware-accelerated BLAS matrix operations:</p>
+    $$\boxed{Z^{[l]} = A^{[l-1]} (W^{[l]})^T + \mathbf{1}_B (\mathbf{b}^{[l]})^T}$$
+    <p>Tracking the exact tensor dimensions at layer $l$:</p>
+    $$[B \times d_{\text{in}}] \times [d_{\text{in}} \times d_{\text{out}}] + [1 \times d_{\text{out}}] \longrightarrow [B \times d_{\text{out}}]$$
+    <p>The bias vector $\mathbf{b}^{[l]} \in \mathbb{R}^{d_{\text{out}}}$ is broadcast across all $B$ batch rows, ensuring identical additive shifts for every example in the mini-batch.</p>
+
+    <h2>5. The Universal Approximation Theorem: Why Depth Beats Width</h2>
+    <div class="callout callout-success">
+        <strong>Universal Approximation Theorem (Cybenko 1989, Hornik 1991):</strong>
+        <p>A single hidden layer feedforward network with a non-linear activation function and finite width can approximate any continuous function on a compact subset of $\mathbb{R}^n$ to arbitrary accuracy $\epsilon > 0$.</p>
+    </div>
+    <p>Why do we use deep networks instead of a single giant wide layer?</p>
+    <ul>
+        <li><strong>Exponential Parameter Efficiency:</strong> Approximating oscillatory or compositional functions with a single layer requires $\mathcal{O}(2^d)$ neurons. A deep network with $L$ layers partitions space into $\mathcal{O}(k^L)$ regions with only $\mathcal{O}(k \cdot L)$ parameters.</li>
+        <li><strong>Compositional Hierarchy:</strong> Natural data (images, speech, text) exhibits compositional structure: pixels $\to$ edges $\to$ parts $\to$ objects. Depth directly mirrors this hierarchical ontology.</li>
+    </ul>
+
+    <h2>6. Step-by-Step Hand Calculation</h2>
+    <p>Given $\mathbf{x} = [1.0, 2.0]^T$, $W^{[1]} = \begin{bmatrix} 0.5 & -0.5 \\ 1.0 & 0.2 \\ -1.5 & 2.0 \end{bmatrix}$, and $\mathbf{b}^{[1]} = \begin{bmatrix} 0.1 \\ -0.2 \\ 0.5 \end{bmatrix}$:</p>
+    $$z_1 = 0.5(1.0) - 0.5(2.0) + 0.1 = -0.4$$
+    $$z_2 = 1.0(1.0) + 0.2(2.0) - 0.2 = 1.2$$
+    $$z_3 = -1.5(1.0) + 2.0(2.0) + 0.5 = 3.0$$
+    <p>With an output layer $W^{[2]} = [0.4, -0.8, 0.5]$ and $b^{[2]} = 0.3$:</p>
+    $$z^{[2]} = 0.4(-0.4) - 0.8(1.2) + 0.5(3.0) + 0.3 = -0.16 - 0.96 + 1.50 + 0.30 = 0.68$$
+
+    <p style="margin-top: 3rem;"><a href="../index.html" class="back-link">← Back to Phase 11 Portal</a></p>
+</body>
+</html>

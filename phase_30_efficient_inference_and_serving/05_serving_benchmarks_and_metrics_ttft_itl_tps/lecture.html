@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 05: Serving Benchmarks &amp; Metrics: TTFT, ITL, TPS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --badge-bg: #fef3c7;
+      --badge-text: #b45309;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #fbbf24;
+        --primary-hover: #fcd34d;
+        --badge-bg: #78350f;
+        --badge-text: #fde68a;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 30 Overview</a>
+    <div>
+      <span class="badge">Topic 30.5</span>
+      <h1>Serving Benchmarks &amp; Telemetry: TTFT, ITL, TPS</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.25rem;">
+        Time to First Token, Inter-Token Latency, System vs. User Throughput, Little's Law, and Open-Loop Poisson load benchmarking.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>Imagine dining at an exclusive sushi restaurant:</p>
+      <ul>
+        <li><strong>Time to First Token (TTFT)</strong>: How long you sit at the counter before the chef hands you your very first piece of sashimi. If this takes 30 minutes, you leave unhappy.</li>
+        <li><strong>Inter-Token Latency (ITL)</strong>: The rhythmic delay between consecutive pieces of sushi. Once eating starts, you want a new piece every 20 seconds. If the chef drops one piece and then vanishes for 10 minutes, the experience feels broken.</li>
+        <li><strong>System Tokens Per Second (System TPS)</strong>: The restaurant owner's view: total pieces of sushi served per hour across all 40 seats. The owner wants high throughput; you want low latency!</li>
+      </ul>
+    </div>
+
+    <h2>2. Telemetry KPI Definitions</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Formal Definition</th>
+          <th>Target Interactive SLA</th>
+          <th>Primary Bottleneck</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\text{TTFT}$</td>
+          <td>$T_{\text{queue}} + T_{\text{prefill}}$</td>
+          <td>$&lt; 200\text{--}400 \text{ ms}$</td>
+          <td>Prompt length (GEMM compute) &amp; request queue buffering</td>
+        </tr>
+        <tr>
+          <td>$\text{ITL}$ (or $\text{TPOT}$)</td>
+          <td>$t_i - t_{i-1}$</td>
+          <td>$&lt; 30\text{--}50 \text{ ms/token}$</td>
+          <td>HBM memory bandwidth (GEMV decode) &amp; batch size</td>
+        </tr>
+        <tr>
+          <td>$\text{TPS}_{\text{user}}$</td>
+          <td>$1 / \text{ITL}$</td>
+          <td>$&gt; 20\text{--}30 \text{ tok/s}$</td>
+          <td>Single-stream decode speed</td>
+        </tr>
+        <tr>
+          <td>$\text{TPS}_{\text{sys}}$</td>
+          <td>$\sum N_{\text{tokens}} / \Delta T$</td>
+          <td>Application-dependent</td>
+          <td>GPU compute saturation &amp; aggregate cluster concurrency</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Queueing Dynamics &amp; Little's Law</h2>
+    <p>In steady-state request scheduling, Little's Law guarantees:</p>
+    $$\boxed{L = \lambda \cdot W}$$
+    <div class="card">
+      <h3>The Congestion Collapse Knee</h3>
+      <p>Under Poisson arrival traffic with service capacity $\mu$ and load intensity $\rho = \lambda / \mu$:</p>
+      $$W = \frac{1/\mu}{1 - \rho}, \qquad L_q = \frac{\rho^2}{1 - \rho}$$
+      <p>When load exceeds $\rho > 0.85$, queues explode asymptotically, causing tail percentiles ($p90, p99$) to deteriorate by orders of magnitude even as throughput appears high.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../index.html" class="btn">Phase 30 Hub &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 13.2: Modules, Optimizers & Training Loops</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 13 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 13.2: Object-Oriented Deep Learning — Modules, Optimizers & Loops</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Mastering PyTorch's architectural patterns: `nn.Module` tree traversal, `Parameter` vs `register_buffer`, modular `Dataset`/`DataLoader` pipelines, and the standard 5-step training loop.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        Building neural networks requires managing hundreds of millions of parameters, caching activations, executing complex gradient updates, and streaming terabytes of data. PyTorch solves this through object-oriented abstractions centered around <code>nn.Module</code> and <code>DataLoader</code>.
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Model Assembly Line & Training Coach</h3>
+        <p>
+            Think of a futuristic racecar assembly plant.
+        </p>
+        <p>
+            An <strong><code>nn.Module</code></strong> is a sub-assembly like the engine or transmission. Inside the engine are tuning screws called <strong><code>nn.Parameter</code></strong>. When you turn a screw, the engine's performance changes.
+        </p>
+        <p>
+            The car also has a dashboard odometer called a <strong>buffer</strong> (<code>register_buffer</code>). It tracks total miles driven (<code>step_count</code>). You don't tune the odometer to make the car faster, but you must record it when saving the car to the garage!
+        </p>
+        <p>
+            The <strong><code>Dataset</code></strong> is the parts warehouse where every crate has a barcode (<code>__getitem__</code>). The <strong><code>DataLoader</code></strong> is the forklift driver that grabs 32 random crates at a time (<code>batch_size</code>), shuffles them so workers don't repeat patterns (<code>shuffle=True</code>), and delivers them to the line.
+        </p>
+        <p>
+            Finally, the <strong>Coach (Optimizer)</strong> runs the 5-step drill: Wipe the telemetry board (<code>zero_grad()</code>) $\to$ Test lap (<code>forward()</code>) $\to$ Calculate time deficit (<code>loss()</code>) $\to$ Compute exact screw adjustments (<code>backward()</code>) $\to$ Turn the wrenches (<code>optimizer.step()</code>)!
+        </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description & Engineering Interpretation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbf{\Theta} = \{\mathbf{W}_l, \mathbf{b}_l\}$</td>
+                <td>Parameter Set</td>
+                <td>All learnable tensors tracked by <code>model.parameters()</code>.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{B} = \{(\mathbf{x}_i, \mathbf{y}_i)\}_{i=1}^B$</td>
+                <td>Mini-batch</td>
+                <td>Batch of $B$ training instances generated by <code>DataLoader</code>.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}(\hat{\mathbf{y}}, \mathbf{y})$</td>
+                <td>Scalar Loss</td>
+                <td>Objective function measuring prediction error against ground truth targets.</td>
+            </tr>
+            <tr>
+                <td>$\nabla_{\mathbf{\Theta}} \mathcal{L}$</td>
+                <td>Gradient Tensor</td>
+                <td>Partial derivatives $\frac{\partial \mathcal{L}}{\partial \mathbf{\Theta}}$ accumulated in each parameter's <code>.grad</code>.</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{v}_t$</td>
+                <td>Velocity Vector</td>
+                <td>Momentum buffer maintained by the optimizer across training steps.</td>
+            </tr>
+            <tr>
+                <td>$\text{state\_dict}$</td>
+                <td>Ordered Dict</td>
+                <td>Dictionary mapping layer names to serializable parameter/buffer arrays.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Canonical 5-Step Training Loop</h2>
+    <p>Every training step in standard PyTorch pipelines follows this immutable protocol:</p>
+    <pre><code>for epoch in range(num_epochs):
+    model.train()  # 1. Enable training mode (Dropout & BatchNorm active)
+    for batch_x, batch_y in dataloader:
+        optimizer.zero_grad()               # 1. Reset accumulated gradients
+        outputs = model(batch_x)            # 2. Forward pass (builds dynamic DAG)
+        loss = criterion(outputs, batch_y)  # 3. Compute scalar loss
+        loss.backward()                     # 4. Reverse-mode autograd (.grad populated)
+        optimizer.step()                    # 5. Update weights using gradients</code></pre>
+
+    <div class="callout callout-danger">
+        <h3>Why <code>optimizer.zero_grad()</code> is Mandatory</h3>
+        <p>
+            Because PyTorch accumulates gradients via addition (<code>param.grad += upstream_grad</code>), failing to call <code>zero_grad()</code> causes gradients from successive batches to sum indefinitely, leading to immediate gradient explosion and diverging weights!
+        </p>
+    </div>
+
+    <h2>4. Checkpointing: Saving State Dictionaries</h2>
+    <p>
+        Always save models using <code>state_dict</code> rather than pickling the full Python object. This prevents dangerous arbitrary code execution vulnerabilities and cross-version deserialization crashes:
+    </p>
+    <pre><code># Checkpoint saving
+torch.save({
+    'epoch': epoch,
+    'model_state_dict': model.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+}, 'checkpoint.pt')
+
+# Safe checkpoint restoration
+checkpoint = torch.load('checkpoint.pt', weights_only=True)
+model.load_state_dict(checkpoint['model_state_dict'])</code></pre>
+
+    <h2>5. Hands-on Experiment Verification</h2>
+    <p>
+        Run our pure Python implementation of <code>Module</code>, <code>DataLoader</code>, and <code>SGDMomentum</code>:
+    </p>
+    <pre><code>python3 phase_13_deep_learning_with_pytorch/02_modules_optimizers_and_training_loops/experiment.py</code></pre>
+</body>
+</html>

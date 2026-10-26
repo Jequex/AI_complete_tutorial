@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 8.1: Exercises & Solutions — Linear Regression & Normal Equation</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        details {
+            margin-top: 1.25rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.5rem 0;
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution {
+            background-color: var(--solution-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 08 Hub</a>
+
+    <h1>Topic 8.1: Exercises & Solutions</h1>
+    <p><em>Practical and analytical exercises in closed-form OLS derivation, manual gradient descent, and orthogonality.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <h3>Exercise 1: Manual Closed-Form Normal Equation Calculation</h3>
+        <p>Given 3 observations: $(x_1, y_1) = (1, 2)$, $(x_2, y_2) = (2, 5)$, $(x_3, y_3) = (3, 7)$.</p>
+        <p>Compute $X^T X$, $X^T y$, invert $(X^T X)$, and solve for the optimal weights $w^* = [w_0, w_1]^T$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p><strong>1. Formulate Matrices:</strong></p>
+                $$X = \begin{bmatrix} 1 & 1 \\ 1 & 2 \\ 1 & 3 \end{bmatrix}, \quad y = \begin{bmatrix} 2 \\ 5 \\ 7 \end{bmatrix}$$
+                <p><strong>2. Compute Products:</strong></p>
+                $$X^T X = \begin{bmatrix} 3 & 6 \\ 6 & 14 \end{bmatrix}, \quad X^T y = \begin{bmatrix} 14 \\ 33 \end{bmatrix}$$
+                <p><strong>3. Matrix Inversion:</strong></p>
+                $$\det(X^T X) = (3)(14) - (6)^2 = 42 - 36 = 6$$
+                $$(X^T X)^{-1} = \frac{1}{6} \begin{bmatrix} 14 & -6 \\ -6 & 3 \end{bmatrix} = \begin{bmatrix} 7/3 & -1 \\ -1 & 1/2 \end{bmatrix}$$
+                <p><strong>4. Solve for $w^*$:</strong></p>
+                $$w^* = \begin{bmatrix} 7/3 & -1 \\ -1 & 1/2 \end{bmatrix} \begin{bmatrix} 14 \\ 33 \end{bmatrix} = \begin{bmatrix} 98/3 - 33 \\ -14 + 33/2 \end{bmatrix} = \begin{bmatrix} -1/3 \\ 5/2 \end{bmatrix} = \begin{bmatrix} -0.3333 \\ 2.5000 \end{bmatrix}$$
+                <p>Final line: $\hat{y} = 2.5 x - 0.3333$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <h3>Exercise 2: Single-Step Gradient Descent Update</h3>
+        <p>Using the dataset above with initial parameters $w_0 = [0, 0]^T$ and learning rate $\eta = 0.05$, compute predictions, residuals, the gradient vector $\nabla_w J$, and update $w_1$.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p><strong>Initial Predictions:</strong> $\hat{y}_0 = [0, 0, 0]^T$.</p>
+                <p><strong>Residuals:</strong> $e_0 = \hat{y}_0 - y = [-2, -5, -7]^T$.</p>
+                <p><strong>Gradient:</strong></p>
+                $$\nabla_w J(w_0) = \frac{1}{3} X^T e_0 = \frac{1}{3} \begin{bmatrix} 1 & 1 & 1 \\ 1 & 2 & 3 \end{bmatrix} \begin{bmatrix} -2 \\ -5 \\ -7 \end{bmatrix} = \begin{bmatrix} -14/3 \\ -33/3 \end{bmatrix} = \begin{bmatrix} -4.667 \\ -11.0 \end{bmatrix}$$
+                <p><strong>Parameter Update:</strong></p>
+                $$w_1 = w_0 - 0.05 \begin{bmatrix} -4.667 \\ -11.0 \end{bmatrix} = \begin{bmatrix} +0.2333 \\ +0.5500 \end{bmatrix}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <h3>Exercise 3: Residual Orthogonality Proof</h3>
+        <p>Prove that for any linear regression solved with the Normal Equation, the residual vector $e = y - Xw^*$ satisfies $X^T e = \mathbf{0}$, and that the sum of residuals $\sum e_i = 0$ if an intercept is present.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <p>$$X^T e = X^T (y - X (X^T X)^{-1} X^T y) = X^T y - (X^T X)(X^T X)^{-1} X^T y = X^T y - X^T y = \mathbf{0}$$</p>
+                <p>Since the first column of $X$ is the column of ones $\mathbf{1}$, the first element of the vector $X^T e$ is $\mathbf{1}^T e = \sum_{i=1}^N e_i = 0$. $\blacksquare$</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 4 -->
+    <div class="problem-card">
+        <h3>Exercise 4: Big-O FLOPs Scaling Benchmark</h3>
+        <p>For $N = 10^7$ and $d = 1000$, contrast the arithmetic operations required for the Normal Equation vs. 20 epochs of Gradient Descent.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution">
+                <ul>
+                    <li><strong>Normal Equation:</strong> $X^T X$ requires $N d^2 = 10^7 \cdot 10^6 = 10^{13}$ FLOPs. Inversion takes $\frac{1}{3} d^3 \approx 3.3 \times 10^8$ FLOPs. Total $\approx 10^{13}$ FLOPs.</li>
+                    <li><strong>Gradient Descent (20 epochs):</strong> $20 \times (2 N d) = 40 \times 10^7 \times 10^3 = 4 \times 10^{11}$ FLOPs.</li>
+                </ul>
+                <p>Gradient Descent is <strong>25 times faster</strong> and uses minimal memory.</p>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>

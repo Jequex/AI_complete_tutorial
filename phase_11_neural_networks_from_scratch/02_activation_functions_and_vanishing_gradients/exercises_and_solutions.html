@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 11.2: Exercises &amp; Solutions — Activation Functions &amp; Vanishing Gradients</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-easy { background-color: #dcfce7; color: #15803d; }
+        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-hard { background-color: #fee2e2; color: #b91c1c; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            outline: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 11 Portal</a>
+
+    <h1>Topic 11.2: Exercises &amp; Solutions — Activation Functions &amp; Vanishing Gradients</h1>
+    <p><em>Analytical derivatives, zero-centering proofs, and deep-network gradient attenuation calculations.</em></p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <span class="badge badge-easy">Easy</span>
+        <h3>Problem 1: Derivation of the Sigmoid Derivative and Maximum Bound</h3>
+        <p>Let the logistic sigmoid function be defined as $\sigma(z) = \frac{1}{1 + e^{-z}}$.</p>
+        <ol>
+            <li>Derive $\sigma'(z) \equiv \frac{d\sigma}{dz}$ and express it in terms of $\sigma(z)$.</li>
+            <li>Prove that $\sigma'(z)$ attains its global maximum at $z = 0$, and find this value.</li>
+            <li>Examine $\lim_{z \to \pm \infty} \sigma'(z)$ and describe its implication for deep networks.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Derivative:</strong></p>
+                $$\frac{d\sigma}{dz} = \frac{e^{-z}}{(1 + e^{-z})^2} = \frac{1}{1 + e^{-z}} \cdot \frac{e^{-z}}{1 + e^{-z}} = \sigma(z)(1 - \sigma(z))$$
+                <p><strong>2. Global Maximum:</strong></p>
+                <p>Let $u = \sigma(z) \in (0, 1)$. We maximize $g(u) = u - u^2$. Setting $g'(u) = 1 - 2u = 0 \implies u = 0.5$. Since $g''(u) = -2 < 0$, this is a maximum. At $u = 0.5$, $z = 0$ and $\sigma'(0) = 0.5(1 - 0.5) = 0.25$.</p>
+                <p><strong>3. Asymptotics:</strong></p>
+                <p>As $z \to \pm\infty$, $\sigma(z) \to 1$ or $0$, yielding $\sigma'(z) \to 0$. In saturated regimes, gradients disappear completely.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <span class="badge badge-medium">Medium</span>
+        <h3>Problem 2: Tanh vs. Sigmoid Algebraic Properties</h3>
+        <p>The hyperbolic tangent is given by $\tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}}$.</p>
+        <ol>
+            <li>Prove that $\tanh(z) = 2\sigma(2z) - 1$.</li>
+            <li>Prove that $\frac{d}{dz}\tanh(z) = 1 - \tanh^2(z)$.</li>
+            <li>Compare the maximum gradient of Tanh with Sigmoid and explain the benefit of zero-centering.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Proof:</strong></p>
+                $$2\sigma(2z) - 1 = \frac{2}{1 + e^{-2z}} - 1 = \frac{1 - e^{-2z}}{1 + e^{-2z}} = \frac{e^z - e^{-z}}{e^z + e^{-z}} = \tanh(z)$$
+                <p><strong>2. Derivative:</strong></p>
+                $$\frac{d}{dz}\left(\frac{e^z - e^{-z}}{e^z + e^{-z}}\right) = \frac{(e^z + e^{-z})^2 - (e^z - e^{-z})^2}{(e^z + e^{-z})^2} = 1 - \tanh^2(z)$$
+                <p><strong>3. Maximum &amp; Zero-Centering:</strong></p>
+                <p>At $z=0$, $\tanh'(0) = 1.0$, which is $4\times$ larger than $\sigma'(0) = 0.25$. Zero-centering prevents gradients on weights from always having the same sign, avoiding slow zigzagging optimization paths.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <span class="badge badge-hard">Hard</span>
+        <h3>Problem 3: Gradient Ratio in a 12-Layer Deep Network</h3>
+        <p>Consider a 12-layer deep network where weights have unit norm and typical pre-activations are $|z| \approx 1.0$.</p>
+        <ol>
+            <li>Compute the 11-layer gradient attenuation $\mathcal{R}_{\sigma} = (\sigma'(1.0))^{11}$.</li>
+            <li>Compare this with $\mathcal{R}_{\text{ReLU}}$ for active neurons.</li>
+            <li>Derive $\text{SiLU}'(z)$ for $\text{SiLU}(z) = z\sigma(z)$, and compute $\mathcal{R}_{\text{SiLU}} = (\text{SiLU}'(1.0))^{11}$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Sigmoid Attenuation:</strong></p>
+                <p>$\sigma(1.0) \approx 0.731059 \implies \sigma'(1.0) \approx 0.196612$. Over 11 layers:</p>
+                $$\mathcal{R}_{\sigma} = (0.196612)^{11} \approx 1.70 \times 10^{-8}$$
+                <p>The gradient shrinks by over 58,000,000-fold, completely arresting learning in early layers.</p>
+                <p><strong>2. ReLU Transmission:</strong></p>
+                <p>For active neurons ($z > 0$), $\text{ReLU}'(z) = 1.0 \implies \mathcal{R}_{\text{ReLU}} = 1.0^{11} = 1.0$. Gradients propagate without attenuation.</p>
+                <p><strong>3. SiLU (Swish) Transmission:</strong></p>
+                $$\text{SiLU}'(z) = \sigma(z) + z\sigma(z)(1 - \sigma(z)) = \sigma(z)[1 + z(1 - \sigma(z))]$$
+                <p>At $z=1.0$: $\text{SiLU}'(1.0) \approx 0.731059(1 + 0.268941) \approx 0.927670$. Over 11 layers:</p>
+                $$\mathcal{R}_{\text{SiLU}} = (0.927670)^{11} \approx 0.428$$
+                <p>Gradients remain healthy and well within an easily trainable range (~43% of initial value).</p>
+            </div>
+        </details>
+    </div>
+
+    <p style="margin-top: 3rem;"><a href="../index.html" class="back-link">← Back to Phase 11 Portal</a></p>
+</body>
+</html>

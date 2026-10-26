@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.4: Exercises &amp; Solutions — Direct Preference Optimization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        details {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.4: Exercises &amp; Solutions — Direct Preference Optimization (DPO)</h1>
+
+    <div class="card">
+        <h3>Problem 1: Partition Function Cancellation in DPO (Easy)</h3>
+        <p>Given $\pi^*(y \mid x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y \mid x) \exp(\frac{1}{\beta} r(x, y))$:</p>
+        <ol>
+            <li>Invert to isolate reward $r(x, y)$.</li>
+            <li>Evaluate $r(x, y_w) - r(x, y_l)$ and show $Z(x)$ cancels identically.</li>
+            <li>Why is $Z(x)$ impossible to compute for LLMs?</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $r(x, y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)$.</p>
+            <p><strong>Step 2:</strong> When taking the difference between two completions for prompt $x$, the constant $\beta \log Z(x)$ subtracts out: $\beta \log Z(x) - \beta \log Z(x) \equiv 0$.</p>
+            <p><strong>Step 3:</strong> Summing over all completions requires $|\mathcal{V}|^T \approx 128{,}000^{512} \approx 10^{2600}$ calculations. Exact cancellation eliminates the need to compute this sum.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: DPO Analytical Gradient &amp; Error Weighting (Medium)</h3>
+        <p>Derive $\nabla_\theta \mathcal{L}_{\text{DPO}}$ and evaluate dynamic error weighting $\sigma(-\Delta \hat{r})$ for:</p>
+        <ol>
+            <li>$\Delta \hat{r} = 0.0$ (neutral).</li>
+            <li>$\Delta \hat{r} = +3.0$ (correctly aligned).</li>
+            <li>$\Delta \hat{r} = -3.0$ (misaligned).</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\nabla_\theta \mathcal{L}_{\text{DPO}} = -\beta \sigma(-\Delta \hat{r}) [\nabla \log \pi_\theta(y_w) - \nabla \log \pi_\theta(y_l)]$.</p>
+            <p><strong>Step 2:</strong> At $\Delta \hat{r}=0.0$, $\sigma(0) = 0.500$. At $+3.0$, $\sigma(-3) \approx 0.0474$ (gradient downscaled $95\%$ to prevent overfitting). At $-3.0$, $\sigma(3) \approx 0.9526$ (maximum corrective force applied).</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: The Role of the $\beta$ Regularizer (Medium)</h3>
+        <p>Analyze how $\beta \in \{0.5, 0.1, 0.01\}$ scales the implicit reward gap $\Delta \hat{r} = \beta \Delta \log$, and explain the failure mode when $\beta \to 0$.</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>For a fixed log-prob change of $+6.0$, $\Delta \hat{r}$ is $+3.0$ ($\beta=0.5$), $+0.6$ ($\beta=0.1$), and $+0.06$ ($\beta=0.01$).</p>
+            <p>When $\beta \to 0$, the implicit logit inside sigmoid collapses to 0 unless the log-ratio goes to infinity. The model loses its reference tether, memorizes training noise, and suffers language degeneration.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 4: DPO vs. Unconstrained SFT on Preferred Data (Hard)</h3>
+        <p>Why can't we simply train SFT on winning completions $(x, y_w)$ alone?</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>SFT on preferred data is a unidirectional pull that increases $P(y_w)$, but never actively suppresses $P(y_l)$. Bad habits, toxic completions, or hallucinations remain in the distribution.</p>
+            <p>DPO acts as a bidirectional push-pull: it reinforces $y_w$ while directly deflating $y_l$, establishing sharp, calibrated decision boundaries.</p>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Back to Lecture 21.4</a>
+        <a href="../05_kto_and_online_preference_optimization/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.5 Lecture →</a>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 13.1: PyTorch Core — Tensors, Strides & Autograd Engine</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 13 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 13.1: PyTorch Core — Tensors, Strides & Dynamic Autograd</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Demystifying PyTorch tensor internals: physical storage buffers, strides, zero-copy views, non-contiguous operations, and reverse-mode automatic differentiation DAGs.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        PyTorch unites high-performance hardware-accelerated multidimensional array math with dynamic automatic differentiation. Rather than storing numbers in multi-layered arrays, PyTorch separates <strong>physical memory</strong> (a 1D flat buffer called <code>Storage</code>) from <strong>logical views</strong> defined by <code>shape</code>, <code>strides</code>, and <code>storage_offset</code>.
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Digital Lego Engine & Memory Blueprint</h3>
+        <p>
+            Imagine a giant organizer box filled with 1,000 numbered slots in a single straight row ($0$ to $999$). This is your <strong>Storage</strong>.
+        </p>
+        <p>
+            A <strong>Tensor</strong> is a magic blueprint lens that looks at this straight row. It tells your eyes: <em>"Treat this as a 2×3 table! To jump to the next row, skip forward 3 slots in the box (stride=3); to jump to the next column, step forward 1 slot (stride=1)."</em>
+        </p>
+        <p>
+            When you <strong>transpose</strong> the table, you don't move the heavy plastic blocks. You merely tweak the instruction lens: <em>"To go to the next row, jump 1 slot; to go to the next column, jump 3 slots!"</em> It happens at the speed of light with zero memory duplication.
+        </p>
+        <p>
+            Meanwhile, the <strong>Autograd Engine</strong> is an automated camera recorder running during your robot's assembly. When you tell it to run backwards (<code>.backward()</code>), it traces each gear in reverse order and calculates precisely which gear needs adjustment to make the robot faster!
+        </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Mathematical Domain</th>
+                <th>Description & Engineering Interpretation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{S}$</td>
+                <td>1D Memory Buffer</td>
+                <td>Raw contiguous 1D array of physical memory elements (like C++ <code>THStorage</code>).</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{d} = (d_0, \dots, d_{D-1})$</td>
+                <td>$\mathbb{N}^D$</td>
+                <td>Logical shape tuple specifying the dimensionality of the tensor.</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{s} = (s_0, \dots, s_{D-1})$</td>
+                <td>$\mathbb{N}^D$</td>
+                <td>Strides vector: memory steps required to advance by 1 unit along axis $k$.</td>
+            </tr>
+            <tr>
+                <td>$\Delta$</td>
+                <td>$\mathbb{N}$</td>
+                <td>Storage offset: index in $\mathcal{S}$ representing coordinate $(0, \dots, 0)$.</td>
+            </tr>
+            <tr>
+                <td>$\text{coord}(\mathbf{i})$</td>
+                <td>Indexing Formula</td>
+                <td>Memory mapping: $\text{addr} = \Delta + \sum_{k=0}^{D-1} i_k s_k$.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{G} = (\mathcal{V}, \mathcal{E})$</td>
+                <td>Directed Acyclic Graph</td>
+                <td>Dynamic DAG of mathematical operators and tensors constructed during forward execution.</td>
+            </tr>
+            <tr>
+                <td>$\text{grad\_fn}$</td>
+                <td>Function Object</td>
+                <td>Internal pointer to backward derivative evaluation function (e.g. <code>AddBackward0</code>).</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Physical Storage, Strides & Contiguity</h2>
+    <p>
+        In C-contiguous (row-major) order, strides are defined by the cumulative products of following dimensions:
+    </p>
+    $$s_k = \prod_{j=k+1}^{D-1} d_j, \quad \text{with } s_{D-1} = 1$$
+
+    <p>
+        Consider a $(2, 3)$ matrix. The elements are laid out linearly in RAM:
+    </p>
+    <pre><code>Storage: [ 10.0, 20.0, 30.0, 40.0, 50.0, 60.0 ]
+Shape:   (2, 3)
+Strides: (3, 1)</code></pre>
+
+    <div class="callout callout-danger">
+        <h3>The Non-Contiguous Trap: Why <code>.view()</code> Fails</h3>
+        <p>
+            When you transpose this matrix via <code>tensor.t()</code>, PyTorch simply sets shape to $(3, 2)$ and strides to $(1, 3)$. The memory is completely unchanged!
+        </p>
+        <p>
+            However, consecutive logical elements along a row now require jumping 3 slots in RAM rather than 1. Because the memory is non-contiguous, calling <code>.view(...)</code> fails with a <code>RuntimeError</code>. To fix this, call <code>.contiguous()</code> to allocate a freshly aligned buffer, or use <code>.reshape(...)</code>.
+        </p>
+    </div>
+
+    <h2>4. Dynamic Autograd & Reverse-Mode Differentiation</h2>
+    <p>
+        PyTorch uses a <strong>Define-by-Run</strong> tape-based dynamic graph. As mathematical operators execute on tensors with <code>requires_grad=True</code>, PyTorch dynamically creates backward nodes.
+    </p>
+
+    <pre><code>import torch
+
+x = torch.tensor(3.0, requires_grad=True)
+y = torch.tensor(4.0, requires_grad=True)
+
+# Forward pass builds computational DAG dynamically:
+f = (x * y) + (y ** 2)
+
+# Reverse-mode autograd:
+f.backward()
+
+print("df/dx:", x.grad)  # 4.0 (y)
+print("df/dy:", y.grad)  # 11.0 (x + 2*y)</code></pre>
+
+    <div class="callout callout-success">
+        <h3>Best Practice: Inference Mode with <code>torch.no_grad()</code></h3>
+        <p>
+            During evaluation or inference, wrap forward passes in <code>with torch.no_grad():</code>. This disables DAG node instantiation and prevents activation caching, reducing memory consumption by over 50%.
+        </p>
+    </div>
+
+    <h2>5. Standalone Experiment Verification</h2>
+    <p>
+        Verify tensor strides and dynamic autograd engine without external dependencies by running our pure Python experiment:
+    </p>
+    <pre><code>python3 phase_13_deep_learning_with_pytorch/01_pytorch_core_tensors_and_autograd/experiment.py</code></pre>
+</body>
+</html>

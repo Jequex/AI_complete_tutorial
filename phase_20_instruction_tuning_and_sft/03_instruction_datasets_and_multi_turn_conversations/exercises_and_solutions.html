@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 20.3: Exercises &amp; Solutions — Instruction Datasets &amp; Multi-Turn</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 20 Hub</a>
+    
+    <h1>Topic 20.3: Exercises &amp; Solutions</h1>
+    <p><em>Instruction Datasets &amp; Multi-Turn Conversations — Practice Problems &amp; Step-by-Step Derivations</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Self-Instruct ROUGE-L Deduplication Tracing (Easy)</h3>
+        <p>In Self-Instruct, instructions are compared against the dataset with ROUGE-L ($F_{\text{LCS}}$) and rejected if $\ge 0.70$. Compare candidate <em>"Write a python function to reverse an integer list"</em> against existing <em>"Write a python function to reverse a list"</em>.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1: Lengths:</strong> $|s_1| = 8$, $|s_2| = 9$.</p>
+            <p><strong>Step 2: LCS:</strong> Shared 7 words (<code>["Write", "a", "python", "function", "to", "reverse", "list"]</code>).</p>
+            <p><strong>Step 3: ROUGE-L F1:</strong>
+            $$F_{\text{LCS}} = \frac{2 \times \text{LCS}}{|s_1| + |s_2|} = \frac{14}{17} \approx 0.8235$$</p>
+            <p><strong>Decision:</strong> $0.8235 \ge 0.70$. Redundant candidate is discarded.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Multi-Turn Loss Mask Construction (Medium)</h3>
+        <p>Construct the target label vector for a 4-turn dialogue (user, asst, user, asst) of length 15 tokens.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>User tokens predict intermediate query tokens and are masked out (<code>-100</code>). The final token of user turns predicts the first assistant token and is supervised. All assistant body and closing tokens are supervised:<br>
+            $$\mathbf{t} = [-100, -100, -100, -100, a_1, a_2, -100, -100, -100, -100, -100, -100, a_3, a_4]$$
+            Total active tokens = 4.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Function Calling Masking &amp; Environment Leakage Proof (Hard)</h3>
+        <p>Prove why supervising external API responses (<code>&lt;tool_response&gt;</code>) damages calibration and causes hallucinations.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>External tool outputs are stochastic real-world observations ($o \sim P_{\text{env}}(o \mid c)$). Training with cross-entropy penalizes the model for failing to memorize external database states, incentivizing it to hallucinate fake responses and skip tool calls altogether at test time. Tool responses must serve as conditional context with label <code>-100</code>.</p>
+        </details>
+    </div>
+
+</body>
+</html>

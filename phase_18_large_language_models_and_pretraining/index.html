@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 18: Large Language Models & Pretraining — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      padding: 0.5rem 0.75rem;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .action-link:hover {
+      background-color: var(--badge-bg);
+      border-color: var(--primary);
+    }
+
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 18 Complete Syllabus</div>
+    <h1>Large Language Models & Pretraining</h1>
+    <p class="lead">
+      Scaling Laws, Petabyte Data Curation Pipelines, 3D Distributed Parallelism, and Next-Generation Transformer Architectures.
+    </p>
+  </header>
+
+  <main>
+    <!-- Topic 1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a class="topic-title" href="01_scaling_laws_and_compute_optimal_training/lecture.html">
+          18.1: Scaling Laws & Compute-Optimal Training
+        </a>
+      </div>
+      <p class="topic-desc">
+        Power-law scaling loss surfaces, Kaplan vs. Chinchilla compute allocation shift, derivation of the compute-optimal frontier, and the LLaMA lifetime inference cost optimization paradigm.
+      </p>
+      <div class="links-grid">
+        <a class="action-link" href="01_scaling_laws_and_compute_optimal_training/lecture.html">
+          📖 Read Lecture Document
+        </a>
+        <a class="action-link" href="01_scaling_laws_and_compute_optimal_training/exercises_and_solutions.html">
+          ✏️ Exercises & Solutions
+        </a>
+        <a class="action-link" href="01_scaling_laws_and_compute_optimal_training/experiment.py">
+          🧪 Python 3 Lab Script
+        </a>
+      </div>
+    </div>
+
+    <!-- Topic 2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a class="topic-title" href="02_data_curation_deduplication_and_filtering/lecture.html">
+          18.2: Data Curation, Deduplication, and Filtering
+        </a>
+      </div>
+      <p class="topic-desc">
+        Common Crawl petabyte refinement pipelines, Gopher/C4 heuristic filters, MinHash universal hashing, Locality-Sensitive Hashing (LSH) S-curve near-deduplication, and benchmark decontamination.
+      </p>
+      <div class="links-grid">
+        <a class="action-link" href="02_data_curation_deduplication_and_filtering/lecture.html">
+          📖 Read Lecture Document
+        </a>
+        <a class="action-link" href="02_data_curation_deduplication_and_filtering/exercises_and_solutions.html">
+          ✏️ Exercises & Solutions
+        </a>
+        <a class="action-link" href="02_data_curation_deduplication_and_filtering/experiment.py">
+          🧪 Python 3 Lab Script
+        </a>
+      </div>
+    </div>
+
+    <!-- Topic 3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a class="topic-title" href="03_distributed_training_and_parallelism_strategies/lecture.html">
+          18.3: Distributed Training & Parallelism Strategies
+        </a>
+      </div>
+      <p class="topic-desc">
+        The 16N Memory Wall, ZeRO-1/2/3 memory sharding hierarchy, Megatron-LM Column and Row Tensor Parallelism, Pipeline Parallelism (GPipe bubble vs. 1F1B schedule), and mixed precision (FP16 vs. BF16).
+      </p>
+      <div class="links-grid">
+        <a class="action-link" href="03_distributed_training_and_parallelism_strategies/lecture.html">
+          📖 Read Lecture Document
+        </a>
+        <a class="action-link" href="03_distributed_training_and_parallelism_strategies/exercises_and_solutions.html">
+          ✏️ Exercises & Solutions
+        </a>
+        <a class="action-link" href="03_distributed_training_and_parallelism_strategies/experiment.py">
+          🧪 Python 3 Lab Script
+        </a>
+      </div>
+    </div>
+
+    <!-- Topic 4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a class="topic-title" href="04_modern_llm_architectures_gqa_swiglu_flashattention/lecture.html">
+          18.4: Modern LLM Architectures (GQA, SwiGLU, FlashAttention)
+        </a>
+      </div>
+      <p class="topic-desc">
+        Grouped-Query Attention (GQA) for 8x KV-cache memory reduction, SwiGLU gated activation with 8/3 parameter-matched hidden dimension scaling, and FlashAttention on-chip SRAM tiling with Online Softmax.
+      </p>
+      <div class="links-grid">
+        <a class="action-link" href="04_modern_llm_architectures_gqa_swiglu_flashattention/lecture.html">
+          📖 Read Lecture Document
+        </a>
+        <a class="action-link" href="04_modern_llm_architectures_gqa_swiglu_flashattention/exercises_and_solutions.html">
+          ✏️ Exercises & Solutions
+        </a>
+        <a class="action-link" href="04_modern_llm_architectures_gqa_swiglu_flashattention/experiment.py">
+          🧪 Python 3 Lab Script
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>
+      <a href="../README.md">← Back to Master Curriculum Index</a>
+    </div>
+    <div>
+      Next: <a href="../phase_19_fine_tuning_and_peft_lora/index.html">Phase 19: Fine-Tuning & PEFT / LoRA →</a>
+    </div>
+  </footer>
+
+</body>
+</html>

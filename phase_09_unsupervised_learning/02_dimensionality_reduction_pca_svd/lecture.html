@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9.2: Dimensionality Reduction — PCA, SVD, &amp; Subspace Learning — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 9 Portal</a>
+
+    <h1>Topic 9.2: Dimensionality Reduction — PCA, SVD, &amp; Subspace Learning</h1>
+    <p><em>From Rayleigh quotients and Lagrange multipliers to the Eckart-Young-Mirsky Theorem.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>High-dimensional datasets contain rich signals tangled with massive redundant noise. Real-world data almost always resides along low-dimensional linear subspaces. <strong>Principal Component Analysis (PCA)</strong> and <strong>Singular Value Decomposition (SVD)</strong> discover the orthogonal directions of maximum variance and project hyper-dimensional observations into compact representations with minimal information loss.</p>
+
+    <div class="diagram">                  PCA PROJECTION: FINDING THE AXIS OF MAXIMUM VARIANCE
+       y ^
+         │                  * (High variance direction: PC 1)
+         │               * *   /
+         │             * * *  /
+         │           * * *   / 
+         │         * * *    /
+         │       * *       / 
+         │      *         /  <-- Second axis (PC 2, orthogonal, minimal variance)
+         └────────────────────────────────────────> x</div>
+
+    <div class="callout">
+        <strong>The 12-Year-Old Analogy: Casting 3D Shadow Puppets onto a Flat Wall</strong>
+        <p>Imagine holding a detailed 3D plastic toy airplane suspended in mid-air in a dark room. You want to record its shape on a flat 2D sheet of paper using a flashlight shadow:</p>
+        <ul>
+            <li><strong>The Wrong Angle:</strong> Pointing the flashlight directly at the nose creates a tiny circular shadow on the wall. You completely lose the wings and fuselage!</li>
+            <li><strong>The Optimal Angle (Principal Component 1):</strong> Walking around until the flashlight captures the broad wingspan and long body yields a 2D shadow retaining 95% of the airplane's recognizable structure.</li>
+            <li><strong>Reconstruction:</strong> Looking only at your 2D shadow drawing, anyone can reconstruct the original 3D toy airplane almost flawlessly, ignoring only the millimeter thickness of the plastic wing!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>$X_c \in \mathbb{R}^{N \times d}$</td><td>Matrix</td><td>Mean-centered data matrix ($X_c = X - \mathbf{1} \bar{x}^T$)</td></tr>
+            <tr><td>$C \in \mathbb{R}^{d \times d}$</td><td>Symmetric Matrix</td><td>Sample covariance matrix: $C = \frac{1}{N-1} X_c^T X_c$</td></tr>
+            <tr><td>$w \in \mathbb{R}^d$</td><td>Unit Vector</td><td>Principal component direction ($\|w\|_2 = 1$)</td></tr>
+            <tr><td>$\lambda_k \in \mathbb{R}_{\ge 0}$</td><td>Scalar</td><td>$k$-th eigenvalue of $C$, equal to the variance along $w_k$</td></tr>
+            <tr><td>$Z = X_c W_k$</td><td>$\mathbb{R}^{N \times k}$</td><td>Projected low-dimensional coordinates / component scores</td></tr>
+            <tr><td>$U \Sigma V^T$</td><td>Decomposition</td><td>Singular Value Decomposition (SVD) of centered matrix $X_c$</td></tr>
+            <tr><td>$\sigma_j$</td><td>$\mathbb{R}_{\ge 0}$</td><td>Singular values, related to eigenvalues by $\lambda_j = \frac{\sigma_j^2}{N-1}$</td></tr>
+        </tbody>
+    </table>
+
+    <h2>3. PCA from First Principles: Lagrange Multiplier Proof</h2>
+    <p>Let $X_c \in \mathbb{R}^{N \times d}$ be centered. The variance of scalar projections $z_i = x_{c,i}^T w$ along unit direction $w$ is:</p>
+    $$\text{Var}(z) = \frac{1}{N-1} \sum_{i=1}^N (x_{c,i}^T w)^2 = w^T \left( \frac{1}{N-1} X_c^T X_c \right) w = w^T C w$$
+
+    <div class="callout callout-success">
+        <strong>The Rayleigh Quotient Maximization:</strong>
+        <p>To maximize variance subject to $\|w\|_2 = 1$, we formulate the Lagrangian:</p>
+        $$\mathcal{L}(w, \lambda) = w^T C w - \lambda(w^T w - 1)$$
+        <p>Setting the gradient to zero:</p>
+        $$\nabla_w \mathcal{L} = 2 C w - 2 \lambda w = 0 \implies C w = \lambda w$$
+        <p>Pre-multiplying by $w^T$: $w^T C w = \lambda w^T w = \lambda$. Thus, the maximum variance is precisely the largest eigenvalue $\lambda_1$ of $C$, and $w_1$ is its corresponding eigenvector!</p>
+    </div>
+
+    <h2>4. Singular Value Decomposition (SVD) Equivalence</h2>
+    <p>Decomposing $X_c = U \Sigma V^T$, we compute the matrix outer product:</p>
+    $$X_c^T X_c = (U \Sigma V^T)^T (U \Sigma V^T) = V \Sigma^T U^T U \Sigma V^T = V \Sigma^2 V^T$$
+    <p>Dividing by $N-1$:</p>
+    $$C = \frac{1}{N-1} X_c^T X_c = V \left(\frac{\Sigma^2}{N-1}\right) V^T \implies C v_j = \left(\frac{\sigma_j^2}{N-1}\right) v_j$$
+    <p><strong>Conclusion:</strong> Right singular vectors $V$ equal the covariance eigenvectors $W$, and eigenvalues equal $\lambda_j = \frac{\sigma_j^2}{N-1}$. Computing SVD directly on $X_c$ avoids forming $X_c^T X_c$ and prevents condition number squaring $\kappa(X_c^T X_c) = \kappa(X_c)^2$.</p>
+
+    <h2>5. The Eckart-Young-Mirsky Theorem &amp; Reconstruction Error</h2>
+    <p>The rank-$k$ truncated SVD reconstruction $\hat{X}_k = \sum_{j=1}^k \sigma_j u_j v_j^T$ is the provably optimal low-rank matrix approximation in Frobenius norm:</p>
+    $$\|X_c - \hat{X}_k\|_F^2 = \sum_{j=k+1}^d \sigma_j^2 = (N-1) \sum_{j=k+1}^d \lambda_j$$
+    <p>The <strong>Explained Variance Ratio (EVR)</strong> informs how many components $k$ to keep:</p>
+    $$\text{EVR}_k = \frac{\lambda_k}{\sum_{j=1}^d \lambda_j}$$
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../index.html" class="back-link">← Phase 9 Hub</a>
+        <a href="exercises_and_solutions.html" class="back-link">Exercises &amp; Solutions →</a>
+    </div>
+</body>
+</html>

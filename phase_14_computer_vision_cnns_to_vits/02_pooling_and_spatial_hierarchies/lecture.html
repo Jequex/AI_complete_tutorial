@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 14.2: Pooling &amp; Spatial Hierarchies — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 14 Portal</a>
+
+    <h1>Topic 14.2: Pooling &amp; Spatial Hierarchies</h1>
+
+    <div class="callout">
+        <strong>Core Thesis:</strong> As feature representations progress from low-level edges to semantic concepts, exact sub-pixel coordinates become less important than feature presence. <strong>Pooling layers</strong> provide downsampling, reduce memory footprint, and inject local translation invariance without introducing learnable parameters.
+    </div>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        If an image network did not downsample its spatial feature maps, a $224 \times 224$ feature volume with 512 channels would demand gigabytes of memory per image during backpropagation. Downsampling layers progressively compress spatial dimensions while expanding channel capacity, constructing a multi-scale spatial hierarchy.
+    </p>
+
+    <div class="diagram">
+                  THE SPATIAL DOWN-SAMPLING PIPELINE
+                  
+    Input Feature Map [4x4]                      Max-Pooled Output [2x2]
+    ┌──────┬──────┬──────┬──────┐                (2x2 window, stride 2)
+    │  12  │  20  │  30  │  0   │
+    ├──────┼──────┼──────┼──────┤                    ┌──────┬──────┐
+    │  8   │  15  │  2   │  14  │    MaxPooling      │  20  │  30  │
+    ├──────┼──────┼──────┼──────┤    ─────────>      ├──────┼──────┤
+    │  34  │  70  │  37  │  4   │                    │  70  │  112 │
+    ├──────┼──────┼──────┼──────┤                    └──────┴──────┘
+    │  11  │  9   │  112 │  64  │
+    └──────┴──────┴──────┴──────┘
+    </div>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: Summarizing a Photo Album Page by Page</h3>
+        <p>Imagine you have a giant photo album with thousands of photos and you need to write a compact summary for a friend:</p>
+        <ul>
+            <li><strong>Max Pooling (The Highlight Reel):</strong> In each $2 \times 2$ quadrant of 4 photos, you only report the single most exciting photo. If that photo shifts slightly to the left, you still pick it. That is <em>translation invariance</em>.</li>
+            <li><strong>Average Pooling (The Average Vibe):</strong> You look at the 4 photos and average their brightness to describe the overall atmosphere.</li>
+            <li><strong>Global Average Pooling (The One-Sentence Chapter Summary):</strong> At the end of the album, instead of handing your friend 49 individual photos, you average the entire page into a single scalar value. This prevents carrying giant piles of unnecessary paper!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Type / Domain</th>
+                <th>Mathematical Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$X \in \mathbb{R}^{C \times H \times W}$</td>
+                <td>3D Tensor</td>
+                <td>Input feature volume with $C$ channels and spatial size $H \times W$</td>
+            </tr>
+            <tr>
+                <td>$Y \in \mathbb{R}^{C \times H_{\text{out}} \times W_{\text{out}}}$</td>
+                <td>3D Tensor</td>
+                <td>Output feature volume after spatial pooling</td>
+            </tr>
+            <tr>
+                <td>$K \in \mathbb{Z}_{\ge 1}$</td>
+                <td>Integer</td>
+                <td>Spatial pooling window dimension ($K \times K$)</td>
+            </tr>
+            <tr>
+                <td>$S \in \mathbb{Z}_{\ge 1}$</td>
+                <td>Integer</td>
+                <td>Stride of the pooling window sweep</td>
+            </tr>
+            <tr>
+                <td>$\Omega_{i, j}$</td>
+                <td>Index Set</td>
+                <td>Coordinates $(r, c)$ falling inside the window for output $(i, j)$</td>
+            </tr>
+            <tr>
+                <td>$M \in \{0, 1\}^{C \times H \times W}$</td>
+                <td>Binary Mask</td>
+                <td>Argmax routing mask tracking coordinates of maximum activations</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{y}_{\text{GAP}} \in \mathbb{R}^C$</td>
+                <td>1D Vector</td>
+                <td>Feature vector produced by Global Average Pooling across all $H \times W$ pixels</td>
+            </tr>
+            <tr>
+                <td>$\frac{\partial \mathcal{L}}{\partial Y}, \frac{\partial \mathcal{L}}{\partial X}$</td>
+                <td>3D Tensors</td>
+                <td>Upstream and downstream loss gradients</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Mathematical Operations: Max, Average, and Global Average Pooling</h2>
+    <p>Pooling layers contain <strong>0 learnable parameters</strong>. They operate on each channel independently.</p>
+
+    <h3>3.1 Max Pooling</h3>
+    $$Y_{c, i, j} = \max_{(m, n) \in \Omega_{i, j}} X_{c, m, n}$$
+    <p>
+        Because preceding ReLU layers output large positive numbers when a pattern is detected and zeros otherwise, Max Pooling acts as a robust detector filter, retaining prominent visual features regardless of small sub-pixel shifts.
+    </p>
+
+    <h3>3.2 Average Pooling</h3>
+    $$Y_{c, i, j} = \frac{1}{K^2} \sum_{m=0}^{K-1} \sum_{n=0}^{K-1} X_{c, \, i \cdot S + m, \, j \cdot S + n}$$
+    <p>
+        Average pooling performs spatial smoothing and low-pass filtering.
+    </p>
+
+    <h3>3.3 Global Average Pooling (GAP)</h3>
+    <p>
+        GAP computes the spatial mean across the entire feature map for each channel:
+    </p>
+    $$y_c = \frac{1}{H \cdot W} \sum_{r=0}^{H-1} \sum_{col=0}^{W-1} X_{c, r, col}, \qquad \forall c \in \{0, \dots, C-1\}$$
+    <div class="callout">
+        <strong>The Parameter-Eliminating Superpower of GAP:</strong> In VGGNet, flattening a $[512, 7, 7]$ feature volume into two 4096-neuron dense layers created <strong>102.7 million parameters</strong> ($>80\%$ of the entire model). Replacing this with GAP reduces the classification interface to a simple $512 \to 1000$ linear layer ($512,000$ parameters)—a <strong>99.5% reduction in parameter count</strong> with zero risk of spatial overfitting!
+    </div>
+
+    <h2>4. Invariance vs. Equivariance</h2>
+    <ul>
+        <li><strong>Equivariance (Convolutions):</strong> $f(g(X)) = g(f(X))$. Shifting an image shifts its convolutional feature map by an identical amount.</li>
+        <li><strong>Invariance (Pooling):</strong> $h(g(X)) = h(X)$. Shifting a visual pattern within the pooling window yields an identical output.</li>
+    </ul>
+
+    <h2>5. Backpropagation Through Pooling Layers</h2>
+
+    <h3>5.1 MaxPooling: Argmax Routing Masks</h3>
+    <p>
+        During the forward pass, the winning coordinate $(m^*, n^*)$ is cached:
+    </p>
+    $$\frac{\partial \mathcal{L}}{\partial X_{c, m, n}} = \sum_{(i, j) \text{ s.t. } (m, n) \in \Omega_{i, j}} \frac{\partial \mathcal{L}}{\partial Y_{c, i, j}} \cdot \mathbf{1}[(m, n) = (m^*, n^*)]$$
+    <p>
+        The entire upstream gradient is routed exclusively to the winning neuron that generated the maximum, while all losing neurons receive exactly zero gradient.
+    </p>
+
+    <h3>5.2 AvgPooling: Uniform Gradient Distribution</h3>
+    <p>
+        Every neuron in the window contributed equally ($\frac{1}{K^2}$), so the upstream gradient is divided equally:
+    </p>
+    $$\frac{\partial \mathcal{L}}{\partial X_{c, m, n}} = \sum_{(i, j) \text{ s.t. } (m, n) \in \Omega_{i, j}} \frac{1}{K^2} \frac{\partial \mathcal{L}}{\partial Y_{c, i, j}}$$
+
+    <h3>5.3 Global Average Pooling Gradient Routing</h3>
+    $$\frac{\partial \mathcal{L}}{\partial X_{c, r, col}} = \frac{1}{H \cdot W} \frac{\partial \mathcal{L}}{\partial y_c}$$
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 15.4: Exercises & Solutions — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .solution-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--accent);
+            padding: 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        pre code { background-color: transparent; padding: 0; }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 15.4 Lecture</a>
+
+    <h1>Topic 15.4: Exercises & Solutions — Seq2Seq & Bahdanau Attention</h1>
+    <p><em>Manual attention energy computations, dynamic context weighting, and bottleneck analysis.</em></p>
+
+    <div class="problem-card">
+        <h3>Problem 1: Step-by-Step Manual Attention Calculation (Hard)</h3>
+        <p>A decoder generates target token $i=1$ from state $s_0 = [1.0, 0.0]^T$. The source sequence has 3 annotations:</p>
+        <p>$h_1 = [1.0, 2.0]^T, \quad h_2 = [0.0, 1.0]^T, \quad h_3 = [-1.0, 0.0]^T$.</p>
+        <p>Parameters: $W_a = I_2, U_a = 0.5 I_2, b_a = \mathbf{0}, v_a = [1.0, 1.0]^T$.</p>
+        <ol>
+            <li>Compute alignment energies $e_{1,1}, e_{1,2}, e_{1,3}$.</li>
+            <li>Compute attention softmax weights $\alpha_{1,1}, \alpha_{1,2}, \alpha_{1,3}$ and verify sum to $1.0$.</li>
+            <li>Compute context vector $c_1$.</li>
+        </ol>
+
+        <div class="solution-box">
+            <h4>Solution</h4>
+            <p><strong>1. Alignment Energies ($W_a s_0 = [1.0, 0.0]^T$):</strong></p>
+            <ul>
+                <li>$e_{1,1} = [1, 1]^T \tanh([1.5, 1.0]^T) \approx 0.9051 + 0.7616 \approx 1.6667$</li>
+                <li>$e_{1,2} = [1, 1]^T \tanh([1.0, 0.5]^T) \approx 0.7616 + 0.4621 \approx 1.2237$</li>
+                <li>$e_{1,3} = [1, 1]^T \tanh([0.5, 0.0]^T) \approx 0.4621 + 0.0 \approx 0.4621$</li>
+            </ul>
+            <p><strong>2. Softmax Normalization:</strong></p>
+            <p>$\sum \exp(e) \approx 5.2947 + 3.3997 + 1.5874 = 10.2818$</p>
+            <ul>
+                <li>$\alpha_{1,1} = 5.2947 / 10.2818 \approx 0.5149$</li>
+                <li>$\alpha_{1,2} = 3.3997 / 10.2818 \approx 0.3307$</li>
+                <li>$\alpha_{1,3} = 1.5874 / 10.2818 \approx 0.1544$</li>
+                <li>Sum: $0.5149 + 0.3307 + 0.1544 = 1.0000$</li>
+            </ul>
+            <p><strong>3. Context Vector:</strong></p>
+            $$c_1 = 0.5149 [1, 2]^T + 0.3307 [0, 1]^T + 0.1544 [-1, 0]^T = [0.3605, 1.3605]^T$$
+        </div>
+    </div>
+
+    <div class="problem-card">
+        <h3>Problem 2: Bahdanau (Additive) vs Luong (Dot-Product) Attention (Medium)</h3>
+        <p>Compare the computational scaling and reasons why modern Transformers chose dot-product over additive attention.</p>
+        <div class="solution-box">
+            <h4>Solution</h4>
+            <p>Additive attention requires evaluating non-linear elementwise $\tanh(W s + U h)$ for all source positions, creating branching overhead on GPUs. Dot-product attention ($Q K^T$) can be executed as a single massive matrix multiplication (`GEMM`) highly optimized on tensor cores.</p>
+        </div>
+    </div>
+
+    <div class="problem-card">
+        <h3>Problem 3: Shannon Channel Bottleneck (Easy)</h3>
+        <p>Why does fixed-vector compression collapse on long text sequences?</p>
+        <div class="solution-box">
+            <h4>Solution</h4>
+            <p>A static 512-dim vector has fixed Shannon channel capacity ($16,384$ bits for float32). Semantic information in natural language scales linearly as $\mathcal{O}(T_x)$. Bypassing this fixed capacity requires an attention mechanism that scales memory dynamically as $\mathcal{O}(T_x)$.</p>
+        </div>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture.html" style="color: var(--primary); font-weight: 600;">&larr; Back to Topic 15.4 Lecture</a>
+        <a href="../index.html" style="color: var(--primary); font-weight: 600;">Phase 15 Hub &rarr;</a>
+    </div>
+
+</body>
+</html>

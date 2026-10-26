@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.1: Exercises &amp; Solutions — Human Preference &amp; Bradley-Terry</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        details {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.1: Exercises &amp; Solutions — Bradley-Terry &amp; Preference Modeling</h1>
+
+    <div class="card">
+        <h3>Problem 1: Human Scalar Noise vs. Pairwise Comparisons (Easy)</h3>
+        <p>Suppose three annotators (Alice, Bob, Carol) rate responses $y_1$ ($u=4.0$) and $y_2$ ($u=2.5$) with rater biases $b_{\text{Alice}}=+3.5$, $b_{\text{Bob}}=0.0$, $b_{\text{Carol}}=-2.0$.</p>
+        <ol>
+            <li>Compute the expected scalar ratings $\mathbb{E}[s_{\text{Alice}}(y_2)]$ and $\mathbb{E}[s_{\text{Carol}}(y_1)]$. Can raw scalar ratings be directly compared across raters?</li>
+            <li>Show that pairwise comparison eliminates individual rater biases identically.</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\mathbb{E}[s_{\text{Alice}}(y_2)] = 2.5 + 3.5 = 6.0$, while $\mathbb{E}[s_{\text{Carol}}(y_1)] = 4.0 - 2.0 = 2.0$. Comparing them directly gives $6.0 > 2.0$, falsely concluding $y_2$ is superior to $y_1$.</p>
+            <p><strong>Step 2:</strong> In a pairwise decision, the perceived difference is $\Delta = (u_1 + b_k) - (u_2 + b_k) = u_1 - u_2 = 1.5$. The rater bias $b_k$ cancels out identically for all raters, giving an agreement probability $> 99.9\%$.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Bradley-Terry Maximum Likelihood Gradient &amp; Hessian (Medium)</h3>
+        <p>Consider the pairwise loss $\ell(\Delta) = -\log \sigma(\Delta)$ where $\Delta = r_w - r_l$.</p>
+        <ol>
+            <li>Derive $\frac{\partial \ell}{\partial \Delta}$ and show it equals $-\sigma(-\Delta) = \sigma(\Delta) - 1$.</li>
+            <li>Compute $\frac{\partial^2 \ell}{\partial \Delta^2}$ and prove strict convexity.</li>
+            <li>Compare gradient magnitudes for $\Delta = +3.0$ vs $\Delta = -3.0$.</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> Using the derivative of sigmoid $\sigma'(z) = \sigma(z)(1-\sigma(z))$:</p>
+            $$\frac{d\ell}{d\Delta} = -\frac{\sigma(\Delta)(1-\sigma(\Delta))}{\sigma(\Delta)} = -(1 - \sigma(\Delta)) = -\sigma(-\Delta)$$
+            <p><strong>Step 2:</strong> Differentiating again: $\frac{d^2\ell}{d\Delta^2} = \sigma(\Delta)(1-\sigma(\Delta)) > 0$ for all real $\Delta$. The objective is strictly convex.</p>
+            <p><strong>Step 3:</strong> At $\Delta = +3.0$, $|\nabla| \approx 0.0474$ (mild adjustment). At $\Delta = -3.0$, $|\nabla| \approx 0.9526$ (large corrective gradient).</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Plackett-Luce Ranking Probability Computation (Medium)</h3>
+        <p>Three candidate responses have rewards $r_A = 2.0$, $r_B = 1.0$, $r_C = 0.0$.</p>
+        <ol>
+            <li>Compute the probability of ranking $y_A \succ y_B \succ y_C$.</li>
+            <li>Compute the probability of inverted ranking $y_C \succ y_B \succ y_A$.</li>
+            <li>Demonstrate the Independence of Irrelevant Alternatives (IIA) property.</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $P(A \mid \{A, B, C\}) = \frac{e^2}{e^2 + e^1 + e^0} = \frac{7.389}{11.107} \approx 0.6652$.</p>
+            <p>$P(B \mid \{B, C\}) = \frac{e^1}{e^1 + e^0} = \frac{2.718}{3.718} \approx 0.7311$. Total $P(A \succ B \succ C) \approx 0.4863$ ($48.63\%$).</p>
+            <p><strong>Step 2:</strong> $P(C \mid \{A, B, C\}) = \frac{1}{11.107} \approx 0.0900$. $P(B \mid \{B, A\}) = \frac{2.718}{10.107} \approx 0.2689$. Total $P(C \succ B \succ A) \approx 0.0242$ ($2.42\%$).</p>
+            <p><strong>Step 3:</strong> $\frac{P(A \mid \{A,B,C\})}{P(B \mid \{A,B,C\})} = \frac{e^{r_A}}{e^{r_B}} = e^{r_A - r_B}$, independent of alternative $C$.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 4: Transitivity Proof &amp; The Condorcet Paradox (Hard)</h3>
+        <ol>
+            <li>Prove that Bradley-Terry enforces Strong Stochastic Transitivity (SST).</li>
+            <li>Given a cyclic preference dataset $A \succ B$, $B \succ C$, $C \succ A$, find the optimal centered MLE rewards ($r_A + r_B + r_C = 0$).</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\Delta_{AC} = (r_A - r_B) + (r_B - r_C) = \Delta_{AB} + \Delta_{BC} \ge \max(\Delta_{AB}, \Delta_{BC})$. Monotonicity of sigmoid guarantees $\sigma(\Delta_{AC}) \ge \max(\sigma(\Delta_{AB}), \sigma(\Delta_{BC}))$, satisfying SST.</p>
+            <p><strong>Step 2:</strong> Differentiating the cyclic log-likelihood $\mathcal{L} = \log\sigma(r_A-r_B) + \log\sigma(r_B-r_C) + \log\sigma(r_C-r_A)$ reveals that the stationary point requires $r_A - r_B = r_B - r_C = r_C - r_A = 0$. With $r_A + r_B + r_C = 0$, the unique MLE solution is $r_A^* = r_B^* = r_C^* = 0.0$, assigning a 50% tie probability to all pairs.</p>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Back to Lecture 21.1</a>
+        <a href="../02_reward_modeling_and_loss_derivation/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.2 Lecture →</a>
+    </div>
+
+</body>
+</html>

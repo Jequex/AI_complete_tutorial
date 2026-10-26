@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 17.4: Exercises &amp; Solutions — Autoregressive Generation &amp; KV-Caching</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 17 Hub</a>
+    
+    <h1>Topic 17.4: Exercises &amp; Solutions</h1>
+    <p><em>Autoregressive Generation &amp; KV-Caching — Practice Problems &amp; Step-by-Step Derivations</em></p>
+
+    <div class="card">
+        <h3>Problem 1: Manual Top-k and Top-p Nucleus Filtering (Easy)</h3>
+        <p>Given logits $\mathbf{z} = [3.0, 1.0, 0.0, 2.0, -1.0]$ for words <code>['the', 'cat', 'dog', 'is', 'a']</code>:</p>
+        <ol>
+            <li>Compute the softmax probabilities $P(w)$.</li>
+            <li>Apply Top-$k$ filtering ($k=2$).</li>
+            <li>Apply Top-$p$ nucleus filtering ($p=0.80$).</li>
+        </ol>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>1. Softmax Probabilities ($\sum \exp(z) = 31.5608$):</strong></p>
+            <ul>
+                <li>'the' ($z=3.0$): $20.0855 / 31.5608 \approx \mathbf{0.6364}$ (63.6%)</li>
+                <li>'is' ($z=2.0$): $7.3891 / 31.5608 \approx \mathbf{0.2341}$ (23.4%)</li>
+                <li>'cat' ($z=1.0$): $2.7183 / 31.5608 \approx \mathbf{0.0861}$ (8.6%)</li>
+                <li>'dog' ($z=0.0$): $1.0000 / 31.5608 \approx \mathbf{0.0317}$ (3.2%)</li>
+                <li>'a' ($z=-1.0$): $0.3679 / 31.5608 \approx \mathbf{0.0117}$ (1.2%)</li>
+            </ul>
+            <p><strong>2. Top-k ($k=2$):</strong> Top 2 words are <code>'the'</code> and <code>'is'</code>. Renormalized probabilities: $P'(\text{'the'}) = 73.1\%, \; P'(\text{'is'}) = 26.9\%$.</p>
+            <p><strong>3. Top-p ($p=0.80$):</strong> Cumulative mass for <code>'the'</code> ($63.6\%$) + <code>'is'</code> ($23.4\%$) = $87.0\% \ge 80\%$. Nucleus is exactly <code>{'the', 'is'}</code>.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Memory Footprint of the KV-Cache (Medium)</h3>
+        <p>Calculate the KV-Cache memory footprint for serving GPT-2 Large ($L=36, d=1280$) across $B=16$ concurrent users with context $T=2048$ in FP16.</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>Total elements: $2 \times B \times L \times T \times d_{\text{model}}$:</p>
+            $$\text{Elements} = 2 \times 16 \times 36 \times 2048 \times 1280 = 3{,}019{,}898{,}880 \text{ floats}$$
+            <p>At 2 bytes per float (FP16):</p>
+            $$\text{VRAM} = 3{,}019{,}898{,}880 \times 2 = 6{,}039{,}797{,}760 \text{ bytes} \approx \mathbf{6.04\text{ GB (5.62 GiB)}}$$
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: Asymptotic Speedup Proof of KV-Caching (Hard)</h3>
+        <p>Prove that generating $M$ tokens with KV-caching accelerates self-attention compute by $\frac{2}{3} M$ asymptotically over naive recomputation.</p>
+        
+        <details>
+            <summary>View Complete Solution</summary>
+            <p>Naive attention FLOPs: $\sum_{t=1}^M 2 t^2 d \approx \frac{2}{3} d M^3$.</p>
+            <p>KV-Cached attention FLOPs: $\sum_{t=1}^M 2 t d \approx d M^2$.</p>
+            $$\lim_{M \to \infty} \frac{\text{FLOPs}_{\text{Naive}}}{\text{FLOPs}_{\text{Cached}}} = \frac{\frac{2}{3} d M^3}{d M^2} = \frac{2}{3} M$$
+            <p>For $M=1000$ generated tokens, speedup is $\frac{2(1000)+1}{3} = \mathbf{667\times}$ faster!</p>
+        </details>
+    </div>
+</body>
+</html>

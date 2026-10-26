@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.1: Markov Decision Processes &amp; Formal Framework — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.1: Markov Decision Processes &amp; Formal Framework</h1>
+    <p><em>The foundational mathematics of sequential decision-making under uncertainty.</em></p>
+
+    <div class="analogy">
+        <h3>12-Year-Old Intuition: The Enchanted Board Game</h3>
+        <p>Imagine playing an enchanted board game like <em>Jumanji</em>. You stand on square 14. A magical guardian appears and asks: <em>"Which direction will you step next?"</em></p>
+        <p>Notice something fundamental: the guardian does not care if you took 2 turns to reach square 14 or 50 turns. The guardian does not care if you arrived by hopping, tumbling backwards, or riding an eagle. The rules of what happens next—your odds of stepping into a trap, grabbing a coin, or sliding down a chute—depend <strong>strictly and entirely on where you stand right now (square 14) and what action you pick right now</strong>.</p>
+        <p>This is the <strong>Markov Property</strong>: <em>The future is independent of the past given the present.</em> Coins collected immediately are shiny and valuable; coins promised 10 turns later have gathered dust and decay by a discount factor $\gamma$.</p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Formal Domain</th>
+                <th>Physical / Computational Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{S}$</td>
+                <td>State Space</td>
+                <td>Set or manifold</td>
+                <td>All possible environmental situations or board configurations.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{A}$</td>
+                <td>Action Space</td>
+                <td>Set or manifold</td>
+                <td>All allowable decisions available to the agent.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{P}$ (or $T$)</td>
+                <td>Transition Kernel</td>
+                <td>$\mathcal{S} \times \mathcal{A} \times \mathcal{S} \to [0, 1]$</td>
+                <td>$\mathcal{P}(s' \mid s, a)$: probability of reaching state $s'$ given action $a$ in state $s$.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{R}$</td>
+                <td>Reward Function</td>
+                <td>$\mathcal{S} \times \mathcal{A} \to \mathbb{R}$</td>
+                <td>Scalar feedback signal $R(s, a)$ delivered immediately following action $a$ in state $s$.</td>
+            </tr>
+            <tr>
+                <td>$\gamma$</td>
+                <td>Discount Factor</td>
+                <td>$\gamma \in [0, 1)$</td>
+                <td>Temporal decay rate balancing immediate gratification against delayed long-term return.</td>
+            </tr>
+            <tr>
+                <td>$\tau$</td>
+                <td>Trajectory / Episode</td>
+                <td>$(s_0, a_0, s_1, \dots, s_T)$</td>
+                <td>Ordered sequence of states, actions, and rewards experienced across time.</td>
+            </tr>
+            <tr>
+                <td>$\pi(a \mid s)$</td>
+                <td>Policy</td>
+                <td>$\mathcal{S} \times \mathcal{A} \to [0, 1]$</td>
+                <td>The agent's decision rule: conditional probability distribution over actions given state $s$.</td>
+            </tr>
+            <tr>
+                <td>$G_t$</td>
+                <td>Discounted Return</td>
+                <td>$\mathbb{R}$</td>
+                <td>Total cumulative discounted reward accumulated from step $t$ onward: $\sum_{k=0}^\infty \gamma^k R_{t+k+1}$.</td>
+            </tr>
+            <tr>
+                <td>$V^\pi(s)$</td>
+                <td>State-Value Function</td>
+                <td>$\mathcal{S} \to \mathbb{R}$</td>
+                <td>Expected future return starting from state $s$ following policy $\pi$.</td>
+            </tr>
+            <tr>
+                <td>$Q^\pi(s, a)$</td>
+                <td>Action-Value Function</td>
+                <td>$\mathcal{S} \times \mathcal{A} \to \mathbb{R}$</td>
+                <td>Expected future return starting from state $s$, executing action $a$, and following $\pi$ thereafter.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Formal Definition of the MDP 5-Tuple</h2>
+    <p>A discrete-time Markov Decision Process is the tuple:</p>
+    $$\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma \rangle$$
+
+    <div class="card">
+        <h3>The Markov Property</h3>
+        <p>A stochastic process satisfies the Markov property if the transition dynamics depend solely on the current state-action pair:</p>
+        $$\mathbb{P}(S_{t+1} = s_{t+1}, R_{t+1} = r_{t+1} \mid S_t = s_t, A_t = a_t, \dots, S_0 = s_0, A_0 = a_0) = \mathbb{P}(S_{t+1} = s_{t+1}, R_{t+1} = r_{t+1} \mid S_t = s_t, A_t = a_t)$$
+        <p>When the observation from the environment is incomplete (e.g. single video frame without velocity), the state is non-Markovian. We resolve this by history-stacking (e.g., Frame Stacking in Atari DQN) or recurrent belief-state tracking.</p>
+    </div>
+
+    <h2>3. Trajectory Probability &amp; Discounted Return</h2>
+    <p>Given an initial state distribution $\rho_0(s_0)$, the probability measure over trajectories $\tau = (s_0, a_0, s_1, \dots, s_H)$ under policy $\pi$ is:</p>
+    $$\mathbb{P}(\tau \mid \pi) = \rho_0(s_0) \prod_{t=0}^{H-1} \pi(a_t \mid s_t) \mathcal{P}(s_{t+1} \mid s_t, a_t)$$
+
+    <p>The return $G_t$ is the geometrically discounted future reward sum:</p>
+    $$G_t \triangleq \sum_{k=0}^\infty \gamma^k R_{t+k+1}$$
+
+    <div class="card">
+        <h4>Why Geometric Discounting $\gamma^k$?</h4>
+        <ol>
+            <li><strong>Bounded Convergence:</strong> If rewards are bounded by $|R_t| \le R_{\max}$, then $|G_t| \le \frac{R_{\max}}{1 - \gamma} < \infty$.</li>
+            <li><strong>Time Consistency:</strong> The relative valuation of two rewards separated by $\Delta t$ steps is $\gamma^{\Delta t}$, remaining identical regardless of when the evaluation is made.</li>
+            <li><strong>Poisson Survival Probability:</strong> Setting $\gamma$ is mathematically identical to a process that terminates at every step with hazard rate $p_{\text{die}} = 1 - \gamma$.</li>
+        </ol>
+    </div>
+
+    <h2>4. Value Functions and the Fundamental Identity</h2>
+    <p>The state-value function $V^\pi(s)$ and action-value function $Q^\pi(s, a)$ are defined as expectations over trajectories:</p>
+    $$V^\pi(s) = \mathbb{E}_\pi [G_t \mid S_t = s]$$
+    $$Q^\pi(s, a) = \mathbb{E}_\pi [G_t \mid S_t = s, A_t = a]$$
+
+    <p>By the law of total expectation, marginalizing over actions:</p>
+    $$V^\pi(s) = \sum_{a \in \mathcal{A}} \pi(a \mid s) Q^\pi(s, a)$$
+
+    <p>Decomposing $G_t = R_{t+1} + \gamma G_{t+1}$ yields the one-step recursive relation:</p>
+    $$Q^\pi(s, a) = \mathcal{R}(s, a) + \gamma \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) V^\pi(s')$$
+
+    <h2>5. Exact Analytical Matrix Solution</h2>
+    <p>For finite state spaces, let $\mathbf{v}^\pi \in \mathbb{R}^{|\mathcal{S}|}$, $\mathbf{r}^\pi \in \mathbb{R}^{|\mathcal{S}|}$ where $r^\pi(s) = \sum_a \pi(a \mid s) \mathcal{R}(s, a)$, and $\mathbf{P}^\pi \in \mathbb{R}^{|\mathcal{S}| \times |\mathcal{S}|}$ where $\mathbf{P}^\pi_{i, j} = \sum_a \pi(a \mid s_i) \mathcal{P}(s_j \mid s_i, a)$.</p>
+    <p>The Bellman expectation system is linear:</p>
+    $$\mathbf{v}^\pi = \mathbf{r}^\pi + \gamma \mathbf{P}^\pi \mathbf{v}^\pi \iff (\mathbf{I} - \gamma \mathbf{P}^\pi) \mathbf{v}^\pi = \mathbf{r}^\pi$$
+    <p>Since $\rho(\gamma \mathbf{P}^\pi) \le \gamma < 1$, $(\mathbf{I} - \gamma \mathbf{P}^\pi)$ is non-singular and invertible via Neumann expansion:</p>
+    $$\mathbf{v}^\pi = (\mathbf{I} - \gamma \mathbf{P}^\pi)^{-1} \mathbf{r}^\pi$$
+
+    <div class="card">
+        <h3>Summary Checklist</h3>
+        <ul>
+            <li><strong>MDP 5-Tuple:</strong> $\langle \mathcal{S}, \mathcal{A}, \mathcal{P}, \mathcal{R}, \gamma \rangle$.</li>
+            <li><strong>Markov Property:</strong> History is irrelevant given the current state.</li>
+            <li><strong>Return $G_t$:</strong> Sum of discounted future rewards, bounded by $\frac{R_{\max}}{1 - \gamma}$.</li>
+            <li><strong>Bridge:</strong> $V^\pi(s) = \sum_a \pi(a \mid s) Q^\pi(s, a)$.</li>
+            <li><strong>Matrix Solver:</strong> Exact values can be computed directly in $O(|\mathcal{S}|^3)$ time.</li>
+        </ul>
+    </div>
+</body>
+</html>

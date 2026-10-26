@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 20.1: Base Models vs. Instruct Models — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 20 Hub</a>
+    
+    <h1>Topic 20.1: Base Models vs. Instruct Models &amp; Chat Templates</h1>
+    <p><em>The Fundamental Paradigm Shift from Internet Auto-Completer to Aligned Assistant</em></p>
+
+    <div class="card">
+        <h3>Executive Summary</h3>
+        <p>A base pre-trained language model $\pi_{\text{base}}$ is trained solely to minimize next-token cross-entropy on internet web crawls:
+        $$\mathcal{L}_{\text{pretrain}}(\theta) = -\mathbb{E}_{\mathbf{x} \sim \mathcal{D}_{\text{web}}} \left[ \sum_{t=1}^T \log P_\theta(x_t \mid x_{<t}) \right]$$
+        Consequently, base models do not know they are conversational agents—they simply auto-complete patterns found on the web (e.g. generating lists of forum questions or homework prompts when asked a question). <strong>Instruction Tuning</strong> transforms this auto-completer into a reliable assistant governed by the <strong>HHH Triad (Helpfulness, Honesty, Harmlessness)</strong> using structured chat templates and reserved special control tokens.</p>
+    </div>
+
+    <div class="analogy">
+        <h3>The 12-Year-Old Analogy: The Walking Encyclopedia vs. The Helpful Teacher</h3>
+        <p>Imagine two characters in a school library:</p>
+        <ul>
+            <li><strong>The Walking Encyclopedia (The Base Model):</strong> Has memorized every book, forum post, and magazine in existence. But when you ask it: <em>"What is the capital of France?"</em>, it doesn't say <em>"Paris!"</em> Instead, because it has read thousands of geography tests, it continues reciting: <em>"What is the capital of Spain? What is the capital of Germany? Time limit: 15 minutes."</em> It isn't dumb—it simply assumes its only job is reading the next line of the book!</li>
+            <li><strong>The Helpful Teacher (The Instruct Model):</strong> Possesses the exact same encyclopedic memory, but went through teacher training (Instruction Tuning). The teacher recognizes the <strong>social contract</strong>: you are asking for help, and they should answer directly: <em>"The capital of France is Paris."</em></li>
+        </ul>
+    </div>
+
+    <h2>Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>$\mathcal{D}_{\text{web}}$</td><td>Corpus</td><td>Unstructured pre-training internet distribution.</td></tr>
+            <tr><td>$\mathcal{D}_{\text{SFT}}$</td><td>Corpus</td><td>Supervised instruction dataset of $(x, y)$ prompt-response pairs.</td></tr>
+            <tr><td>$\mathbf{x} = (x_1, \dots, x_M)$</td><td>Sequence</td><td>Instruction / prompt token sequence from user or system.</td></tr>
+            <tr><td>$\mathbf{y} = (y_1, \dots, y_K)$</td><td>Sequence</td><td>Target response token sequence written by assistant.</td></tr>
+            <tr><td>$\pi_{\text{base}}$</td><td>Model</td><td>Autoregressive next-token probability distribution of raw base model.</td></tr>
+            <tr><td>$\pi_{\text{SFT}}$</td><td>Model</td><td>Model fine-tuned to follow instructions.</td></tr>
+            <tr><td>$\mathcal{V}_{\text{special}}$</td><td>Token Set</td><td>Dedicated control tokens (`&lt;|im_start|&gt;`, `&lt;|im_end|&gt;`, etc.).</td></tr>
+            <tr><td>$HHH$</td><td>Criteria</td><td>Helpfulness, Honesty, Harmlessness alignment triad.</td></tr>
+            <tr><td>$\tau(\mathbf{x})$</td><td>Function</td><td>Deterministic chat template mapping structured turns to raw token sequences.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>The Triad of Alignment: HHH</h2>
+    <div class="card">
+        <ul>
+            <li><strong>Helpfulness:</strong> Following user intent, respecting explicit positive/negative constraints, executing complex reasoning, and avoiding unhelpful evasiveness.</li>
+            <li><strong>Honesty:</strong> Generating factually accurate content, expressing calibrated uncertainty, and avoiding hallucinations or fabricated citations.</li>
+            <li><strong>Harmlessness:</strong> Gracefully refusing malicious requests (e.g. malware synthesis, weapons manufacturing) while distinguishing defensive/educational inquiries.</li>
+        </ul>
+    </div>
+
+    <h2>Prompt Formats &amp; Chat Templates</h2>
+
+    <h3>1. Stanford Alpaca Format (Plaintext Delimiters)</h3>
+    <pre><code>Below is an instruction that describes a task...
+
+### Instruction:
+Calculate the area of a circle with radius 5.
+
+### Response:
+The area of a circle is A = π * r^2. For r = 5, A = 25π ≈ 78.54.</code></pre>
+    <p><em>Vulnerability:</em> Plaintext tokens like <code>### Response:</code> can be typed by users to stage prompt injections and hijack instructions.</p>
+
+    <h3>2. OpenAI ChatML Format (Special Control Tokens)</h3>
+    <pre><code>&lt;|im_start|&gt;system
+You are a helpful assistant.&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+What causes ocean tides?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+Ocean tides are primarily caused by the gravitational pull of the Moon and Sun.&lt;|im_end|&gt;</code></pre>
+
+    <h3>3. Meta LLaMA 3 Header Format</h3>
+    <pre><code>&lt;|begin_of_text|&gt;&lt;|start_header_id|&gt;system&lt;|end_header_id|&gt;
+
+You are an expert AI assistant.&lt;|eot_id|&gt;&lt;|start_header_id|&gt;user&lt;|end_header_id|&gt;
+
+How do I reverse a list in Python?&lt;|eot_id|&gt;&lt;|start_header_id|&gt;assistant&lt;|end_header_id|&gt;
+
+You can use slicing: my_list[::-1]&lt;|eot_id|&gt;</code></pre>
+
+    <div class="card">
+        <h3>Generation Prompt Mechanics</h3>
+        <p>When prompting the model to produce an answer, we append an unclosed assistant header:
+        <code>&lt;|start_header_id|&gt;assistant&lt;|end_header_id|&gt;\n\n</code> (LLaMA 3) or <code>&lt;|im_start|&gt;assistant\n</code> (ChatML). The autoregressive loop predicts tokens until emitting the end-of-turn token <code>&lt;|eot_id|&gt;</code> or <code>&lt;|im_end|&gt;</code>, which instructs the runtime to halt generation.</p>
+    </div>
+
+</body>
+</html>

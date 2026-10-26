@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 29.1: Exercises &amp; Solutions — Uniform Quantization Mechanics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #60a5fa;
+                --primary-light: #1e293b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--primary-light);
+            border: 1px solid var(--border);
+        }
+        summary {
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 29 Hub</a>
+    
+    <header>
+        <h1>Topic 29.1: Exercises &amp; Solutions</h1>
+        <p style="color: #64748b; font-size: 1.1rem;">Analytical Proofs: Integer Zero Preservation, Hardware Dot Product Cross-Terms, and Optimal Clipping Thresholds</p>
+    </header>
+
+    <section class="card">
+        <h2>Exercise 1: Zero-Point Integer Constraining and Exact Zero Preservation</h2>
+        <p><strong>Problem:</strong> In deep neural networks, exact zeros occur frequently due to zero-padding, ReLU activations ($\max(0, x)$), and sparse embeddings.</p>
+        <ol>
+            <li>Show mathematically that if $z$ were allowed to be an arbitrary real number $z \in \mathbb{R}$ rather than an integer $z \in \mathbb{Z}$, the quantized code $q$ for $x = 0$ would round to an integer, causing $x = 0$ to dequantize to a non-zero value $\hat{x} \neq 0$.</li>
+            <li>Derive the maximum dequantization error $|\hat{x} - 0|$ for real zero when $z$ is rounded to the nearest integer.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div style="margin-top: 1rem;">
+                <p><strong>1. Analytical proof:</strong></p>
+                <p>Let $x = 0.0$. Under the continuous affine formula before integer rounding of the zero-point:
+                $$z_{\text{real}} = -\frac{x_{\min}}{s} + q_{\min}$$
+                If we evaluate quantization of $x = 0$:
+                $$q(0) = \left\lfloor \frac{0}{s} + z_{\text{real}} \right\rceil = \lfloor z_{\text{real}} \rceil$$
+                If $z_{\text{real}} \notin \mathbb{Z}$, then $\lfloor z_{\text{real}} \rceil \neq z_{\text{real}}$. When dequantized:
+                $$\hat{x}(0) = s \left( q(0) - z_{\text{real}} \right) = s \left( \lfloor z_{\text{real}} \rceil - z_{\text{real}} \right) \neq 0$$
+                This destroys sparsity: every padded zero or ReLU-deactivated neuron in a tensor would become a non-zero floating-point number, causing severe numerical drift and breaking zero-skipping hardware optimizations.</p>
+
+                <p><strong>2. Integer Constraining:</strong></p>
+                <p>By defining $z = \lfloor z_{\text{real}} \rceil \in \mathbb{Z}$ as part of the quantizer specification, the dequantization formula uses the exact integer $z$:
+                $$\hat{x} = s(q - z)$$
+                Evaluating at $x = 0$:
+                $$q(0) = \left\lfloor \frac{0}{s} + z \right\rceil = \lfloor z \rceil = z \implies \hat{x}(0) = s(z - z) = 0.0$$
+                The maximum shift in the dynamic range boundary is bounded by $|z - z_{\text{real}}| \le 0.5$ LSBs, shifting the effective $x_{\min}$ by at most $\frac{s}{2}$, while guaranteeing that zero is represented with zero error.</p>
+            </div>
+        </details>
+    </section>
+
+    <section class="card">
+        <h2>Exercise 2: Hardware Dot Product Cross-Terms in Asymmetric vs. Symmetric Quantization</h2>
+        <p><strong>Problem:</strong> Consider continuous vectors $\mathbf{x}, \mathbf{w} \in \mathbb{R}^K$. Let their quantized representations be $q_x^{(k)}$ with scale $s_x$, zero-point $z_x$, and $q_w^{(k)}$ with scale $s_w$, zero-point $z_w$.</p>
+        <ol>
+            <li>Derive the algebraic expansion for the inner product $\mathbf{x}^\top \mathbf{w} \approx \hat{\mathbf{x}}^\top \hat{\mathbf{w}}$.</li>
+            <li>Identify which terms can be precomputed offline during compilation, and contrast the runtime computation of asymmetric quantization vs symmetric quantization ($z_x = 0, z_w = 0$).</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div style="margin-top: 1rem;">
+                <p><strong>1. Algebraic expansion:</strong></p>
+                $$\hat{\mathbf{x}}^\top \hat{\mathbf{w}} = \sum_{k=1}^K s_x (q_x^{(k)} - z_x) \cdot s_w (q_w^{(k)} - z_w)$$
+                $$\hat{\mathbf{x}}^\top \hat{\mathbf{w}} = s_x s_w \left[ \underbrace{\sum_{k=1}^K q_x^{(k)} q_w^{(k)}}_{\text{Term 1: Integer MAC}} - \underbrace{z_w \sum_{k=1}^K q_x^{(k)}}_{\text{Term 2: Activation Reduction}} - \underbrace{z_x \sum_{k=1}^K q_w^{(k)}}_{\text{Term 3: Weight Reduction}} + \underbrace{K \cdot z_x z_w}_{\text{Term 4: Constant Offset}} \right]$$
+
+                <p><strong>2. Hardware Implications:</strong></p>
+                <ul>
+                    <li><strong>Terms 3 &amp; 4:</strong> Weights $\mathbf{w}$ are static. Thus, $\sum_{k=1}^K q_w^{(k)}$ and $K z_x z_w$ are computed offline and folded into the pre-existing bias vector.</li>
+                    <li><strong>Term 2:</strong> Requires runtime row-sum reduction over incoming activation tokens.</li>
+                    <li><strong>Symmetric Weights ($z_w = 0$):</strong> Eliminates Term 2 and Term 4 immediately!</li>
+                    <li><strong>Fully Symmetric ($z_x = 0, z_w = 0$):</strong> Only Term 1 remains:
+                    $$\hat{\mathbf{x}}^\top \hat{\mathbf{w}} = s_x s_w \sum_{k=1}^K q_x^{(k)} q_w^{(k)}$$
+                    A pure integer dot product executed in single-instruction hardware units (NVIDIA Tensor Core <code>mma.sync</code> / ARM <code>sdot</code>).</li>
+                </ul>
+            </div>
+        </details>
+    </section>
+
+    <section class="card">
+        <h2>Exercise 3: Optimal Clipping Threshold for Gaussian Weights</h2>
+        <p><strong>Problem:</strong> Let weight tensor elements be independent samples from standard normal distribution $W \sim \mathcal{N}(0, \sigma^2)$. A symmetric $b$-bit quantizer has clipping boundary $[-c, c]$ with step size $\Delta = \frac{2c}{2^b - 1}$. The total expected MSE is:
+        $$\text{MSE}(c) = \int_{-c}^c \frac{\Delta^2}{12} p(w) dw + 2 \int_c^\infty (w - c)^2 p(w) dw$$
+        Explain why setting $c = \max(|W|)$ is suboptimal for large tensors, and describe how percentile calibration reduces total MSE.</p>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div style="margin-top: 1rem;">
+                <p>For a Gaussian tensor of size $N = 10^7$, extreme value theory dictates that the sample maximum satisfies $\mathbb{E}[\max |W_i|] \approx \sigma \sqrt{2 \ln(N)} \approx 5.68 \sigma$.</p>
+                <p>If we set $c = \max(|W|) \approx 5.68 \sigma$ (MinMax calibration), clipping error is zero, but step size $\Delta$ is inflated. Because rounding noise variance $\sigma_e^2 \propto \Delta^2 \propto c^2$, all $99.9999\%$ of non-outlier weights suffer an error variance increased by $\left(\frac{5.68}{3}\right)^2 \approx 3.6\times$ ($>360\%$).</p>
+                <p>By clipping at $c \approx 3.0 \sigma$ to $3.5 \sigma$ (e.g. 99.9th percentile), only $0.1\%$ of the weights are clamped, while reducing the step size $\Delta$ and rounding variance by $>60\%$ for the other $99.9\%$ of values. Hence, optimal clipping satisfies $c^* < \max(|W|)$.</p>
+            </div>
+        </details>
+    </section>
+</body>
+</html>

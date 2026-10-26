@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 30.3: Exercises &amp; Solutions — Speculative Decoding</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #7c3aed;
+      --primary-hover: #6d28d9;
+      --badge-bg: #ede9fe;
+      --badge-text: #6d28d9;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #a78bfa;
+        --primary-hover: #c4b5fd;
+        --badge-bg: #4c1d95;
+        --badge-text: #ddd6fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 30.3 Lecture</a>
+    <h1>Topic 30.3: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Rigorous mathematical verifications of rejection sampling distributions, total variation identities, and lookahead optimization.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Numerical Verification of Rejection Sampling Equivalence</h3>
+      <p>
+        Given vocabulary $\mathcal{V} = \{w_1, w_2, w_3, w_4\}$ with target distribution $p = [0.10, 0.50, 0.30, 0.10]$ and draft distribution $q = [0.40, 0.30, 0.10, 0.20]$.
+      </p>
+      <ol>
+        <li>Compute the individual token acceptance probabilities $\alpha(w_i)$ and mean acceptance rate $\beta$.</li>
+        <li>Verify that $\beta = 1 - D_{\text{TV}}(p, q)$.</li>
+        <li>Derive the residual recovery distribution $p'(w_i)$.</li>
+        <li>Verify numerically that $\mathbb{P}_{\text{spec}}(w_i) = p(w_i)$ for all tokens.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Acceptance Probabilities &amp; Mean Rate $\beta$</h4>
+          $$\alpha(w_1) = \min(1, 0.1/0.4) = 0.25, \quad \alpha(w_2) = 1.0, \quad \alpha(w_3) = 1.0, \quad \alpha(w_4) = 0.50$$
+          $$\beta = (0.4)(0.25) + (0.3)(1.0) + (0.1)(1.0) + (0.2)(0.5) = \mathbf{0.60}$$
+
+          <h4>2. Total Variation Verification</h4>
+          $$D_{\text{TV}}(p, q) = \frac{1}{2} (|0.1-0.4| + |0.5-0.3| + |0.3-0.1| + |0.1-0.2|) = \frac{0.80}{2} = 0.40$$
+          $$\beta = 1 - D_{\text{TV}}(p, q) = 1 - 0.40 = \mathbf{0.60} \quad \checkmark$$
+
+          <h4>3. Residual Distribution $p'$</h4>
+          $$(p - q)^+ = [0.0, 0.20, 0.20, 0.0] \implies Z = 0.40 = 1 - \beta$$
+          $$p' = [0.0, 0.50, 0.50, 0.0]$$
+
+          <h4>4. Total Emitted Probabilities</h4>
+          $$\mathbb{P}_{\text{spec}}(w_1) = 0.40 \times 0.25 + 0.40 \times 0 = \mathbf{0.10} = p(w_1)$$
+          $$\mathbb{P}_{\text{spec}}(w_2) = 0.30 \times 1.00 + 0.40 \times 0.50 = \mathbf{0.50} = p(w_2)$$
+          $$\mathbb{P}_{\text{spec}}(w_3) = 0.10 \times 1.00 + 0.40 \times 0.50 = \mathbf{0.30} = p(w_3)$$
+          $$\mathbb{P}_{\text{spec}}(w_4) = 0.20 \times 0.50 + 0.40 \times 0 = \mathbf{0.10} = p(w_4)$$
+          <p>Every token's emission probability is mathematically identical to $p(x)$!</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Optimal Lookahead Horizon $\gamma^*$ Optimization</h3>
+      <p>
+        For token acceptance rate $\beta = 0.75$ and draft-to-target forward pass cost ratio $r = 0.06$, find the optimal lookahead $\gamma^*$ that maximizes generation speedup.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p>The speedup formula is $S(\gamma) = \frac{1 - \beta^{\gamma+1}}{(1 - \beta)(1 + \gamma r)}$.</p>
+          <ul>
+            <li>$\gamma = 3$: $\mathbb{E}[N] = 2.73$, Cost = $1.18$ &rarr; Speedup = $2.317\times$</li>
+            <li>$\gamma = 5$: $\mathbb{E}[N] = 3.29$, Cost = $1.30$ &rarr; Speedup = $2.529\times$</li>
+            <li>$\gamma = 6$: $\mathbb{E}[N] = 3.47$, Cost = $1.36$ &rarr; <strong>Speedup = $2.549\times$ (Maximum)</strong></li>
+            <li>$\gamma = 7$: $\mathbb{E}[N] = 3.60$, Cost = $1.42$ &rarr; Speedup = $2.535\times$</li>
+          </ul>
+          <p>The optimum occurs at $\gamma^* = 6$. For $\gamma > 6$, the marginal benefit of another token $\beta^{\gamma+1}$ is outweighed by the linear cost $r$ of the draft model.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

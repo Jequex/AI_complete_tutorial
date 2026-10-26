@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 04: KV Cache Compression &amp; Tensor Parallel Serving</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 30 Overview</a>
+    <div>
+      <span class="badge">Topic 30.4</span>
+      <h1>KV Cache Compression &amp; Tensor Parallel Serving</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.25rem;">
+        Architectural head grouping (MQA/GQA), Heavy Hitter Oracle (H2O) eviction, and distributed Megatron KV cache sharding.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>Imagine investigating a 1,000-page mystery. If you keep all 1,000 pages spread across your desk, you run out of space immediately.</p>
+      <ul>
+        <li><strong>Smart Pruning (H2O Eviction)</strong>: You keep the first 4 pages (the suspect list &amp; premise), the last 10 pages (what you just saw), and 20 critical clues in the middle. You toss the 966 pages of useless filler. You save 80% of desk space with 99% accuracy!</li>
+        <li><strong>Distributed Sharding (Tensor Parallelism)</strong>: If the case file is still too big, you hire 4 assistant detectives and divide the attention heads. Detective 1 tracks Motive, Detective 2 tracks Alibis, Detective 3 tracks Forensics, Detective 4 tracks Timelines. Each detective holds only 1/4 of the notes on their desk, and they whisper conclusions at each step via an All-Reduce.</li>
+      </ul>
+    </div>
+
+    <h2>2. Architectural Compression: MHA vs. MQA vs. GQA</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Attention Architecture</th>
+          <th>Query Heads</th>
+          <th>Key/Value Heads</th>
+          <th>KV Cache Footprint Ratio</th>
+          <th>Representative Models</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Multi-Head Attention (MHA)</td>
+          <td>$H$</td>
+          <td>$H$</td>
+          <td>$1.0\times$ (Baseline)</td>
+          <td>GPT-3, LLaMA-1, OPT</td>
+        </tr>
+        <tr>
+          <td>Multi-Query Attention (MQA)</td>
+          <td>$H$</td>
+          <td>$1$</td>
+          <td>$1 / H$ (e.g. $0.015\times$)</td>
+          <td>Falcon, StarCoder</td>
+        </tr>
+        <tr>
+          <td>Grouped-Query Attention (GQA)</td>
+          <td>$H$</td>
+          <td>$H / G$</td>
+          <td>$1 / G$ (e.g. $0.125\times$)</td>
+          <td>LLaMA-2/3 (70B), Mistral-7B</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Heavy Hitter Oracle (H2O) &amp; Attention Sinks</h2>
+    <p>Softmax attention creates distinct patterns in long-context sequences:</p>
+    <div class="card">
+      <h3>The Tri-Partite Eviction Structure</h3>
+      <ul>
+        <li><strong>Attention Sinks ($W_{\text{sink}} \approx 4$ tokens)</strong>: Initial prompt tokens hold large residual softmax mass regardless of semantics. Evicting them causes perplexity to explode.</li>
+        <li><strong>Recency Window ($W_{\text{recency}} \approx 64\text{--}128$)</strong>: Local context essential for grammar and immediate coherence.</li>
+        <li><strong>Heavy Hitters ($k_{\text{heavy}}$)</strong>: Tokens with highest cumulative attention scores $\sum_{\tau} \sum_h A_{\tau, j}^{(h)}$.</li>
+      </ul>
+      <p>Tokens outside these three sets are evicted, compressing the KV footprint by $60\text{--}80\%$ while maintaining $>95\%$ generation accuracy.</p>
+    </div>
+
+    <h2>4. Tensor Parallel KV Cache Sharding</h2>
+    <p>Under Megatron-LM Tensor Parallelism across $N_{\text{tp}}$ GPUs:</p>
+    $$W_Q, W_K, W_V \in \text{Column Parallel} \implies \text{Attention Heads partitioned across GPUs}$$
+    $$\boxed{\text{Mem}_{\text{KV\_per\_GPU}} = \frac{4 \cdot n_{\text{layers}} \cdot H_{\text{kv}} \cdot d_{\text{head}} \cdot b \cdot s}{N_{\text{tp}}}}$$
+    <p>Each GPU holds only $1 / N_{\text{tp}}$ of the total KV cache. An 8-GPU node provides $8\times$ the KV cache memory capacity.</p>
+
+    <div class="nav-buttons">
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../05_serving_benchmarks_and_metrics_ttft_itl_tps/lecture.html" class="btn">Next: Topic 05 &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

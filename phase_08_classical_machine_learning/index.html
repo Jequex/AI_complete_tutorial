@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 08: Classical Machine Learning — AI Complete Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background-color: var(--text-muted);
+      color: #ffffff;
+    }
+
+    .code-block {
+      background-color: #1e1e2e;
+      color: #cdd6f4;
+      padding: 1.2rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="badge">Phase 08</span>
+    <h1>Classical Machine Learning</h1>
+    <p class="lead">From closed-form Normal Equations and logistic log-odds to Decision Trees, Random Forests, Support Vector Machines, and Naive Bayes.</p>
+  </header>
+
+  <main>
+
+    <!-- Topic 1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="01_linear_regression/lecture.html" class="topic-title">8.1 Linear Regression &amp; The Normal Equation</a>
+        <span class="badge">Analytical &amp; Iterative</span>
+      </div>
+      <p class="topic-desc">Derivation of the closed-form Normal Equation $w^* = (X^T X)^{-1} X^T y$ from $\nabla_w \text{MSE} = 0$, orthogonal projection onto column space $\text{Col}(X)$, iterative Gradient Descent scaling laws, and Ridge Regularization.</p>
+      <div class="topic-links">
+        <a href="01_linear_regression/lecture.html" class="btn btn-primary">Interactive Lecture</a>
+        <a href="01_linear_regression/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="01_linear_regression/experiment.py" class="btn btn-secondary">Run Lab (Pure Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="02_logistic_regression/lecture.html" class="topic-title">8.2 Logistic Regression &amp; Binary Classification</a>
+        <span class="badge">Probabilistic Classifier</span>
+      </div>
+      <p class="topic-desc">The Sigmoid activation $\sigma(z) = \frac{1}{1 + e^{-z}}$, log-odds (logits), maximum likelihood estimation via Binary Cross-Entropy loss, and the mathematical identity linking BCE gradients to linear regression.</p>
+      <div class="topic-links">
+        <a href="02_logistic_regression/lecture.html" class="btn btn-primary">Interactive Lecture</a>
+        <a href="02_logistic_regression/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="02_logistic_regression/experiment.py" class="btn btn-secondary">Run Lab (Pure Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="03_decision_trees_and_ensembles/lecture.html" class="topic-title">8.3 Decision Trees &amp; Ensemble Methods</a>
+        <span class="badge">Non-Linear Trees</span>
+      </div>
+      <p class="topic-desc">Gini Impurity, Shannon Entropy, and Information Gain. CART recursive tree growing, Bagging, Random Forests feature subsampling variance reduction, and Gradient Boosted Decision Trees (GBDT) fitting pseudo-residuals.</p>
+      <div class="topic-links">
+        <a href="03_decision_trees_and_ensembles/lecture.html" class="btn btn-primary">Interactive Lecture</a>
+        <a href="03_decision_trees_and_ensembles/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="03_decision_trees_and_ensembles/experiment.py" class="btn btn-secondary">Run Lab (Pure Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="04_support_vector_machines/lecture.html" class="topic-title">8.4 Support Vector Machines &amp; The Kernel Trick</a>
+        <span class="badge">Maximum Margin</span>
+      </div>
+      <p class="topic-desc">Geometric and functional margins, primal soft-margin SVM via Hinge Loss subgradient descent, Wolfe Dual formulation via KKT multipliers, and the infinite-dimensional Radial Basis Function (RBF) Kernel Trick.</p>
+      <div class="topic-links">
+        <a href="04_support_vector_machines/lecture.html" class="btn btn-primary">Interactive Lecture</a>
+        <a href="04_support_vector_machines/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="04_support_vector_machines/experiment.py" class="btn btn-secondary">Run Lab (Pure Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 5 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="05_naive_bayes_and_knn/lecture.html" class="topic-title">8.5 Naive Bayes &amp; K-Nearest Neighbors (KNN)</a>
+        <span class="badge">Generative &amp; Instance-Based</span>
+      </div>
+      <p class="topic-desc">Multinomial and Gaussian Naive Bayes with conditional independence, Laplace (add-1) smoothing, non-parametric lazy KNN with Minkowski distance metrics, and the geometric breakdown of the Curse of Dimensionality.</p>
+      <div class="topic-links">
+        <a href="05_naive_bayes_and_knn/lecture.html" class="btn btn-primary">Interactive Lecture</a>
+        <a href="05_naive_bayes_and_knn/exercises_and_solutions.html" class="btn btn-secondary">Exercises &amp; Solutions</a>
+        <a href="05_naive_bayes_and_knn/experiment.py" class="btn btn-secondary">Run Lab (Pure Python)</a>
+      </div>
+    </div>
+
+    <h2>⚡ Quickstart: Executing Phase 8 Labs</h2>
+    <p>Run all Topic experiments directly from your terminal using standard Python 3 (no third-party dependencies required):</p>
+    
+    <div class="code-block">
+# Topic 8.1: Linear Regression &amp; Normal Equation
+python3 phase_08_classical_machine_learning/01_linear_regression/experiment.py
+
+# Topic 8.2: Logistic Regression &amp; Binary Cross-Entropy
+python3 phase_08_classical_machine_learning/02_logistic_regression/experiment.py
+
+# Topic 8.3: Decision Trees &amp; Random Forest Ensemble
+python3 phase_08_classical_machine_learning/03_decision_trees_and_ensembles/experiment.py
+
+# Topic 8.4: Support Vector Machines &amp; RBF Kernel Trick
+python3 phase_08_classical_machine_learning/04_support_vector_machines/experiment.py
+
+# Topic 8.5: Naive Bayes &amp; K-Nearest Neighbors
+python3 phase_08_classical_machine_learning/05_naive_bayes_and_knn/experiment.py
+    </div>
+
+  </main>
+
+</body>
+</html>

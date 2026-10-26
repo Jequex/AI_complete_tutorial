@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 23.3: Metric Learning &amp; Contrastive Losses</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 23 Hub</a>
+
+    <h1>Topic 23.3: Metric Learning &amp; Contrastive Losses</h1>
+    <p><em>Metric Learning Principles, Contrastive Loss (Hadsell et al. 2006), Triplet Loss (FaceNet), and Online Negative Mining Strategies.</em></p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: Magnets with Matching and Repelling Poles</h3>
+        <p>Imagine sorting a box of magnetic puzzle pieces:</p>
+        <ul>
+            <li><strong>The Snap-Together Spring (Positives):</strong> Two puzzle pieces from the same hero have opposite poles (North and South). When you release them, they snap together until distance is zero: $\frac{1}{2} D^2$.</li>
+            <li><strong>The Push-Away Shield (Negatives &amp; Margin $m$):</strong> Two pieces from different characters have matching poles (North and North). If they get closer than 3 inches ($m$), they violently push each other away! But once they are safely beyond 3 inches, the repulsion shuts off ($\max(0, m - D) = 0$) so they don't blast out of the galaxy!</li>
+            <li><strong>The Goldilocks Negatives (Semi-Hard Mining):</strong> Easy negatives (apple vs car tire) require zero thought. Hard negatives (apple vs apple-perfumed pear) trigger confusion. <strong>Semi-hard negatives</strong> (apple vs real pear) present the exact right challenge to train an expert sniffer dog!</li>
+        </ul>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr><th>Symbol</th><th>Domain</th><th>Description &amp; Meaning</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>$f_\theta(x)$</td><td>$\mathbb{R}^d$</td><td>Deep feature embedding for input $x$.</td></tr>
+            <tr><td>$D(x_1, x_2)$</td><td>$\mathbb{R}_{\ge 0}$</td><td>Euclidean distance $\|f(x_1) - f(x_2)\|_2$.</td></tr>
+            <tr><td>$y \in \{0, 1\}$</td><td>Binary</td><td>Pair label: $y = 0$ (Positive), $y = 1$ (Negative).</td></tr>
+            <tr><td>$m > 0$</td><td>$\mathbb{R}^+$</td><td>Euclidean margin hyperparameter in Contrastive Loss.</td></tr>
+            <tr><td>$a, p, n$</td><td>Inputs</td><td>Anchor, Positive (same class), Negative (different class).</td></tr>
+            <tr><td>$\alpha > 0$</td><td>$\mathbb{R}^+$</td><td>Relative margin hyperparameter in Triplet Loss.</td></tr>
+        </tbody>
+    </table>
+
+    <h2>2. Contrastive Loss (Hadsell, Chopra, LeCun 2006)</h2>
+    <p>Contrastive loss enforces an absolute margin $m$ between pairs:</p>
+    $$\mathcal{L}_{\text{contrastive}} = \frac{1}{2} (1 - y) D^2 + \frac{1}{2} y \max(0, m - D)^2$$
+    <p>Analytical gradient behavior:</p>
+    <ul>
+        <li><strong>Positive Pair ($y = 0$):</strong> $\nabla_{f(x_1)} \mathcal{L} = f(x_1) - f(x_2)$ (attractive Hooke's spring).</li>
+        <li><strong>Negative Pair ($y = 1$):</strong> If $D < m$, $\nabla_{f(x_1)} \mathcal{L} = -(m - D) \frac{f(x_1) - f(x_2)}{D}$ (repulsive electrostatic push). If $D \ge m$, gradient is $\mathbf{0}$.</li>
+    </ul>
+
+    <h2>3. Triplet Loss (Schroff et al. 2015, FaceNet)</h2>
+    <p>Triplet loss optimizes relative rank ordering between an anchor $a$, a positive $p$, and a negative $n$:</p>
+    $$\mathcal{L}_{\text{triplet}} = \max\left(0, \|f(a) - f(p)\|_2^2 - \|f(a) - f(n)\|_2^2 + \alpha\right)$$
+    <p>When the loss is active ($D_{ap} - D_{an} + \alpha > 0$):</p>
+    $$\nabla_{f(a)} \mathcal{L} = 2(f(n) - f(p))$$
+    $$\nabla_{f(p)} \mathcal{L} = 2(f(p) - f(a))$$
+    $$\nabla_{f(n)} \mathcal{L} = 2(f(a) - f(n))$$
+
+    <h2>4. Negative Mining Strategies</h2>
+    <pre>
+    0 ───────────── D_ap ──────────────── D_ap + alpha ────────────────► D_an
+           |                      |                          |
+           |   Hard Negatives     |   Semi-Hard Negatives    |   Easy Negatives
+           |  (D_an < D_ap)       | (D_ap < D_an < D_ap + a) |  (D_an > D_ap + a)
+           |  Loss > alpha        | 0 < Loss < alpha         |  Loss = 0.0
+    </pre>
+
+    <ul>
+        <li><strong>Easy Negatives ($D_{an} > D_{ap} + \alpha$):</strong> Produce zero loss; model learns nothing.</li>
+        <li><strong>Hard Negatives ($D_{an} < D_{ap}$):</strong> Negative is closer than positive; can cause gradient explosion if overused early.</li>
+        <li><strong>Semi-Hard Negatives ($D_{ap} < D_{an} < D_{ap} + \alpha$):</strong> Farther than positive yet inside margin $\alpha$. Proven essential for stable convergence.</li>
+    </ul>
+
+</body>
+</html>

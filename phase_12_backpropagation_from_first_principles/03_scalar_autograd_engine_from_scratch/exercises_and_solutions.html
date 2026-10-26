@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 12.3: Exercises &amp; Solutions — Scalar Autograd Engine</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 12 Overview</a>
+
+    <h1>Topic 12.3: Exercises &amp; Solutions — Scalar Autograd Engine</h1>
+
+    <h2>Problem 1: Implementing the Sigmoid Activation Function (Easy)</h2>
+    <div class="callout">
+        <p>Derive $\sigma'(x) = \sigma(x)(1 - \sigma(x))$ and write the full <code>Value.sigmoid()</code> method.</p>
+    </div>
+    <div class="callout callout-success">
+        <h3>Solution:</h3>
+        <p>Using the quotient/chain rule on $(1 + e^{-x})^{-1}$ yields $\frac{e^{-x}}{(1+e^{-x})^2} = \frac{1}{1+e^{-x}}(1 - \frac{1}{1+e^{-x}}) = \sigma(x)(1 - \sigma(x))$.</p>
+        <pre><code class="language-python">def sigmoid(self):
+    s = 1.0 / (1.0 + math.exp(-self.data))
+    out = Value(s, (self,), "sigmoid")
+    def _backward():
+        self.grad += (s * (1.0 - s)) * out.grad
+    out._backward = _backward
+    return out</code></pre>
+    </div>
+
+    <h2>Problem 2: Hand Simulation of DFS Topological Sort (Medium)</h2>
+    <div class="callout">
+        <p>Trace the post-order DFS on diamond graph $c = x^2 + 3x$ to prove that reverse topological traversal guarantees all downstream consumers accumulate their gradients into $x$ before $x$ is processed.</p>
+    </div>
+    <div class="callout callout-success">
+        <h3>Solution:</h3>
+        <p>Starting DFS at $c$: traverses to $a = x^2$, which traverses to $x$. $x$ has no dependencies, so it is appended to <code>topo = [x]</code>. Next $a$ finishes: <code>topo = [x, a]</code>. Next branch $b = 3x$ sees $x$ is already visited, finishes: <code>topo = [x, a, b]</code>. Finally $c$ finishes: <code>topo = [x, a, b, c]</code>.</p>
+        <p>Reversing gives <code>[c, b, a, x]</code>. Thus, $c$ fires gradients into $b$ and $a$, and both $b$ and $a$ accumulate into $x$ before $x$ is finished!</p>
+    </div>
+
+    <h2>Problem 3: Deriving the Softmax + Cross-Entropy Gradient Cancellation (Hard)</h2>
+    <div class="callout">
+        <p>Prove that differentiating $L = -\ln(\hat{y}_k)$ with softmax $\hat{y}$ collapses analytically to $\frac{\partial L}{\partial z_i} = \hat{y}_i - y_i$.</p>
+    </div>
+    <div class="callout callout-success">
+        <h3>Solution:</h3>
+        <p>Expanding $L = \ln(\sum_j e^{z_j}) - z_k$. Differentiating with respect to $z_i$ gives $\frac{\partial L}{\partial z_i} = \frac{e^{z_i}}{\sum_j e^{z_j}} - \mathbb{I}(i = k) = \hat{y}_i - y_i$.</p>
+        <p>Production frameworks fuse this operation into a single kernel to prevent numerical overflow ($\exp(1000) \to \text{inf}$) and eliminate unnecessary memory round-trips.</p>
+    </div>
+
+</body>
+</html>

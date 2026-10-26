@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 03: Speculative Decoding</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #7c3aed;
+      --primary-hover: #6d28d9;
+      --badge-bg: #ede9fe;
+      --badge-text: #6d28d9;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #a78bfa;
+        --primary-hover: #c4b5fd;
+        --badge-bg: #4c1d95;
+        --badge-text: #ddd6fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 30 Overview</a>
+    <div>
+      <span class="badge">Topic 30.3</span>
+      <h1>Speculative Decoding</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.25rem;">
+        Mathematical proof of distribution equivalence, modified rejection sampling, and $2\times\text{--}3\times$ lossless wall-clock acceleration.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>Imagine a world-famous professor writing a complex novel. Because they are deep in thought, composing one sentence takes them <strong>10 seconds</strong>.</p>
+      <p>A fast 10-year-old student sits beside them and drafts 5 words in <strong>0.2 seconds</strong>: <code>["The", "treaty", "was", "signed", "today"]</code>.</p>
+      <p>The professor glances across all 5 words simultaneously in a single 10-second pass:</p>
+      <ul>
+        <li>Word 1 ("The") &rarr; Approved!</li>
+        <li>Word 2 ("treaty") &rarr; Approved!</li>
+        <li>Word 3 ("was") &rarr; Approved!</li>
+        <li>Word 4 ("signed") &rarr; Rejected! Replaced with "ratified". Word 5 is thrown out.</li>
+      </ul>
+      <p>In 10 seconds, the professor approved 4 high-quality words (a $4\times$ speedup), and the final book is <strong>100% faithful</strong> to the professor's exact vocabulary and intellect.</p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Domain / Type</th>
+          <th>Formal / System Definition</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$M_p$</td>
+          <td>Target Model</td>
+          <td>LLM ($p(x)$)</td>
+          <td>High-capacity, high-latency model whose distribution is strictly preserved.</td>
+        </tr>
+        <tr>
+          <td>$M_q$</td>
+          <td>Draft Model</td>
+          <td>LLM ($q(x)$)</td>
+          <td>Small, low-latency speculative model generating $\gamma$ draft tokens.</td>
+        </tr>
+        <tr>
+          <td>$\gamma$</td>
+          <td>Speculative Horizon</td>
+          <td>Integer $\ge 1$</td>
+          <td>Number of candidate tokens speculated per iteration.</td>
+        </tr>
+        <tr>
+          <td>$\alpha(x)$</td>
+          <td>Acceptance Probability</td>
+          <td>$[0, 1]$</td>
+          <td>$\min\left(1, \frac{p(x)}{q(x)}\right)$</td>
+        </tr>
+        <tr>
+          <td>$p'(x)$</td>
+          <td>Residual Distribution</td>
+          <td>$\Delta(\mathcal{V})$</td>
+          <td>$\frac{(p(x) - q(x))^+}{\sum_{x'} (p(x') - q(x'))^+}$</td>
+        </tr>
+        <tr>
+          <td>$\beta$</td>
+          <td>Mean Acceptance Rate</td>
+          <td>$[0, 1]$</td>
+          <td>$\mathbb{E}_{x \sim q}[\alpha(x)] = 1 - D_{\text{TV}}(p, q)$</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Formal Proof of Exact Distribution Equivalence</h2>
+    <p>We prove that the probability of emitting any token $x$ under speculative decoding equals $p(x)$ exactly:</p>
+    
+    <div class="card">
+      <h3>The Two-Path Emission Decomposition</h3>
+      $$\mathbb{P}_{\text{spec}}(X = x) = \mathbb{P}(\text{Accepted and } x) + \mathbb{P}(\text{Rejected and } x)$$
+      $$= q(x) \cdot \min\left(1, \frac{p(x)}{q(x)}\right) + (1 - \beta) \cdot \frac{(p(x) - q(x))^+}{1 - \beta}$$
+      $$= \min(p(x), q(x)) + (p(x) - q(x))^+$$
+      <ul>
+        <li>If $p(x) \ge q(x)$: $\min(p(x), q(x)) + (p(x) - q(x)) = q(x) + p(x) - q(x) = \mathbf{p(x)}$.</li>
+        <li>If $p(x) < q(x)$: $\min(p(x), q(x)) + 0 = \mathbf{p(x)}$.</li>
+      </ul>
+      $$\therefore \quad \boxed{\mathbb{P}_{\text{spec}}(X = x) = p(x) \quad \forall x \in \mathcal{V}}$$
+      <p>Speculative decoding introduces <strong>zero loss in accuracy</strong>, zero drift in perplexity, and perfectly preserves model temperature and sampling behavior.</p>
+    </div>
+
+    <h2>4. Theoretical Speedup Bound</h2>
+    <p>The expected number of emitted tokens per target model forward step is:</p>
+    $$\boxed{\mathbb{E}[N] = \frac{1 - \beta^{\gamma+1}}{1 - \beta}}$$
+    <p>Given draft-to-target cost ratio $r = c_{\text{draft}} / c_{\text{target}}$, the wall-clock speedup is:</p>
+    $$\text{Speedup } S = \frac{\frac{1 - \beta^{\gamma+1}}{1 - \beta}}{1 + \gamma \cdot r}$$
+
+    <div class="nav-buttons">
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../04_kv_cache_compression_and_tensor_parallel_serving/lecture.html" class="btn">Next: Topic 04 &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

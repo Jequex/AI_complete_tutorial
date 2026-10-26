@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 28.1: GPU Architecture, CUDA & Memory Hierarchy — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 28 Overview</a>
+
+    <h1>Topic 28.1: GPU Architecture, CUDA &amp; Memory Hierarchy</h1>
+    <p>A rigorous examination of high-performance computing for deep learning: from Streaming Multiprocessors and Warp SIMT lockstep execution to Tensor Cores, memory tiers, and the Roofline Model.</p>
+
+    <div class="analogy">
+        <h3>12-Year-Old Intuition: The Racecar vs. The Freight Train</h3>
+        <p>Imagine moving 1,000 heavy cargo boxes across town:</p>
+        <ul>
+            <li><strong>The Ferrari (CPU)</strong>: Carries only <strong>one box</strong> at a time, but speeds at 200 mph with laser-sharp steering, completing a run in 2 minutes. For unpredictable, sequential errands, it's supreme. But moving 1,000 boxes takes 2,000 minutes (over 33 hours!).</li>
+            <li><strong>The Freight Train (GPU)</strong>: Moves at a modest 25 mph, cannot make sudden turns, and takes time to get rolling. But it has <strong>1,000 flatbed cars</strong> attached side-by-side. On a single trip, it hauls all 1,000 boxes at once in 30 minutes!</li>
+        </ul>
+        <p>Deep learning is about performing billions of identical multiplications at once. The GPU abandons complex sequential steering logic to pack tens of thousands of floating-point arithmetic engines onto a single chip.</p>
+    </div>
+
+    <h2>Mathematical &amp; Architectural Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Concept</th>
+                <th>Physical Units</th>
+                <th>Architectural Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\text{SM}$</td>
+                <td>Streaming Multiprocessor</td>
+                <td>Hardware Block</td>
+                <td>Autonomous GPU compute core with Warp Schedulers, Register Files, Tensor Cores, and SRAM.</td>
+            </tr>
+            <tr>
+                <td>$W$</td>
+                <td>Warp Size</td>
+                <td>Threads ($= 32$)</td>
+                <td>Atomic execution bundle of NVIDIA GPUs executing a single instruction across 32 threads in lockstep.</td>
+            </tr>
+            <tr>
+                <td>$I$</td>
+                <td>Operational / Arithmetic Intensity</td>
+                <td>$\text{FLOPs} / \text{Byte}$</td>
+                <td>Ratio of floating-point arithmetic performed per byte fetched from off-chip memory (HBM).</td>
+            </tr>
+            <tr>
+                <td>$P_{\text{peak}}$</td>
+                <td>Peak Compute Throughput</td>
+                <td>$\text{TFLOP/s}$ ($10^{12} \text{ op/s}$)</td>
+                <td>Maximum theoretical floating-point execution rate across all SMs and Tensor Cores.</td>
+            </tr>
+            <tr>
+                <td>$B_{\text{peak}}$</td>
+                <td>Peak Memory Bandwidth</td>
+                <td>$\text{GB/s}$ or $\text{TB/s}$</td>
+                <td>Maximum physical rate data transfers between off-chip HBM and the SMs.</td>
+            </tr>
+            <tr>
+                <td>$I^*$</td>
+                <td>Roofline Ridge Point</td>
+                <td>$\text{FLOPs} / \text{Byte}$</td>
+                <td>Intersection threshold $P_{\text{peak}} / B_{\text{peak}}$ separating memory-bound from compute-bound regimes.</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{D} = \mathbf{A}\mathbf{B} + \mathbf{C}$</td>
+                <td>MMA Primitive</td>
+                <td>Matrix Tile</td>
+                <td>Hardware Tensor Core operation: multiplies low-precision matrices $\mathbf{A}, \mathbf{B}$ and accumulates into $\mathbf{C}$.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>CPU vs. GPU Architectural Comparison</h2>
+    <div class="card">
+        <h3>Latency-Optimized (CPU) vs. Throughput-Optimized (GPU)</h3>
+        <p>A modern CPU dedicates over 50% of its die space to caching (L2, L3) and speculative instruction-level parallelism (branch predictors, reorder buffers). A modern GPU dedicates 80%+ of silicon area to raw Arithmetic Logic Units (ALUs).</p>
+        <p>When memory stalls occur ($300 - 800\text{ cycles}$ to fetch from HBM), the GPU does not wait: the warp scheduler instantly swaps in another ready warp in 1 clock cycle. <strong>Concurrency hides latency.</strong></p>
+    </div>
+
+    <h2>Streaming Multiprocessors, Warps, and SIMT Divergence</h2>
+    <p>In CUDA, threads execute in lockstep groups of 32 known as <strong>Warps</strong>. When threads within a warp evaluate a conditional branch to different targets:</p>
+    <pre><code>if (threadIdx.x < 16) {
+    path_A(); // 40 cycles
+} else {
+    path_B(); // 40 cycles
+}</code></pre>
+    <p>The hardware must <strong>serialize</strong> execution: it executes Path A for threads 0&ndash;15 while masking off threads 16&ndash;31, then executes Path B for threads 16&ndash;31 while masking off threads 0&ndash;15.</p>
+    $$\text{Total Cycles} = 40 + 40 = 80\text{ cycles} \quad (50\%\text{ of compute capability wasted!})$$
+
+    <h2>Tensor Cores &amp; Mixed-Precision MMA</h2>
+    <p>Unlike standard CUDA cores that operate on scalars ($d = a \cdot b + c$), Tensor Cores execute hardware Matrix Multiply-Accumulate (MMA) operations per clock cycle:</p>
+    $$\mathbf{D}_{\text{FP32}} = \mathbf{A}_{\text{FP16/BF16/FP8}} \times \mathbf{B}_{\text{FP16/BF16/FP8}} + \mathbf{C}_{\text{FP32}}$$
+    <p>On an NVIDIA H100 SXM5:</p>
+    <ul>
+        <li>Standard FP32 CUDA Cores: $\approx 67\text{ TFLOP/s}$</li>
+        <li>FP16/BF16 Tensor Cores: $\mathbf{989\text{ TFLOP/s}}$ ($>14\times$ faster)</li>
+        <li>FP8 Tensor Cores: $\mathbf{1{,}978\text{ TFLOP/s}}$ ($>29\times$ faster)</li>
+    </ul>
+
+    <h2>The GPU Memory Hierarchy</h2>
+    <div class="card">
+        <ul>
+            <li><strong>Registers</strong>: ~64 KB per SM ($>25\text{ TB/s}$ aggregate), 1 cycle latency.</li>
+            <li><strong>Shared Memory / L1 Data Cache (SRAM)</strong>: ~192&ndash;256 KB per SM ($15&ndash;19\text{ TB/s}$), ~20 cycles latency. Used by FlashAttention to tile Q, K, V matrices.</li>
+            <li><strong>L2 Cache</strong>: Shared across all SMs (~50 MB on A100/H100, $5&ndash;7\text{ TB/s}$), ~100 cycles latency.</li>
+            <li><strong>High Bandwidth Memory (HBM2e / HBM3)</strong>: Off-chip VRAM (80GB&ndash;144GB, $2.0&ndash;3.35\text{ TB/s}$), $300&ndash;800\text{ cycles}$ latency.</li>
+        </ul>
+    </div>
+
+    <h2>Arithmetic Intensity &amp; The Roofline Model</h2>
+    <p>The operational intensity of any algorithm is defined as:</p>
+    $$I = \frac{\text{Work (FLOPs)}}{\text{Memory Movement (Bytes)}} \quad \left[\frac{\text{FLOP}}{\text{Byte}}\right]$$
+    <p>The attainable performance $P$ is bounded by:</p>
+    $$P = \min\left(P_{\text{peak}}, \; I \cdot B_{\text{peak}}\right)$$
+    <p>The <strong>Ridge Point</strong> $I^* = \frac{P_{\text{peak}}}{B_{\text{peak}}}$ marks the transition from memory-bandwidth limited to compute-limited performance:</p>
+    <ul>
+        <li><strong>NVIDIA A100</strong>: $I^* = \frac{312 \times 10^{12}}{2039 \times 10^9} \approx 153.0\text{ FLOP/Byte}$</li>
+        <li><strong>NVIDIA H100</strong>: $I^* = \frac{989 \times 10^{12}}{3350 \times 10^9} \approx 295.2\text{ FLOP/Byte}$</li>
+    </ul>
+
+    <h3>Neural Network Layer Regimes (FP16 Workload)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Operation</th>
+                <th>FLOPs Formula</th>
+                <th>Memory Bytes</th>
+                <th>Intensity $I$</th>
+                <th>Regime (H100)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>GELU / ReLU</strong></td>
+                <td>$10 N$</td>
+                <td>$4 N$ bytes</td>
+                <td>$2.5\text{ FLOP/B}$</td>
+                <td><strong>Deeply Memory-Bound</strong> ($<1\%$ peak)</td>
+            </tr>
+            <tr>
+                <td><strong>LayerNorm</strong></td>
+                <td>$8 D$ per token</td>
+                <td>$4 D$ per token</td>
+                <td>$2.0\text{ FLOP/B}$</td>
+                <td><strong>Deeply Memory-Bound</strong> ($<1\%$ peak)</td>
+            </tr>
+            <tr>
+                <td><strong>Large GEMM ($65\text{k}\times 4\text{k}\times 14\text{k}$)</strong></td>
+                <td>$2 M N K$</td>
+                <td>$2(MK + KN + MN)$</td>
+                <td>$\approx 3{,}038\text{ FLOP/B}$</td>
+                <td><strong>Compute-Bound</strong> ($100\%$ peak)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="card">
+        <h3>Engineering Implication: Kernel Fusion</h3>
+        <p>Because elementwise activations and normalizations have tiny arithmetic intensities ($I \le 2.5$), keeping them as separate PyTorch operations floods the slow HBM bus. <strong>Kernel Fusion</strong> (e.g. FlashAttention, PyTorch <code>torch.compile</code>, Triton) executes activation, normalization, and projection within on-chip SRAM, eliminating HBM round trips entirely.</p>
+    </div>
+
+</body>
+</html>

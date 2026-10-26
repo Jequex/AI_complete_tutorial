@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 7.4: Convex Optimization, Duality & KKT Conditions — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 7 Hub</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 7.4: Convex Optimization, Duality & KKT Conditions</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Theoretical foundations: convex sets and functions, Lagrangian duality, KKT optimality certificates, and why deep learning breaks classical convexity.
+    </p>
+
+    <h2>1. Executive Summary & The 12-Year-Old Analogy</h2>
+    <p>
+        In convex optimization, every local minimum is guaranteed to be a global minimum. When constraints are present (e.g. bounded budget, safety bounds), <strong>Lagrange Multipliers</strong> and the <strong>Karush-Kuhn-Tucker (KKT) conditions</strong> provide the necessary and sufficient conditions for exact optimality.
+    </p>
+
+    <div class="callout">
+        <h3>🛹 The 12-Year-Old Analogy: The Skateboard Bowl and the Fence</h3>
+        <ul>
+            <li><strong>Convex Optimization (The Smooth Skateboard Bowl):</strong> Drop a marble anywhere in a smooth, round concrete bowl. It rolls directly and inevitably to the exact single lowest point at the bottom center. No fake traps exist.</li>
+            <li><strong>Constraints & Lagrange Multipliers (The Wooden Fence):</strong> Suppose the city puts a fence across the bowl. If the lowest point is on the forbidden side, the marble rolls until it smacks into the fence. The force of the fence pushing back against the marble is the <strong>Lagrange multiplier $\lambda$</strong>!</li>
+            <li><strong>Complementary Slackness ($\lambda \cdot g(x) = 0$):</strong> Either the marble presses tightly against the fence ($g(x)=0, \lambda > 0$), OR it rests peacefully in the interior away from the fence ($g(x) < 0, \lambda = 0$). You never have pushing force and distance simultaneously.</li>
+            <li><strong>Deep Learning (The Haunted Mountain Range):</strong> Deep neural networks are NOT skateboard bowls. They are vast, multi-billion-dimensional landscapes with billions of saddle points and permutation symmetries.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$C \subseteq \mathbb{R}^d$</td>
+                <td>Convex set</td>
+                <td>Set containing all line segments between any pair of internal points</td>
+            </tr>
+            <tr>
+                <td>$f(x)$</td>
+                <td>Convex function</td>
+                <td>Objective whose secant lines lie on or above the graph</td>
+            </tr>
+            <tr>
+                <td>$\nabla^2 f(x) \succeq 0$</td>
+                <td>Matrix property</td>
+                <td>Positive semi-definite Hessian (all eigenvalues $\ge 0$)</td>
+            </tr>
+            <tr>
+                <td>$g_i(x) \le 0$</td>
+                <td>Constraints</td>
+                <td>Inequality constraints ($i = 1, \dots, m$)</td>
+            </tr>
+            <tr>
+                <td>$h_j(x) = 0$</td>
+                <td>Constraints</td>
+                <td>Affine equality constraints ($j = 1, \dots, p$)</td>
+            </tr>
+            <tr>
+                <td>$\lambda_i \ge 0, \nu_j$</td>
+                <td>Dual variables</td>
+                <td>Lagrange multipliers measuring constraint sensitivities</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{L}(x, \lambda, \nu)$</td>
+                <td>Lagrangian</td>
+                <td>$f(x) + \sum \lambda_i g_i(x) + \sum \nu_j h_j(x)$</td>
+            </tr>
+            <tr>
+                <td>$g(\lambda, \nu)$</td>
+                <td>Dual function</td>
+                <td>$\inf_x \mathcal{L}(x, \lambda, \nu)$ (concave lower bound)</td>
+            </tr>
+            <tr>
+                <td>$\Pi_C(z)$</td>
+                <td>Projection</td>
+                <td>$\arg\min_{y \in C} \|z - y\|_2$ (closest point in $C$)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. The Four KKT Conditions</h2>
+    <p>
+        For a convex optimization problem with zero duality gap (Slater's condition), $x^*$ is optimal if and only if there exist multipliers $(\lambda^*, \nu^*)$ satisfying:
+    </p>
+    <div class="callout callout-success">
+        <ol>
+            <li><strong>Primal Feasibility:</strong> $g_i(x^*) \le 0$ for all $i$, and $h_j(x^*) = 0$ for all $j$.</li>
+            <li><strong>Dual Feasibility:</strong> $\lambda_i^* \ge 0$ for all $i$.</li>
+            <li><strong>Complementary Slackness:</strong> $\lambda_i^* g_i(x^*) = 0$ for all $i$.</li>
+            <li><strong>Stationarity:</strong> $\nabla f(x^*) + \sum_{i=1}^m \lambda_i^* \nabla g_i(x^*) + \sum_{j=1}^p \nu_j^* \nabla h_j(x^*) = 0$.</li>
+        </ol>
+    </div>
+
+    <h2>4. Projected Gradient Descent (PGD)</h2>
+    <p>
+        To minimize $f(x)$ over a convex domain $C$, Projected Gradient Descent steps in the direction of steepest descent and projects back into $C$:
+        $$x_{t+1} = \Pi_C\left( x_t - \eta \nabla f(x_t) \right)$$
+        For box bounds $l_i \le x_i \le u_i$, the projection is an element-wise clipping: $\Pi(z)_i = \max(l_i, \min(u_i, z_i))$.
+    </p>
+
+    <h2>5. Why Deep Learning is Non-Convex</h2>
+    <ul>
+        <li><strong>Permutation Symmetries:</strong> Swapping neurons within hidden layers leaves the network function identical. In a 3-layer net with 1024 neurons, there are $(1024!)^3 \approx 10^{7910}$ equivalent optima!</li>
+        <li><strong>High-Dimensional Saddle Points:</strong> The probability that all $d$ Hessian eigenvalues are positive at a critical point is $2^{-d}$. In a million-parameter network, critical points are almost exclusively saddle points, not local minima.</li>
+    </ul>
+</body>
+</html>

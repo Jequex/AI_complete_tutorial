@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 0.2: History of AI — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-callout: #f0fdf4;
+      --border-callout: #22c55e;
+      --bg-tech: #eff6ff;
+      --border-tech: #3b82f6;
+      --bg-warn: #fef2f2;
+      --border-warn: #ef4444;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --code-bg: #f1f5f9;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-callout: #064e3b33;
+        --border-callout: #10b981;
+        --bg-tech: #1e3a8a33;
+        --border-tech: #60a5fa;
+        --bg-warn: #7f1d1d33;
+        --border-warn: #f87171;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --code-bg: #0b1120;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
+
+    .callout {
+      border-left: 4px solid;
+      padding: 1.2rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .callout-kid {
+      background-color: var(--bg-callout);
+      border-color: var(--border-callout);
+    }
+    .callout-tech {
+      background-color: var(--bg-tech);
+      border-color: var(--border-tech);
+    }
+    .callout-warn {
+      background-color: var(--bg-warn);
+      border-color: var(--border-warn);
+    }
+    .callout-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    code {
+      background-color: var(--code-bg);
+      padding: 0.15rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.9em;
+    }
+    pre code { background: none; padding: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 00</a> &gt; <span>Topic 0.2</span>
+    </div>
+    <h1>Topic 0.2: The History of AI — From Alan Turing to Modern Reasoning</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Trace the intellectual journey: Turing's imitation game, Dartmouth, AI winters, the Perceptron XOR crisis, AlexNet, and Transformers.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Chronological Timeline</h2>
+      <pre>
+ 1950 ── Alan Turing proposes the "Imitation Game" (Turing Test)
+ 1956 ── Dartmouth Summer Workshop: "Artificial Intelligence" is coined
+ 1957 ── Frank Rosenblatt invents the Perceptron
+ 1969 ── Minsky & Papert publish "Perceptrons" (Prove single-layer XOR failure)
+ 1974–1980 ── FIRST AI WINTER (Funding collapses, Lighthill report)
+ 1980s ── Rise of Expert Systems & Backpropagation popularized (Hinton et al.)
+ 1987–1993 ── SECOND AI WINTER (Lisp hardware market crashes)
+ 1990s ── The Statistical Revolution (Support Vector Machines, Bayes nets)
+ 2012 ── The AlexNet Earthquake (ImageNet won via GPUs + Deep Learning)
+ 2017 ── "Attention Is All You Need" (The Transformer is invented)
+ 2020 ── GPT-3 & Scaling Laws (Chinchilla, Kaplan et al.)
+ 2022 ── Generative AI boom (ChatGPT, Midjourney, Stable Diffusion)
+ 2024+── Modern Reasoning Systems (Chain-of-Thought, RL Test-Time Compute)
+      </pre>
+    </section>
+
+    <section>
+      <h2>1. 1950: Alan Turing & The Imitation Game</h2>
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The 12-Year-Old Analogy: The Mystery Texting Buddy</div>
+        <p>Imagine texting two strangers in separate rooms. One is a human; the other is a computer running an algorithm. You can ask anything: <em>"Tell me a joke," "How do you feel when it rains?", "Write a silly poem about bananas."</em></p>
+        <p>If, after hours of chatting, you cannot reliably tell which one is the machine, Turing argued: <strong>It does not matter whether the computer "has feelings" or "really thinks." Pragmatically, it is exhibiting intelligent behavior.</strong></p>
+      </div>
+      <p>Published in his 1950 paper <em>"Computing Machinery and Intelligence,"</em> the Turing Test established an operational, behavioral standard for machine intelligence that sidestepped metaphysical definitions.</p>
+    </section>
+
+    <section>
+      <h2>2. 1956: The Dartmouth Workshop</h2>
+      <p>Organized by John McCarthy, Marvin Minsky, Claude Shannon, and Nathaniel Rochester, the Dartmouth conference founded AI as a formal academic discipline. The organizers famously hypothesized that a 10-person team could solve major components of human intelligence in two months—underestimating the vast complexity of biological cognition by several decades.</p>
+    </section>
+
+    <section>
+      <h2>3. 1957: The Perceptron & The First AI Winter</h2>
+      <p>Frank Rosenblatt built the <strong>Perceptron</strong>, the first computational learning model inspired by biological neurons:</p>
+      
+      <p>$$z = \sum_{i=1}^d w_i x_i + b = \mathbf{w}^T \mathbf{x} + b$$</p>
+      <p>$$\hat{y} = \begin{cases} 1 & \text{if } z \geq 0 \\ 0 & \text{if } z < 0 \end{cases}$$</p>
+
+      <div class="callout callout-warn">
+        <div class="callout-title">💥 The 1969 Crisis: Minsky and Papert's XOR Proof</div>
+        <p>In 1969, Marvin Minsky and Seymour Papert published <em>Perceptrons</em>, proving that a single linear threshold unit could <strong>never</strong> compute the logical <strong>Exclusive OR (XOR)</strong> function.</p>
+      </div>
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 The Hallway Light Switch Puzzle</div>
+        <p>Think of a hallway with two light switches ($x_1, x_2$). The light turns ON only when exactly ONE switch is up:</p>
+        <ul>
+          <li>Both DOWN $(0, 0) \to \text{OFF } (0)$</li>
+          <li>One UP $(1, 0) \to \text{ON } (1)$</li>
+          <li>One UP $(0, 1) \to \text{ON } (1)$</li>
+          <li>Both UP $(1, 1) \to \text{OFF } (0)$</li>
+        </ul>
+        <p>If you plot these 4 points on a 2D grid, it is geometrically impossible to draw a single straight line separating the ON points from the OFF points!</p>
+      </div>
+
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Complete Algebraic Proof of the Contradiction</div>
+        <p>For a single perceptron to solve XOR, four linear inequalities must hold simultaneously:</p>
+        <ol>
+          <li>For $(0, 0) \to 0$: &nbsp; $w_1(0) + w_2(0) + b < 0 \implies \mathbf{b < 0}$</li>
+          <li>For $(1, 0) \to 1$: &nbsp; $w_1(1) + w_2(0) + b \geq 0 \implies \mathbf{w_1 + b \geq 0}$</li>
+          <li>For $(0, 1) \to 1$: &nbsp; $w_1(0) + w_2(1) + b \geq 0 \implies \mathbf{w_2 + b \geq 0}$</li>
+          <li>For $(1, 1) \to 0$: &nbsp; $w_1(1) + w_2(1) + b < 0 \implies \mathbf{w_1 + w_2 + b < 0}$</li>
+        </ol>
+        <p>Add inequalities (2) and (3) together:</p>
+        <p>$$(w_1 + b) + (w_2 + b) \geq 0 \implies (w_1 + w_2 + b) + b \geq 0$$</p>
+        <p>However, from (4) we know that $(w_1 + w_2 + b) < 0$, and from (1) we know that $b < 0$. The sum of two negative numbers must be strictly negative:</p>
+        <p>$$\underbrace{(w_1 + w_2 + b)}_{< 0} + \underbrace{b}_{< 0} < 0$$</p>
+        <p>We have derived that this quantity must be both $\geq 0$ and $< 0$. This is an impossible mathematical contradiction! $\blacksquare$</p>
+      </div>
+      <p>This mathematical proof led to the cancellation of neural network research grants, sparking the <strong>First AI Winter (1974–1980)</strong>.</p>
+    </section>
+
+    <section>
+      <h2>4. 1986: Backpropagation & The Multi-Layer Breakthrough</h2>
+      <p>In 1986, Rumelhart, Hinton, and Williams published backpropagation for Multi-Layer Perceptrons (MLPs). By adding a hidden layer with non-linear activation functions (like the sigmoid function $\sigma(z) = \frac{1}{1+e^{-z}}$), the hidden layer bends and transforms the coordinate space, making XOR easily separable.</p>
+    </section>
+
+    <section>
+      <h2>5. 2012: The AlexNet Revolution & Modern Transformers</h2>
+      <p>At the 2012 ImageNet competition, Alex Krizhevsky, Ilya Sutskever, and Geoffrey Hinton deployed <strong>AlexNet</strong>—a deep convolutional neural network trained on parallel Nvidia GPUs using ReLU activations and Dropout regularization. AlexNet cut classification error by over 10 percentage points, triggering the modern deep learning boom.</p>
+      <p>In 2017, Vaswani et al. published <em>"Attention Is All You Need,"</em> introducing the <strong>Transformer</strong>. By replacing recurrent networks with parallel self-attention:</p>
+      <p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$</p>
+      <p>Transformers unlocked unprecedented scale, leading directly to the modern era of foundation models and reasoning systems.</p>
+    </section>
+
+    <div class="nav-buttons">
+      <a href="../01_what_is_intelligence/exercises_and_solutions.html" class="btn">← Topic 0.1</a>
+      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

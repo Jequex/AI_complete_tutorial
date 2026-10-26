@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 13.1: Exercises & Solutions — PyTorch Tensors & Autograd</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 13.1</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">🏠 Phase 13 Hub</a>
+
+    <h1>Topic 13.1: Exercises & Solutions</h1>
+    <p style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Mathematical derivations of tensor strides in 4D vision tensors, reverse-mode automatic differentiation over dynamic graphs with diamond dependencies, and practical PyTorch memory leak prevention.
+    </p>
+
+    <h2>Problem 1: Memory Address Mapping in 4D Vision Tensors (NCHW to NHWC)</h2>
+    <p>
+        Consider an input image batch tensor with shape $(N=4, C=3, H=32, W=32)$.
+    </p>
+    <ol>
+        <li>Derive the canonical C-contiguous strides vector $\mathbf{s}_{\text{NCHW}}$.</li>
+        <li>Compute the exact physical 1D storage index for element $(n=2, c=1, h=10, w=15)$ assuming <code>storage_offset = 0</code>.</li>
+        <li>If the tensor is permuted via <code>x.permute(0, 2, 3, 1)</code> to $(N, H, W, C)$:
+            <ul>
+                <li>What are the resulting shape and strides?</li>
+                <li>Is this permuted tensor contiguous? Why or why not?</li>
+                <li>What is the physical storage index of element $(n=2, h=10, w=15, c=1)$ in the permuted tensor?</li>
+            </ul>
+        </li>
+    </ol>
+
+    <div class="callout callout-success">
+        <h3>Solution 1</h3>
+        <p><strong>1. Stride Derivation:</strong></p>
+        $$s_3 = 1, \quad s_2 = 1 \cdot 32 = 32, \quad s_1 = 32 \cdot 32 = 1024, \quad s_0 = 1024 \cdot 3 = 3072$$
+        $$\mathbf{s}_{\text{NCHW}} = (3072, 1024, 32, 1)$$
+
+        <p><strong>2. Storage Address:</strong></p>
+        $$\text{addr} = 2(3072) + 1(1024) + 10(32) + 15(1) = 6144 + 1024 + 320 + 15 = 7503$$
+
+        <p><strong>3. Permuted View:</strong></p>
+        <p>Shape: $(4, 32, 32, 3)$. Strides: $(3072, 32, 1, 1024)$. Non-contiguous because canonical row-major strides would be $(3072, 96, 3, 1)$. Re-evaluating the physical index yields $2(3072) + 10(32) + 15(1) + 1(1024) = 7503$, confirming zero-copy memory re-indexing!</p>
+    </div>
+
+    <h2>Problem 2: Reverse-Mode Autograd with Diamond Graph Recombination</h2>
+    <p>
+        Let $x = 2.0$, and define intermediate variables:
+        $$u = x^2, \quad v = 3x, \quad y = u \cdot v + u$$
+    </p>
+    <ol>
+        <li>Compute the analytical derivative $\frac{dy}{dx}$ at $x=2.0$.</li>
+        <li>Trace the reverse-mode autograd accumulation at nodes $u$ and $x$.</li>
+    </ol>
+
+    <div class="callout callout-success">
+        <h3>Solution 2</h3>
+        <p><strong>Analytical Derivation:</strong></p>
+        $$y = 3x^3 + x^2 \implies \frac{dy}{dx} = 9x^2 + 2x \implies 9(4) + 2(2) = 40.0$$
+        <p><strong>Autograd Backpropagation:</strong></p>
+        <p>At root $y$: $\bar{y} = 1.0$. Gradients flowing into $u$ come from both $u \cdot v$ and $+u$: $\bar{u} = \bar{y} \cdot v + \bar{y} \cdot 1.0 = 1.0(6.0) + 1.0(1.0) = 7.0$.</p>
+        <p>Gradients flowing into $x$: from $v$: $\bar{v} \cdot 3 = 4.0(3) = 12.0$; from $u$: $\bar{u} \cdot 2x = 7.0(4.0) = 28.0$. Total accumulated gradient at $x$: $12.0 + 28.0 = 40.0$.</p>
+    </div>
+
+    <h2>Problem 3: Diagnosing Memory Leaks in PyTorch Training/Eval Loops</h2>
+    <p>
+        Why does appending <code>losses.append(loss)</code> inside an evaluation loop cause a CUDA Out of Memory crash, and how is it resolved?
+    </p>
+
+    <div class="callout callout-danger">
+        <h3>Solution 3</h3>
+        <p>
+            The <code>loss</code> tensor retains a reference to its <code>.grad_fn</code> and the entire dynamic backward graph (including cached activations). Appending tensors directly keeps all prior graph nodes alive in RAM.
+        </p>
+        <p>
+            <strong>Fix:</strong> Use <code>losses.append(loss.item())</code> to store pure Python floats, and wrap inference in <code>with torch.inference_mode():</code> or <code>with torch.no_grad():</code>.
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 2.4 Exercises & Solutions — The Complete AI Mastery Course</title>
+  
+  <!-- KaTeX for math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --bg-solution: #f0fdf4;
+      --border-solution: #16a34a;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --bg-solution: #064e3b2e;
+        --border-solution: #10b981;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .breadcrumbs {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    .breadcrumbs a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2.5rem; }
+
+    .problem-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    details.solution {
+      background-color: var(--bg-solution);
+      border: 1px solid var(--border-solution);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      margin-top: 1.25rem;
+    }
+    details.solution summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--border-solution);
+      user-select: none;
+      font-size: 1.05rem;
+    }
+    details.solution[open] summary {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="breadcrumbs">
+      <a href="../index.html">Phase 02</a> &gt; <a href="./lecture.html">Topic 2.4</a> &gt; <span>Exercises &amp; Solutions</span>
+    </div>
+    <h1>Topic 2.4: Practice Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Eigenvalue root finding, orthogonal eigenvectors, fast matrix powers via diagonalization, and RNN stability.</p>
+  </header>
+
+  <main>
+    <!-- PROBLEM 1 -->
+    <div class="problem-box">
+      <h2>Problem 1: Full Eigendecomposition by Hand</h2>
+      <p>Given symmetric matrix $B = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$:</p>
+      <ul>
+        <li><strong>Part A:</strong> Compute the characteristic polynomial $\det(B - \lambda I) = 0$.</li>
+        <li><strong>Part B:</strong> Find eigenvalues $\lambda_1, \lambda_2$.</li>
+        <li><strong>Part C:</strong> Find eigenvectors $\mathbf{v}_1, \mathbf{v}_2$.</li>
+        <li><strong>Part D:</strong> Verify that $\mathbf{v}_1 \cdot \mathbf{v}_2 = 0$.</li>
+      </ul>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p><strong>Part A &amp; B: Eigenvalues</strong></p>
+        <p>$$\det \begin{bmatrix} 2-\lambda & 1 \\ 1 & 2-\lambda \end{bmatrix} = (2-\lambda)^2 - 1 = \lambda^2 - 4\lambda + 3 = 0$$</p>
+        <p>$$(\lambda - 3)(\lambda - 1) = 0 \implies \mathbf{\lambda_1 = 3, \quad \lambda_2 = 1}$$</p>
+
+        <p><strong>Part C: Eigenvectors</strong></p>
+        <ul>
+          <li>For $\lambda_1 = 3$: $(B - 3I)\mathbf{v}_1 = \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \mathbf{0} \implies v_1 = v_2 \implies \mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$.</li>
+          <li>For $\lambda_2 = 1$: $(B - 1I)\mathbf{v}_2 = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \mathbf{0} \implies v_2 = -v_1 \implies \mathbf{v}_2 = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$.</li>
+        </ul>
+
+        <p><strong>Part D: Orthogonality</strong></p>
+        <p>$$\mathbf{v}_1 \cdot \mathbf{v}_2 = (1)(1) + (1)(-1) = 1 - 1 = \mathbf{0} \quad \text{(Orthogonal!)}$$</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 2 -->
+    <div class="problem-box">
+      <h2>Problem 2: Fast Matrix Powers via Diagonalization</h2>
+      <p>Use $B = Q \Lambda Q^{-1}$ to calculate $B^4$ without doing 4 successive matrix multiplications.</p>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <p>$$Q = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}, \qquad \Lambda = \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix}, \qquad Q^{-1} = \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$$</p>
+        <p>$$\Lambda^4 = \begin{bmatrix} 3^4 & 0 \\ 0 & 1^4 \end{bmatrix} = \begin{bmatrix} 81 & 0 \\ 0 & 1 \end{bmatrix}$$</p>
+        <p>$$B^4 = Q \Lambda^4 Q^{-1} = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} 81 & 0 \\ 0 & 1 \end{bmatrix} \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix} = \mathbf{\begin{bmatrix} 41 & 40 \\ 40 & 41 \end{bmatrix}}$$</p>
+      </details>
+    </div>
+
+    <!-- PROBLEM 3 -->
+    <div class="problem-box">
+      <h2>Problem 3: RNN Gradient Stability</h2>
+      <p>Hidden states evolve as $\mathbf{h}_t = W \mathbf{h}_{t-1}$. If $\mathbf{h}_0$ is an eigenvector with eigenvalue $\lambda$, compute the signal multiplier $\lambda^{100}$ after 100 steps for $\lambda = 1.10$ and $\lambda = 0.90$.</p>
+
+      <details class="solution">
+        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
+        <h3>Solution:</h3>
+        <ul>
+          <li><strong>For $\lambda = 1.10$:</strong> $(1.10)^{100} \approx \mathbf{13,780.6}$ (Exploding gradient—overflows float limits).</li>
+          <li><strong>For $\lambda = 0.90$:</strong> $(0.90)^{100} \approx \mathbf{0.0000266}$ (Vanishing gradient—past context is forgotten).</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="nav-buttons">
+      <a href="./lecture.html" class="btn">← Back to Lecture</a>
+      <a href="../05_singular_value_decomposition/lecture.html" class="btn btn-primary">Next Topic: 2.5 Singular Value Decomposition →</a>
+    </div>
+  </main>
+
+</body>
+</html>
+

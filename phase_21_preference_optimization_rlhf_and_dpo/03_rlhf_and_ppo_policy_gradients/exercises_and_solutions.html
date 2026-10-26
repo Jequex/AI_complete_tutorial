@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 21.3: Exercises &amp; Solutions — RLHF &amp; PPO Policy Gradients</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        details {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">← Back to Phase 21: Preference Optimization</a>
+
+    <h1>Topic 21.3: Exercises &amp; Solutions — RLHF &amp; PPO Policy Gradients</h1>
+
+    <div class="card">
+        <h3>Problem 1: 4-Model VRAM Arithmetic &amp; Memory Footprint (Easy)</h3>
+        <p>In a 7B model training setup in FP16 precision:</p>
+        <ol>
+            <li>Compute the memory for Actor (trainable), Critic (trainable), Reference (frozen), and Reward (frozen).</li>
+            <li>What is the total static VRAM requirement?</li>
+            <li>How many 80 GB GPUs are required?</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> Trainable models require weights (14 GB) + gradients (14 GB) + AdamW moments (56 GB) = 84 GB each. Frozen models require weights only (14 GB each).</p>
+            <p><strong>Step 2:</strong> $\text{Actor}(84) + \text{Critic}(84) + \text{Ref}(14) + \text{Reward}(14) = 196\text{ GB}$.</p>
+            <p><strong>Step 3:</strong> $\frac{196}{80} \approx 2.45 \implies$ at least 3-4 enterprise 80 GB GPUs are required just to hold the model states.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 2: Token-Level vs. Sequence-Level KL Divergence (Medium)</h3>
+        <ol>
+            <li>Prove that $D_{\text{KL}}(\pi_\theta \parallel \pi_{\text{ref}}) = \mathbb{E} \left[ \sum_{t=1}^T (\log \pi_\theta(y_t) - \log \pi_{\text{ref}}(y_t)) \right]$.</li>
+            <li>Why does per-token reward distribution improve credit assignment over terminal lump-sum subtraction?</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> Using $\log \prod_t a_t = \sum_t \log a_t$ and linearity of expectation, the log-likelihood ratio separates into individual token terms identically.</p>
+            <p><strong>Step 2:</strong> Distributing the KL penalty across steps allows the Critic value network to assign credit to the exact tokens that deviated from the reference distribution, rather than penalizing the entire sequence uniformly at the end.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 3: PPO Probability Ratio Clipping Analysis (Medium)</h3>
+        <p>Given $\mathcal{L}^{\text{CLIP}} = \min(r_t \hat{A}_t, \, \text{clip}(r_t, 1-\epsilon, 1+\epsilon) \hat{A}_t)$ with $\epsilon = 0.20$:</p>
+        <ol>
+            <li>Evaluate for $\hat{A}_t = +4.0$ when $r_t = 1.50$.</li>
+            <li>Evaluate for $\hat{A}_t = -3.0$ when $r_t = 0.60$.</li>
+        </ol>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>Step 1:</strong> $\min(1.50 \times 4.0, 1.20 \times 4.0) = \min(6.0, 4.8) = 4.8$. Clipped! The gradient $\frac{\partial \mathcal{L}}{\partial r_t} = 0$, preventing over-aggressive updates.</p>
+            <p><strong>Step 2:</strong> $\min(0.60 \times (-3.0), 0.80 \times (-3.0)) = \min(-1.8, -2.4) = -2.4$. Clipped! The gradient is zero, preventing excessive downward destruction of probability mass.</p>
+        </details>
+    </div>
+
+    <div class="card">
+        <h3>Problem 4: Hand Calculation of GAE Advantage on a 4-Token Trajectory (Hard)</h3>
+        <p>Given $\gamma = 1.0, \lambda = 0.90$, values $V = [1.2, 1.5, 1.8, 2.0, 0.0]$, and rewards $R = [0.0, -0.1, 0.0, 3.0]$:</p>
+        <details>
+            <summary>View Complete Solution</summary>
+            <p><strong>TD errors:</strong></p>
+            <ul>
+                <li>$\delta_0 = 0.0 + 1.5 - 1.2 = +0.30$</li>
+                <li>$\delta_1 = -0.1 + 1.8 - 1.5 = +0.20$</li>
+                <li>$\delta_2 = 0.0 + 2.0 - 1.8 = +0.20$</li>
+                <li>$\delta_3 = 3.0 + 0.0 - 2.0 = +1.00$</li>
+            </ul>
+            <p><strong>GAE recursion ($\hat{A}_t = \delta_t + 0.90 \hat{A}_{t+1}$):</strong></p>
+            <ul>
+                <li>$\hat{A}_3 = 1.00 + 0 = 1.000$</li>
+                <li>$\hat{A}_2 = 0.20 + 0.90(1.00) = 1.100$</li>
+                <li>$\hat{A}_1 = 0.20 + 0.90(1.10) = 1.190$</li>
+                <li>$\hat{A}_0 = 0.30 + 0.90(1.19) = 1.371$</li>
+            </ul>
+            <p>The earliest token ($t=0$) receives the largest advantage, properly crediting the initial decisions that positioned the model to achieve the terminal reward.</p>
+        </details>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">← Back to Lecture 21.3</a>
+        <a href="../04_direct_preference_optimization_dpo/lecture.html" style="color: var(--primary); font-weight: 600; text-decoration: none;">Next: Topic 21.4 Lecture →</a>
+    </div>
+
+</body>
+</html>

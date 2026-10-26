@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 10.3: Exercises & Solutions — Evaluation Metrics & Calibration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-proof { background: #fef3c7; color: #92400e; }
+        .badge-metric { background: #dbeafe; color: #1e40af; }
+        .badge-decomp { background: #f3e8ff; color: #6b21a8; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 10.3</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">🏠 Phase 10 Hub</a>
+
+    <h1>Topic 10.3: Exercises & Solutions</h1>
+    <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">
+        Mathematical equivalence of ROC-AUC and Wilcoxon-Mann-Whitney statistics, $F_\beta$ optimization, and the Murphy decomposition of the Brier score.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: Wilcoxon-Mann-Whitney Equivalence to AUC-ROC</h3>
+            <span class="badge badge-proof">Ranking Theory Proof</span>
+        </div>
+        <p>
+            Let positive set $\mathcal{D}_+$ have $N_+$ instances and negative set $\mathcal{D}_-$ have $N_-$ instances.
+            The Wilcoxon-Mann-Whitney rank statistic is:
+        </p>
+        $$\hat{A} = \frac{1}{N_+ N_-} \sum_{i=1}^{N_+} \sum_{j=1}^{N_-} \mathbb{I}(s(x_i^+) > s(x_j^-))$$
+        <ol>
+            <li>Prove that the area under the empirical ROC curve (AUC-ROC) equals $\hat{A}$.</li>
+            <li>What is the expected value of $\hat{A}$ for a random guesser?</li>
+            <li>How does sorting reduce computation from $\mathcal{O}(N_+ N_-)$ to $\mathcal{O}(N \log N)$?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Proof:</strong> Sorting by descending score, every positive sample creates a vertical step of $\frac{1}{N_+}$ and every negative creates a horizontal step of $\frac{1}{N_-}$. The height of the curve at each negative instance $x_j^-$ is the fraction of positives ranked above it: $\frac{1}{N_+}\sum_{i=1}^{N_+} \mathbb{I}(s_i^+ > s_j^-)$. Summing these vertical bars times width $\frac{1}{N_-}$ across all negative instances yields exactly $\hat{A}$.</p>
+                <p><strong>2. Random Baseline:</strong> For random rankings, by symmetry $P(s^+ > s^-) = 0.5$, so $\mathbb{E}[\hat{A}] = 0.5$.</p>
+                <p><strong>3. Complexity:</strong> Sorting takes $\mathcal{O}(N \log N)$. Once sorted, the sum of ranks formula computes $\hat{A}$ in a single linear $\mathcal{O}(N)$ pass.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Tuning $F_\beta$ for Medical Screening</h3>
+            <span class="badge badge-metric">Harmonic Mean Trade-offs</span>
+        </div>
+        <p>
+            The generalized $F_\beta$ score is defined as:
+        </p>
+        $$F_\beta = (1 + \beta^2) \frac{P \cdot R}{\beta^2 P + R}$$
+        <ol>
+            <li>Show that $F_1$ is the harmonic mean of Precision and Recall.</li>
+            <li>In cancer screening where a False Negative is fatal, should $\beta > 1$ or $\beta < 1$?</li>
+            <li>Compute $F_2$ and $F_{0.5}$ for $P = 0.50$ and $R = 0.90$.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Harmonic Mean:</strong> For $\beta=1$: $F_1 = \frac{2 P R}{P + R} = \frac{2}{P^{-1} + R^{-1}} = (\frac{P^{-1} + R^{-1}}{2})^{-1}$.</p>
+                <p><strong>2. Cancer Screening:</strong> Choose $\beta > 1$ (e.g. $\beta=2$) to weight Recall more heavily than Precision.</p>
+                <p><strong>3. Calculations:</strong></p>
+                $$F_2 = 5 \times \frac{0.45}{4(0.50) + 0.90} = \frac{2.25}{2.90} \approx 0.7759 \quad (77.6\%)$$
+                $$F_{0.5} = 1.25 \times \frac{0.45}{0.25(0.50) + 0.90} = \frac{0.5625}{1.025} \approx 0.5488 \quad (54.9\%)$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: The Murphy Decomposition of Brier Score</h3>
+            <span class="badge badge-decomp">Calibration Analysis</span>
+        </div>
+        <p>
+            The Brier score decomposes into three orthogonal components:
+        </p>
+        $$\text{BS} = \text{Reliability} - \text{Resolution} + \text{Uncertainty}$$
+        <ol>
+            <li>What does each component measure intuitively?</li>
+            <li>Compute the three terms for a naive baseline predicting constant base rate $f = \bar{y}$.</li>
+            <li>Why does Platt scaling improve Brier score without hurting resolution?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Definitions:</strong></p>
+                <ul>
+                    <li><strong>Reliability:</strong> Calibration gap $(f_k - \bar{y}_k)^2$. Lower is better.</li>
+                    <li><strong>Resolution:</strong> Sorting power $(\bar{y}_k - \bar{y})^2$. Higher is better.</li>
+                    <li><strong>Uncertainty:</strong> Inherent noise $\bar{y}(1 - \bar{y})$ of the problem.</li>
+                </ul>
+                <p><strong>2. Constant Predictor:</strong> Reliability = 0 (perfectly calibrated), Resolution = 0 (zero sorting), Brier score = $\bar{y}(1 - \bar{y})$.</p>
+                <p><strong>3. Platt Scaling Effect:</strong> Since the logistic transform is monotonic, rankings and resolution are completely preserved while driving the reliability error toward zero.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

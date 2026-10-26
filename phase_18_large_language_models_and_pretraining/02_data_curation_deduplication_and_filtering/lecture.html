@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 18.2: Data Curation, Deduplication, and Filtering — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        .analogy-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 700;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code, li code {
+            background-color: var(--card-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: 0.88em;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 18 Overview</a>
+
+    <h1>Topic 18.2: Data Curation, Deduplication, and Filtering</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: -0.25rem;">
+        From Raw Petabyte Common Crawl Dumps to High-Reasoning Gold Pretraining Corpora.
+    </p>
+
+    <div class="analogy-box">
+        <div class="analogy-title">🌊 12-Year-Old Analogy: Panning for Gold in a Muddy River</div>
+        <p>Imagine you want to feed your genius robot, but it can only learn from pure gold nuggets:</p>
+        <ul>
+            <li><strong>The Raw River Water:</strong> Petabytes of web dumps from Common Crawl, containing mud, broken glass, soda cans, and dead fish.</li>
+            <li><strong>The Coarse Wire Sieve:</strong> Document extraction and FastText language filters that strip HTML tags and discard foreign languages you don't want.</li>
+            <li><strong>The Flume Run:</strong> Heuristic filters that wash away repetitive machine spam, advertising keywords, and empty boilerplate.</li>
+            <li><strong>The Magnet Grid (MinHash + LSH):</strong> Finding 5,000 duplicate plastic bottle caps with the exact same logo and throwing out 4,999 identical copies so your robot doesn't waste time studying the same thing over and over.</li>
+            <li><strong>The Security Inspection:</strong> Ensuring no test-exam cheat sheets are hidden in the nuggets so your robot passes the final test fairly.</li>
+        </ul>
+        <p>At the bottom of your pan lies gleaming, high-density 24-karat gold dust!</p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Mathematical Definition</th>
+                    <th>Concrete Physical Meaning</th>
+                    <th>Typical Values</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$S_D$</td>
+                    <td>$\{s_1, \dots, s_k\}$</td>
+                    <td>Set of $k$-shingles extracted from document $D$</td>
+                    <td>$k=3$ words or $k=5$ chars</td>
+                </tr>
+                <tr>
+                    <td>$J(A, B)$</td>
+                    <td>$\frac{|S_A \cap S_B|}{|S_A \cup S_B|}$</td>
+                    <td>Jaccard Similarity between two documents</td>
+                    <td>$[0.0, 1.0]$</td>
+                </tr>
+                <tr>
+                    <td>$\pi$</td>
+                    <td>Random permutation</td>
+                    <td>Permutation of the shingle hash domain</td>
+                    <td>$\mathbb{Z} \to \mathbb{Z}$</td>
+                </tr>
+                <tr>
+                    <td>$M$</td>
+                    <td>Length of MinHash signature</td>
+                    <td>Number of independent universal hash functions</td>
+                    <td>$64, 128, \text{ or } 256$</td>
+                </tr>
+                <tr>
+                    <td>$b, r$</td>
+                    <td>$M = b \cdot r$</td>
+                    <td>Number of LSH bands ($b$) and rows per band ($r$)</td>
+                    <td>$b=16, r=8$</td>
+                </tr>
+                <tr>
+                    <td>$s^*$</td>
+                    <td>$(1/b)^{1/r}$</td>
+                    <td>LSH 50% collision probability threshold</td>
+                    <td>Typically $0.6 - 0.8$</td>
+                </tr>
+                <tr>
+                    <td>$P(s)$</td>
+                    <td>$1 - (1 - s^r)^b$</td>
+                    <td>Probability two documents with similarity $s$ collide in LSH</td>
+                    <td>Sigmoidal S-curve</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>2. MinHash Theorem & Universal Hashing</h2>
+    <p>
+        The MinHash algorithm (Broder, 1997) maps variable-length sets into fixed-size signature vectors:
+        $$P\left( \min_{s \in S_A} \pi(s) = \min_{s \in S_B} \pi(s) \right) = \frac{|S_A \cap S_B|}{|S_A \cup S_B|} = J(A, B)$$
+    </p>
+    <p>
+        To compute signatures efficiently in practice without materializing large permutations, we employ universal hash functions:
+        $$h_i(x) = (a_i x + b_i) \bmod p$$
+        where $p = 2^{31} - 1$ is a Mersenne prime, and $a_i, b_i$ are randomly chosen integers.
+    </p>
+
+    <h2>3. The LSH Banding Mechanism & S-Curve Derivation</h2>
+    <p>
+        Pairwise comparisons across a corpus of $N = 10^9$ documents would require $\approx 5 \times 10^{17}$ comparisons.
+        LSH groups $M$ signature integers into $b$ bands of $r$ rows:
+    </p>
+    <ul>
+        <li>Probability of an exact match in all $r$ rows of a single band: $s^r$</li>
+        <li>Probability of differing in at least one row: $1 - s^r$</li>
+        <li>Probability of failing to match across all $b$ independent bands: $(1 - s^r)^b$</li>
+        <li>Probability of colliding in at least one band:
+            $$P_{\text{collision}}(s) = 1 - (1 - s^r)^b$$
+        </li>
+    </ul>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>True Similarity $s$</th>
+                    <th>$s^r$ ($r=8$)</th>
+                    <th>$(1 - s^r)^b$ ($b=16$)</th>
+                    <th>$P_{\text{collision}}$</th>
+                    <th>Verdict</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$0.95$ (Near-identical)</td>
+                    <td>$0.6634$</td>
+                    <td>$0.0000004$</td>
+                    <td>$\mathbf{0.9999996}$</td>
+                    <td>Virtually guaranteed collision</td>
+                </tr>
+                <tr>
+                    <td>$0.80$ (High overlap)</td>
+                    <td>$0.1678$</td>
+                    <td>$0.0519$</td>
+                    <td>$\mathbf{0.9481}$</td>
+                    <td>High candidate recall ($94.8\%$)</td>
+                </tr>
+                <tr>
+                    <td>$0.707$ ($s^*$ Threshold)</td>
+                    <td>$0.0625$</td>
+                    <td>$0.3561$</td>
+                    <td>$\mathbf{0.6439}$</td>
+                    <td>Transition threshold</td>
+                </tr>
+                <tr>
+                    <td>$0.40$ (Low overlap)</td>
+                    <td>$0.000655$</td>
+                    <td>$0.9896$</td>
+                    <td>$\mathbf{0.0104}$</td>
+                    <td>Rare collision ($1\%$)</td>
+                </tr>
+                <tr>
+                    <td>$0.10$ (Unrelated)</td>
+                    <td>$1.0 \times 10^{-8}$</td>
+                    <td>$0.9999998$</td>
+                    <td>$\mathbf{0.0000002}$</td>
+                    <td>Zero noise collisions</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>4. Heuristic Quality Filtering (The Gopher & C4 Rules)</h2>
+    <ul>
+        <li><strong>Stopword Threshold:</strong> High-quality English text requires $\ge 15\%$ stopword density.</li>
+        <li><strong>Symbol-to-Word Ratio:</strong> Code dumps or binary noise with $> 18\%$ symbol characters are pruned.</li>
+        <li><strong>Repetition Penalties:</strong> Documents with any single 3-gram representing $> 20\%$ of all 3-grams are discarded to eliminate infinite crawler loops.</li>
+        <li><strong>Benchmark Decontamination:</strong> Containment checks against 13-gram test sets ensure benchmark integrity.</li>
+    </ul>
+
+    <div class="nav-links">
+        <a href="../01_scaling_laws_and_compute_optimal_training/lecture.html">← Previous Topic: Scaling Laws</a>
+        <a href="exercises_and_solutions.html">Proceed to Topic 18.2 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>

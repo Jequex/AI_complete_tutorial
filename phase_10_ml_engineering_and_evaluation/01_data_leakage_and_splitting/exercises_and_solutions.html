@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 10.1: Exercises & Solutions — Data Leakage & Splitting</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --solution-bg: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --solution-bg: #131d31;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .problem-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .badge-case { background: #dbeafe; color: #1e40af; }
+        .badge-proof { background: #fef3c7; color: #92400e; }
+        .badge-prob { background: #f3e8ff; color: #6b21a8; }
+        details {
+            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border);
+        }
+        pre {
+            background-color: #1e1e2e;
+            color: #cdd6f4;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="lecture.html" class="back-link">← Back to Lecture 10.1</a>
+    <a href="../index.html" class="back-link" style="margin-left: 1.5rem;">🏠 Phase 10 Hub</a>
+
+    <h1>Topic 10.1: Exercises & Solutions</h1>
+    <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">
+        Mastering data leakage detection, mathematical proof of sample dependence, and probability distributions of split bias.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 1: The Churn Post-Decision Confounder</h3>
+            <span class="badge badge-case">Case Study & Audit</span>
+        </div>
+        <p>
+            An engineer trains an XGBoost model predicting customer churn ($y \in \{0, 1\}$) using:
+            <code>tenure_months</code>, <code>avg_monthly_bill</code>, <code>support_tickets_count</code>, 
+            <code>retention_discount_applied</code>, and <code>data_usage_gb</code>.
+        </p>
+        <p>
+            Offline 5-fold CV shows <strong>99.4% ROC-AUC</strong>, but production accuracy is <strong>53.1%</strong>.
+        </p>
+        <ol>
+            <li>Identify the variable causing target leakage and explain why.</li>
+            <li>Define the exact temporal inequality that valid features must satisfy.</li>
+            <li>How can the pipeline be corrected?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Leaked Feature:</strong> <code>retention_discount_applied</code>. In customer support operations, retention discounts are only assigned when a customer calls to cancel. The discount is an effect of impending churn, not a predictor. At test time before churn is initiated, this feature is unpopulated.</p>
+                <p><strong>2. Temporal Constraint:</strong> For prediction time $t_{\text{pred}}$ and event realization time $t_{\text{event}}$:</p>
+                $$\text{timestamp}(x_j) \le t_{\text{pred}} < t_{\text{event}}$$
+                <p><strong>3. Fix:</strong> Drop concurrent flags or replace with historic lag features such as <code>prior_year_discounts</code> computed strictly prior to $t_{\text{pred}}$.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 2: Mathematical Proof of Preprocessing Leakage</h3>
+            <span class="badge badge-proof">Mathematical Proof</span>
+        </div>
+        <p>
+            Suppose global mean $\hat{\mu} = \frac{1}{N}\sum_{i=1}^N x_i$ is computed across the entire dataset of size $N$ prior to partitioning into training (size $N-M$) and test (size $M$). Features are scaled as $z_i = (x_i - \hat{\mu})/\sigma$.
+        </p>
+        <ol>
+            <li>Show that training sample $z_i$ mathematically depends on test sample $x_k$ ($k \in \text{test}$).</li>
+            <li>Compute the exact covariance $\text{Cov}(z_i, x_k)$ assuming i.i.d. observations with variance $\sigma^2$.</li>
+            <li>State the correct engineering implementation.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Proof of Dependency:</strong></p>
+                $$z_i = \frac{x_i - \left(\frac{1}{N}\sum_{j \in \text{train}} x_j + \frac{1}{N}\sum_{m \in \text{test}} x_m\right)}{\sigma}$$
+                $$\frac{\partial z_i}{\partial x_k} = -\frac{1}{N\sigma} \ne 0$$
+                <p>Since the derivative is non-zero, every training feature is algebraically contaminated by test set values.</p>
+                <p><strong>2. Exact Covariance:</strong></p>
+                $$\text{Cov}(z_i, x_k) = \frac{1}{\sigma}\left(\text{Cov}(x_i, x_k) - \frac{1}{N}\sum_{j=1}^N \text{Cov}(x_j, x_k)\right)$$
+                <p>Because samples are i.i.d., $\text{Cov}(x_i, x_k) = 0$ for $i \ne k$, and $\text{Cov}(x_k, x_k) = \sigma^2$:</p>
+                $$\text{Cov}(z_i, x_k) = \frac{1}{\sigma}\left(0 - \frac{1}{N}\sigma^2\right) = -\frac{\sigma}{N}$$
+                <p><strong>3. Protocol:</strong> Compute $\hat{\mu}_{\text{train}}$ solely on training samples; apply it as a fixed constant to test instances.</p>
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Random vs Stratified K-Fold in Rare Events</h3>
+            <span class="badge badge-prob">Probability Analysis</span>
+        </div>
+        <p>
+            A medical dataset of $N=100$ patients has only $5$ positive cases ($y=1$). We perform standard 5-fold CV (each fold has size 20).
+        </p>
+        <ol>
+            <li>What is the probability that a single validation fold contains zero positive cases?</li>
+            <li>What is the probability that at least one of the 5 folds contains zero positive cases?</li>
+            <li>How does Stratified $K$-Fold eliminate this?</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Single Fold Zero Probability (Hypergeometric):</strong></p>
+                $$P(X = 0) = \frac{\binom{5}{0}\binom{95}{20}}{\binom{100}{20}} = \frac{80 \times 79 \times 78 \times 77 \times 76}{100 \times 99 \times 98 \times 97 \times 96} \approx 0.3188 \quad (31.9\%)$$
+                <p><strong>2. At Least One Fold Zero:</strong> The only way no fold has zero is if every one of the 5 folds gets exactly 1 positive:</p>
+                $$P(\text{all get 1}) = \frac{20^5}{\binom{100}{5}} = \frac{3,200,000}{75,287,520} \approx 0.0425$$
+                $$P(\ge 1 \text{ fold has zero}) = 1 - 0.0425 = 0.9575 \quad (95.75\%)$$
+                <p>Over 95% of random splits will produce at least one fold with zero positive samples!</p>
+                <p><strong>3. Stratified Fix:</strong> Partitions positives and negatives independently, allocating exactly 1 positive and 19 negatives to every fold.</p>
+            </div>
+        </details>
+    </div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.4: Generative Adversarial Networks (GANs) &amp; Minimax Dynamics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .analogy-box {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.4: Generative Adversarial Networks (GANs) &amp; Minimax Dynamics</h1>
+    <p>Zero-sum game theory, proof of the optimal discriminator, connection to Jensen-Shannon Divergence, and mode collapse.</p>
+
+    <div class="analogy-box">
+        <h3>The 12-Year-Old Analogy: The Art Forger and the Detective</h3>
+        <p><strong>The Forger (Generator $G$):</strong> Tries to paint fake Da Vincis from scratch.</p>
+        <p><strong>The Detective (Discriminator $D$):</strong> Inspects paintings and spots microscopic differences between real masterpieces and fakes.</p>
+        <p><strong>The Impasse (Nash Equilibrium):</strong> Eventually, the forger becomes so skilled that the detective has to flip a coin ($D(x) = 0.5$). The fake paintings have become indistinguishable from reality.</p>
+    </div>
+
+    <h2>1. The Two-Player Minimax Formulation</h2>
+    $$\boxed{\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z)))]}$$
+
+    <h2>2. Derivation of the Optimal Discriminator $D^*(x)$</h2>
+    <p>For any fixed generator $G$, the value function in data space is:</p>
+    $$V(D, G) = \int_{\mathcal{X}} \left[ p_{\text{data}}(x) \log D(x) + p_g(x) \log(1 - D(x)) \right] dx$$
+    <p>Maximizing pointwise $f(y) = a \log y + b \log(1 - y)$ yields critical point $y^* = \frac{a}{a + b}$. Thus:</p>
+    $$\boxed{D^*(x) = \frac{p_{\text{data}}(x)}{p_{\text{data}}(x) + p_g(x)}}$$
+
+    <h2>3. Equivalence to Jensen-Shannon Divergence</h2>
+    <p>Substituting $D^*(x)$ back into the minimax value function:</p>
+    $$V(D^*, G) = -\log 4 + 2 \cdot \text{JSD}(p_{\text{data}} \parallel p_g)$$
+    <p>The global minimum is achieved if and only if $\text{JSD} = 0 \iff p_g = p_{\text{data}}$, where $D^*(x) = 0.5$.</p>
+
+    <h2>4. Vanishing Gradients &amp; The Non-Saturating Heuristic</h2>
+    <div class="callout">
+        <h4>Why $\log(1 - D)$ fails early on:</h4>
+        <p>When the generator is weak ($D(G(z)) \approx 0$), the derivative of $\log(1 - \sigma(\text{logit}))$ with respect to logit is $-\sigma(\text{logit}) \approx 0$, causing backpropagation to stall.</p>
+        <p><strong>The Non-Saturating Solution:</strong> Maximize $\log D(G(z))$ (or minimize $-\log D(G(z))$). The gradient with respect to logit becomes $-(1 - D(G(z)))$, providing maximum gradient ($1.0$) when $D \approx 0$.</p>
+    </div>
+
+    <h2>5. Mode Collapse Mechanics</h2>
+    <p>Because simultaneous gradient ascent/descent does not guarantee convergence to Nash equilibria in non-convex landscapes, the generator may collapse to producing only a single class or mode $x^*$, cycling between modes rather than covering the whole distribution.</p>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 28.1: Exercises &amp; Solutions — GPU Architecture &amp; Memory Hierarchy</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        details {
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background-color: var(--bg);
+            padding: 0.75rem 1rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        summary:hover {
+            text-decoration: underline;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 28 Overview</a>
+
+    <h1>Topic 28.1: Exercises &amp; Solutions</h1>
+    <p>Quantitative problems on operational intensity, Roofline limits, SIMT warp divergence penalties, and hardware Tensor Core derivations.</p>
+
+    <!-- Exercise 1 -->
+    <div class="card">
+        <h3>Exercise 1: Arithmetic Intensity &amp; Kernel Fusion of Softmax</h3>
+        <p>Consider computing the Softmax function over a batch of vectors: $\mathbf{y} = \text{Softmax}(\mathbf{x})$, $\mathbf{x} \in \mathbb{R}^{B \times S}$ with $B = 32$, $S = 4{,}096$ in FP16 ($2\text{ bytes/element}$).</p>
+        <p>The numerically stable algorithm requires: (1) max reduction ($S$ ops), (2) sum of exp ($3S$ ops), (3) normalization ($3S$ ops) $\implies 7S\text{ FLOPs}$ per vector.</p>
+        <ol>
+            <li>Compute total FLOPs and memory traffic for a naive PyTorch implementation writing intermediates to HBM.</li>
+            <li>Compute memory traffic for a fused kernel holding vectors in on-chip SRAM.</li>
+            <li>Compute the Arithmetic Intensity $I$ for both. On NVIDIA A100 ($P_{\text{peak}} = 312\text{ TFLOP/s}$, $B_{\text{peak}} = 2{,}039\text{ GB/s}$, $I^* = 153.0\text{ FLOP/B}$), calculate the attainable performance and fusion speedup.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Naive (Unfused) Implementation:</strong></p>
+            <ul>
+                <li>Total Elements: $N = 32 \times 4{,}096 = 131{,}072$.</li>
+                <li>Total FLOPs: $7 \times 131{,}072 = 917{,}504\text{ FLOPs} \approx 0.918\text{ MFLOPs}$.</li>
+                <li>Memory Traffic: Read $\mathbf{x}$ ($2N$), Read/Write intermediate numerators ($4N$), Write $\mathbf{y}$ ($2N$) plus initial reduction read ($2N$) $= 10N\text{ bytes} \approx 1.31\text{ MB}$.</li>
+                <li>$I_{\text{naive}} = \frac{7N}{20N} = \mathbf{0.35\text{ FLOPs/Byte}}$.</li>
+            </ul>
+            <p><strong>2. Fused Implementation:</strong></p>
+            <ul>
+                <li>Memory Traffic: Read $\mathbf{x}$ once ($2N$), write $\mathbf{y}$ once ($2N$) $= 4N\text{ bytes} \approx 0.524\text{ MB}$.</li>
+                <li>$I_{\text{fused}} = \frac{7N}{8N} = \mathbf{0.875\text{ FLOPs/Byte}}$.</li>
+            </ul>
+            <p><strong>3. Attainable Performance &amp; Speedup (A100):</strong></p>
+            <p>Both are deeply <strong>memory-bound</strong> since $I \ll 153.0\text{ FLOP/B}$.</p>
+            <p>$$P_{\text{naive}} = 0.35 \times 2{,}039\text{ GB/s} = 713.65\text{ GFLOP/s} = 0.714\text{ TFLOP/s} \quad (0.23\%\text{ of peak})$$</p>
+            <p>$$P_{\text{fused}} = 0.875 \times 2{,}039\text{ GB/s} = 1{,}784.1\text{ GFLOP/s} = 1.784\text{ TFLOP/s} \quad (0.57\%\text{ of peak})$$</p>
+            <p>Kernel fusion yields a $\frac{10N}{4N} = \mathbf{2.5\times}$ speedup purely by saving memory bandwidth.</p>
+        </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+        <h3>Exercise 2: SIMT Warp Divergence Penalty Analysis</h3>
+        <p>A warp of 32 threads executes the following branch:</p>
+        <pre><code>if (threadIdx.x % 2 == 0) {
+    path_even(); // 120 instructions
+} else {
+    path_odd();  // 80 instructions
+}</code></pre>
+        <ol>
+            <li>How many execution cycles does the warp require to complete?</li>
+            <li>What is the active SIMT thread slot efficiency?</li>
+            <li>How can the data mapping be refactored to eliminate divergence completely?</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. Required Cycles:</strong></p>
+            <p>Because adjacent threads alternate even and odd, each 32-thread warp contains 16 even threads and 16 odd threads. The SIMT scheduler serializes execution:</p>
+            $$\text{Total Cycles} = 120 + 80 = \mathbf{200\text{ cycles}}$$
+            <p><strong>2. SIMT Slot Efficiency:</strong></p>
+            <p>Useful work: $(16 \times 120) + (16 \times 80) = 1{,}920 + 1{,}280 = 3{,}200\text{ thread-instructions}$.</p>
+            <p>Total allocated slots: $32\text{ threads} \times 200\text{ cycles} = 6{,}400\text{ slot-cycles}$.</p>
+            $$\text{Efficiency } \eta = \frac{3{,}200}{6{,}400} = \mathbf{50.0\%}$$
+            <p><strong>3. Refactoring:</strong></p>
+            <p>Remap workloads so that all 32 threads within a single warp branch together: assign even workloads to warps $0, 2, 4\dots$ and odd workloads to warps $1, 3, 5\dots$. Even warps take 120 cycles ($100\%$ efficiency), odd warps take 80 cycles ($100\%$ efficiency), giving an average of 100 cycles ($2\times$ faster).</p>
+        </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+        <h3>Exercise 3: Hardware Derivation of Tensor Core Peak Throughput</h3>
+        <p>An NVIDIA H100 SXM5 GPU features 132 SMs running at a base clock of $1.83\text{ GHz}$. Each SM contains 4 Fourth-Generation Tensor Cores. Each Tensor Core executes a $16 \times 16 \times 16$ FP16 MMA matrix tile per cycle ($\mathbf{D} = \mathbf{A}\mathbf{B} + \mathbf{C}$).</p>
+        <ol>
+            <li>Derive the number of scalar FLOPs in one $16 \times 16 \times 16$ MMA operation.</li>
+            <li>Calculate the theoretical peak FP16 Tensor Core throughput in TFLOP/s from first principles.</li>
+        </ol>
+
+        <details>
+            <summary>Click to view Solution</summary>
+            <h4>Solution:</h4>
+            <p><strong>1. FLOPs per MMA Tile:</strong></p>
+            <p>Matrix $\mathbf{A} \in \mathbb{R}^{16 \times 16}$ multiplied by $\mathbf{B} \in \mathbb{R}^{16 \times 16}$ yields $16 \times 16 = 256$ elements. Each element requires a 16-element dot product (16 multiplies, 16 adds = 32 FLOPs).</p>
+            $$\text{FLOPs per tile} = 2 \times 16 \times 16 \times 16 = \mathbf{8{,}192\text{ FLOPs}}$$
+            <p><strong>2. Peak TFLOP/s Derivation:</strong></p>
+            <p>Total Tensor Cores: $132\text{ SMs} \times 4 = 528\text{ Tensor Cores}$.</p>
+            <p>FLOPs per cycle across chip: $528 \times 8{,}192 = 4{,}325{,}376\text{ FLOPs/cycle}$.</p>
+            $$\text{Throughput} = 4{,}325{,}376 \times 1.83 \times 10^9\text{ cycles/s} \approx \mathbf{791.5\text{ TFLOP/s}}$$
+            <p>(With boost clocks $\sim 1.98\text{ GHz}$, official peak dense FP16 reaches $989\text{ TFLOP/s}$, and with 2:4 structured sparsity reaches $1{,}978\text{ TFLOP/s}$).</p>
+        </details>
+    </div>
+
+</body>
+</html>

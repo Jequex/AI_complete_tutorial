@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.5: Exercises &amp; Solutions — WGAN &amp; Gradient Penalty</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.5: Exercises &amp; Solutions</h1>
+    <p>Optimal transport on discrete spikes, equivalence proofs of Lipschitz continuity and gradient norms, and mathematical derivation of unit gradient norms on geodesic lines.</p>
+
+    <h2>Problem 1: Earth Mover's Distance vs. Total Variation on Discrete Spikes (Easy)</h2>
+    <p>Given $P = 0.5\delta_1 + 0.5\delta_3$ and $Q = 0.5\delta_2 + 0.5\delta_4$, compute Total Variation, JSD, and $\mathcal{W}_1$. Then repeat for shifted distribution $Q' = 0.5\delta_{10} + 0.5\delta_{12}$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>For $P$ and $Q$:</strong></p>
+        <ul>
+            <li>Total Variation: $\delta(P, Q) = 1.0$ (Saturated).</li>
+            <li>JSD: $\text{JSD}(P \parallel Q) = \log 2 \approx 0.69315$ (Saturated).</li>
+            <li>Wasserstein-1: $\mathcal{W}_1(P, Q) = 0.5|1-2| + 0.5|3-4| = 1.0$.</li>
+        </ul>
+        <p><strong>For Shifted $Q'$:</strong></p>
+        <ul>
+            <li>Total Variation: Still $1.0$ (Zero information about distance).</li>
+            <li>JSD: Still $\log 2 \approx 0.69315$ (Flat zero gradient).</li>
+            <li>Wasserstein-1: $\mathcal{W}_1(P, Q') = 0.5(9) + 0.5(9) = 9.0$.</li>
+        </ul>
+        <p>Wasserstein distance scales linearly with geometric displacement, providing an informative gradient where TV and JSD saturate.</p>
+    </details>
+
+    <h2>Problem 2: Equivalence of Lipschitz Constant and Gradient Norm (Medium)</h2>
+    <p>Prove that for continuously differentiable $f: \mathbb{R}^D \to \mathbb{R}$, $\|f\|_L \le 1 \iff \|\nabla f(x)\|_2 \le 1$ everywhere.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>$(\implies):$</strong> By directional derivative $\nabla f(x)^\top v = \lim_{t\to 0} \frac{f(x+tv)-f(x)}{t} \le 1$ for unit vector $v = \frac{\nabla f}{\|\nabla f\|}$. Thus $\|\nabla f\|_2 \le 1$.</p>
+        <p><strong>$(\impliedby):$</strong> By fundamental theorem of calculus along line segment $\gamma(t) = (1-t)x + ty$:</p>
+        $$|f(y) - f(x)| \le \int_0^1 |\nabla f(\gamma(t))^\top (y - x)| dt \le \int_0^1 \|\nabla f\|_2 \|y - x\|_2 dt \le \|y - x\|_2$$
+        <p>Thus $\|f\|_L \le 1$. Constraining the gradient norm strictly enforces 1-Lipschitz continuity.</p>
+    </details>
+
+    <h2>Problem 3: Derivation of Unit Gradient Norm on Geodesic Lines (Hard)</h2>
+    <p>Prove that the optimal Kantorovich-Rubinstein critic $f^*$ has $\|\nabla_{\hat{x}} f^*(\hat{x})\|_2 = 1.0$ everywhere on the straight line connecting paired real and generated samples.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>For optimal coupling pairs $(x_0, x_1)$, $f^*(x_0) - f^*(x_1) = \|x_0 - x_1\|_2$.</p>
+        <p>Along line $\hat{x}_t = (1-t)x_0 + tx_1$, the 1-Lipschitz triangle inequality forces $f^*(\hat{x}_t) = f^*(x_0) - t\|x_1 - x_0\|_2$.</p>
+        <p>Differentiating with respect to $t$:</p>
+        $$\frac{d}{dt} f^*(\hat{x}_t) = \nabla_{\hat{x}} f^*(\hat{x}_t)^\top (x_1 - x_0) = -\|x_1 - x_0\|_2$$
+        $$\nabla_{\hat{x}} f^*(\hat{x}_t)^\top \left(\frac{x_0 - x_1}{\|x_0 - x_1\|_2}\right) = 1.0$$
+        <p>Since $\|f^*\|_L \le 1$, Cauchy-Schwarz requires $\nabla_{\hat{x}} f^*(\hat{x}_t) = \frac{x_0 - x_1}{\|x_0 - x_1\|_2}$ with exact Euclidean norm $\|\nabla_{\hat{x}} f^*(\hat{x}_t)\|_2 = 1.0$. This proves why the two-sided gradient penalty $(\|\nabla f\| - 1)^2$ directly targets the optimal critic.</p>
+    </details>
+
+</body>
+</html>

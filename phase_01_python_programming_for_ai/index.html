@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 01: Python & Programming for AI — Complete AI Tutorial</title>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .topic-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .topic-title:hover {
+      color: var(--primary);
+    }
+    .topic-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+    .links-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-lecture {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .btn-lecture:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    
+    .quickstart {
+      background-color: var(--bg-card);
+      border: 1px dashed var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-top: 3rem;
+    }
+    pre {
+      background-color: #0b1120;
+      color: #f8fafc;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      margin: 0.5rem 0 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge">Phase 01 • Programming &amp; Software Engineering</div>
+    <h1>Python &amp; Programming for AI</h1>
+    <p class="lead">Before building artificial brains, you must master the digital loom that weaves them: clean Python programming, software engineering discipline, the scientific stack, and custom tensor architectures.</p>
+  </header>
+
+  <main>
+    <!-- TOPIC 1.1 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./01_python_core_and_advanced/lecture.html" class="topic-title">1.1 Core &amp; Advanced Python for AI</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 1.1</span>
+      </div>
+      <p class="topic-desc">The sticky nametag mental model, mutability vs immutability, pass-by-object-reference, OOP and dunder methods (__call__, __len__, __getitem__), lazy generators, and inference latency decorators.</p>
+      <div class="links-row">
+        <a href="./01_python_core_and_advanced/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./01_python_core_and_advanced/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 1.2 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./02_python_tooling_and_engineering/lecture.html" class="topic-title">1.2 AI Software Engineering, Tooling &amp; Reproducibility</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 1.2</span>
+      </div>
+      <p class="topic-desc">Static type hints and Protocols, automated unit testing for ML invariants, eliminating GPU starvation with cProfile, professional multi-level logging, and ironclad pseudo-random seed locking.</p>
+      <div class="links-row">
+        <a href="./02_python_tooling_and_engineering/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./02_python_tooling_and_engineering/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 1.3 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./03_scientific_computing_stack/lecture.html" class="topic-title">1.3 The Scientific Python Ecosystem</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 1.3</span>
+      </div>
+      <p class="topic-desc">NumPy contiguous arrays and SIMD vectorization, pandas data cleaning and indexing (.loc vs .iloc), Matplotlib figure hierarchies, SciPy mathematical optimization, and streaming JSON Lines (.jsonl).</p>
+      <div class="links-row">
+        <a href="./03_scientific_computing_stack/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./03_scientific_computing_stack/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 1.4 -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <a href="./04_project_micro_tensor_library/lecture.html" class="topic-title">1.4 Capstone Project: Micro-Tensor Library</a>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Topic 1.4</span>
+      </div>
+      <p class="topic-desc">Engineering a mini-PyTorch tensor engine from scratch in pure Python: flat 1D storage buffers, row-major strides, zero-copy transposition (.T), matrix multiplication (@), and a complete 2-layer MLP forward pass.</p>
+      <div class="links-row">
+        <a href="./04_project_micro_tensor_library/lecture.html" class="btn btn-lecture">📖 Read Lecture</a>
+        <a href="./04_project_micro_tensor_library/exercises_and_solutions.html" class="btn btn-secondary">✏️ Exercises &amp; Solutions</a>
+        <span class="btn btn-secondary" style="cursor: default;">🧪 experiment.py</span>
+      </div>
+    </div>
+
+    <div class="quickstart">
+      <h3 style="margin-top: 0; font-size: 1.1rem;">🧪 How to Run Phase 1 Python Experiments</h3>
+      <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem;">All experiments are 100% self-contained standard library Python 3 scripts with zero external dependencies:</p>
+      <pre><code>python3 phase_01_python_programming_for_ai/01_python_core_and_advanced/experiment.py
+python3 phase_01_python_programming_for_ai/02_python_tooling_and_engineering/experiment.py
+python3 phase_01_python_programming_for_ai/03_scientific_computing_stack/experiment.py
+python3 phase_01_python_programming_for_ai/04_project_micro_tensor_library/experiment.py</code></pre>
+    </div>
+  </main>
+
+</body>
+</html>
+

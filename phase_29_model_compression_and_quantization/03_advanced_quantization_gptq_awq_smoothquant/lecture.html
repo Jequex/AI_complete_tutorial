@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 29.3: Advanced Quantization: GPTQ, AWQ &amp; SmoothQuant — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #60a5fa;
+                --primary-light: #1e293b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th { background-color: var(--primary-light); font-weight: 600; }
+        pre.code-block {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: "JetBrains Mono", "Fira Code", monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            padding-left: 1.25rem;
+            font-style: italic;
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 29 Hub</a>
+    
+    <header>
+        <h1>Topic 29.3: Advanced Quantization: GPTQ, AWQ &amp; SmoothQuant</h1>
+        <p style="color: #64748b; font-size: 1.1rem;">Second-Order Taylor Curvature, Optimal Brain Surgery, Salient Weight Scaling, and Outlier Migration</p>
+    </header>
+
+    <section>
+        <h2>1. 12-Year-Old Intuition: The Acrobatic Pyramid &amp; The Shared Backpack</h2>
+        <div class="card analogy">
+            <p><strong>The Acrobatic Pyramid (GPTQ):</strong> Imagine 100 acrobats forming a giant human pyramid. In naive Round-To-Nearest (RTN), everyone blindly snaps their feet to the nearest line on the floor at the exact same moment. Because everyone made uncoordinated rounding errors, the entire pyramid collapses. In GPTQ, Acrobat #1 snaps their foot first. Because the team understands the physics of the pyramid (the Hessian matrix $\mathbf{H}$), all remaining 99 acrobats instantly adjust their balance to cancel out Acrobat #1's mistake!</p>
+            <p><strong>The Backpack Rebalancing Trick (SmoothQuant &amp; AWQ):</strong> Imagine Hiker Activation is carrying a 100-pound boulder in their backpack, while Hiker Weight has an empty pack. Hiker Activation is stumbling. Rather than forcing them to squeeze the boulder into a tiny lunchbox, you move 50 pounds into Hiker Weight's backpack. The total carried load is identical, but now both can walk normally.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Mathematical Symbol Decoder</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Name</th>
+                    <th>Domain</th>
+                    <th>Role in Compression</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>$\mathbf{H} = 2 \mathbf{X}^\top \mathbf{X}$</td>
+                    <td>Layer Hessian</td>
+                    <td>$\mathbb{R}^{K \times K}$ (PSD)</td>
+                    <td>Curvature of squared output reconstruction error with respect to weight deviations.</td>
+                </tr>
+                <tr>
+                    <td>$\mathbf{H}^{-1}$</td>
+                    <td>Inverse Hessian</td>
+                    <td>$\mathbb{R}^{K \times K}$</td>
+                    <td>Cross-coupling matrix used to compute optimal error compensation updates.</td>
+                </tr>
+                <tr>
+                    <td>$[\mathbf{H}^{-1}]_{qq}$</td>
+                    <td>Inverse Pivot</td>
+                    <td>$\mathbb{R}^+$</td>
+                    <td>Sensitivity cost of quantizing coordinate $q$.</td>
+                </tr>
+                <tr>
+                    <td>$\mathbf{S} = \text{diag}(\mathbf{s})$</td>
+                    <td>Smoothing Matrix</td>
+                    <td>Diagonal $\mathbb{R}^{K \times K}$</td>
+                    <td>Channel-wise scaling matrix migrating outlier difficulty between activations and weights.</td>
+                </tr>
+                <tr>
+                    <td>$\alpha \in [0, 1]$</td>
+                    <td>Migration Exponent</td>
+                    <td>$[0, 1]$</td>
+                    <td>Split ratio allocating outlier dynamic range (typically $\alpha = 0.5$).</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>3. Second-Order Taylor Approximation &amp; GPTQ</h2>
+        <p>Because trained weights sit near a loss minimum ($\nabla_{\mathbf{w}} \mathcal{L} \approx \mathbf{0}$), the error penalty simplifies to the quadratic curvature:</p>
+        
+        <div class="card">
+            <h3>Quadratic Loss Perturbation</h3>
+            $$\Delta \mathcal{L} \approx \frac{1}{2} (\mathbf{w} - \hat{\mathbf{w}})^\top \mathbf{H} (\mathbf{w} - \hat{\mathbf{w}})$$
+            
+            <h3>Optimal Weight Compensation Update (OBQ / GPTQ)</h3>
+            <p>When weight $w_q$ is snapped to discrete integer $\hat{w}_q$, the optimal adjustment for all unquantized weights is:</p>
+            $$\boxed{\Delta \mathbf{w} = -\frac{w_q - \hat{w}_q}{[\mathbf{H}^{-1}]_{qq}} \mathbf{H}^{-1}_{:, q}}$$
+            <p>And the added squared error is: $\Delta E = \frac{(w_q - \hat{w}_q)^2}{2 [\mathbf{H}^{-1}]_{qq}}$.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Activation-Aware Weight Quantization (AWQ)</h2>
+        <p>AWQ demonstrates that LLM performance is dominated by the top 1% salient weights. Salience is dictated by the incoming activation magnitude $\mathbf{s}_X = \max_{\text{tokens}} |\mathbf{X}|$.</p>
+        <div class="card">
+            <h3>Equivalent Transformation</h3>
+            $$\mathbf{Y} = \mathbf{X}\mathbf{W} = (\mathbf{X} \mathbf{S}^{-1}) (\mathbf{S}\mathbf{W})$$
+            <p>By scaling up salient weights and scaling down corresponding activations, AWQ compresses quantization distortion on critical channels without mixed-precision hardware overhead.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>5. SmoothQuant: Systematic Outlier Migration</h2>
+        <p>In LLMs (>6.7B parameters), persistent activation channels spike up to $100\times$ normal values. SmoothQuant shifts this dynamic range burden into the weights:</p>
+        <div class="card">
+            $$s_j = \frac{\max(|X_j|)^\alpha}{\max(|W_j|)^{1 - \alpha}}$$
+            $$\hat{\mathbf{X}} = \mathbf{X} \cdot \text{diag}(\mathbf{s})^{-1}, \quad \hat{\mathbf{W}} = \text{diag}(\mathbf{s}) \cdot \mathbf{W}$$
+            <p>With $\alpha = 0.5$, dynamic range is shared equally, unlocking fast INT8 matrix multiplication (W8A8) across the entire model.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>6. Verification Script</h2>
+        <p>Run the pure Python SmoothQuant migration and mini-GPTQ experiment:</p>
+        <pre class="code-block">python3 phase_29_model_compression_and_quantization/03_advanced_quantization_gptq_awq_smoothquant/experiment.py</pre>
+    </section>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 18.2: Exercises & Solutions — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .problem-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+        details {
+            margin-top: 1rem;
+            border-top: 1px dashed var(--border);
+            padding-top: 1rem;
+        }
+        summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .solution-content {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .nav-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 18 Overview</a>
+
+    <h1>Topic 18.2: Exercises & Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: -0.25rem;">
+        Analytical & Practical Problems in Data Curation, MinHash LSH Deduplication, and Quality Filtering.
+    </p>
+
+    <!-- Problem 1 -->
+    <div class="problem-card">
+        <div class="problem-header">Exercise 1: LSH Banding Parameter Optimization & S-Curve Analysis</div>
+        <p>
+            An engineering team has $M = 128$ MinHash permutations and tests three band configurations:
+        </p>
+        <ul>
+            <li>Config 1: $b=32, r=4$</li>
+            <li>Config 2: $b=16, r=8$</li>
+            <li>Config 3: $b=8, r=16$</li>
+        </ul>
+        <ol>
+            <li>Calculate theoretical 50% threshold $s^* \approx (1/b)^{1/r}$ for each.</li>
+            <li>Evaluate $P_{\text{collision}}(s) = 1 - (1 - s^r)^b$ for near-duplicates ($s = 0.80$) and unrelated texts ($s = 0.30$).</li>
+            <li>Determine which configuration achieves optimal precision-recall trade-off.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Mathematical Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Theoretical Thresholds:</strong></p>
+                $$s_1^* = (1/32)^{1/4} \approx 0.4204, \quad s_2^* = (1/16)^{1/8} \approx 0.7071, \quad s_3^* = (1/8)^{1/16} \approx 0.8781$$
+
+                <p><strong>2. Collision Probabilities:</strong></p>
+                <ul>
+                    <li><strong>Config 1 ($b=32, r=4$):</strong> $P(0.80) \approx 0.99999995$, but $P(0.30) \approx 0.2291$ (catastrophic 23% false positive rate).</li>
+                    <li><strong>Config 2 ($b=16, r=8$):</strong> $P(0.80) \approx 0.9481$ (94.8% recall), and $P(0.30) \approx 0.00105$ (only 0.1% false positives).</li>
+                    <li><strong>Config 3 ($b=8, r=16$):</strong> $P(0.80) \approx 0.2063$ (terrible false negative rate: misses 79% of duplicates).</li>
+                </ul>
+
+                <p><strong>3. Conclusion:</strong></p>
+                Config 2 ($b=16, r=8$) is the industry standard: it captures virtually all duplicates with almost zero false collisions.
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 2 -->
+    <div class="problem-card">
+        <div class="problem-header">Exercise 2: Shannon Entropy & Repetition Quality Filtering</div>
+        <p>
+            Compare Document A (the 4 words "loading data please wait" repeated 200 times) with Document B (clean encyclopedia prose with 320 unique words and $H(W) \approx 7.2$ bits/word).
+        </p>
+        <ol>
+            <li>Formulate the unigram word entropy $H(W)$.</li>
+            <li>Calculate $H(W_A)$ for Document A.</li>
+            <li>Evaluate the 3-gram repetition ratio for Document A against Gopher / C4 rules.</li>
+        </ol>
+
+        <details>
+            <summary>View Complete Mathematical Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Entropy Formulation:</strong></p>
+                $$H(W) = -\sum_{i=1}^{|V|} p(w_i) \log_2 p(w_i)$$
+
+                <p><strong>2. Document A Calculation:</strong></p>
+                $$|V| = 4, \quad p(w_i) = 0.25$$
+                $$H(W_A) = -4 \cdot (0.25 \log_2 0.25) = -1.0 \cdot (-2.0) = 2.0 \text{ bits/word}$$
+                Document A has an entropy deficit of over 5.2 bits per word compared to natural prose ($H \approx 7.2$).
+
+                <p><strong>3. 3-Gram Ratio:</strong></p>
+                $$\text{Max 3-gram ratio} = \frac{200}{798} \approx 25.06\%$$
+                Because $25.06\% > 20\%$, Document A violates the C4/Gopher repetition threshold and is discarded.
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">Exercise 3: Benchmark Decontamination via 13-gram Containment Probability</div>
+        <p>
+            Explain why an $n=13$ word overlap threshold is used for benchmark decontamination rather than $n=3$.
+        </p>
+        <details>
+            <summary>View Complete Mathematical Solution</summary>
+            <div class="solution-content">
+                <p><strong>1. Small $n$ Flaw:</strong> Common 3-word phrases ("in order to", "according to the") occur naturally billions of times in English prose. A 3-gram filter would discard millions of clean, unrelated training documents.</p>
+                <p><strong>2. 13-Gram Random Probability:</strong> In human language with typical branching factor $\approx 20$:
+                $$P(\text{accidental 13-gram match}) \approx (20)^{-13} \approx 1.2 \times 10^{-17}$$
+                In a 1-Trillion token corpus ($10^{12}$ tokens), the expected number of accidental matches is:
+                $$\mathbb{E}[\text{matches}] = 10^{12} \times 1.2 \times 10^{-17} \approx 1.2 \times 10^{-5} \ll 1$$
+                An accidental 13-gram collision is statistically impossible. Any match represents genuine memorization or data leakage.
+                </p>
+            </div>
+        </details>
+    </div>
+
+    <div class="nav-links">
+        <a href="lecture.html">← Back to Lecture 18.2</a>
+        <a href="../03_distributed_training_and_parallelism_strategies/lecture.html">Next Topic: Distributed Training & Parallelism →</a>
+    </div>
+</body>
+</html>

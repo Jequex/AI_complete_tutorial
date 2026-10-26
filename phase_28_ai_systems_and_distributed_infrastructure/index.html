@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 28: AI Systems &amp; Distributed Infrastructure — AI Complete Tutorial</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"], @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    [data-theme="light"] {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      position: relative;
+    }
+
+    .theme-toggle-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; color: var(--text); }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button class="theme-toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
+    <span class="badge">Curriculum Module</span>
+    <h1>Phase 28: AI Systems &amp; Distributed Infrastructure</h1>
+    <p class="lead">From low-level GPU microarchitecture, Streaming Multiprocessors, and Tensor Cores to Ring All-Reduce, 3D Parallelism, ZeRO sharding, FP8, and FlashAttention IO-awareness.</p>
+  </header>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. GPU Architecture, CUDA &amp; Memory Hierarchy</h2>
+      <p>
+        CPU vs GPU compute paradigm, Streaming Multiprocessors (SMs), Warp execution (32 threads lockstep SIMT, warp divergence penalties and branch serialization), Tensor Cores (hardware mixed-precision MMA matrix multiply-accumulate), GPU Memory Tiers (Registers: ~25 TB/s, SRAM: ~15 TB/s, L2 Cache, HBM3: ~3.3 TB/s), and the Roofline Model ($I = \frac{\text{FLOPs}}{\text{Bytes}}$ with ridge point $I^* = \frac{P_{\text{peak}}}{B_{\text{peak}}}$ delineating memory-bound vs compute-bound regimes).
+      </p>
+      <div class="topic-links">
+        <a href="01_gpu_architecture_cuda_and_memory_hierarchy/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_gpu_architecture_cuda_and_memory_hierarchy/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_gpu_architecture_cuda_and_memory_hierarchy/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_gpu_architecture_cuda_and_memory_hierarchy/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_gpu_architecture_cuda_and_memory_hierarchy/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Distributed Communication Primitives &amp; Ring All-Reduce</h2>
+      <p>
+        Interconnect topologies (PCIe Gen5 vs NVLink 4 @ 900 GB/s vs InfiniBand NDR RDMA @ 50 GB/s), collective communication primitives (Broadcast, Scatter, Gather, All-Gather, Reduce, All-Reduce, Reduce-Scatter), the Parameter Server scalability bottleneck $\mathcal{O}(N \cdot M)$, and the complete mathematical proof of Ring All-Reduce ($V = 2 \cdot \frac{N-1}{N} M$) achieving complete bandwidth independence of cluster size $N$ as $N \to \infty$.
+      </p>
+      <div class="topic-links">
+        <a href="02_distributed_communication_primitives/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_distributed_communication_primitives/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_distributed_communication_primitives/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_distributed_communication_primitives/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_distributed_communication_primitives/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. 3D Parallelism &amp; ZeRO Sharding</h2>
+      <p>
+        The 3D Parallelism Triad (Data Parallelism with gradient buckets, Pipeline Parallelism GPipe vs 1F1B bubble schedules $F = \frac{p-1}{m}$, and Tensor Parallelism Megatron-LM Column/Row MLP splits with 1 All-Reduce per block), the $16\Phi$ model state memory crisis (LLaMA-70B = 1,120 GB), and DeepSpeed ZeRO-1/2/3 partitioning optimizer states, gradients, and model parameters to achieve linear $\mathcal{O}(1/N)$ memory scaling.
+      </p>
+      <div class="topic-links">
+        <a href="03_3d_parallelism_and_zero_sharding/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_3d_parallelism_and_zero_sharding/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_3d_parallelism_and_zero_sharding/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_3d_parallelism_and_zero_sharding/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_3d_parallelism_and_zero_sharding/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Mixed Precision &amp; FP8 Training</h2>
+      <p>
+        Anatomy of floating-point formats: IEEE FP32, FP16, Google BF16, and OCP FP8 standards (E4M3 for forward weights/activations vs E5M2 for backward gradients). Mathematical analysis of the gradient underflow catastrophe in raw FP16, and Automatic Mixed Precision (AMP) with Dynamic Loss Scaling ($\mathcal{L}_{\text{scaled}} = S \cdot \mathcal{L}$, Inf/NaN inspection, scale halving and doubling).
+      </p>
+      <div class="topic-links">
+        <a href="04_mixed_precision_and_fp8_training/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_mixed_precision_and_fp8_training/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_mixed_precision_and_fp8_training/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_mixed_precision_and_fp8_training/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_mixed_precision_and_fp8_training/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Memory Optimization &amp; Activation Checkpointing</h2>
+      <p>
+        The dynamic activation memory crisis $\mathcal{O}(B \cdot S \cdot L \cdot D)$ under long contexts ($S = 32\text{k}, 128\text{k}$), mathematical derivation of Activation Checkpointing (Gradient Recomputation) with optimal interval $k^* = \sqrt{L}$ cutting activation memory to $\mathcal{O}(\sqrt{L})$ with only $33.3\%$ compute overhead, and FlashAttention IO-awareness fusing Attention into SRAM via Online Softmax to eliminate the $\mathcal{O}(S^2)$ quadratic HBM traffic.
+      </p>
+      <div class="topic-links">
+        <a href="05_memory_optimization_and_activation_checkpointing/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_memory_optimization_and_activation_checkpointing/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_memory_optimization_and_activation_checkpointing/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_memory_optimization_and_activation_checkpointing/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_memory_optimization_and_activation_checkpointing/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 28 Experiments</h2>
+    <p>Every experiment is implemented from first principles in pure Python 3 standard library with zero external dependencies (no PyTorch, no CUDA, no NumPy):</p>
+    <pre class="code-block">python3 phase_28_ai_systems_and_distributed_infrastructure/01_gpu_architecture_cuda_and_memory_hierarchy/experiment.py
+python3 phase_28_ai_systems_and_distributed_infrastructure/02_distributed_communication_primitives/experiment.py
+python3 phase_28_ai_systems_and_distributed_infrastructure/03_3d_parallelism_and_zero_sharding/experiment.py
+python3 phase_28_ai_systems_and_distributed_infrastructure/04_mixed_precision_and_fp8_training/experiment.py
+python3 phase_28_ai_systems_and_distributed_infrastructure/05_memory_optimization_and_activation_checkpointing/experiment.py</pre>
+  </section>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+    }
+  </script>
+
+</body>
+</html>

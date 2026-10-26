@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 9.1: Clustering — K-Means & Gaussian Mixture Models — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-warning {
+            background-color: #fffbeb;
+            border-left-color: #d97706;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 9 Portal</a>
+
+    <h1>Topic 9.1: Clustering — K-Means, Gaussian Mixture Models, &amp; Beyond</h1>
+    <p><em>Mastering unsupervised partitioning, Voronoi tessellations, soft probabilities, and Expectation-Maximization.</em></p>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>In supervised learning, every data point arrives with a label telling the model what it is. In the real world, the vast majority of data is <strong>unlabeled</strong>: customer behavior, medical signals, DNA, images, and raw web text. <strong>Clustering</strong> is the foundational task of discovering natural clusters and latent partitions in unannotated data points using only their geometric positions and statistical distributions.</p>
+
+    <div class="diagram">       UNSUPERVISED CLUSTERING: DISCOVERING HIDDEN ATTRACTIONS
+       
+    y ^
+      │       * * *                      # # # #
+      │     * Cluster 1 *              # Cluster 2 #
+      │       * * *                      # # # #
+      │
+      │                     @ @ @ @
+      │                   @ Cluster 3 @
+      │                     @ @ @ @
+      └────────────────────────────────────────> x
+       Data points possess no labels: the algorithm must discover 
+       boundaries using geometry (distances) or probability density!</div>
+
+    <div class="callout">
+        <strong>The 12-Year-Old Analogy: Sorting Mixed Marbles &amp; Secret Clubs</strong>
+        <p>Imagine you dump 300 mystery marbles onto your bedroom carpet:</p>
+        <ul>
+            <li><strong>The K-Means Approach (Hard Bins):</strong> You put 3 empty boxes on the floor. First, you toss every marble into whichever box is closest. Next, you slide each box into the exact physical center of all the marbles inside it. You repeat this dance until the boxes stop moving! <em>Limitation:</em> Every marble is forced 100% into one box, even if it rests exactly midway between two.</li>
+            <li><strong>The GMM &amp; EM Approach (Secret Clubs):</strong> Instead of rigid boxes, imagine 3 campus clubs (Chess, Art, Robotics). Each club has an epicenter, but fuzzy, oval boundaries. When a new student arrives, they receive a <strong>membership badge</strong> with soft percentages: <em>"70% Robotics, 25% Chess, 5% Art."</em> In the <strong>E-step</strong>, we estimate everyone's membership percentages. In the <strong>M-step</strong>, each club refines its center and oval shape to best welcome its community.</li>
+            <li><strong>The DBSCAN Approach (Neighborhood Block Parties):</strong> You don't guess the number of clubs! Instead, you say: <em>"If at least 5 people live within 50 feet of each other, that's an active party."</em> Parties merge if their borders touch, and lone individuals isolated in the woods are tagged as <strong>noise/outliers</strong>.</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Domain</th>
+                <th>Description &amp; Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>$\mathcal{D} = \{x_1, \dots, x_N\}$</td><td>$\mathbb{R}^d$</td><td>Unlabeled dataset of $N$ observations in $d$-dimensional continuous space</td></tr>
+            <tr><td>$K$</td><td>$\mathbb{Z}_{\ge 1}$</td><td>Number of clusters or mixture components</td></tr>
+            <tr><td>$\mu_k \in \mathbb{R}^d$</td><td>Vector</td><td>Center (centroid / mean vector) of cluster $k$</td></tr>
+            <tr><td>$r_{ik} \in \{0, 1\}$</td><td>Binary indicator</td><td>Hard assignment indicator ($r_{ik} = 1$ if $x_i \in C_k$, else $0$)</td></tr>
+            <tr><td>$J$ (Inertia)</td><td>$\mathbb{R}_{\ge 0}$</td><td>Within-Cluster Sum of Squares (WCSS) objective function</td></tr>
+            <tr><td>$z_i \in \{1, \dots, K\}$</td><td>Categorical latent</td><td>Unobserved cluster identity generating observation $x_i$</td></tr>
+            <tr><td>$\pi_k = P(z = k)$</td><td>Simplex $\sum \pi_k = 1$</td><td>Prior mixture weight for component $k$</td></tr>
+            <tr><td>$\Sigma_k \in \mathbb{R}^{d \times d}$</td><td>SPD Matrix</td><td>Covariance matrix of Gaussian component $k$</td></tr>
+            <tr><td>$\gamma_{ik} \equiv P(z_i = k \mid x_i)$</td><td>$[0, 1]$</td><td><strong>Responsibility</strong>: posterior probability that component $k$ generated $x_i$</td></tr>
+            <tr><td>$N_k = \sum_{i=1}^N \gamma_{ik}$</td><td>$\mathbb{R}_{>0}$</td><td>Effective sample count for component $k$</td></tr>
+        </tbody>
+    </table>
+
+    <h2>3. K-Means Clustering &amp; Lloyd's Algorithm</h2>
+    <p>Given observations $\{x_i\}_{i=1}^N \subset \mathbb{R}^d$, K-Means partitions data into $K$ disjoint clusters $C_1, \dots, C_K$ minimizing the <strong>Inertia</strong> (Within-Cluster Sum of Squares):</p>
+    $$J(r, \mu) = \sum_{i=1}^N \sum_{k=1}^K r_{ik} \|x_i - \mu_k\|_2^2 \quad \text{s.t.} \quad \sum_{k=1}^K r_{ik} = 1, \; r_{ik} \in \{0, 1\}$$
+
+    <div class="callout callout-success">
+        <strong>Lloyd's Alternating Optimization:</strong>
+        <ol>
+            <li><strong>Assignment Step (Voronoi Partition):</strong> Fix centroids $\mu_k$. Assign each point to the closest centroid:
+            $$r_{ik} = \begin{cases} 1 & \text{if } k = \arg\min_j \|x_i - \mu_j\|_2^2 \\ 0 & \text{otherwise} \end{cases}$$</li>
+            <li><strong>Update Step (Center of Mass):</strong> Fix assignments $r_{ik}$. Solve $\nabla_{\mu_k} J = 0$:
+            $$\nabla_{\mu_k} J = -2 \sum_{i=1}^N r_{ik} (x_i - \mu_k) = 0 \implies \mu_k^* = \frac{\sum_{i=1}^N r_{ik} x_i}{\sum_{i=1}^N r_{ik}} = \frac{1}{|C_k|} \sum_{x \in C_k} x$$</li>
+        </ol>
+    </div>
+
+    <h3>The K-Means++ Initialization Guarantee</h3>
+    <p>Uniform initialization often traps K-Means in poor local minima. <strong>K-Means++</strong> seeds centroids sequentially:</p>
+    <ol>
+        <li>Pick first centroid $\mu_1$ uniformly at random from dataset.</li>
+        <li>For each point $x_i$, compute squared distance to closest existing centroid: $D(x_i)^2 = \min_{j < k} \|x_i - \mu_j\|^2$.</li>
+        <li>Sample next centroid with probability $P(x_i) = \frac{D(x_i)^2}{\sum_m D(x_m)^2}$.</li>
+        <li>Repeat until $K$ centroids are chosen.</li>
+    </ol>
+    <p><em>Theoretical Guarantee:</em> Arthur &amp; Vassilvitskii (2007) proved this guarantees an expected distortion $\mathbb{E}[J] \le 8(\ln K + 2) J_{\text{opt}}$.</p>
+
+    <h2>4. Gaussian Mixture Models (GMM) &amp; Expectation-Maximization (EM)</h2>
+    <p>A GMM models the continuous density as a convex combination of Gaussians:</p>
+    $$p(x \mid \theta) = \sum_{k=1}^K \pi_k \mathcal{N}(x; \mu_k, \Sigma_k)$$
+    <p>The marginal log-likelihood contains a sum inside the log:</p>
+    $$\ln p(X \mid \theta) = \sum_{i=1}^N \ln \left( \sum_{k=1}^K \pi_k \mathcal{N}(x_i; \mu_k, \Sigma_k) \right)$$
+
+    <h3>Expectation-Maximization Derivation</h3>
+    <ul>
+        <li><strong>E-Step (Expectation):</strong> Compute soft responsibilities via Bayes' Theorem:
+        $$\gamma_{ik} \equiv P(z_i = k \mid x_i, \theta) = \frac{\pi_k \mathcal{N}(x_i; \mu_k, \Sigma_k)}{\sum_{j=1}^K \pi_j \mathcal{N}(x_i; \mu_j, \Sigma_j)}$$</li>
+        <li><strong>M-Step (Maximization):</strong> Update parameters by maximizing the expected complete-data log-likelihood:
+        $$N_k = \sum_{i=1}^N \gamma_{ik}, \quad \pi_k^{\text{new}} = \frac{N_k}{N}$$
+        $$\mu_k^{\text{new}} = \frac{1}{N_k} \sum_{i=1}^N \gamma_{ik} x_i$$
+        $$\Sigma_k^{\text{new}} = \frac{1}{N_k} \sum_{i=1}^N \gamma_{ik} (x_i - \mu_k^{\text{new}})(x_i - \mu_k^{\text{new}})^T$$</li>
+    </ul>
+
+    <h2>5. Algorithmic Comparison</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Criterion</th>
+                <th>K-Means</th>
+                <th>Gaussian Mixture Models</th>
+                <th>DBSCAN</th>
+                <th>Hierarchical (HAC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td><strong>Cluster Geometry</strong></td><td>Convex, spherical Voronoi</td><td>Flexible ellipsoids</td><td>Arbitrary density shapes</td><td>Any geometry (linkage dependent)</td></tr>
+            <tr><td><strong>Assignment</strong></td><td>Hard ($0$ or $1$)</td><td>Soft posterior ($\gamma_{ik} \in [0, 1]$)</td><td>Hard partition + Noise flag</td><td>Nested dendrogram tree</td></tr>
+            <tr><td><strong>Requires $K$?</strong></td><td>Yes</td><td>Yes</td><td>No ($\epsilon, \text{MinPts}$)</td><td>No (cut dendrogram at height)</td></tr>
+            <tr><td><strong>Noise Handling</strong></td><td>High distortion</td><td>Modifies covariance</td><td>Explicit noise class</td><td>Isolated leaves</td></tr>
+            <tr><td><strong>Complexity</strong></td><td>$\mathcal{O}(NKd \cdot \text{iters})$</td><td>$\mathcal{O}(NKd^2 \cdot \text{iters})$</td><td>$\mathcal{O}(N \log N)$ (with spatial trees)</td><td>$\mathcal{O}(N^2)$ to $\mathcal{O}(N^3)$</td></tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../index.html" class="back-link">← Phase 9 Hub</a>
+        <a href="exercises_and_solutions.html" class="back-link">Exercises &amp; Solutions →</a>
+    </div>
+</body>
+</html>

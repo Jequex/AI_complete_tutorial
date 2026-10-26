@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.4: Agent Memory Systems</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.5rem;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin-top: 0.5rem; margin-bottom: 0.75rem; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--text); }
+    p { margin-bottom: 1.25rem; }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .diagram-box {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: monospace;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 1.5rem 0;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 27 Overview</a><br>
+    <span class="badge">Topic 27.4</span>
+    <h1>Agent Memory Systems</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">Cognitive architectures: working, episodic, semantic, and procedural tiers; multi-factor scoring; eviction and generative reflection.</p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <p>Think about how your own brain handles information throughout a busy day:</p>
+    <ul>
+      <li><strong>Working Memory (Your Desk):</strong> You sit at your desk. It is small and can only hold a notebook and a pencil. This is whatever you are thinking about <em>right this second</em>.</li>
+      <li><strong>Episodic Memory (Your Diary):</strong> The chronological movie of your day: <em>"At 10:15 AM the fire alarm went off; at 12:30 PM Marcus spilled soup."</em></li>
+      <li><strong>Semantic Memory (Your Mental Encyclopedia):</strong> Consolidated abstract knowledge: <em>"Paris is in France; fire is dangerously hot."</em> You don't remember the exact minute you learned it.</li>
+      <li><strong>Procedural Memory (Muscle Memory):</strong> How to pedal a bike or tie shoes. For agents, this is system instructions and tool signatures.</li>
+      <li><strong>Sleep &amp; Consolidation:</strong> While sleeping, your brain discards useless trivia (bus driver's sock color), retains critical formulas, and turns daily experiences into wiser habits.</li>
+    </ul>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Formal Type</th>
+          <th>Intuitive Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{M}_{\text{working}}$</td>
+          <td>Working Memory</td>
+          <td>Token Buffer $L \le L_{\max}$</td>
+          <td>Active prompt context processed by Transformer self-attention.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{M}_{\text{episodic}}$</td>
+          <td>Episodic Memory</td>
+          <td>Event Stream $\{m_1, m_2, \dots\}$</td>
+          <td>Chronological log of historical agent-environment interactions.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{M}_{\text{semantic}}$</td>
+          <td>Semantic Memory</td>
+          <td>Vector Store / Knowledge Base</td>
+          <td>Collection of timeless principles, summarized insights, and domain facts.</td>
+        </tr>
+        <tr>
+          <td>$\lambda > 0$</td>
+          <td>Temporal Decay Rate</td>
+          <td>Positive Real Scalar</td>
+          <td>Exponential decay constant governing recency.</td>
+        </tr>
+        <tr>
+          <td>$R(m, t)$</td>
+          <td>Recency Score</td>
+          <td>Real $\in (0, 1]$</td>
+          <td>$\exp(-\lambda(t - t_m))$, measuring freshness since last access.</td>
+        </tr>
+        <tr>
+          <td>$I(m)$</td>
+          <td>Importance Score</td>
+          <td>Real $\in [0, 1]$</td>
+          <td>Inherent operational criticality of memory $m$.</td>
+        </tr>
+        <tr>
+          <td>$\text{Sim}(m, q)$</td>
+          <td>Relevance Score</td>
+          <td>Real $\in [-1, 1]$</td>
+          <td>Cosine similarity between query embedding $\mathbf{e}_q$ and memory embedding $\mathbf{e}_m$.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Tri-Factor Memory Scoring Formulation</h2>
+    <div class="callout">
+      $$\boxed{S(m, q, t) = w_r \cdot R(m, t) + w_i \cdot I(m) + w_s \cdot \text{Sim}(m, q)}$$
+      <p>where $w_r + w_i + w_s = 1$, balancing temporal recency, intrinsic importance, and topical query relevance.</p>
+    </div>
+
+    <h2>4. Interactive Experiment Runner</h2>
+    <p>Run the accompanying pure Python memory manager to observe working buffer eviction and semantic retrieval:</p>
+    <pre class="code-block">python3 phase_27_ai_agents_and_multi_agent_systems/04_agent_memory_systems/experiment.py</pre>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" style="padding: 0.6rem 1.2rem; background: var(--primary); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">Go to Exercises &amp; Solutions &rarr;</a>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 24.1: Exercises &amp; Solutions — Taxonomy &amp; Autoregressive Models</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 24 Hub</a>
+
+    <h1>Topic 24.1: Exercises &amp; Solutions</h1>
+    <p>Analytical problems exploring computational complexity, high-dimensional latent space geometry, and exact gradient derivations in autoregressive modeling.</p>
+
+    <h2>Problem 1: Computational Complexity &amp; Inference Latency in Explicit vs. Implicit Models (Easy)</h2>
+    <p>A vision system generates $512 \times 512$ RGB images ($D = 786,432$ sub-pixels). Compare an Autoregressive model ($0.2\text{ ms}$ per step) with an implicit GAN generator ($12\text{ ms}$ for the entire image).</p>
+    <ol>
+        <li>Compute the total sampling latency for the autoregressive model.</li>
+        <li>Compute the GAN speedup factor.</li>
+        <li>Identify a key capability of autoregressive models that GANs lack.</li>
+    </ol>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>1. Autoregressive Sampling Time:</strong></p>
+        $$\text{Latency} = 786,432 \times 0.2\text{ ms} = 157,286.4\text{ ms} \approx 157.3\text{ seconds} \ (\approx 2.62\text{ minutes})$$
+        <p><strong>2. GAN Speedup:</strong></p>
+        $$\text{Speedup} = \frac{157,286.4\text{ ms}}{12\text{ ms}} = 13,107.2\times$$
+        <p><strong>3. Unique Capability:</strong></p>
+        <p>Autoregressive models compute exact likelihood $P(x)$, enabling out-of-distribution detection, lossless compression, and model evaluation. GANs lack an explicit density function.</p>
+    </details>
+
+    <h2>Problem 2: The Geometry of Empty Latent Space in High Dimensions (Medium)</h2>
+    <p>A dataset of $N = 10,000$ points is mapped into latent dimension $d = 20$. Each point occupies an $\epsilon = 0.05$ hypercube. The sampling space is $[-1, 1]^{20}$.</p>
+    <ol>
+        <li>Compute the total search volume $V_{\text{total}}$.</li>
+        <li>Compute the volume occupied by data $V_{\text{data}}$.</li>
+        <li>Compute the probability of randomly landing on valid data.</li>
+    </ol>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>1. Total Volume:</strong> $V_{\text{total}} = 2^{20} = 1,048,576$.</p>
+        <p><strong>2. Data Volume:</strong> $V_{\text{data}} = 10^4 \times (0.05)^{20} \approx 9.54 \times 10^{-23}$.</p>
+        <p><strong>3. Probability:</strong></p>
+        $$P(\text{Valid}) = \frac{9.54 \times 10^{-23}}{1,048,576} \approx 9.09 \times 10^{-29}$$
+        <p>The empty void constitutes $>99.99999999999999999999999999\%$ of the volume. Unconstrained random sampling will land in an empty region and produce meaningless decoder output.</p>
+    </details>
+
+    <h2>Problem 3: Deriving the Autoregressive Maximum Likelihood Gradient (Hard)</h2>
+    <p>Derive the gradient of negative log-likelihood $\mathcal{L}_t = -\log P_\theta(x_t = y_t \mid x_{<t})$ with respect to logits $\mathbf{s}_t$.</p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Let softmax probability be $p_{t, k} = \frac{\exp(s_{t, k})}{\sum_j \exp(s_{t, j})}$. Then:</p>
+        $$\mathcal{L}_t = -s_{t, y_t} + \log\left(\sum_{j=1}^K \exp(s_{t, j})\right)$$
+        $$\frac{\partial \mathcal{L}_t}{\partial s_{t, k}} = -\mathbb{I}(k = y_t) + \frac{\exp(s_{t, k})}{\sum_j \exp(s_{t, j})} = p_{t, k} - \mathbb{I}(k = y_t)$$
+        <p>In vector notation:</p>
+        $$\boxed{\nabla_{\mathbf{s}_t} \mathcal{L}_t = \mathbf{p}_t - \mathbf{y}_t}$$
+        <p>The driving gradient is simply the error residual between predicted probabilities and the one-hot target indicator.</p>
+    </details>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 5.5: Bayesian Inference & Conjugate Priors</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        .callout-danger {
+            background-color: var(--danger-bg);
+            border-left-color: var(--danger);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        p code {
+            background-color: rgba(125, 125, 125, 0.15);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
+    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <h1>Topic 5.5: Bayesian Inference & Conjugate Priors</h1>
+    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
+        Beyond point estimates: maintaining full posterior distributions, posterior predictive ensembles, Beta-Binomial conjugate updating, and the intractability of deep networks.
+    </p>
+
+    <h2>1. Executive Summary & The Video Game Skill Tracker</h2>
+    <p>
+        In point estimation (MLE and MAP), models output a single weight vector. But when facing rare out-of-distribution inputs, point models suffer from dangerous overconfidence.
+        <strong>Full Bayesian Inference maintains the entire probability curve over possible weights: $P(\mathbf{w} \mid D)$.</strong>
+    </p>
+
+    <div class="callout">
+        <h3>The 12-Year-Old Analogy: The Live Video Game Skill Tracker</h3>
+        <p>A new player enters an online lobby. The server estimates their win-rate $\theta$:</p>
+        <ol>
+            <li><strong>Before any matches (The Prior):</strong> The server has a broad, flat bell curve centered at $50\%$. Uncertainty is massive.</li>
+            <li><strong>After 10 matches (8 wins, 2 losses):</strong> The curve shifts toward $80\%$ and grows narrower (confidence builds).</li>
+            <li><strong>After 100 matches (82 wins, 18 losses):</strong> The curve sharpens into a tight spike centered at $82\%$.</li>
+        </ol>
+        <p>
+            The server does not pretend to hold a single magic number; it maintains a living distribution of belief that updates with every single match!
+        </p>
+    </div>
+
+    <h2>2. The Bayesian Framework & The Predictive Distribution</h2>
+    <p>Bayes' Theorem for continuous parameter distributions:</p>
+    $$P(\mathbf{w} \mid D) = \frac{P(D \mid \mathbf{w}) P(\mathbf{w})}{\int P(D \mid \mathbf{w}) P(\mathbf{w}) d\mathbf{w}}$$
+
+    <h3>The Posterior Predictive Distribution (The Infinite Ensemble)</h3>
+    <p>
+        To make a prediction for a new test input $\mathbf{x}_{\text{new}}$, Bayesian AI integrates over all possible models:
+    </p>
+    $$\mathbf{P(y_{\text{new}} \mid \mathbf{x}_{\text{new}}, D) = \int P(y_{\text{new}} \mid \mathbf{x}_{\text{new}}, \mathbf{w}) P(\mathbf{w} \mid D) d\mathbf{w}}$$
+    <p>
+        This acts as an infinite ensemble of neural networks! If the models disagree, the system accurately reports high epistemic uncertainty.
+    </p>
+
+    <h2>3. The Algebraic Magic of Conjugate Priors</h2>
+    <div class="callout callout-success">
+        <strong>Definition:</strong> A prior distribution $P(\theta)$ is called <strong>conjugate</strong> to a likelihood $P(D \mid \theta)$ if the resulting posterior $P(\theta \mid D)$ belongs to the exact same distribution family as the prior!
+    </div>
+    <p>When using conjugate priors, Bayesian updating requires zero calculus: you simply add observation counts directly to the prior parameters!</p>
+
+    <h2>4. Master Derivation: The Beta-Binomial Conjugate Model</h2>
+    <p>
+        We want to infer an unknown success probability $\theta \in [0, 1]$ (e.g. ad click rate or LLM benchmark accuracy).
+    </p>
+    <p><strong>1. Prior:</strong> We choose a $\text{Beta}(\alpha, \beta)$ prior:</p>
+    $$P(\theta) \propto \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}$$
+    <p><strong>2. Likelihood:</strong> We observe $k$ successes in $n$ independent trials (Binomial):</p>
+    $$P(D \mid \theta) \propto \theta^k (1 - \theta)^{n - k}$$
+    <p><strong>3. Posterior Calculation:</strong> Multiplying prior and likelihood:</p>
+    $$P(\theta \mid D) \propto \Big[ \theta^k (1 - \theta)^{n - k} \Big] \cdot \Big[ \theta^{\alpha - 1} (1 - \theta)^{\beta - 1} \Big]$$
+    $$\mathbf{P(\theta \mid D) \propto \theta^{(\alpha + k) - 1} (1 - \theta)^{(\beta + n - k) - 1}}$$
+    <p>
+        This is identically another Beta distribution:
+    </p>
+    $$\mathbf{\theta \mid D \sim \text{Beta}(\alpha + k, \quad \beta + n - k)} \quad \blacksquare$$
+
+    <h2>5. Streaming Bayesian Updates in $O(1)$ Memory</h2>
+    <p>
+        Because the posterior is also a Beta distribution, updating is completely sequential. Today's posterior becomes tomorrow's prior:
+    </p>
+    $$\text{Beta}(\alpha, \beta) \xrightarrow{+k \text{ wins, } +(n-k) \text{ losses}} \text{Beta}(\alpha + k, \, \beta + n - k)$$
+    <p>
+        The posterior expected value of the parameter is simply:
+    </p>
+    $$\mathbb{E}[\theta \mid D] = \mathbf{\frac{\alpha + k}{(\alpha + k) + (\beta + n - k)}}$$
+
+    <h2>6. Why Deep Learning Uses Approximations</h2>
+    <div class="callout callout-danger">
+        <h3>The High-Dimensional Integral Wall</h3>
+        <p>
+            For a billion-parameter transformer, calculating the denominator $P(D) = \int P(D|\mathbf{w})P(\mathbf{w})d\mathbf{w}$ requires integrating over a 1-billion-dimensional space, which is analytically and numerically impossible.
+        </p>
+        <p>
+            Therefore, modern deep learning uses powerful approximations:
+        </p>
+        <ul>
+            <li><strong>Variational Inference (VI):</strong> Approximates the posterior with an analytical Gaussian family $q_\phi(\mathbf{w})$ by optimizing the ELBO (the foundation of <strong>VAEs</strong>!).</li>
+            <li><strong>Monte Carlo Dropout (MC Dropout):</strong> Keeps dropout active at test-time to generate samples from an approximate Bayesian posterior.</li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
+        <a href="../04_map_estimation_and_regularization/lecture.html" class="back-link">← Previous: 5.4 MAP & Regularization</a>
+        <a href="exercises_and_solutions.html" class="back-link">Next: 5.5 Exercises & Solutions →</a>
+    </div>
+</body>
+</html>
+

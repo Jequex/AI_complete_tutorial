@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.3: Temporal Difference, Q-Learning &amp; DQN — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.3: Temporal Difference, Q-Learning &amp; Deep Q-Networks (DQN)</h1>
+    <p><em>From model-free tabular TD learning to stabilizing deep neural Q-networks via replay memory and target networks.</em></p>
+
+    <div class="analogy">
+        <h3>12-Year-Old Intuition: Predicting the Bus Ride Home</h3>
+        <p>Imagine guessing how long your bus ride home from school will take on a rainy Monday.</p>
+        <p><strong>The Monte Carlo Way:</strong> You guess 30 minutes when leaving the school gates. You ride the bus, get stuck in traffic, and walk inside your house 52 minutes later. Only then do you compute your error: <em>"My school gate guess was off by 22 minutes!"</em></p>
+        <p><strong>The Temporal Difference (TD) Way:</strong> You guess 30 minutes. After 5 minutes, you turn onto the highway and see an enormous traffic jam. Your updated prediction immediately leaps to 60 minutes. You update your original guess <em>right then and there</em>: <em>"Because reaching this jam means 60 minutes, my initial guess was too low!"</em></p>
+        <p>TD learning means <strong>learning a guess from a guess</strong>, updating predictions before the final outcome even happens.</p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Formal Domain</th>
+                <th>Mathematical &amp; Algorithmic Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\delta_t$</td>
+                <td>TD Error</td>
+                <td>$\mathbb{R}$</td>
+                <td>One-step discrepancy: $\delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$.</td>
+            </tr>
+            <tr>
+                <td>$\alpha$</td>
+                <td>Learning Rate</td>
+                <td>$(0, 1]$</td>
+                <td>Fraction of the error propagated into current parameter estimates.</td>
+            </tr>
+            <tr>
+                <td>$\theta$</td>
+                <td>Online Network Weights</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>Parameters optimized by SGD at each mini-batch step.</td>
+            </tr>
+            <tr>
+                <td>$\theta^-$</td>
+                <td>Target Network Weights</td>
+                <td>$\mathbb{R}^D$</td>
+                <td>Slowly updated parameter copy used to evaluate regression targets without moving the goalpost.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{D}$</td>
+                <td>Replay Buffer</td>
+                <td>Capacity $N$</td>
+                <td>Ring buffer storing transition tuples $(s, a, r, s', d)$ to break autocorrelation.</td>
+            </tr>
+            <tr>
+                <td>$y_i$</td>
+                <td>DQN Target Value</td>
+                <td>$\mathbb{R}$</td>
+                <td>Target label: $r_i + \gamma (1 - d_i) \max_{a'} Q(s_i', a'; \theta^-)$.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Monte Carlo vs Temporal Difference TD(0)</h2>
+    <div class="card">
+        <h3>Mathematical Comparison</h3>
+        <p><strong>Monte Carlo:</strong> $V(S_t) \leftarrow V(S_t) + \alpha [G_t - V(S_t)]$ where $G_t = \sum_{k=0}^{T-t-1} \gamma^k R_{t+k+1}$.<br>
+        Unbiased ($\mathbb{E}[G_t \mid S_t] = V^\pi(S_t)$), but high variance because it sums many stochastic transitions.</p>
+        <p><strong>TD(0):</strong> $V(S_t) \leftarrow V(S_t) + \alpha [R_{t+1} + \gamma V(S_{t+1}) - V(S_t)]$.<br>
+        Biased initially due to bootstrapping from $V(S_{t+1})$, but significantly lower variance and updates immediately every step.</p>
+    </div>
+
+    <h2>3. SARSA vs Q-Learning</h2>
+    <div class="card">
+        <h3>On-Policy SARSA</h3>
+        $$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ R_{t+1} + \gamma Q(S_{t+1}, A_{t+1}) - Q(S_t, A_t) \right]$$
+        <p>Uses the actual next action $A_{t+1} \sim \pi$. Evaluates the policy being actively followed, including accidental exploration mistakes.</p>
+    </div>
+
+    <div class="card">
+        <h3>Off-Policy Q-Learning (Watkins 1989)</h3>
+        $$Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha \left[ R_{t+1} + \gamma \max_{a'} Q(S_{t+1}, a') - Q(S_t, A_t) \right]$$
+        <p>Evaluates the greedy action $\max_{a'} Q(S_{t+1}, a')$ regardless of which exploratory action the agent actually chose. Directly estimates $Q^*(s, a)$.</p>
+    </div>
+
+    <h2>4. Deep Q-Networks (DQN, Mnih et al. 2015)</h2>
+    <p>Combining neural network function approximation with off-policy TD learning introduces the <strong>Deadly Triad</strong> of instability:</p>
+    <ol>
+        <li><strong>Function Approximation:</strong> Generalization can inadvertently alter values of distant states.</li>
+        <li><strong>Bootstrapping:</strong> Target depends on the function itself.</li>
+        <li><strong>Off-Policy Learning:</strong> Training distribution differs from target policy distribution.</li>
+    </ol>
+
+    <div class="card">
+        <h3>DQN's Architectural Remedies</h3>
+        <p><strong>1. Experience Replay Buffer $\mathcal{D}$:</strong> Uniformly sampling $(s, a, r, s', d) \sim \mathcal{D}$ breaks sequential correlation and restores an i.i.d. training regime.</p>
+        <p><strong>2. Target Network $Q_{\theta^-}$:</strong> Freezes target computation using parameter set $\theta^-$, updated only every $C$ steps:</p>
+        $$\mathcal{L}(\theta) = \mathbb{E}_{(s, a, r, s', d) \sim \mathcal{D}} \left[ \left( r + \gamma(1 - d) \max_{a'} Q(s', a'; \theta^-) - Q(s, a; \theta) \right)^2 \right]$$
+    </div>
+</body>
+</html>

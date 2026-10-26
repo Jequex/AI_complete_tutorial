@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 26.2: Bellman Equations &amp; Dynamic Programming — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .analogy {
+            border-left: 4px solid var(--accent);
+            background-color: var(--accent-bg);
+            padding: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 26: Reinforcement Learning</a>
+
+    <h1>Topic 26.2: Bellman Equations &amp; Dynamic Programming</h1>
+    <p><em>The Bellman expectation and optimality operators, the Banach fixed-point theorem, contraction mapping proof, and exact Dynamic Programming.</em></p>
+
+    <div class="analogy">
+        <h3>12-Year-Old Intuition: The Giant Pyramid</h3>
+        <p>Imagine climbing a pyramid with thousands of stone steps. At the top sits a glittering diamond chest. Every step has gold or spikes.</p>
+        <p>To find the richest path to the top, do you need to test all 10 billion possible zigzag paths? <strong>No!</strong> Think backwards from the summit. If you are standing one step away from the diamond, your choice is obvious: step onto the diamond. One step before that, your value is simply: <em>the gold on your next move plus the value of wherever you land.</em></p>
+        <p>This is Richard Bellman's <strong>Principle of Optimality</strong>: <em>An optimal decision today leads directly into another optimal decision tomorrow.</em></p>
+    </div>
+
+    <h2>1. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Mathematical Domain</th>
+                <th>Intuitive Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathcal{T}^\pi$</td>
+                <td>Bellman Expectation Operator</td>
+                <td>$\mathbb{R}^{|\mathcal{S}|} \to \mathbb{R}^{|\mathcal{S}|}$</td>
+                <td>Applies one-step lookahead expected backup under fixed policy $\pi$.</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{T}^*$</td>
+                <td>Bellman Optimality Operator</td>
+                <td>$\mathbb{R}^{|\mathcal{S}|} \to \mathbb{R}^{|\mathcal{S}|}$</td>
+                <td>Applies greedy one-step lookahead maximum backup across all actions.</td>
+            </tr>
+            <tr>
+                <td>$\|\cdot\|_\infty$</td>
+                <td>Supremum / Infinity Norm</td>
+                <td>$\mathbb{R}^{|\mathcal{S}|} \to \mathbb{R}_{\ge 0}$</td>
+                <td>$\|V\|_\infty = \max_{s \in \mathcal{S}} |V(s)|$: maximum worst-case error across the entire state space.</td>
+            </tr>
+            <tr>
+                <td>$V^*$</td>
+                <td>Optimal State-Value Function</td>
+                <td>$\mathcal{S} \to \mathbb{R}$</td>
+                <td>Maximum achievable expected return from each state under the best policy.</td>
+            </tr>
+            <tr>
+                <td>$Q^*$</td>
+                <td>Optimal Action-Value Function</td>
+                <td>$\mathcal{S} \times \mathcal{A} \to \mathbb{R}$</td>
+                <td>Maximum return starting from $s$, taking action $a$, and acting optimally thereafter.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>2. Bellman Expectation &amp; Optimality Equations</h2>
+    <div class="card">
+        <h3>Bellman Expectation Equations</h3>
+        $$V^\pi(s) = \sum_{a \in \mathcal{A}} \pi(a \mid s) \left[ \mathcal{R}(s, a) + \gamma \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) V^\pi(s') \right]$$
+        $$Q^\pi(s, a) = \mathcal{R}(s, a) + \gamma \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) \sum_{a' \in \mathcal{A}} \pi(a' \mid s') Q^\pi(s', a')$$
+    </div>
+
+    <div class="card">
+        <h3>Bellman Optimality Equations</h3>
+        $$V^*(s) = \max_{a \in \mathcal{A}} \left[ \mathcal{R}(s, a) + \gamma \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) V^*(s') \right]$$
+        $$Q^*(s, a) = \mathcal{R}(s, a) + \gamma \sum_{s' \in \mathcal{S}} \mathcal{P}(s' \mid s, a) \max_{a' \in \mathcal{A}} Q^*(s', a')$$
+        <p>Because the $\max$ operator is non-linear, $V^*$ cannot be solved with standard linear matrix inversion. It is solved via contraction fixed-point iterations.</p>
+    </div>
+
+    <h2>3. The Bellman Contraction Mapping Proof</h2>
+    <p>Let $(\mathcal{T}^* V)(s) \triangleq \max_{a} \left[ \mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) V(s') \right]$.</p>
+
+    <div class="card">
+        <h3>Step-by-Step Proof that $\|\mathcal{T}^* U - \mathcal{T}^* V\|_\infty \le \gamma \|U - V\|_\infty$</h3>
+        <p>1. By definition, for any state $s$:</p>
+        $$|(\mathcal{T}^* U)(s) - (\mathcal{T}^* V)(s)| = \left| \max_a \left( \mathcal{R}(s,a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s,a) U(s') \right) - \max_b \left( \mathcal{R}(s,b) + \gamma \sum_{s'} \mathcal{P}(s' \mid s,b) V(s') \right) \right|$$
+        <p>2. Lemma: $|\max_x f(x) - \max_x g(x)| \le \max_x |f(x) - g(x)|$. Applying this:</p>
+        $$\le \max_{a \in \mathcal{A}} \left| \mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) U(s') - \left( \mathcal{R}(s, a) + \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) V(s') \right) \right|$$
+        <p>3. The immediate reward cancels out:</p>
+        $$= \max_{a \in \mathcal{A}} \gamma \left| \sum_{s'} \mathcal{P}(s' \mid s, a) (U(s') - V(s')) \right|$$
+        <p>4. By triangle inequality and bounding by the supremum norm $\|U - V\|_\infty = \max_{s''} |U(s'') - V(s'')|$:</p>
+        $$\le \max_{a \in \mathcal{A}} \gamma \sum_{s'} \mathcal{P}(s' \mid s, a) |U(s') - V(s')| \le \gamma \|U - V\|_\infty \max_{a \in \mathcal{A}} \sum_{s'} \mathcal{P}(s' \mid s, a)$$
+        <p>5. Since $\sum_{s'} \mathcal{P}(s' \mid s, a) = 1$:</p>
+        $$|(\mathcal{T}^* U)(s) - (\mathcal{T}^* V)(s)| \le \gamma \|U - V\|_\infty$$
+        <p>6. Taking the maximum over all states $s \in \mathcal{S}$:</p>
+        $$\|\mathcal{T}^* U - \mathcal{T}^* V\|_\infty \le \gamma \|U - V\|_\infty \quad \blacksquare$$
+    </div>
+
+    <h2>4. Dynamic Programming Algorithms</h2>
+    <div class="card">
+        <h3>Policy Iteration vs Value Iteration</h3>
+        <p><strong>Policy Iteration:</strong> Alternates between exact Policy Evaluation ($V^{\pi_k} \leftarrow (\mathcal{T}^{\pi_k})^\infty$) and greedy Policy Improvement ($\pi_{k+1} \leftarrow \arg\max Q^{\pi_k}$). Guaranteed to terminate in finite iterations because the set of deterministic policies is finite ($|\mathcal{A}|^{|\mathcal{S}|}$).</p>
+        <p><strong>Value Iteration:</strong> Truncates policy evaluation to a single Bellman optimality backup ($V_{k+1} \leftarrow \mathcal{T}^* V_k$). Converges geometrically at rate $\gamma$ to the unique fixed point $V^*$.</p>
+    </div>
+</body>
+</html>

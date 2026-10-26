@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 27.1: Exercises &amp; Solutions — Agent Architectures</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 27.1 Lecture</a>
+    <h1>Topic 27.1: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">Formal mathematical proofs and rigorous problems on POMDPs, Bayesian updates, and agent belief states.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Analytical Bayesian Belief State Update in a 3-State POMDP</h3>
+      <p>Consider an autonomous cleaning robot navigating a 1D corridor with three discrete cells: $\mathcal{S} = \{s_1, s_2, s_3\}$.</p>
+      <p>At time $t=0$, the robot has uniform uncertainty over its location:</p>
+      $$b_0 = [b(s_1), b(s_2), b(s_3)] = \left[\frac{1}{3}, \frac{1}{3}, \frac{1}{3}\right]$$
+      <p>The robot takes action $a = \text{RIGHT}$. The transition matrix $\mathcal{T}(s' \mid s, \text{RIGHT})$ is given by:</p>
+      <ul>
+        <li>From $s_1$: transitions to $s_2$ with probability 0.8, remains at $s_1$ with probability 0.2.</li>
+        <li>From $s_2$: transitions to $s_3$ with probability 0.8, remains at $s_2$ with probability 0.2.</li>
+        <li>From $s_3$: bumper hits wall, remains at $s_3$ with probability 1.0.</li>
+      </ul>
+      <p>The robot then takes an acoustic sonar reading $o \in \{\text{OPEN}, \text{WALL}\}$. State $s_3$ is adjacent to the end wall. The sensor model satisfies:</p>
+      $$\mathcal{O}(\text{WALL} \mid s_1) = 0.05, \quad \mathcal{O}(\text{WALL} \mid s_2) = 0.10, \quad \mathcal{O}(\text{WALL} \mid s_3) = 0.90$$
+      <p><strong>Question:</strong> If the robot takes action $a = \text{RIGHT}$ and subsequently perceives observation $o = \text{WALL}$, compute the exact posterior belief distribution $b_1 = [b_1(s_1), b_1(s_2), b_1(s_3)]$.</p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>Step 1: Compute the prior predictive distribution (prediction step):</strong></p>
+          $$\bar{b}_1(s') = \sum_{s \in \mathcal{S}} \mathcal{T}(s' \mid s, \text{RIGHT}) \cdot b_0(s)$$
+          <ul>
+            <li>$\bar{b}_1(s_1) = (0.2)(1/3) + (0)(1/3) + (0)(1/3) = \frac{0.2}{3} \approx 0.0667$</li>
+            <li>$\bar{b}_1(s_2) = (0.8)(1/3) + (0.2)(1/3) + (0)(1/3) = \frac{1.0}{3} \approx 0.3333$</li>
+            <li>$\bar{b}_1(s_3) = (0)(1/3) + (0.8)(1/3) + (1.0)(1/3) = \frac{1.8}{3} = 0.6000$</li>
+          </ul>
+
+          <p><strong>Step 2: Measurement update with observation $o = \text{WALL}$ (unnormalized):</strong></p>
+          $$\tilde{b}_1(s') = \mathcal{O}(\text{WALL} \mid s') \cdot \bar{b}_1(s')$$
+          <ul>
+            <li>$\tilde{b}_1(s_1) = 0.05 \times \frac{0.2}{3} = \frac{0.010}{3}$</li>
+            <li>$\tilde{b}_1(s_2) = 0.10 \times \frac{1.0}{3} = \frac{0.100}{3}$</li>
+            <li>$\tilde{b}_1(s_3) = 0.90 \times \frac{1.8}{3} = \frac{1.620}{3}$</li>
+          </ul>
+
+          <p><strong>Step 3: Normalizing constant $Z = \mathbb{P}(\text{WALL} \mid b_0, \text{RIGHT})$:</strong></p>
+          $$Z = \frac{0.010 + 0.100 + 1.620}{3} = \frac{1.730}{3} \approx 0.57667$$
+
+          <p><strong>Step 4: Normalized posterior distribution:</strong></p>
+          <ul>
+            <li>$b_1(s_1) = \frac{0.010}{1.730} \approx \mathbf{0.00578}$ ($0.58\%$)</li>
+            <li>$b_1(s_2) = \frac{0.100}{1.730} \approx \mathbf{0.05780}$ ($5.78\%$)</li>
+            <li>$b_1(s_3) = \frac{1.620}{1.730} \approx \mathbf{0.93642}$ ($93.64\%$)</li>
+          </ul>
+          <p>The robot's belief shifts decisively toward certainty that it is at the wall ($93.6\%$).</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Proof that a POMDP is an MDP over Continuous Belief Space $\Delta(\mathcal{S})$</h3>
+      <p>Let $\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{T}, \mathcal{R}, \Omega, \mathcal{O}, \gamma \rangle$ be a discrete POMDP.</p>
+      <p>Define the continuous belief space $\mathcal{B} \triangleq \Delta(\mathcal{S}) = \left\{ b \in \mathbb{R}^{|\mathcal{S}|} : \sum_s b(s) = 1, \, b(s) \ge 0 \right\}$.</p>
+      <p><strong>Question:</strong> Prove that belief state transitions satisfy the Markov property:
+      $$\mathbb{P}(b_{t+1} \mid b_t, a_t, b_{t-1}, a_{t-1}, \dots, b_0, a_0) = \mathbb{P}(b_{t+1} \mid b_t, a_t)$$
+      and define the continuous Belief MDP transition and reward operators.</p>
+
+      <details>
+        <summary>View Complete Mathematical Proof</summary>
+        <div class="solution-content">
+          <p><strong>Proof:</strong></p>
+          <p>The updated belief $b_{t+1}$ is a deterministic map $\psi(b_t, a_t, o_{t+1})$ determined by Bayes' rule:</p>
+          $$b_{t+1} = \psi(b_t, a_t, o_{t+1}) = \frac{\mathcal{O}(o_{t+1} \mid \cdot, a_t) \odot (\mathcal{T}(\cdot \mid \cdot, a_t) b_t)}{\mathbb{P}(o_{t+1} \mid b_t, a_t)}$$
+          <p>The observation $o_{t+1}$ is sampled from the distribution:</p>
+          $$\mathbb{P}(o_{t+1} = o \mid b_t, a_t) = \sum_{s' \in \mathcal{S}} \mathcal{O}(o \mid s', a_t) \sum_{s \in \mathcal{S}} \mathcal{T}(s' \mid s, a_t) b_t(s)$$
+          <p>Crucially, this probability distribution depends strictly on $b_t$ and $a_t$, and is conditionally independent of all preceding history $(b_{t-1}, a_{t-1}, \dots, b_0, a_0)$.</p>
+          <p>Therefore, the transition probability density to any next belief $b' \in \mathcal{B}$ satisfies:</p>
+          $$\mathbb{P}(b_{t+1} = b' \mid b_t, a_t, \dots, b_0, a_0) = \sum_{o \in \Omega} \mathbb{I}(\psi(b_t, a_t, o) = b') \mathbb{P}(o \mid b_t, a_t) = \mathbb{P}(b_{t+1} = b' \mid b_t, a_t)$$
+          <p>The expected reward is defined as $\rho(b, a) = \sum_{s \in \mathcal{S}} b(s) \mathcal{R}(s, a)$. Thus, the Belief MDP $\langle \mathcal{B}, \mathcal{A}, \mathcal{T}_{\mathcal{B}}, \rho, \gamma \rangle$ is a fully observable Markov Decision Process. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Context Window Truncation and Epistemic Drift in LLM Agents</h3>
+      <p>In an LLM-based autonomous agent, the context window length is bounded by $L_{\max} = 8192$ tokens. When an execution trajectory exceeds $L_{\max}$, a naive FIFO sliding window discards the earliest tokens $(o_1, a_1, \dots)$.</p>
+      <p><strong>Question:</strong> Using POMDP theory, explain why FIFO context truncation breaks the sufficient statistic property of the agent's belief state, and describe two concrete failure modes (loops or contradictions) that arise in practice.</p>
+
+      <details>
+        <summary>View Complete Architectural Analysis</summary>
+        <div class="solution-content">
+          <p><strong>1. Violation of Sufficient Statistic Property:</strong></p>
+          <p>In POMDP theory, the belief state $b_t$ is a sufficient statistic because it preserves all mutual information regarding the underlying state: $I(S_t; h_t) = I(S_t; b_t)$. When FIFO drops history $h_{0:k}$ without state consolidation:</p>
+          $$I(S_t; h_t^{\text{FIFO}}) < I(S_t; h_t)$$
+          <p>The agent loses conditioning on past environmental feedback, violating the Markov property in prompt space.</p>
+
+          <p><strong>2. Concrete Failure Modes:</strong></p>
+          <ul>
+            <li><strong>Action Cycling (Infinite Oscillation):</strong> If an agent attempts an action that fails at step 2 (e.g. attempting to bind to an in-use port), discarding that step at step 25 causes the agent to re-attempt the exact same invalid action at step 26, entering an infinite loop.</li>
+            <li><strong>Goal Drift &amp; Constraint Inversion:</strong> When initial user safety guidelines or constraints (e.g., "Do not alter the production database schema") get pushed out of the active context window, subsequent model generations may violate those core constraints during error recovery.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

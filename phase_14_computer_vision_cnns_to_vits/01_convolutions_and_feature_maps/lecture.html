@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 14.1: Convolutions &amp; Feature Maps — AI Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4338ca;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --accent-bg: #ecfdf5;
+            --danger: #dc2626;
+            --danger-bg: #fef2f2;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --accent-bg: #064e3b;
+                --danger: #f87171;
+                --danger-bg: #450a0a;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        .callout {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary);
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .callout-success {
+            background-color: var(--accent-bg);
+            border-left-color: var(--accent);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--card-bg);
+            font-weight: 600;
+        }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.88em;
+        }
+        .diagram {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, monospace;
+            white-space: pre;
+            line-height: 1.3;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-link">← Back to Phase 14 Portal</a>
+
+    <h1>Topic 14.1: Convolutions &amp; Feature Maps</h1>
+
+    <div class="callout">
+        <strong>Core Thesis:</strong> Fully connected networks fail on visual data due to parameter explosion and the loss of 2D spatial locality. <strong>Convolutional Neural Networks (CNNs)</strong> leverage <em>sparse local connectivity</em> and <em>parameter sharing</em> to process visual patterns equivariantly across entire images.
+    </div>
+
+    <h2>1. Executive Summary &amp; The 12-Year-Old Analogy</h2>
+    <p>
+        In an MLP, every input pixel connects to every hidden neuron. A $1024 \times 1024$ color image possesses over 3 million numbers; connecting it to 1024 hidden neurons requires over 3 billion parameters. CNNs replace this brute-force approach with compact, sliding filters (kernels) that discover edges, textures, and object parts anywhere in the image.
+    </p>
+
+    <div class="diagram">
+                   THE 2D CONVOLUTION (CROSS-CORRELATION) OPERATION
+                   
+     Input Feature Map (I)                Kernel (K)              Output Feature Map (S)
+    ┌─────┬─────┬─────┬─────┐                                     ┌─────┬─────┐
+    │  1  │  2  │  0  │  0  │             ┌─────┬─────┐           │  8  │  7  │
+    ├─────┼─────┼─────┼─────┤             │  1  │  2  │           ├─────┼─────┤
+    │  0  │  3  │  1  │  0  │      *      ├─────┼─────┤     =     │ 10  │  6  │
+    ├─────┼─────┼─────┼─────┤             │  0  │  1  │           └─────┴─────┘
+    │  1  │  2  │  1  │  0  │             └─────┴─────┘
+    ├─────┼─────┼─────┼─────┤
+    │  0  │  0  │  1  │  1  │
+    └─────┴─────┴─────┴─────┘
+            [4 x 4]                           [2 x 2]                 [2 x 2] (Stride 2)
+    </div>
+
+    <div class="callout callout-success">
+        <h3>The 12-Year-Old Analogy: The Sliding Cookie Cutter &amp; Edge Highlighter</h3>
+        <p>Imagine you have a giant coloring book page with a secret mystery drawing:</p>
+        <ul>
+            <li><strong>The Stencil (The Kernel):</strong> You hold a tiny magnifying stencil looking for bright vertical stripes.</li>
+            <li><strong>Sliding Across the Page (The Convolutional Sweep):</strong> You place the stencil over the top-left corner. If the pixels match your stencil, it glows bright green (a high positive number!). If not, it stays dark.</li>
+            <li><strong>The Tracing Sheet (The Feature Map):</strong> You record the brightness on a fresh piece of paper. Then you step one notch to the right (the <em>stride</em>) and check the next patch.</li>
+            <li><strong>Multi-Channel Magic:</strong> If the drawing is in full color (RGB), your stencil has three layers—one checking red, one checking green, and one checking blue—and adds them up into a single score.</li>
+            <li><strong>The Visual Hierarchy:</strong> Early layers find edges, middle layers find shapes (ears, wheels), and deep layers recognize entire objects!</li>
+        </ul>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Type / Domain</th>
+                <th>Mathematical Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$I \in \mathbb{R}^{H \times W}$</td>
+                <td>2D Matrix</td>
+                <td>Input image or feature map with spatial height $H$ and width $W$</td>
+            </tr>
+            <tr>
+                <td>$K \in \mathbb{R}^{K_h \times K_w}$</td>
+                <td>2D Matrix</td>
+                <td>Spatial convolutional filter/kernel of size $K_h \times K_w$</td>
+            </tr>
+            <tr>
+                <td>$X \in \mathbb{R}^{C_{\text{in}} \times H \times W}$</td>
+                <td>3D Tensor</td>
+                <td>Multi-channel input volume with $C_{\text{in}}$ channels</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{W} \in \mathbb{R}^{C_{\text{out}} \times C_{\text{in}} \times K_h \times K_w}$</td>
+                <td>4D Tensor</td>
+                <td>Convolutional weight tensor holding $C_{\text{out}}$ distinct 3D filters</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{b} \in \mathbb{R}^{C_{\text{out}}}$</td>
+                <td>1D Vector</td>
+                <td>Learnable per-channel additive bias vector</td>
+            </tr>
+            <tr>
+                <td>$Y \in \mathbb{R}^{C_{\text{out}} \times H_{\text{out}} \times W_{\text{out}}}$</td>
+                <td>3D Tensor</td>
+                <td>Output feature map volume after multi-channel convolution</td>
+            </tr>
+            <tr>
+                <td>$P \in \mathbb{Z}_{\ge 0}$</td>
+                <td>Integer</td>
+                <td>Zero-padding width added symmetrically to borders</td>
+            </tr>
+            <tr>
+                <td>$S \in \mathbb{Z}_{\ge 1}$</td>
+                <td>Integer</td>
+                <td>Stride: step size in pixels between window evaluations</td>
+            </tr>
+            <tr>
+                <td>$RF_l \in \mathbb{Z}_{\ge 1}$</td>
+                <td>Integer</td>
+                <td>Spatial diameter of the receptive field at network layer $l$</td>
+            </tr>
+            <tr>
+                <td>$J_l \in \mathbb{Z}_{\ge 1}$</td>
+                <td>Integer</td>
+                <td>Cumulative stride (jump) at layer $l$: $J_l = \prod_{i=1}^l S_i$</td>
+            </tr>
+            <tr>
+                <td>$\text{MACs}$</td>
+                <td>Integer</td>
+                <td>Multiply-Accumulate operations performed in one forward pass</td>
+            </tr>
+            <tr>
+                <td>$\text{FLOPs}$</td>
+                <td>Integer</td>
+                <td>Floating-point operations ($\approx 2 \times \text{MACs}$)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Convolution vs. Cross-Correlation in Deep Learning</h2>
+    <p>
+        In classical mathematics and signal processing, continuous convolution is defined with a reflected kernel:
+    </p>
+    $$(f * g)(t) = \int_{-\infty}^{\infty} f(\tau) g(t - \tau) d\tau$$
+    <p>
+        In deep learning frameworks, the kernel is <strong>not reflected</strong>. The operation performed is <strong>cross-correlation</strong> ($\star$):
+    </p>
+    $$(I \star K)(i, j) = \sum_{m=0}^{K_h - 1} \sum_{n=0}^{K_w - 1} I(i + m, j + n) K(m, n)$$
+    <p>
+        Because the weights in $K$ are learned automatically via backpropagation, learning an unflipped kernel is mathematically equivalent to learning a flipped one, while saving index reflection overhead in GPU kernels.
+    </p>
+
+    <h2>4. Spatial Dimension Arithmetic: Padding &amp; Stride</h2>
+    <p>
+        When sliding a kernel of shape $K_h \times K_w$ over an input of shape $H \times W$ with zero-padding $P$ and stride $S$, the output dimensions are:
+    </p>
+    $$H_{\text{out}} = \left\lfloor \frac{H - K_h + 2P}{S} \right\rfloor + 1, \qquad W_{\text{out}} = \left\lfloor \frac{W - K_w + 2P}{S} \right\rfloor + 1$$
+
+    <h3>Standard Padding Regimes</h3>
+    <ul>
+        <li><strong>Valid Padding ($P = 0$):</strong> No padding added. Spatial size shrinks at every layer: $O = \lfloor \frac{W - K}{S} \rfloor + 1 < W$.</li>
+        <li><strong>Same Padding ($O = W$ when $S = 1$):</strong> Preserves exact spatial dimensions. For odd kernel size $K$:
+            $$P = \frac{K - 1}{2}$$
+            For a $3 \times 3$ kernel, $P = 1$; for $5 \times 5$, $P = 2$; for $7 \times 7$, $P = 3$.
+        </li>
+    </ul>
+
+    <h2>5. Multi-Channel Convolutions: 4D Tensor Transformations</h2>
+    <p>
+        Modern CNN layers consume inputs with multiple channels (e.g. RGB with $C_{\text{in}} = 3$, or latent representations with $C_{\text{in}} = 256$) and produce $C_{\text{out}}$ feature maps.
+    </p>
+    <div class="diagram">
+                  MULTI-CHANNEL CONVOLUTION VOLUME TRANSFORMATION
+                  
+       Input Tensor X               Weight Tensor W                Output Tensor Y
+      [C_in x H x W]         [C_out x C_in x K_h x K_w]       [C_out x H_out x W_out]
+       
+         ┌──────┐                     ┌──────┐                      ┌──────┐
+        ╱ C_in ╱│                    ╱ C_in ╱│                     ╱C_out ╱│
+       ┌──────┐ │     *             ┌──────┐ │      =             ┌──────┐ │
+       │      │ │      K_out        │      │ │                    │      │ │
+       │  H   │ │     filters       │ K_h  │ │                    │H_out │ │
+       │      │╱                    │      │╱                     │      │╱
+       └──────┘                     └──────┘                      └──────┘
+          W                           K_w                           W_out
+    </div>
+
+    <p>
+        The scalar activation at coordinate $(i, j)$ in output feature map $k$ is given by:
+    </p>
+    $$Y_{k, i, j} = b_k + \sum_{c=0}^{C_{\text{in}}-1} \sum_{m=0}^{K_h-1} \sum_{n=0}^{K_w-1} X_{c, \, i\cdot S + m, \, j\cdot S + n} \cdot \mathcal{W}_{k, c, m, n}$$
+
+    <h2>6. Computational Complexity: Parameters &amp; FLOPs</h2>
+    <ul>
+        <li><strong>Total Parameters:</strong> $C_{\text{out}} \times (C_{\text{in}} \cdot K_h \cdot K_w + 1)$ (weights plus 1 bias per output channel). Note that parameter count is completely independent of input image resolution ($H, W$).</li>
+        <li><strong>MACs (Multiply-Accumulate Operations):</strong>
+            $$\text{MACs} = H_{\text{out}} \cdot W_{\text{out}} \cdot C_{\text{out}} \cdot (C_{\text{in}} \cdot K_h \cdot K_w)$$
+        </li>
+        <li><strong>FLOPs:</strong> Because each MAC consists of 1 multiplication and 1 addition, $\text{FLOPs} \approx 2 \times \text{MACs}$.</li>
+    </ul>
+
+    <h2>7. Receptive Field (RF) Propagation</h2>
+    <p>
+        The <strong>Receptive Field (RF)</strong> denotes the patch of input pixels that can influence a given output neuron. As layers stack, the receptive field expands recursively:
+    </p>
+    $$RF_l = RF_{l-1} + (k_l - 1) \cdot J_{l-1}, \qquad \text{where } J_l = J_{l-1} \cdot s_l \text{ and } RF_0 = 1, \, J_0 = 1$$
+
+    <p>
+        <strong>Worked Example:</strong> Stacking two $3 \times 3$ convolutions with stride 1:
+        $$RF_1 = 1 + (3 - 1) \cdot 1 = 3$$
+        $$RF_2 = 3 + (3 - 1) \cdot 1 = 5$$
+        Two stacked $3 \times 3$ filters have the exact same receptive field ($5 \times 5$) as a single $5 \times 5$ filter, but use $2 \times (3^2) = 18$ weights instead of $1 \times (5^2) = 25$ weights—a <strong>28% reduction in parameters</strong> plus an extra non-linear activation!
+    </p>
+
+    <h2>8. Hand-Crafted Feature Detectors: The Sobel Kernels</h2>
+    <p>
+        The Sobel operators estimate spatial derivatives $\frac{\partial I}{\partial x}$ and $\frac{\partial I}{\partial y}$:
+    </p>
+    $$G_x = \begin{bmatrix} -1 & 0 & +1 \\ -2 & 0 & +2 \\ -1 & 0 & +1 \end{bmatrix}, \qquad G_y = \begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ +1 & +2 & +1 \end{bmatrix}$$
+    <p>
+        In modern CNNs, the kernels are not fixed to Sobel values; backpropagation automatically discovers optimal edge, texture, and color filters directly from data.
+    </p>
+</body>
+</html>

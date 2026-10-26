@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic 25.3: Exercises &amp; Solutions — Noise Schedules &amp; Denoising</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #1e293b;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --border: #e2e8f0;
+            --card-bg: #f8fafc;
+            --accent: #059669;
+            --code-bg: #1e1e2e;
+            --code-text: #cdd6f4;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --text: #f1f5f9;
+                --primary: #818cf8;
+                --primary-light: #1e1b4b;
+                --border: #334155;
+                --card-bg: #1e293b;
+                --accent: #34d399;
+                --code-bg: #0b0f19;
+                --code-text: #e2e8f0;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text);
+            background-color: var(--bg);
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+        h1, h2, h3 { color: var(--text); font-weight: 700; line-height: 1.3; }
+        h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
+        h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h3 { font-size: 1.25rem; margin-top: 1.5rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .back-link:hover { text-decoration: underline; }
+        details {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--primary);
+            user-select: none;
+        }
+        summary:hover { text-decoration: underline; }
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 25 Hub</a>
+
+    <h1>Topic 25.3: Exercises &amp; Solutions — Noise Schedules &amp; Denoising</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0;">
+        Cosine boundary analysis, variational weighting breakdowns, and gradient derivations.
+    </p>
+
+    <h2>Problem 1: Cosine Schedule Boundary Values <span class="badge">Easy</span></h2>
+    <p>
+        For $f(t) = \cos^2\left(\frac{t/T + s}{1 + s} \frac{\pi}{2}\right)$ with $s = 0.008$ and $T = 1000$:
+    </p>
+    <ol>
+        <li>Compute $f(0)$ and $\bar{\alpha}_0$.</li>
+        <li>Compute $f(T)$ and $\bar{\alpha}_T$.</li>
+        <li>Why does setting $s = 0$ cause undesirable behavior?</li>
+    </ol>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p><strong>Step 1:</strong> $\theta_0 = \frac{0.008}{1.008}\frac{\pi}{2} \approx 0.01247 \implies f(0) = \cos^2(0.01247) \approx 0.99984 \implies \bar{\alpha}_0 = 1.0$.</p>
+        <p><strong>Step 2:</strong> At $t = T$, $\theta_T = \frac{\pi}{2} \implies f(T) = \cos^2(\pi/2) = 0 \implies \bar{\alpha}_T = 0.0$. Exactly 100% of signal is destroyed.</p>
+        <p><strong>Step 3:</strong> If $s = 0$, $\frac{d}{dt}\cos^2(0) = 0$, making initial $\beta_1 \approx 0$. An offset $s > 0$ guarantees non-zero initial variance.</p>
+    </details>
+
+    <h2>Problem 2: Analysis of VLB Weighting vs. Simplified Loss <span class="badge">Medium</span></h2>
+    <p>
+        Prove that the theoretical VLB weight $w(t) = \frac{\beta_t}{2\alpha_t(1 - \bar{\alpha}_{t-1})}$ blows up to $\infty$ as $t \to 1$, explaining why $L_{\text{simple}}$ produces superior perceptual images.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>As $t \to 1$, $\bar{\alpha}_{t-1} = \bar{\alpha}_0 = 1$. The denominator $1 - \bar{\alpha}_0 = 0$, driving $w(1) \to \infty$.</p>
+        <p>Theoretical VLB over-penalizes microscopic noise at $t=1$. Discarding $w(t)$ balances learning across all scales, emphasizing global layout at large $t$.</p>
+    </details>
+
+    <h2>Problem 3: Analytical Weight Gradient under $L_{\text{simple}}$ <span class="badge">Hard</span></h2>
+    <p>
+        For a linear model $\epsilon_w(x_t) = w \cdot x_t$, solve for the optimal weight $w^*(t)$ minimizing $\mathbb{E}[(\epsilon - w x_t)^2]$.
+    </p>
+
+    <details>
+        <summary>View Complete Solution</summary>
+        <p>Expanding the expectation with independent noise $\epsilon$:</p>
+        $$\mathbb{E}[\epsilon x_t] = \sqrt{1 - \bar{\alpha}_t}, \quad \mathbb{E}[x_t^2] = \bar{\alpha}_t(\mu_0^2 + \sigma_0^2) + (1 - \bar{\alpha}_t)$$
+        $$w^*(t) = \frac{\mathbb{E}[\epsilon x_t]}{\mathbb{E}[x_t^2]} = \frac{\sqrt{1 - \bar{\alpha}_t}}{\bar{\alpha}_t(\mu_0^2 + \sigma_0^2) + (1 - \bar{\alpha}_t)}$$
+        <ul>
+            <li>At $t \to 0$ ($\bar{\alpha}_t \to 1$): $w^*(0) = 0$ (clean signal contains no noise).</li>
+            <li>At $t \to T$ ($\bar{\alpha}_t \to 0$): $w^*(T) = 1.0$ (pure noise: predict the observation itself).</li>
+        </ul>
+    </details>
+
+</body>
+</html>
