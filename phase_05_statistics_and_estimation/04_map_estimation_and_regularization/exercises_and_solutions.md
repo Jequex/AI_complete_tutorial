@@ -4,11 +4,11 @@
 
 ## Problem Set Overview
 
-| Problem | Focus | Difficulty |
-| :--- | :--- | :--- |
-| **1** | **Precision-Weighted 1D Gaussian Mean MAP Estimation** | Easy |
-| **2** | **Closed-Form Ridge Regression Matrix MAP Derivation** | Medium |
-| **3** | **The Subgradient Calculus of L1 Sparsity (Soft-Thresholding)** | Challenging |
+| Problem | Focus | Difficulty | Real-World Context |
+| :---: | :--- | :---: | :--- |
+| **1** | **Precision-Weighted 1D Gaussian Mean MAP** | Easy | Fusing noisy sensor measurements with prior calibration beliefs |
+| **2** | **Closed-Form Ridge Regression Matrix MAP** | Medium | Deriving weight decay to stabilize overparameterized neural networks |
+| **3** | **Subgradient Calculus of L1 Sparsity (Soft-Thresholding)** | Challenging | Proving why Lasso regularization drives unimportant weights to exact zero |
 
 ---
 
@@ -29,7 +29,10 @@ $$\mu \sim \mathcal{N}(\mu_0, \, \sigma_0^2)$$
 
 ---
 
-### Solution 1
+<details>
+<summary>Click to Reveal Step-by-Step Solution</summary>
+
+### Step-by-Step Solution
 
 #### 1. Log-Likelihood and Log-Prior
 $$\ln P(D \mid \mu) = -\frac{1}{2\sigma^2} \sum_{i=1}^n (X_i - \mu)^2 + C_1$$
@@ -50,9 +53,11 @@ Using $\tau_{\text{data}} = \frac{n}{\sigma^2}$ and $\tau_{\text{prior}} = \frac
 $$\mathbf{\hat{\mu}_{\text{MAP}} = \frac{\tau_{\text{data}} \bar{X} + \tau_{\text{prior}} \mu_0}{\tau_{\text{data}} + \tau_{\text{prior}}}} \quad \blacksquare$$
 
 #### 5. Limiting Cases
-- **Infinite Data ($n \to \infty$):** $\tau_{\text{data}} = \frac{n}{\sigma^2} \to \infty$. The prior is completely washed out:
+- **Big Data Regime ($n \to \infty$):** $\tau_{\text{data}} = \frac{n}{\sigma^2} \to \infty$. The data completely overwhelms the prior:
   $$\lim_{n \to \infty} \hat{\mu}_{\text{MAP}} = \bar{X} = \hat{\mu}_{\text{MLE}}$$
-- **Uninformative Prior ($\sigma_0^2 \to \infty$):** $\tau_{\text{prior}} \to 0$. We recover the MLE directly: $\hat{\mu}_{\text{MAP}} = \bar{X}$.
+- **Uninformative Prior ($\sigma_0^2 \to \infty$):** $\tau_{\text{prior}} \to 0$. Grandma has zero opinion, so we recover pure MLE: $\hat{\mu}_{\text{MAP}} = \bar{X}$.
+
+</details>
 
 ---
 
@@ -75,17 +80,18 @@ $$\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \, \sigma_0^2 I_d)$$
 
 ---
 
-### Solution 2
+<details>
+<summary>Click to Reveal Step-by-Step Solution</summary>
+
+### Step-by-Step Solution
 
 #### 1. Matrix Log-Posterior
-$$\ln P(\mathbf{y} \mid X, \mathbf{w}) = -\frac{1}{2\sigma^2} (\mathbf{y} - X\mathbf{w})^T (\mathbf{y} - X\mathbf{w}) + C_1$$
-$$\ln P(\mathbf{w}) = -\frac{1}{2\sigma_0^2} \mathbf{w}^T \mathbf{w} + C_2$$
 $$J(\mathbf{w}) = -\frac{1}{2\sigma^2} (\mathbf{y} - X\mathbf{w})^T (\mathbf{y} - X\mathbf{w}) - \frac{1}{2\sigma_0^2} \mathbf{w}^T \mathbf{w}$$
 
 #### 2. Vector Gradient with respect to $\mathbf{w}$
 Expand the quadratic form:
 $$(\mathbf{y} - X\mathbf{w})^T (\mathbf{y} - X\mathbf{w}) = \mathbf{y}^T \mathbf{y} - 2\mathbf{w}^T X^T \mathbf{y} + \mathbf{w}^T X^T X \mathbf{w}$$
-Differentiate using matrix calculus identities ($\nabla_{\mathbf{w}} (\mathbf{w}^T A \mathbf{w}) = 2 A \mathbf{w}$ for symmetric $A$):
+Differentiate using standard matrix calculus ($\nabla_{\mathbf{w}} (\mathbf{w}^T A \mathbf{w}) = 2 A \mathbf{w}$ for symmetric $A$):
 $$\nabla_{\mathbf{w}} J(\mathbf{w}) = -\frac{1}{2\sigma^2} \Big( -2 X^T \mathbf{y} + 2 X^T X \mathbf{w} \Big) - \frac{1}{2\sigma_0^2} (2\mathbf{w})$$
 $$\nabla_{\mathbf{w}} J(\mathbf{w}) = \frac{1}{\sigma^2} X^T (\mathbf{y} - X\mathbf{w}) - \frac{1}{\sigma_0^2} \mathbf{w}$$
 
@@ -93,14 +99,16 @@ $$\nabla_{\mathbf{w}} J(\mathbf{w}) = \frac{1}{\sigma^2} X^T (\mathbf{y} - X\mat
 $$\frac{1}{\sigma^2} X^T X \mathbf{w} + \frac{1}{\sigma_0^2} \mathbf{w} = \frac{1}{\sigma^2} X^T \mathbf{y}$$
 Multiply across by $\sigma^2$:
 $$\left( X^T X + \frac{\sigma^2}{\sigma_0^2} I_d \right) \mathbf{w} = X^T \mathbf{y}$$
-Let $\lambda = \frac{\sigma^2}{\sigma_0^2}$:
+Setting $\lambda = \frac{\sigma^2}{\sigma_0^2}$:
 $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = (X^T X + \lambda I_d)^{-1} X^T \mathbf{y}} \quad \blacksquare$$
 
-#### 4. Guaranteed Invertibility
-When $d > n$, the sample covariance matrix $X^T X \in \mathbb{R}^{d \times d}$ has rank at most $n < d$, meaning it has at least $d - n$ zero eigenvalues (it is singular and cannot be inverted!).
-Adding $\lambda I_d$ shifts all eigenvalues by $+\lambda > 0$:
-$$\lambda_i(X^T X + \lambda I) = \lambda_i(X^T X) + \lambda \ge \lambda > 0$$
-Every eigenvalue is strictly positive! The matrix is guaranteed to be positive definite and strictly invertible, saving the model from numerical collapse!
+#### 4. Guaranteed Numerical Invertibility
+When $d > n$ (e.g. 100 features but only 20 samples), $X^T X \in \mathbb{R}^{d \times d}$ has rank at most $n < d$, meaning it has zero eigenvalues and cannot be inverted!
+Adding $\lambda I_d$ shifts every single eigenvalue upwards by $+\lambda > 0$:
+$$\lambda_i(X^T X + \lambda I_d) = \lambda_i(X^T X) + \lambda \ge \lambda > 0$$
+Every eigenvalue is strictly positive, making the matrix strictly positive-definite and guaranteed invertible!
+
+</details>
 
 ---
 
@@ -124,7 +132,10 @@ A point $w^*$ is a global minimum if and only if $0 \in \partial f(w^*)$.
 
 ---
 
-### Solution 3
+<details>
+<summary>Click to Reveal Step-by-Step Solution</summary>
+
+### Step-by-Step Solution
 
 #### 1. Case 1: $w > 0$
 Here $\partial |w| = +1$:
@@ -153,9 +164,7 @@ a + \lambda & \text{if } a < -\lambda
 Using the sign function:
 $$\mathbf{w^* = \operatorname{sign}(a) \max(0, \, |a| - \lambda)} \quad \blacksquare$$
 
-<div class="takeaway">
-    <strong>The Mathematical Root of Sparsity:</strong>
-    Whenever the unregularized signal $|a|$ is smaller than the threshold $\lambda$, the Laplace prior forces the weight to collapse <strong>identically to zero</strong> ($w^* = 0$).
-    This is why L1 Lasso eliminates irrelevant features, while L2 Ridge only shrinks weights toward zero without ever making them strictly zero!
-</div>
+> **🧒 12-Year-Old Takeaway (The Mathematical Origin of Sparsity):**
+> Notice that whenever the raw unregularized signal $|a|$ is smaller than the leash threshold $\lambda$, the weight is forced to **identically $0.000$**! This is why L1 Lasso prunes useless neural network connections, while L2 Ridge only shrinks weights into tiny fractions without ever setting them to true zero.
 
+</details>

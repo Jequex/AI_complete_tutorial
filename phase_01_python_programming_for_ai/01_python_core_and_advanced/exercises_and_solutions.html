@@ -86,9 +86,6 @@
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -122,174 +119,125 @@
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 0.9em;
         }
-        .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+        p code, li code {
+            background-color: var(--primary-light);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-
     <a href="lecture.html" class="back-link">← Back to Lecture 1.1</a>
-    <header>
-        <h1>Topic 1.1: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Mutability, Generators, OOP Datasets, and Latency Decorators</p>
-    </header>
 
-    <!-- PROBLEM 1 -->
+    <h1>Topic 1.1: Exercises & Solutions</h1>
+    <p>Practice problem set covering memory mutability, PyTorch-style neural network mechanics, and streaming big data.</p>
+
+    <!-- Problem 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 1: Memory Mutability, Reference Aliasing &amp; Default Arguments</h3>
+            <h3>Problem 1: Memory Mutability, Reference Aliasing & Default Arguments</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>In AI training scripts, subtle bugs often emerge from unintended reference aliasing or default mutable arguments accumulating state across epochs.</p>
+        <p>In AI training scripts, bugs often arise from unintended reference aliasing or default mutable arguments accumulating state across epochs.</p>
         
-        <h4>Part A: Default Argument Output Prediction</h4>
+        <h4>Part A: Predict the Output</h4>
         <pre><code>def train_model(epoch_data, training_history=[]):
     training_history.append(epoch_data)
     return training_history
 
 run_1 = train_model("loss: 0.85")
-run_2 = train_model("loss: 0.62")
-print("run_1 is run_2:", run_1 is run_2)</code></pre>
-        <ol>
-            <li>What does <code>run_1</code> contain after both calls?</li>
-            <li>What does <code>run_2</code> contain?</li>
-            <li>Why does <code>run_1 is run_2</code> return <code>True</code>?</li>
-            <li>Rewrite the function so that calling it without a history always creates a fresh, independent list.</li>
-        </ol>
+print("Run 1:", run_1)
 
-        <h4>Part B: The Shallow List Multiplication Trap</h4>
+run_2 = train_model("loss: 0.62")
+print("Run 2:", run_2)
+
+print("run_1 is run_2:", run_1 is run_2)</code></pre>
+
+        <h4>Part B: The Shallow Multiplication Trap</h4>
         <pre><code>row = [0.0, 0.0, 0.0]
 matrix = [row] * 3
-matrix[0][1] = 5.0</code></pre>
-        <p>What is printed by <code>print(matrix)</code>? Explain why, and write the proper list comprehension.</p>
+matrix[0][1] = 5.0
+print("Matrix:", matrix)</code></pre>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
-                <div class="step-box">
-                    <strong>Part A Solution:</strong>
-                    <ul>
-                        <li><code>run_1</code> is <code>['loss: 0.85', 'loss: 0.62']</code></li>
-                        <li><code>run_2</code> is <code>['loss: 0.85', 'loss: 0.62']</code></li>
-                        <li><code>run_1 is run_2</code> is <strong>True</strong> because Python creates default arguments once at definition time. Both variables point to the exact same list in RAM!</li>
-                    </ul>
-                    <strong>Corrected Code:</strong>
-                    <pre><code>def train_model(epoch_data, training_history=None):
+                <h4>Part A Solution:</h4>
+                <p><strong>Run 1 Output:</strong> <code>['loss: 0.85']</code></p>
+                <p><strong>Run 2 Output:</strong> <code>['loss: 0.85', 'loss: 0.62']</code></p>
+                <p><strong>Identity Check:</strong> <code>True</code></p>
+                <p><em>Explanation:</em> Default arguments are evaluated only once at function definition time. <code>run_1</code> and <code>run_2</code> point to the exact same list in memory.</p>
+                <pre><code># Fixed Implementation
+def train_model(epoch_data, training_history=None):
     if training_history is None:
         training_history = []
     training_history.append(epoch_data)
     return training_history</code></pre>
-                </div>
 
-                <div class="step-box">
-                    <strong>Part B Solution:</strong>
-                    <p>Printed Output: <code>[[0.0, 5.0, 0.0], [0.0, 5.0, 0.0], [0.0, 5.0, 0.0]]</code></p>
-                    <p><em>Reason:</em> The <code>* 3</code> syntax replicates the <em>pointer</em> to <code>row</code> three times. All rows share the same memory address.</p>
-                    <strong>Correct Idiom:</strong>
-                    <pre><code>matrix = [[0.0 for _ in range(3)] for _ in range(3)]
-matrix[0][1] = 5.0  # Only changes row 0!</code></pre>
-                </div>
+                <h4>Part B Solution:</h4>
+                <p><strong>Output:</strong> <code>[[0.0, 5.0, 0.0], [0.0, 5.0, 0.0], [0.0, 5.0, 0.0]]</code></p>
+                <p><em>Explanation:</em> <code>[row] * 3</code> copies the pointer, not the list. Modifying one row changes all three rows.</p>
+                <pre><code># Correct Independent Rows
+matrix = [[0.0 for _ in range(3)] for _ in range(3)]
+matrix[0][1] = 5.0</code></pre>
             </div>
         </details>
     </div>
 
-    <!-- PROBLEM 2 -->
+    <!-- Problem 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 2: Custom PyTorch-style Dataset &amp; Lazy Batch Streamer</h3>
+            <h3>Problem 2: Hand Calculation of a Linear Layer Forward Pass</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Build an OOP data pipeline with lazy streaming for text datasets.</p>
+        <p>Given the forward equation $\mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$ with parameters:</p>
+        $$\mathbf{W} = \begin{bmatrix} 2.0 & -1.0 \\ 0.5 & 3.0 \end{bmatrix}, \qquad \mathbf{x} = \begin{bmatrix} 4.0 \\ 1.0 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 0.5 \\ -2.0 \end{bmatrix}$$
+        <p>Calculate neurons $y_1$ and $y_2$ step-by-step.</p>
+
+        <details>
+            <summary>Click to view solution for Problem 2</summary>
+            <div class="solution-content">
+                <h4>Step 1: Neuron 1 ($y_1$)</h4>
+                $$y_1 = (2.0 \times 4.0) + (-1.0 \times 1.0) + 0.5 = 8.0 - 1.0 + 0.5 = \mathbf{7.5}$$
+                <h4>Step 2: Neuron 2 ($y_2$)</h4>
+                $$y_2 = (0.5 \times 4.0) + (3.0 \times 1.0) + (-2.0) = 2.0 + 3.0 - 2.0 = \mathbf{3.0}$$
+                <h4>Step 3: Final Output Vector</h4>
+                $$\mathbf{y} = \begin{bmatrix} 7.5 \\ 3.0 \end{bmatrix}$$
+            </div>
+        </details>
+    </div>
+
+    <!-- Problem 3 -->
+    <div class="problem-card">
+        <div class="problem-header">
+            <h3>Problem 3: Lazy Batch Streamer & Memory Complexity</h3>
+            <span class="badge badge-hard">Challenging</span>
+        </div>
+        <p>You train on an image dataset of $N = 100,000$ images, each taking $2\text{ MB}$ of memory.</p>
         <ol>
-            <li>Create a class <code>TextClassificationDataset</code> implementing <code>__len__</code> and <code>__getitem__</code>.</li>
-            <li>Create a generator function <code>stream_batches(dataset, batch_size, drop_last=False)</code> that yields mini-batches without allocating memory for the entire dataset.</li>
+            <li>If loaded eagerly into a Python list, how many GB of RAM is required?</li>
+            <li>If streamed using a generator with batch size $B = 32$, how many MB of RAM is required?</li>
+            <li>State the asymptotic memory complexity ($\mathcal{O}(\cdot)$) of each approach.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
-                <pre><code>class TextClassificationDataset:
-    def __init__(self, texts: list[str], labels: list[int]):
-        if len(texts) != len(labels):
-            raise ValueError("Length mismatch between texts and labels.")
-        self.texts = texts
-        self.labels = labels
-
-    def __len__(self) -> int:
-        return len(self.texts)
-
-    def __getitem__(self, idx: int) -> dict:
-        return {
-            "text": self.texts[idx],
-            "label": self.labels[idx],
-            "word_count": len(self.texts[idx].split())
-        }
-
-def stream_batches(dataset, batch_size: int, drop_last: bool = False):
-    """Lazily yields mini-batches from a dataset."""
-    batch = []
-    for i in range(len(dataset)):
-        batch.append(dataset[i])
-        if len(batch) == batch_size:
-            yield batch
-            batch = []
-    if batch and not drop_last:
-        yield batch</code></pre>
+                <h4>Step 1: Eager List</h4>
+                $$\text{Total Memory} = 100,000 \times 2\text{ MB} = 200,000\text{ MB} \approx \mathbf{195.31\text{ GB of RAM}}$$
+                <h4>Step 2: Generator Streamer</h4>
+                $$\text{Active Memory} = 32 \times 2\text{ MB} = \mathbf{64\text{ MB of RAM}}$$
+                <h4>Step 3: Big-O Complexity</h4>
+                <ul>
+                    <li>Eager List: $\mathcal{O}(N)$ (grows linearly with total dataset size).</li>
+                    <li>Generator Streamer: $\mathcal{O}(B) = \mathcal{O}(1)$ with respect to dataset size $N$.</li>
+                </ul>
             </div>
         </details>
     </div>
 
-    <!-- PROBLEM 3 -->
-    <div class="problem-card">
-        <div class="problem-header">
-            <h3>Problem 3: Production AI Decorator: Shape Validation</h3>
-            <span class="badge badge-hard">Challenging</span>
-        </div>
-        <p>Write a decorator <code>@validate_input_dim(expected_dim)</code> that inspects the 2D matrix input <code>x</code>, checks that the number of columns matches <code>expected_dim</code>, and raises a custom <code>ShapeMismatchError</code> if mismatched.</p>
-
-        <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
-            <div class="solution-content">
-                <pre><code>import functools
-
-class ShapeMismatchError(Exception):
-    pass
-
-def validate_input_dim(expected_dim: int):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(x, *args, **kwargs):
-            if not isinstance(x, list) or not x or not isinstance(x[0], list):
-                raise TypeError("Input must be a 2D list matrix.")
-            actual_dim = len(x[0])
-            if actual_dim != expected_dim:
-                raise ShapeMismatchError(
-                    f"Expected {expected_dim} features, but got {actual_dim}."
-                )
-            return func(x, *args, **kwargs)
-        return wrapper
-    return decorator
-
-# Usage
-@validate_input_dim(expected_dim=4)
-def forward_pass(x: list[list[float]]):
-    return [sum(row) for row in x]
-
-# Verified:
-# forward_pass([[1, 2, 3, 4]]) -> Valid!
-# forward_pass([[1, 2]])       -> Raises ShapeMismatchError!</code></pre>
-            </div>
-        </details>
+    <div style="margin-top: 2rem;">
+        <a href="lecture.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">← Back to Lecture 1.1</a>
     </div>
-
 </body>
 </html>
-

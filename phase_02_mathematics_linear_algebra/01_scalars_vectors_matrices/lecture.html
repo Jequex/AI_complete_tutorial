@@ -74,11 +74,13 @@
       text-decoration: none;
     }
     .breadcrumbs a:hover { text-decoration: underline; }
-
+    
     h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
     h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
     h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
 
+    p, li { font-size: 1.05rem; }
+    
     .callout {
       border-left: 4px solid;
       padding: 1.2rem 1.5rem;
@@ -93,10 +95,6 @@
       background-color: var(--bg-tech);
       border-color: var(--border-tech);
     }
-    .callout-warn {
-      background-color: var(--bg-warn);
-      border-color: var(--border-warn);
-    }
     .callout-title {
       font-weight: 700;
       font-size: 1.05rem;
@@ -109,17 +107,10 @@
       border-radius: 0.5rem;
       padding: 1rem 1.25rem;
       overflow-x: auto;
-      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 0.95rem;
+      line-height: 1.5;
     }
-    code {
-      background-color: var(--code-bg);
-      padding: 0.15rem 0.35rem;
-      border-radius: 0.25rem;
-      font-family: ui-monospace, monospace;
-      font-size: 0.9em;
-    }
-    pre code { background: none; padding: 0; }
 
     table {
       width: 100%;
@@ -186,11 +177,11 @@
 
   <main>
     <section>
-      <h2>1. The 12-Year-Old Analogy: The Treasure Map</h2>
+      <h2>1. 🧒 The 12-Year-Old Analogy: The Pirate Treasure Map</h2>
       
       <div class="callout callout-kid">
         <div class="callout-title">🧒 The Pirate Adventure</div>
-        <p>Imagine you are hunting for buried pirate treasure:</p>
+        <p>Imagine you are hunting for buried pirate treasure with Timmy and Maya:</p>
         <ol>
           <li><strong>Scalar ($x \in \mathbb{R}$):</strong> Just a single number without any direction: <em>"Drink 3 sips of water"</em> or <em>"Air temperature is 78°F."</em></li>
           <li><strong>Vector ($\mathbf{x} \in \mathbb{R}^n$):</strong> An arrow on your treasure map: <em>"Walk 4 paces East and 3 paces North."</em> It takes <strong>two numbers together</strong> $[4, 3]$ to describe this arrow. The arrow has a <strong>length</strong> ($\sqrt{4^2+3^2} = 5$ paces) and points in a <strong>direction</strong> (Northeast).</li>
@@ -216,152 +207,116 @@
    x ∈ ℝ               x ∈ ℝ³                         A ∈ ℝ³ˣ⁵
       </pre>
 
-      <p>By universal convention in machine learning and deep learning, <strong>vectors are represented as column vectors</strong>:</p>
+      <p>By universal convention in machine learning, <strong>vectors are represented as column vectors</strong>:</p>
       <p>$$\mathbf{x} = \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{bmatrix} \in \mathbb{R}^n$$</p>
+    </section>
 
+    <section>
+      <h2>3. 📋 Mathematical & Technical Symbol Decoder Table</h2>
       <table>
         <thead>
           <tr>
             <th>Symbol</th>
             <th>Pronunciation</th>
             <th>Plain English Meaning</th>
-            <th>Example</th>
+            <th>Concrete Real-World Analogy / Flashcard Example</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>$\mathbb{R}$</td>
-            <td>"Real numbers"</td>
-            <td>Continuous number line ($-\infty$ to $+\infty$)</td>
-            <td>$3.1415, -7, 0$</td>
+            <td>"the real numbers"</td>
+            <td>The continuous infinite number line</td>
+            <td>Any decimal, fraction, or integer ($3.14, -7, 0$)</td>
           </tr>
           <tr>
             <td>$x \in \mathbb{R}$</td>
-            <td>"$x$ in R"</td>
-            <td>Single real scalar number</td>
-            <td>$x = 5.2$</td>
+            <td>"x in R"</td>
+            <td>$x$ is a single real scalar number</td>
+            <td>The outdoor temperature on the beach ($78^\circ\text{F}$)</td>
           </tr>
           <tr>
             <td>$\mathbf{x} \in \mathbb{R}^n$</td>
             <td>"vector x in R-n"</td>
-            <td>Column vector of $n$ numbers</td>
-            <td>$[3, -1, 4]^T \in \mathbb{R}^3$</td>
+            <td>A vertical stack of $n$ numbers</td>
+            <td>Walking 4 paces East and 3 paces North ($[4, 3]^T$)</td>
           </tr>
           <tr>
             <td>$A \in \mathbb{R}^{m \times n}$</td>
             <td>"Matrix A in R m-by-n"</td>
-            <td>Grid with $m$ rows and $n$ columns</td>
-            <td>$3 \times 2$ table of weights</td>
+            <td>A 2D grid with $m$ rows and $n$ columns</td>
+            <td>A spreadsheet of travel paths for 3 different pirates</td>
           </tr>
           <tr>
             <td>$\mathbf{x}^T$</td>
             <td>"x transpose"</td>
-            <td>Flips vertical column into horizontal row</td>
-            <td>$[1, 2]^T = [1 \quad 2]$</td>
+            <td>Flips a vertical column vector into a horizontal row</td>
+            <td>Tilting a vertical stick into a horizontal position</td>
           </tr>
           <tr>
-            <td>$\|\mathbf{x}\|$</td>
-            <td>"norm of x"</td>
-            <td>The geometric length/magnitude of the arrow</td>
-            <td>$\sqrt{3^2 + 4^2} = 5$</td>
+            <td>$\|\mathbf{x}\|_2$</td>
+            <td>"L-2 norm of x"</td>
+            <td>The straight-line Euclidean distance</td>
+            <td>Flying straight as the crow flies across a field ($\sqrt{4^2 + 3^2} = 5$)</td>
+          </tr>
+          <tr>
+            <td>$\|\mathbf{x}\|_1$</td>
+            <td>"L-1 norm of x"</td>
+            <td>Manhattan or taxicab grid distance</td>
+            <td>Driving a taxi on Manhattan city blocks ($|4| + |3| = 7$)</td>
           </tr>
           <tr>
             <td>$\mathbf{x} \cdot \mathbf{y}$</td>
             <td>"x dot y"</td>
-            <td>Dot product (alignment score between two arrows)</td>
-            <td>$(1)(3) + (2)(4) = 11$</td>
+            <td>Dot product (similarity alignment score)</td>
+            <td>How strongly two arrows point in the same direction</td>
+          </tr>
+          <tr>
+            <td>$\cos\theta$</td>
+            <td>"cosine theta"</td>
+            <td>Angle cosine between two vectors ($-1$ to $+1$)</td>
+            <td>Two compass needles pointing together vs. apart</td>
+          </tr>
+          <tr>
+            <td>$\det(A)$</td>
+            <td>"determinant of A"</td>
+            <td>Scaling factor of volume or area under matrix $A$</td>
+            <td>How much a rubber sheet stretches or shrinks in area</td>
           </tr>
         </tbody>
       </table>
     </section>
 
     <section>
-      <h2>3. Vector Norms: How Long is an Arrow?</h2>
-      
-      <div class="callout callout-kid">
-        <div class="callout-title">🧒 Manhattan Taxi ($L_1$) vs. The Crow's Flight ($L_2$)</div>
-        <p>If you want to travel from point A to point B in Manhattan, New York, you cannot fly through buildings; you must take a taxi along street blocks: $|4| + |3| = 7$ blocks. That is the <strong>$L_1$ Norm</strong>!</p>
-        <p>If you are a bird flying straight through the air, you fly the hypotenuse: $\sqrt{4^2 + 3^2} = 5$ miles. That is the <strong>$L_2$ Norm</strong>!</p>
-      </div>
-
-      <ul>
-        <li><strong>$L_2$ Euclidean Norm:</strong>
-          $$\|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^n x_i^2} = \sqrt{x_1^2 + x_2^2 + \dots + x_n^2}$$
-        </li>
-        <li><strong>$L_1$ Manhattan Norm:</strong>
-          $$\|\mathbf{x}\|_1 = \sum_{i=1}^n |x_i| = |x_1| + |x_2| + \dots + |x_n|$$
-          <em>Used in Lasso Regularization to drive unimportant weights to exactly 0 (creating sparse networks).</em>
-        </li>
-        <li><strong>$L_\infty$ Max Norm:</strong>
-          $$\|\mathbf{x}\|_\infty = \max_i |x_i|$$
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>4. The Dot Product &amp; Law of Cosines Derivation</h2>
-      <p>The dot product multiplies corresponding components and adds them up:</p>
-      <p>$$\mathbf{x} \cdot \mathbf{y} = \mathbf{x}^T \mathbf{y} = \sum_{i=1}^n x_i y_i = x_1 y_1 + x_2 y_2 + \dots + x_n y_n$$</p>
-
+      <h2>4. Vector Norms: How Long is an Arrow?</h2>
       <div class="callout callout-tech">
-        <div class="callout-title">🔬 Complete Mathematical Derivation of $\mathbf{x} \cdot \mathbf{y} = \|\mathbf{x}\| \|\mathbf{y}\| \cos\theta$</div>
-        <p>Consider vectors $\mathbf{x}$ and $\mathbf{y}$ forming two sides of a triangle with angle $\theta$. The side connecting their tips is the difference vector $(\mathbf{x} - \mathbf{y})$.</p>
-        <ol>
-          <li>By the <strong>Law of Cosines</strong>:
-            $$\|\mathbf{x} - \mathbf{y}\|^2 = \|\mathbf{x}\|^2 + \|\mathbf{y}\|^2 - 2 \|\mathbf{x}\| \|\mathbf{y}\| \cos\theta$$
-          </li>
-          <li>Expanding algebraically via dot products:
-            $$\|\mathbf{x} - \mathbf{y}\|^2 = (\mathbf{x} - \mathbf{y}) \cdot (\mathbf{x} - \mathbf{y}) = \|\mathbf{x}\|^2 - 2(\mathbf{x} \cdot \mathbf{y}) + \|\mathbf{y}\|^2$$
-          </li>
-          <li>Equating both expressions:
-            $$\|\mathbf{x}\|^2 + \|\mathbf{y}\|^2 - 2(\mathbf{x} \cdot \mathbf{y}) = \|\mathbf{x}\|^2 + \|\mathbf{y}\|^2 - 2 \|\mathbf{x}\| \|\mathbf{y}\| \cos\theta$$
-          </li>
-          <li>Subtracting $\|\mathbf{x}\|^2 + \|\mathbf{y}\|^2$ and dividing by $-2$:
-            $$\boxed{\mathbf{x} \cdot \mathbf{y} = \|\mathbf{x}\| \|\mathbf{y}\| \cos\theta} \quad \blacksquare$$
-          </li>
-        </ol>
+        <div class="callout-title">🔬 Euclidean vs. Manhattan Distance</div>
+        <p>$$\|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^n x_i^2} = \sqrt{x_1^2 + x_2^2 + \dots + x_n^2}$$</p>
+        <p>$$\|\mathbf{x}\|_1 = \sum_{i=1}^n |x_i| = |x_1| + |x_2| + \dots + |x_n|$$</p>
+        <p><strong>🧒 What the math is actually doing:</strong> $L_2$ calculates straight-line flight distance (crow's flight). $L_1$ calculates grid walking distance (taxi blocks). In AI, $L_1$ drives weights to 0 for sparse models.</p>
       </div>
-
-      <h3>Cosine Similarity in AI</h3>
-      <p>By dividing the dot product by the vector lengths, we isolate the angle $\cos\theta$:</p>
-      <p>$$\cos\theta = \frac{\mathbf{x} \cdot \mathbf{y}}{\|\mathbf{x}\| \|\mathbf{y}\|}$$</p>
-      <p>This is how LLMs and search engines measure conceptual similarity between words and sentences:</p>
-      <ul>
-        <li>$\cos\theta \approx 1.0$: Identical direction (e.g. <code>"puppy"</code> and <code>"dog"</code>).</li>
-        <li>$\cos\theta = 0.0$: Orthogonal / completely unrelated (e.g. <code>"banana"</code> and <code>"quantum physics"</code>).</li>
-        <li>$\cos\theta \approx -1.0$: Opposite direction.</li>
-      </ul>
     </section>
 
     <section>
-      <h2>5. Matrix Multiplication: $C = AB$</h2>
-      <p>Multiplying matrix $A \in \mathbb{R}^{m \times k}$ by $B \in \mathbb{R}^{k \times n}$ produces $C \in \mathbb{R}^{m \times n}$:</p>
-      <div class="callout callout-warn">
-        <div class="callout-title">⚠️ The Golden Dimension Rule</div>
-        <p>$$\mathbf{(m \times \mathbf{k}) \times (\mathbf{k} \times n) \longrightarrow (m \times n)}$$</p>
-        <p>The <strong>inner dimensions must match</strong> ($k = k$)! Each entry $c_{ij}$ is the dot product of <strong>Row $i$ of $A$</strong> and <strong>Column $j$ of $B$</strong>.</p>
+      <h2>5. The Dot Product &amp; Cosine Similarity</h2>
+      <p>$$\mathbf{x} \cdot \mathbf{y} = \|\mathbf{x}\|_2 \|\mathbf{y}\|_2 \cos\theta$$</p>
+      $$\underbrace{\cos\theta}_{\substack{\text{Semantic similarity} \\ \text{score between } -1 \text{ and } +1}} = \frac{ \overbrace{\mathbf{x} \cdot \mathbf{y}}^{\text{Raw directional alignment}} }{ \underbrace{\|\mathbf{x}\|_2 \|\mathbf{y}\|_2}_{\text{Lengths of the two vectors}} }$$
+
+      <div class="callout callout-kid">
+        <div class="callout-title">🧒 Concrete Numerical Example</div>
+        <p>Let $\mathbf{x} = [4, 3]^T$ ("king") and $\mathbf{y} = [1, 2]^T$ ("queen"):</p>
+        <ul>
+          <li>Dot Product: $(4 \times 1) + (3 \times 2) = 4 + 6 = \mathbf{10}$</li>
+          <li>Lengths: $\|\mathbf{x}\|_2 = \sqrt{16+9} = \mathbf{5.0}, \quad \|\mathbf{y}\|_2 = \sqrt{1+4} \approx \mathbf{2.236}$</li>
+          <li>Cosine Similarity: $\frac{10}{5.0 \times 2.236} \approx \mathbf{0.8944}$ (Very high semantic match!)</li>
+        </ul>
       </div>
-
-      <pre>
-Let A = [ [1, 2],        B = [ [5, 6],
-          [3, 4] ]             [7, 8] ]
-
-c₁₁ = (1×5) + (2×7) = 5 + 14 = 19
-c₁₂ = (1×6) + (2×8) = 6 + 16 = 22
-c₂₁ = (3×5) + (4×7) = 15 + 28 = 43
-c₂₂ = (3×6) + (4×8) = 18 + 32 = 50
-
-C = [ [19, 22],
-      [43, 50] ]
-      </pre>
     </section>
 
     <div class="nav-buttons">
-      <a href="../index.html" class="btn">← Phase 02 Overview</a>
-      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+      <a href="../index.html" class="btn">← Linear Algebra Home</a>
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Topic 2.1 Exercises & Solutions →</a>
     </div>
   </main>
-
 </body>
 </html>
-

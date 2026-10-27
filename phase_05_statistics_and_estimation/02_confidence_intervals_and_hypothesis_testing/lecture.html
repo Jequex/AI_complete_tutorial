@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 5.2: Confidence Intervals, Hypothesis Testing & AI A/B Testing</title>
+    <title>Topic 5.2: Confidence Intervals, Hypothesis Testing & AI A/B Testing — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -20,8 +20,8 @@
             --accent-bg: #ecfdf5;
             --danger: #dc2626;
             --danger-bg: #fef2f2;
-            --warning: #d97706;
             --warning-bg: #fffbeb;
+            --warning-border: #fef3c7;
             --code-bg: #1e1e2e;
             --code-text: #cdd6f4;
         }
@@ -37,8 +37,8 @@
                 --accent-bg: #064e3b;
                 --danger: #f87171;
                 --danger-bg: #450a0a;
-                --warning: #fbbf24;
                 --warning-bg: #451a03;
+                --warning-border: #78350f;
                 --code-bg: #0b0f19;
                 --code-text: #e2e8f0;
             }
@@ -54,8 +54,6 @@
         }
         h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
         h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
-        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
-        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -65,169 +63,283 @@
             font-weight: 600;
             margin-bottom: 1.5rem;
         }
+        .back-link:hover { text-decoration: underline; }
         .callout {
             background-color: var(--card-bg);
             border-left: 4px solid var(--primary);
-            padding: 1.25rem;
+            padding: 1.25rem 1.5rem;
             margin: 1.5rem 0;
             border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .callout-story {
+            background-color: var(--primary-light);
+            border-left-color: var(--primary);
         }
         .callout-success {
             background-color: var(--accent-bg);
             border-left-color: var(--accent);
         }
-        .callout-warning {
-            background-color: var(--warning-bg);
-            border-left-color: var(--warning);
-        }
         .callout-danger {
             background-color: var(--danger-bg);
             border-left-color: var(--danger);
+        }
+        .callout-warning {
+            background-color: var(--warning-bg);
+            border-left-color: #d97706;
+            border-top: 1px solid var(--warning-border);
+            border-right: 1px solid var(--warning-border);
+            border-bottom: 1px solid var(--warning-border);
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
+            font-size: 0.95rem;
         }
         th, td {
+            padding: 0.85rem 1rem;
             border: 1px solid var(--border);
-            padding: 0.75rem 1rem;
             text-align: left;
         }
         th {
-            background-color: var(--primary-light);
+            background-color: var(--card-bg);
             color: var(--primary);
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre, code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         pre {
             background-color: var(--code-bg);
             color: var(--code-text);
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             overflow-x: auto;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        p code {
-            background-color: rgba(125, 125, 125, 0.15);
+            background-color: var(--card-bg);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
+            font-size: 0.88em;
+            border: 1px solid var(--border);
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
-    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 5: Statistics & Estimation</a>
 
     <h1>Topic 5.2: Confidence Intervals, Hypothesis Testing & AI A/B Testing</h1>
-    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
-        Making rigorous data-driven decisions: bounding benchmark error bars, p-values, Type I/II trade-offs, and A/B testing model checkpoints.
-    </p>
+    <p><em>Separating genuine algorithmic breakthroughs from the illusions of lucky sample noise.</em></p>
 
-    <h2>1. Executive Summary & The Courtroom Trial Analogy</h2>
-    <p>
-        Suppose you evaluate a newly fine-tuned model (Model B) against your production baseline (Model A):
-    </p>
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;">
+
+    <h2>1. Executive Summary & Intuitive Foundations</h2>
+    <p>Suppose an AI engineer fine-tunes a model (Model B) and evaluates it against the baseline (Model A) on 200 customer support chats:</p>
     <ul>
-        <li><strong>Model A:</strong> $82.0\%$ accuracy on 200 questions</li>
-        <li><strong>Model B:</strong> $85.0\%$ accuracy on 200 questions</li>
+        <li><strong>Model A:</strong> $82.0\%$ accuracy (164 / 200)</li>
+        <li><strong>Model B:</strong> $85.0\%$ accuracy (170 / 200)</li>
     </ul>
-    <p>
-        Is Model B genuinely more intelligent, or did it merely get lucky on an easier draw of questions? If you ship Model B based purely on this single number without testing for statistical significance, you risk shipping an inferior model.
-    </p>
+    <p>Is Model B genuinely smarter, or did it just get a lucky batch of easier questions? If you deploy Model B to millions of users without statistical verification, you risk catastrophic production regressions!</p>
 
-    <div class="callout">
-        <h3>The 12-Year-Old Analogy: The Courtroom Trial & The Rigged Coin</h3>
-        <p>Imagine your friend flips a coin 10 times and gets 8 Heads. You suspect the coin is weighted.</p>
+    <div class="callout callout-story">
+        <h3>🧒 The 12-Year-Old Courtroom Trial: Timmy's "Lucky" Coin</h3>
+        <p>Imagine <strong>Timmy</strong> brings a coin to school and flips <strong>8 Heads in 10 flips</strong>. Maya claims the coin is rigged!</p>
+        <p>In statistics, we hold a formal <strong>Courtroom Trial</strong>:</p>
         <ol>
-            <li><strong>The Null Hypothesis ($H_0$, "Innocent until proven guilty"):</strong> We assume the coin is completely fair ($P = 0.50$).</li>
-            <li><strong>The Alternative Hypothesis ($H_1$, "Guilty"):</strong> The coin is unfair ($P > 0.50$).</li>
-            <li><strong>The $p$-value:</strong> How often would an honest coin produce 8 or more Heads purely by chance? By binomial probability, that chance is <strong>$5.5\%$</strong>.</li>
-            <li><strong>The Verdict:</strong> Because $5.5\% > 5\%$ (our standard reasonable-doubt threshold $\alpha = 0.05$), we do not have enough evidence to convict. We fail to reject $H_0$.</li>
+            <li><strong>The Null Hypothesis ($H_0$, "Innocent until proven guilty"):</strong> We assume the coin is completely fair ($P(\text{Heads}) = 0.50$). Timmy is innocent of cheating.</li>
+            <li><strong>The Alternative Hypothesis ($H_1$, "Guilty as charged"):</strong> Maya's claim that the coin is rigged ($P(\text{Heads}) > 0.50$).</li>
+            <li><strong>The Evidence:</strong> 8 Heads in 10 flips.</li>
+            <li><strong>The $p$-value:</strong> If the coin was truly fair, the probability of getting 8 or more heads purely by random chance is about <strong>$5.5\%$</strong> ($p = 0.0547$).</li>
+            <li><strong>The Verdict ($\alpha = 0.05$):</strong> Our reasonable doubt threshold is $5\%$. Because $5.5\% > 5\%$, the evidence is not quite strong enough to convict. <em>Verdict: Fail to reject $H_0$.</em></li>
         </ol>
     </div>
 
-    <h2>2. Derivation of the 95% Confidence Interval</h2>
-    <p>
-        By the Central Limit Theorem, the distribution of the sample mean $\bar{X}$ across repeated draws of size $n$ is Normal:
-    </p>
-    $$\bar{X} \sim \mathcal{N}\left(\mu, \, \frac{\sigma^2}{n}\right)$$
-    <p>Standardizing into a standard normal variable $Z$:</p>
-    $$Z = \frac{\bar{X} - \mu}{\sigma / \sqrt{n}} \sim \mathcal{N}(0, 1)$$
-    <p>
-        For a $95\%$ confidence level ($\alpha = 0.05$), the critical boundary on the standard normal curve is $z_{0.025} = 1.96$:
-    </p>
-    $$P\left( -1.96 \le \frac{\bar{X} - \mu}{\sigma / \sqrt{n}} \le +1.96 \right) = 0.95$$
-    <p>Multiplying across by the Standard Error $\frac{\sigma}{\sqrt{n}}$ and isolating $\mu$:</p>
-    $$\mathbf{P\left( \bar{X} - 1.96\frac{\sigma}{\sqrt{n}} \le \mu \le \bar{X} + 1.96\frac{\sigma}{\sqrt{n}} \right) = 0.95}$$
-    <p>The resulting <strong>95% Confidence Interval</strong> is:</p>
-    $$\mathbf{\text{CI}_{95\%} = \left[ \bar{X} - 1.96\frac{\sigma}{\sqrt{n}}, \quad \bar{X} + 1.96\frac{\sigma}{\sqrt{n}} \right]}$$
+    <div class="callout">
+        <h3>🧒 Confidence Intervals as Fishing Nets</h3>
+        <p>Imagine you are fishing in a foggy lake for a rare golden fish named <strong>$\mu$ (the True Population Mean)</strong>. The fish stays at a fixed location, but the water is murky.</p>
+        <p>You cast a wide <strong>fishing net</strong> (the confidence interval). Because each cast is influenced by random waves (sample noise), each net lands in a slightly different place.</p>
+        <p>A <strong>95% Confidence Interval</strong> means: if you cast the net 100 times, <strong>95 of those nets will successfully capture the fish</strong>, and 5 nets will miss!</p>
+    </div>
 
-    <h2>3. The Hypothesis Testing Decision Matrix</h2>
+    <h2>2. 📋 Mathematical Symbol Decoder Table</h2>
     <table>
         <thead>
             <tr>
-                <th>Action Taken</th>
-                <th>$H_0$ is Truly True (No Real Difference)</th>
-                <th>$H_0$ is Truly False (Model B is Truly Better)</th>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$H_0$</td>
+                <td><em>"H-naught"</em> or <em>"H-zero"</em></td>
+                <td><strong>Null Hypothesis</strong></td>
+                <td>The defendant is innocent. The coin is fair ($p=0.5$). Model B is identical to Model A.</td>
+            </tr>
+            <tr>
+                <td>$H_1$ or $H_A$</td>
+                <td><em>"H-one"</em> or <em>"H-alt"</em></td>
+                <td><strong>Alternative Hypothesis</strong></td>
+                <td>The prosecution's claim. The coin is rigged ($p>0.5$). Model B is genuinely superior.</td>
+            </tr>
+            <tr>
+                <td>$\alpha$</td>
+                <td><em>"AL-fuh"</em></td>
+                <td><strong>Significance Level</strong></td>
+                <td>The false alarm threshold (usually $0.05$ or $5\%$). Risk of convicting an innocent person.</td>
+            </tr>
+            <tr>
+                <td>$\beta$</td>
+                <td><em>"BAY-tuh"</em></td>
+                <td><strong>Type II Error Rate</strong></td>
+                <td>The risk of letting a guilty criminal walk free (failing to detect a real improvement).</td>
+            </tr>
+            <tr>
+                <td>$1 - \beta$</td>
+                <td><em>"one minus beta"</em></td>
+                <td><strong>Statistical Power</strong></td>
+                <td>The radar sensitivity: probability of catching a real difference when it truly exists.</td>
+            </tr>
+            <tr>
+                <td>$p\text{-value}$</td>
+                <td><em>"pee-value"</em></td>
+                <td><strong>Fluke Probability</strong></td>
+                <td>How likely we are to see data this extreme purely by random accident under $H_0$.</td>
+            </tr>
+            <tr>
+                <td>$Z$</td>
+                <td><em>"zee-score"</em></td>
+                <td><strong>Standard Normal Statistic</strong></td>
+                <td>How many standard errors our sample sits away from the expected null center.</td>
+            </tr>
+            <tr>
+                <td>$t$</td>
+                <td><em>"tee-statistic"</em></td>
+                <td><strong>Student's t-Statistic</strong></td>
+                <td>The test statistic when population variance is unknown and estimated using sample spread $S$.</td>
+            </tr>
+            <tr>
+                <td>$\text{CI}_{95\%}$</td>
+                <td><em>"95% confidence interval"</em></td>
+                <td><strong>The Fishing Net</strong></td>
+                <td>The range $[\bar{X} - 1.96\text{SE}, \, \bar{X} + 1.96\text{SE}]$ that captures $\mu$ in 95 out of 100 trials.</td>
+            </tr>
+            <tr>
+                <td>$z_{\text{crit}}$</td>
+                <td><em>"zee-critical"</em></td>
+                <td><strong>The Jury Boundary Line</strong></td>
+                <td>The cutoff mark (e.g., $1.96$ for two-tailed 95%) beyond which we reject $H_0$.</td>
+            </tr>
+            <tr>
+                <td>$\hat{p}$</td>
+                <td><em>"pee-hat"</em></td>
+                <td><strong>Pooled Proportion</strong></td>
+                <td>The combined success rate across both A and B groups assuming they are identical.</td>
+            </tr>
+            <tr>
+                <td>$\text{SE}_{\text{diff}}$</td>
+                <td><em>"SE of difference"</em></td>
+                <td><strong>Gap Uncertainty</strong></td>
+                <td>The standard error measuring random noise in the difference between two sample averages.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Confidence Intervals: Constructing the Net</h2>
+    <h3>Line-by-Line Breakdown: The 95% Normal Confidence Interval</h3>
+    $$\mathbf{\text{CI}_{95\%} = \left[ \underbrace{\bar{X}}_{\substack{\text{Center of net} \\ \text{(sample mean)}}} - \underbrace{1.96}_{\substack{\text{95\% normal} \\ \text{multiplier}}} \times \underbrace{\frac{\sigma}{\sqrt{n}}}_{\substack{\text{Standard} \\ \text{Error}}}, \quad \bar{X} + 1.96 \times \frac{\sigma}{\sqrt{n}} \right]}$$
+    <p><strong>🧒 What the math is actually doing:</strong> By the Central Limit Theorem, sample averages follow a bell curve. $95\%$ of all samples land within $1.96$ standard errors of the truth. Reversing the inequality creates our net!</p>
+
+    <h3>Small Samples & Student's $t$-Distribution</h3>
+    $$\mathbf{\text{CI}_{1-\alpha} = \left[ \bar{X} - \underbrace{t_{\alpha/2, \, n-1}}_{\substack{\text{Wider multiplier for} \\ \text{small sample uncertainty}}} \times \frac{S}{\sqrt{n}}, \quad \bar{X} + t_{\alpha/2, \, n-1} \times \frac{S}{\sqrt{n}} \right]}$$
+    <p>When true spread $\sigma$ is unknown, estimating it with sample spread $S$ introduces extra wobble. The Student's $t$-distribution uses heavier tails to make the net wider and safer.</p>
+
+    <h2>4. The Decision Matrix: Type I vs. Type II Errors</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Decision</th>
+                <th>$H_0$ is Truly True (No Difference)</th>
+                <th>$H_0$ is Truly False (Model B is Better!)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td><strong>Reject $H_0$ (Ship Model B)</strong></td>
-                <td><span style="color: var(--danger); font-weight: bold;">TYPE I ERROR ($\alpha$)</span><br>False Alarm (shipped a dud)</td>
-                <td><span style="color: var(--accent); font-weight: bold;">CORRECT DECISION</span><br>Statistical Power ($1 - \beta$)</td>
+                <td><span style="color: var(--danger); font-weight: bold;">TYPE I ERROR (False Alarm, $\alpha$)</span><br>Shipped an overfitted fluke!</td>
+                <td><span style="color: var(--accent); font-weight: bold;">CORRECT DECISION (Power, $1 - \beta$)</span><br>True breakthrough deployed!</td>
             </tr>
             <tr>
                 <td><strong>Fail to Reject $H_0$ (Keep Model A)</strong></td>
-                <td><span style="color: var(--accent); font-weight: bold;">CORRECT DECISION</span><br>True Negative ($1 - \alpha$)</td>
-                <td><span style="color: var(--warning); font-weight: bold;">TYPE II ERROR ($\beta$)</span><br>Missed Discovery (discarded a winner)</td>
+                <td><span style="color: var(--accent); font-weight: bold;">CORRECT DECISION ($1 - \alpha$)</span><br>Safely avoided deploying noise.</td>
+                <td><span style="color: var(--danger); font-weight: bold;">TYPE II ERROR (Missed Win, $\beta$)</span><br>Discarded a truly superior model!</td>
             </tr>
         </tbody>
     </table>
 
-    <h2>4. What a $p$-value Is (and What It Is NOT)</h2>
-    <div class="callout callout-warning">
-        <p><strong>Formal Definition:</strong></p>
-        $$\mathbf{p\text{-value} = P(\text{Observing data as or more extreme than } D \mid H_0 \text{ is true})}$$
-        <p><strong>Common Traps to Avoid:</strong></p>
+    <h2>5. Real-World AI Case Study: A/B Testing 4-Bit Model Quantization</h2>
+    <p>We test uncompressed 16-bit Model A against compressed 4-bit Model B on $1{,}000$ live requests each:</p>
+    <ul>
+        <li>Model A: $n_A = 1{,}000$, Thumbs-Up $x_A = 780$ ($\hat{p}_A = 78.0\%$)</li>
+        <li>Model B: $n_B = 1{,}000$, Thumbs-Up $x_B = 730$ ($\hat{p}_B = 73.0\%$)</li>
+    </ul>
+
+    <div class="callout">
+        <h4>Step-by-Step Statistical Analysis:</h4>
+        <ol>
+            <li><strong>Pooled Proportion under $H_0$:</strong>
+                $$\hat{p} = \frac{780 + 730}{1000 + 1000} = \frac{1510}{2000} = \mathbf{0.755}$$
+            </li>
+            <li><strong>Standard Error of Difference:</strong>
+                $$\text{SE}_{\text{diff}} = \sqrt{(0.755)(0.245)\left(\frac{1}{1000} + \frac{1}{1000}\right)} = \sqrt{0.00036995} \approx \mathbf{0.01923}$$
+            </li>
+            <li><strong>$Z$-Test Statistic:</strong>
+                $$Z = \frac{0.780 - 0.730}{0.01923} = \frac{0.050}{0.01923} \approx \mathbf{+2.60}$$
+            </li>
+            <li><strong>Two-Tailed $p$-value:</strong>
+                $$p = 2 \times (1 - \Phi(2.60)) \approx 2 \times 0.00466 \approx \mathbf{0.0093 \quad (0.93\%)}$$
+            </li>
+            <li><strong>Verdict:</strong> Because $p = 0.0093 < 0.01$, we <strong>reject $H_0$ at the 99% confidence level</strong>. Quantization caused a statistically significant drop in user satisfaction!</li>
+        </ol>
+    </div>
+
+    <h2>6. Concrete Numerical Walkthrough: Token Latency SLA</h2>
+    <p>A model's token latency was measured across $n = 64$ runs: $\bar{X} = 42.5\text{ ms}$, $S = 8.0\text{ ms}$. Target SLA: under $45.0\text{ ms}$.</p>
+    <div class="callout callout-success">
         <ul>
-            <li>The $p$-value is NOT the probability that the hypothesis is true ($P(H_0 \mid D)$ requires Bayesian inference!).</li>
-            <li>A tiny $p$-value does NOT mean the model improvement is large. It only means the improvement is statistically distinguishable from zero.</li>
+            <li>$\text{SE}(\bar{X}) = \frac{8.0}{\sqrt{64}} = \frac{8.0}{8} = 1.0\text{ ms}$</li>
+            <li>$\text{Margin of Error} = 1.96 \times 1.0 = 1.96\text{ ms}$</li>
+            <li>$\text{CI}_{95\%} = [42.5 - 1.96, \, 42.5 + 1.96] = \mathbf{[40.54\text{ ms}, \, 44.46\text{ ms}]}$</li>
+            <li><strong>Conclusion:</strong> The entire interval is strictly below $45.0\text{ ms}$, confirming SLA compliance with 95% confidence!</li>
         </ul>
     </div>
 
-    <h2>5. Real-World AI Case: A/B Testing Model Checkpoints</h2>
-    <p>
-        Suppose an engineering team evaluates whether a 4-bit quantized model (Model B) degrades user acceptance compared to the 16-bit baseline (Model A):
-    </p>
-    <ul>
-        <li><strong>Model A:</strong> $1{,}000$ requests, $780$ thumbs-up ($\hat{p}_A = 0.780$)</li>
-        <li><strong>Model B:</strong> $1{,}000$ requests, $730$ thumbs-up ($\hat{p}_B = 0.730$)</li>
-    </ul>
-
-    <h3>The 5-Step Hypothesis Test</h3>
-    <ol>
-        <li><strong>Hypotheses:</strong> $H_0: p_A = p_B$ vs $H_1: p_A > p_B$.</li>
-        <li><strong>Pooled Proportion:</strong> $\hat{p} = \frac{780 + 730}{2000} = 0.755$.</li>
-        <li><strong>Standard Error:</strong>
-            $$\text{SE}_{\text{diff}} = \sqrt{(0.755)(0.245)\left(\frac{1}{1000} + \frac{1}{1000}\right)} \approx 0.01923$$
-        </li>
-        <li><strong>$z$-Test Statistic:</strong>
-            $$z = \frac{0.780 - 0.730}{0.01923} \approx \mathbf{+2.60}$$
-        </li>
-        <li><strong>$p$-value:</strong> $p = 1 - \Phi(2.60) \approx \mathbf{0.0047} \quad (0.47\%)$.</li>
-    </ol>
-
-    <div class="callout callout-danger">
-        <strong>Verdict:</strong> Because $p = 0.0047 < 0.01$, we reject the null hypothesis. The performance loss of the 4-bit model is real and significant. Do not ship without quantization-aware fine-tuning!
+    <div class="nav-links">
+        <a href="../01_populations_samples_and_estimators/lecture.html">&larr; Topic 5.1</a>
+        <a href="exercises_and_solutions.html">Exercises &amp; Solutions &rarr;</a>
     </div>
 
-    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
-        <a href="../01_populations_samples_and_estimators/lecture.html" class="back-link">← Previous: 5.1 Estimators & Bias</a>
-        <a href="exercises_and_solutions.html" class="back-link">Next: 5.2 Exercises & Solutions →</a>
-    </div>
 </body>
 </html>
-

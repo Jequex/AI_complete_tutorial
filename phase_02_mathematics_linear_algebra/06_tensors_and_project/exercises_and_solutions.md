@@ -53,6 +53,9 @@ The input sequence tensor is $X \in \mathbb{R}^{4 \times 512 \times 768}$.
 
 ---
 
+<details>
+<summary>Click to view solution for Problem 1</summary>
+
 ### Solution 1
 
 #### Part A: Convolutional Spatial Dimensions
@@ -83,6 +86,7 @@ The input sequence tensor is $X \in \mathbb{R}^{4 \times 512 \times 768}$.
    $$(512 \times 64) \times (64 \times 512) \longrightarrow (512 \times 512)$$
    $$\text{Shape}(A) = (4, 12, 512, 512)$$
    *Insight:* Each head computes a $512 \times 512$ matrix where entry $(i, j)$ represents how strongly token $i$ attends to token $j$!
+</details>
 
 ---
 
@@ -109,6 +113,9 @@ Consider a 3D tensor $T$ with shape $(D_0, D_1, D_2) = (3, 4, 5)$ stored in stan
 5. What coordinate corresponds to flat index $idx = 37$?
 
 ---
+
+<details>
+<summary>Click to view solution for Problem 2</summary>
 
 ### Solution 2
 
@@ -148,6 +155,7 @@ Consider a 3D tensor $T$ with shape $(D_0, D_1, D_2) = (3, 4, 5)$ stored in stan
    - $k = 2 / 1 = 2$
    $$\text{Coordinate} = (1, 3, 2)$$
    *Check:* $1(20) + 3(5) + 2(1) = 20 + 15 + 2 = 37$. Exact match!
+</details>
 
 ---
 
@@ -180,6 +188,9 @@ $$x_1 = \begin{bmatrix} 2 \\ 4 \end{bmatrix}, \quad x_2 = \begin{bmatrix} 4 \\ 6
    What percentage of the total variance is captured by this single 1D axis?
 
 ---
+
+<details>
+<summary>Click to view solution for Problem 3</summary>
 
 ### Solution 3
 
@@ -251,4 +262,5 @@ $$\text{Total Variance} = \lambda_1 + \lambda_2 = 8 + 0 = 8$$
 $$\text{Variance Explained by PC1} = \frac{\lambda_1}{\lambda_1 + \lambda_2} = \frac{8}{8} = 100\%$$
 
 *Insight:* Because the 3 original points $(2,4), (4,6), (6,8)$ lie perfectly along the line $y = x + 2$, the second eigenvalue is exactly $0$. A single 1D principal component preserves $100\%$ of the information without any reconstruction error whatsoever!
+</details>
 

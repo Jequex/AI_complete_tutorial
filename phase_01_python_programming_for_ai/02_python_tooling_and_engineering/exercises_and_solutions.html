@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 1.2: Exercises & Solutions — AI Software Engineering & Reproducibility</title>
+    <title>Topic 1.2: Exercises & Solutions — AI Software Engineering, Tooling & Reproducibility</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -86,9 +86,6 @@
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -122,139 +119,85 @@
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 0.9em;
         }
-        .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+        p code, li code {
+            background-color: var(--primary-light);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-
     <a href="lecture.html" class="back-link">← Back to Lecture 1.2</a>
-    <header>
-        <h1>Topic 1.2: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Invariant Testing, Safe Softmax, Profiling &amp; Seeds</p>
-    </header>
 
-    <!-- PROBLEM 1 -->
+    <h1>Topic 1.2: Exercises & Solutions</h1>
+    <p>Practice problem set covering numerical stability, theoretical loss invariants, and profiling algorithmic bottlenecks.</p>
+
+    <!-- Problem 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 1: Unit Testing Numerical Invariants &amp; Safe Softmax</h3>
+            <h3>Problem 1: Unit Testing Numerical Invariants & Safe Softmax</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>In standard floating-point arithmetic, computing $e^{z_i}$ for $z_i \ge 710$ raises an <code>OverflowError</code> or produces <code>nan</code>.</p>
-        <ol>
-            <li>Implement <code>safe_softmax(logits)</code> using the max-subtraction stabilization technique.</li>
-            <li>Write a <code>unittest.TestCase</code> checking:
-                <ul>
-                    <li>Probabilities sum to $1.0$ within tolerance.</li>
-                    <li>No <code>nan</code> or overflow occurs when tested with <code>[1000.0, 1001.0, 1002.0]</code>.</li>
-                </ul>
-            </li>
-        </ol>
+        <p>The standard Softmax formula $\text{Softmax}(\mathbf{z})_i = \frac{e^{z_i}}{\sum_j e^{z_j}}$ overflows on inputs $\ge 710$ in 64-bit IEEE floating point. Show how subtracting the maximum logit $m = \max_k z_k$ stabilizes it, and compute safe softmax for $\mathbf{z} = [1000.0, 1001.0, 1002.0]$.</p>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
-                <pre><code>import math
-import unittest
+                <h4>Part 1: Proof of Invariance</h4>
+                $$\frac{e^{z_i - c}}{\sum_{j=1}^K e^{z_j - c}} = \frac{e^{z_i} \cdot e^{-c}}{e^{-c} \cdot \sum_{j=1}^K e^{z_j}} = \frac{e^{z_i}}{\sum_{j=1}^K e^{z_j}}$$
+                <p>The constant $e^{-c}$ cancels out in numerator and denominator! When $c = \max_k z_k$, the largest exponent is $e^0 = 1.0$, avoiding overflow.</p>
 
-def safe_softmax(logits: list[float]) -> list[float]:
-    if not logits:
-        return []
-    max_val = max(logits)
-    # Subtract max_val to prevent overflow
-    exps = [math.exp(x - max_val) for x in logits]
-    sum_exps = sum(exps)
-    return [e / sum_exps for e in exps]
-
-class TestSoftmax(unittest.TestCase):
-    def test_sum_to_one(self):
-        probs = safe_softmax([1.0, 2.0, 3.0])
-        self.assertAlmostEqual(sum(probs), 1.0, places=6)
-
-    def test_overflow_protection(self):
-        probs = safe_softmax([1000.0, 1001.0, 1002.0])
-        self.assertFalse(any(math.isnan(p) for p in probs))
-        self.assertAlmostEqual(sum(probs), 1.0, places=6)</code></pre>
+                <h4>Part 2: Hand Calculation</h4>
+                <ol>
+                    <li>$m = 1002.0 \implies \mathbf{z} - m = [-2.0, -1.0, 0.0]$</li>
+                    <li>$e^{-2} \approx 0.1353, \quad e^{-1} \approx 0.3679, \quad e^0 = 1.0000$</li>
+                    <li>$\text{Sum} = 0.1353 + 0.3679 + 1.0000 = \mathbf{1.5032}$</li>
+                    <li>$p_1 = \frac{0.1353}{1.5032} \approx \mathbf{0.0900}, \quad p_2 = \frac{0.3679}{1.5032} \approx \mathbf{0.2447}, \quad p_3 = \frac{1.0000}{1.5032} \approx \mathbf{0.6653}$</li>
+                </ol>
             </div>
         </details>
     </div>
 
-    <!-- PROBLEM 2 -->
+    <!-- Problem 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 2: Algorithmic Profiling &amp; Eliminating Bottlenecks</h3>
+            <h3>Problem 2: Baseline Random Loss Invariant Check</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Consider an unoptimized vocabulary filter scanning $N = 100{,}000$ tokens against a stopword list of $M = 5{,}000$ items using a Python list: <code>token not in stopwords</code>.</p>
-        <ol>
-            <li>What is the Big-O time complexity?</li>
-            <li>How can the data structure be altered to reduce lookup complexity to $O(1)$?</li>
-            <li>Why does this CPU bottleneck cause GPU starvation during deep learning training?</li>
-        </ol>
+        <p>You initialize a language model with a vocabulary of $V = 32,000$ tokens. What is the theoretical baseline cross-entropy loss $\mathcal{L}_{\text{random}}$ before training?</p>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
-                <div class="step-box">
-                    <strong>1. Complexity:</strong> Scanning an $M$-element list for $N$ tokens is $O(N \times M)$ ($500{,}000{,}000$ comparisons).
-                </div>
-                <div class="step-box">
-                    <strong>2. Optimization:</strong> Convert the stopword collection into a <code>set</code> (hash table). Set lookups are $O(1)$ on average, reducing total runtime to $O(N + M)$—yielding a ~9,000x speedup!
-                </div>
-                <div class="step-box">
-                    <strong>3. GPU Starvation:</strong> Deep learning accelerators (GPUs) compute batches in milliseconds. If the CPU host thread takes tens of seconds preparing the next batch, the GPU remains idle at 0% utilization.
-                </div>
+                $$\mathcal{L}_{\text{random}} = -\ln\left(\frac{1}{V}\right) = \ln(V)$$
+                $$\mathcal{L}_{\text{random}} = \ln(32,000) \approx \mathbf{10.3735}$$
+                <p>If initial loss starts at 1.45 instead of ~10.37, it flags data leakage or an evaluation slicing bug in your test suite!</p>
             </div>
         </details>
     </div>
 
-    <!-- PROBLEM 3 -->
+    <!-- Problem 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 3: Production Training Configuration &amp; Reproducibility Harness</h3>
+            <h3>Problem 3: Algorithmic Profiling & Asymptotic Complexity</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>Implement an <code>ExperimentConfig</code> dataclass that manages hyperparameters, locks pseudo-random seeds, and ensures that separate script executions produce identical stochastic weight draws.</p>
+        <p>Compare the time complexity of checking $N = 100,000$ items using a list ($\mathcal{O}(N^2)$) versus a hash set ($\mathcal{O}(N)$).</p>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
-                <pre><code>import random
-from dataclasses import dataclass
-
-@dataclass
-class ExperimentConfig:
-    seed: int
-    learning_rate: float
-    batch_size: int
-
-    def lock_seeds(self):
-        random.seed(self.seed)
-
-# Verification
-cfg1 = ExperimentConfig(seed=42, learning_rate=1e-4, batch_size=32)
-cfg2 = ExperimentConfig(seed=42, learning_rate=1e-4, batch_size=32)
-
-cfg1.lock_seeds()
-draws1 = [random.random() for _ in range(3)]
-
-cfg2.lock_seeds()
-draws2 = [random.random() for _ in range(3)]
-
-assert draws1 == draws2
-print("Deterministic reproducibility confirmed!")</code></pre>
+                <ul>
+                    <li><strong>List search ($\mathcal{O}(N^2)$):</strong> $5 \times 10^9$ operations $\approx \mathbf{1.39\text{ hours}}$</li>
+                    <li><strong>Hash set ($\mathcal{O}(N)$):</strong> $100,000$ operations $\approx \mathbf{0.1\text{ seconds}}$</li>
+                </ul>
+                <p>Profiling identifies this bottleneck and yields a 50,000x speedup!</p>
             </div>
         </details>
     </div>
 
+    <div style="margin-top: 2rem;">
+        <a href="lecture.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">← Back to Lecture 1.2</a>
+    </div>
 </body>
 </html>
-

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 1.4: Capstone Project — Building a Micro-Tensor Library</title>
+    <title>Topic 1.4: Capstone Project — Building a Micro-Tensor Library — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -68,13 +68,6 @@
             margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        .tip-box {
-            background-color: var(--accent-bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 0 8px 8px 0;
-        }
         pre {
             background-color: var(--code-bg);
             color: var(--code-text);
@@ -91,70 +84,130 @@
         }
         p code, li code {
             background-color: var(--primary-light);
-            color: var(--primary);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
         }
     </style>
 </head>
 <body>
+    <a href="../index.html" class="back-link">← Back to Phase 1: Python Programming for AI</a>
+    
+    <h1>Topic 1.4: Capstone Project — Building a Micro-Tensor Library</h1>
+    <p>Welcome to the <strong>Capstone Project for Phase 1</strong>! In this project, we demystify deep learning engines by building a pure Python tensor library supporting multi-dimensional strides, zero-copy transposition, matrix multiplication, and a complete neural network forward pass.</p>
 
-    <a href="../index.html" class="back-link">← Back to Phase 1 Index</a>
-    <header>
-        <h1>Topic 1.4: Capstone Project — Building a Micro-Tensor Library</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Designing a Mini-PyTorch Numerical Computing Engine from Scratch in Pure Python</p>
-    </header>
+    <h2>1. 🧒 The 12-Year-Old Analogy: The Conveyor Belt & The Cardboard Divider</h2>
+    <div class="concept-card">
+        <h3>Tensors are Flat Conveyor Belts in Memory</h3>
+        <p>A tensor is not a nested list. It consists of:</p>
+        <ol>
+            <li><strong>Storage (The Conveyor Belt):</strong> A single flat 1D continuous array of numbers in RAM.</li>
+            <li><strong>Shape (The Cardboard Dividers):</strong> Dimensions telling your brain how many rows and columns to imagine.</li>
+            <li><strong>Strides (The Step Ruler):</strong> Offsets telling the CPU how many items to skip along the conveyor belt to move by 1 in each dimension.</li>
+        </ol>
+        $$\text{flat\_index}(r, c) = r \cdot S_0 + c \cdot S_1$$
+    </div>
 
-    <section>
-        <h2>1. The Anatomy of a Tensor</h2>
-        <div class="concept-card">
-            <h3>Under the Hood of PyTorch and NumPy</h3>
-            <p>A tensor is fundamentally composed of three components:</p>
-            <ul>
-                <li><strong>1D Storage Buffer:</strong> A single continuous array holding raw floating-point numbers.</li>
-                <li><strong>Shape Tuple:</strong> The dimensional sizes, e.g. <code>(rows, cols)</code>.</li>
-                <li><strong>Strides Tuple:</strong> Step sizes needed to jump in the flat 1D buffer to advance along each dimension.</li>
-            </ul>
-            <p>For any 2D coordinate $(r, c)$, the 1D index in memory is calculated via:</p>
-            <p>$$\text{flat\_index}(r, c) = r \times S_0 + c \times S_1$$</p>
-        </div>
-    </section>
+    <h2>2. Zero-Copy Operations: The Transposition Mirror Trick</h2>
+    <div class="concept-card">
+        <h3>🧒 The 12-Year-Old Analogy: Tilting Your Head vs. Moving Heavy Bricks</h3>
+        <p>To transpose a matrix from $(2, 3)$ to $(3, 2)$, you don't pick up and move the numbers! You simply swap the shape tuple to $(3, 2)$ and swap the strides tuple to $(1, 3)$. It executes in $\mathcal{O}(1)$ time with zero memory copies!</p>
+    </div>
 
-    <section>
-        <h2>2. Zero-Copy Transposition</h2>
-        <p>In classical programming, transposing a matrix creates a new matrix and copies every value. In high-performance tensor engines, transposition is an $O(1)$ constant-time operation that merely swaps the <strong>shape</strong> and <strong>strides</strong> metadata while sharing the exact same underlying 1D data buffer!</p>
-        <div class="tip-box">
-            <strong>Stride Swap Magic:</strong>
-            $$\text{Matrix } A: \text{Shape } (M, N), \text{Strides } (N, 1)$$
-            $$\text{Matrix } A^T: \text{Shape } (N, M), \text{Strides } (1, N)$$
-        </div>
-    </section>
+    <h2>3. Matrix Multiplication: The Core Workhorse (<code>@</code>)</h2>
+    <div class="concept-card">
+        <h3>Entrywise Product Formula</h3>
+        $$C_{i, j} = \sum_{k=0}^{K-1} A_{i, k} \times B_{k, j}$$
+        <p><strong>🧒 What the math is actually doing:</strong> Row $i$ of Matrix $A$ hugs Column $j$ of Matrix $B$. Matching pairs multiply together and sum into a single output score $C_{i, j}$.</p>
+    </div>
 
-    <section>
-        <h2>3. The Desired Target API</h2>
-        <p>Our micro-tensor engine will support standard deep learning syntax:</p>
-        <pre><code># Instantiation
-x = Tensor([[1.0, 2.0], [3.0, 4.0]])
+    <h2>4. 📋 Mathematical & Technical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>storage</code></td>
+                <td>"storage buffer"</td>
+                <td>1D flat continuous memory array holding all raw numbers</td>
+                <td>A single long conveyor belt holding candy pieces in a row</td>
+            </tr>
+            <tr>
+                <td><code>shape</code></td>
+                <td>"shape tuple"</td>
+                <td>Dimensions describing the multi-dimensional extents</td>
+                <td>Cardboard dividers showing how many rows and columns exist</td>
+            </tr>
+            <tr>
+                <td><code>strides</code></td>
+                <td>"strides tuple"</td>
+                <td>Memory offsets required to step along each axis in 1D RAM</td>
+                <td>Ruler marks telling a robot arm how far to reach on the belt</td>
+            </tr>
+            <tr>
+                <td><code>@</code></td>
+                <td>"matmul operator"</td>
+                <td>Operator overloading for matrix-matrix or matrix-vector product</td>
+                <td>Rows of Matrix A taking a flying leap to hug columns of Matrix B</td>
+            </tr>
+            <tr>
+                <td><code>.T</code></td>
+                <td>"dot T (transpose)"</td>
+                <td>Zero-copy transpose property created by swapping strides</td>
+                <td>Tilting your head sideways instead of carrying heavy stone blocks</td>
+            </tr>
+            <tr>
+                <td>$\text{ReLU}(z)$</td>
+                <td>"ray-loo of z"</td>
+                <td>Rectified Linear Unit activation function: $\max(0, z)$</td>
+                <td>A one-way electrical diode that lets positive voltage pass</td>
+            </tr>
+        </tbody>
+    </table>
 
-# Matrix Multiplication Operator
-y = x @ x
-
-# Transposition (Zero-Copy)
-y_trans = y.T
-
-# Elementwise Arithmetic & Reductions
-z = y + 10.0
-total = z.sum()</code></pre>
-    </section>
-
-    <section>
-        <h2>4. Multi-Layer Perceptron (MLP) Forward Pass</h2>
-        <p>Using our custom tensor engine, we will execute a complete 2-layer neural network forward pass:</p>
-        <p>$$z_1 = X W_1 + b_1$$</p>
-        <p>$$a_1 = \text{ReLU}(z_1)$$</p>
-        <p>$$\hat{y} = a_1 W_2 + b_2$$</p>
-    </section>
-
+    <div class="nav-buttons">
+        <a href="../03_scientific_computing_stack/lecture.html" class="btn btn-outline">← Previous: Topic 1.3</a>
+        <a href="exercises_and_solutions.html" class="btn">Topic 1.4 Exercises & Solutions →</a>
+    </div>
 </body>
 </html>
-

@@ -65,8 +65,8 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .problem-header {
@@ -74,238 +74,174 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.75rem;
         }
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
         }
-        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
         details {
-            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
+            margin-top: 1.25rem;
             overflow: hidden;
-            background: var(--solution-bg);
         }
         summary {
             padding: 0.85rem 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            background-color: var(--primary-light);
             color: var(--primary);
             user-select: none;
-            transition: background 0.2s;
+            background-color: var(--primary-light);
+            border-bottom: 1px solid transparent;
         }
-        summary:hover {
-            opacity: 0.9;
+        details[open] summary {
+            border-bottom-color: var(--border);
         }
         .solution-content {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+            padding: 1.25rem;
         }
-        pre {
-            background-color: var(--code-bg);
-            color: var(--code-text);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.9rem;
+        .step-box {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
         }
-        code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        p code {
-            background-color: rgba(125, 125, 125, 0.15);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-        }
-        .takeaway {
-            background-color: var(--accent-bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
+        .step-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-link">← Back to Phase 3 Portal</a>
-    <a href="lecture.html" class="back-link" style="margin-left: 1.5rem;">📖 Read Lecture 3.3</a>
-    
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 3.3</a>
+
     <h1>Topic 3.3: Exercises & Solutions</h1>
-    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
-        Master computational graph decomposition, branch accumulation calculus, and vectorized matrix backpropagation.
-    </p>
+    <p>Work through each problem with pen and paper before revealing the collapsible solutions below.</p>
 
-    <!-- Problem 1 -->
+    <!-- PROBLEM 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3 style="margin: 0;">Problem 1: Step-by-Step Manual Backpropagation on a DAG</h3>
+            <h3>Problem 1: Step-by-Step Manual Backpropagation on a Computational Graph</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Consider the computational graph evaluating:</p>
-        $$f(x, y, z) = (x + y) \cdot z$$
-        <p>Given the specific numerical input values:</p>
-        $$x = 2.0, \quad y = 3.0, \quad z = 4.0$$
-        <p>Define intermediate node $q = x + y$, so that $f = q \cdot z$.</p>
+        <p><strong>🧒 The Context:</strong> Maya's arithmetic calculator evaluates $f(x, y, z) = (x + y) \cdot z$ with inputs $x = 2.0, y = 3.0, z = 4.0$. Intermediate node is $q = x + y$.</p>
         <ol>
-            <li>Execute the <strong>Forward Pass</strong>: Compute the numerical values of $q$ and $f$.</li>
-            <li>Compute the <strong>Local Derivatives</strong>: $\frac{\partial f}{\partial q}$, $\frac{\partial f}{\partial z}$, $\frac{\partial q}{\partial x}$, and $\frac{\partial q}{\partial y}$.</li>
-            <li>Execute the <strong>Backward Pass</strong>: Apply the chain rule to compute adjoints $\bar{f}$, $\bar{z}$, $\bar{q}$, $\bar{x}$, and $\bar{y}$.</li>
-            <li>State the numerical sensitivity interpretation: If $x$ is increased by $+0.01$, by how much does $f$ change?</li>
+            <li>Compute the Forward Pass values for $q$ and $f$.</li>
+            <li>Find local derivatives $\frac{\partial f}{\partial q}, \frac{\partial f}{\partial z}, \frac{\partial q}{\partial x}, \frac{\partial q}{\partial y}$.</li>
+            <li>Run Backward Pass for adjoints $\bar{f}, \bar{z}, \bar{q}, \bar{x}, \bar{y}$.</li>
+            <li>Verify output change if $x$ is nudged by $+0.01$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
-                <h4>1. Forward Pass</h4>
-                <ul>
-                    <li>$q = x + y = 2.0 + 3.0 = \mathbf{5.0}$</li>
-                    <li>$f = q \cdot z = 5.0 \cdot 4.0 = \mathbf{20.0}$</li>
-                </ul>
-
-                <h4>2. Local Derivatives</h4>
-                <ul>
-                    <li>$\frac{\partial f}{\partial q} = z = 4.0$</li>
-                    <li>$\frac{\partial f}{\partial z} = q = 5.0$</li>
-                    <li>$\frac{\partial q}{\partial x} = 1.0$</li>
-                    <li>$\frac{\partial q}{\partial y} = 1.0$</li>
-                </ul>
-
-                <h4>3. Backward Pass (Adjoint Propagation)</h4>
-                <ol>
-                    <li>Seed upstream loss adjoint:
-                        $$\bar{f} = \frac{\partial f}{\partial f} = \mathbf{1.0}$$
-                    </li>
-                    <li>Backprop through multiplication node $f = q \cdot z$:
-                        $$\bar{z} = \bar{f} \cdot \frac{\partial f}{\partial z} = 1.0 \times 5.0 = \mathbf{5.0}$$
-                        $$\bar{q} = \bar{f} \cdot \frac{\partial f}{\partial q} = 1.0 \times 4.0 = \mathbf{4.0}$$
-                    </li>
-                    <li>Backprop through addition node $q = x + y$:
-                        $$\bar{x} = \bar{q} \cdot \frac{\partial q}{\partial x} = 4.0 \times 1.0 = \mathbf{4.0}$$
-                        $$\bar{y} = \bar{q} \cdot \frac{\partial q}{\partial y} = 4.0 \times 1.0 = \mathbf{4.0}$$
-                    </li>
-                </ol>
-
-                <div class="takeaway">
-                    <strong>Sensitivity Check:</strong> Since $\frac{\partial f}{\partial x} = 4.0$, perturbing $x$ by $\Delta x = +0.01$ changes $f$ by:
-                    $$\Delta f \approx \bar{x} \cdot \Delta x = 4.0 \times 0.01 = \mathbf{+0.04}$$
-                    Direct check: $((2.01 + 3) \times 4) = 5.01 \times 4 = 20.04$ (exact match!).
+                <div class="step-box">
+                    <strong>1. Forward Pass:</strong>
+                    $q = 2.0 + 3.0 = \mathbf{5.0}$; &nbsp; $f = 5.0 \cdot 4.0 = \mathbf{20.0}$.
+                </div>
+                <div class="step-box">
+                    <strong>2. Local Derivatives:</strong>
+                    $\frac{\partial f}{\partial q} = z = 4.0, \quad \frac{\partial f}{\partial z} = q = 5.0, \quad \frac{\partial q}{\partial x} = 1.0, \quad \frac{\partial q}{\partial y} = 1.0$.
+                </div>
+                <div class="step-box">
+                    <strong>3. Backward Adjoints:</strong>
+                    <ul>
+                        <li>$\bar{f} = 1.0$</li>
+                        <li>$\bar{z} = 1.0 \times 5.0 = \mathbf{5.0}$</li>
+                        <li>$\bar{q} = 1.0 \times 4.0 = \mathbf{4.0}$</li>
+                        <li>$\bar{x} = 4.0 \times 1.0 = \mathbf{4.0}$</li>
+                        <li>$\bar{y} = 4.0 \times 1.0 = \mathbf{4.0}$</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <strong>4. Sensitivity Verification:</strong>
+                    $\Delta f \approx \bar{x} \Delta x = 4.0 \times 0.01 = \mathbf{+0.04}$.
+                    Direct check: $(2.01 + 3) \times 4 = 20.04$ ✅.
                 </div>
             </div>
         </details>
     </div>
 
-    <!-- Problem 2 -->
+    <!-- PROBLEM 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3 style="margin: 0;">Problem 2: Multi-Path Gradient Accumulation Calculus</h3>
+            <h3>Problem 2: Multi-Path Gradient Accumulation Calculus</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>In modern architectures (such as Transformer multi-head attention and Residual connections $x + F(x)$), gradients flow through multiple parallel paths and must accumulate at branching inputs.</p>
-        <p>Consider the multivariable scalar function:</p>
-        $$f(x, y) = x^2 y + x y^2$$
+        <p><strong>🧒 The Context:</strong> In Transformer residual connections, gradients split and recombine. Consider $f(x, y) = x^2 y + x y^2$.</p>
         <ol>
-            <li>Differentiate directly with respect to $x$ using standard calculus rules.</li>
-            <li>Break $f(x, y)$ into intermediate nodes: $u = x^2 y$, $v = x y^2$, and $f = u + v$.</li>
-            <li>Apply the multivariable chain rule $\frac{\partial f}{\partial x} = \frac{\partial f}{\partial u}\frac{\partial u}{\partial x} + \frac{\partial f}{\partial v}\frac{\partial v}{\partial x}$ and prove that it yields the identical formula.</li>
-            <li>Evaluate numerically at $(x = 2, y = 3)$.</li>
+            <li>Differentiate directly with respect to $x$.</li>
+            <li>Break into branches $u = x^2 y$ and $v = x y^2$ with $f = u + v$.</li>
+            <li>Apply multivariable chain rule $\frac{\partial f}{\partial x} = \frac{\partial f}{\partial u}\frac{\partial u}{\partial x} + \frac{\partial f}{\partial v}\frac{\partial v}{\partial x}$.</li>
+            <li>Evaluate at $(x = 2, y = 3)$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
-                <h4>1. Direct Differentiation</h4>
-                $$\frac{\partial f}{\partial x} = \frac{\partial}{\partial x}(x^2 y) + \frac{\partial}{\partial x}(x y^2) = \mathbf{2xy + y^2}$$
-
-                <h4>2. Intermediate Node Derivatives</h4>
-                <ul>
-                    <li>$u = x^2 y \implies \frac{\partial u}{\partial x} = 2xy$</li>
-                    <li>$v = x y^2 \implies \frac{\partial v}{\partial x} = y^2$</li>
-                    <li>$f = u + v \implies \frac{\partial f}{\partial u} = 1, \quad \frac{\partial f}{\partial v} = 1$</li>
-                </ul>
-
-                <h4>3. Multivariable Chain Rule Verification</h4>
-                $$\frac{\partial f}{\partial x} = \frac{\partial f}{\partial u} \frac{\partial u}{\partial x} + \frac{\partial f}{\partial v} \frac{\partial v}{\partial x} = (1)(2xy) + (1)(y^2) = \mathbf{2xy + y^2} \quad \blacksquare$$
-
-                <h4>4. Numerical Evaluation at $(x = 2, y = 3)$</h4>
-                $$\frac{\partial f}{\partial x}(2, 3) = 2(2)(3) + 3^2 = 12 + 9 = \mathbf{21.0}$$
-
-                <div class="takeaway">
-                    <strong>Key Architectural Principle:</strong> In PyTorch, anytime a variable $x$ is used more than once in the forward pass, its gradient accumulator <code>grad += incoming</code> ensures that all incoming chain rule signals from parallel branches sum together automatically.
+                <div class="step-box">
+                    <strong>1. Direct Derivative:</strong>
+                    $\frac{\partial f}{\partial x} = \mathbf{2xy + y^2}$.
+                </div>
+                <div class="step-box">
+                    <strong>2. Branch Derivatives:</strong>
+                    $\frac{\partial u}{\partial x} = 2xy, \quad \frac{\partial v}{\partial x} = y^2, \quad \frac{\partial f}{\partial u} = 1, \quad \frac{\partial f}{\partial v} = 1$.
+                </div>
+                <div class="step-box">
+                    <strong>3. Chain Rule:</strong>
+                    $$\frac{\partial f}{\partial x} = (1)(2xy) + (1)(y^2) = \mathbf{2xy + y^2} \quad \blacksquare$$
+                </div>
+                <div class="step-box">
+                    <strong>4. Numerical Value:</strong>
+                    $\frac{\partial f}{\partial x}(2, 3) = 2(2)(3) + 3^2 = 12 + 9 = \mathbf{21.0}$.
                 </div>
             </div>
         </details>
     </div>
 
-    <!-- Problem 3 -->
+    <!-- PROBLEM 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3 style="margin: 0;">Problem 3: Vectorized Matrix Backpropagation Derivation ($Y = XW + b$)</h3>
+            <h3>Problem 3: Vectorized Matrix Backpropagation Derivation ($Y = XW + b$)</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>In deep learning frameworks, neural layers execute batched linear transformations:</p>
-        $$Y = X W + b$$
-        <p>Where:</p>
-        <ul>
-            <li>$X \in \mathbb{R}^{B \times D_{\text{in}}}$ (Input batch of size $B$)</li>
-            <li>$W \in \mathbb{R}^{D_{\text{in}} \times D_{\text{out}}}$ (Weight matrix)</li>
-            <li>$b \in \mathbb{R}^{D_{\text{out}}}$ (Bias row vector broadcasted across batch)</li>
-            <li>$Y \in \mathbb{R}^{B \times D_{\text{out}}}$ (Output activation matrix)</li>
-        </ul>
-        <p>Let $\mathcal{L}$ be the scalar objective loss. Assume the upstream gradient matrix $\frac{\partial \mathcal{L}}{\partial Y} \in \mathbb{R}^{B \times D_{\text{out}}}$ has already been backpropagated.</p>
+        <p><strong>🧒 The Context:</strong> The core backward pass in PyTorch linear layers with inputs $X \in \mathbb{R}^{B \times D_{\text{in}}}$, weights $W \in \mathbb{R}^{D_{\text{in}} \times D_{\text{out}}}$, and downstream gradient $\frac{\partial \mathcal{L}}{\partial Y}$.</p>
         <ol>
-            <li>Using summation index notation, express $Y_{i, j}$ in terms of elements of $X$, $W$, and $b$.</li>
-            <li>Derive the weight gradient matrix $\frac{\partial \mathcal{L}}{\partial W}$. Show that $\frac{\partial \mathcal{L}}{\partial W} = X^T \left(\frac{\partial \mathcal{L}}{\partial Y}\right)$.</li>
-            <li>Derive the input gradient matrix $\frac{\partial \mathcal{L}}{\partial X}$. Show that $\frac{\partial \mathcal{L}}{\partial X} = \left(\frac{\partial \mathcal{L}}{\partial Y}\right) W^T$.</li>
-            <li>Derive the bias gradient vector $\frac{\partial \mathcal{L}}{\partial b}$.</li>
+            <li>Express $Y_{i, j}$ using summation.</li>
+            <li>Derive $\frac{\partial \mathcal{L}}{\partial W} = X^T \left( \frac{\partial \mathcal{L}}{\partial Y} \right)$.</li>
+            <li>Derive $\frac{\partial \mathcal{L}}{\partial X} = \left( \frac{\partial \mathcal{L}}{\partial Y} \right) W^T$.</li>
+            <li>Derive bias gradient $\frac{\partial \mathcal{L}}{\partial b}$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
-                <h4>1. Element-wise Index Expression</h4>
-                $$Y_{i, j} = \sum_{k=1}^{D_{\text{in}}} X_{i, k} W_{k, j} + b_j$$
-
-                <h4>2. Derivation of $\frac{\partial \mathcal{L}}{\partial W}$</h4>
-                <p>By the multivariable chain rule, $W_{k, j}$ affects the loss through all batch samples $i \in \{1, \dots, B\}$ in output column $j$:</p>
-                $$\frac{\partial \mathcal{L}}{\partial W_{k, j}} = \sum_{i=1}^B \frac{\partial \mathcal{L}}{\partial Y_{i, j}} \frac{\partial Y_{i, j}}{\partial W_{k, j}}$$
-                <p>Since $\frac{\partial Y_{i, j}}{\partial W_{k, j}} = X_{i, k}$:</p>
-                $$\frac{\partial \mathcal{L}}{\partial W_{k, j}} = \sum_{i=1}^B X_{i, k} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} = \sum_{i=1}^B (X^T)_{k, i} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j}$$
-                <p>Recognizing the definition of matrix multiplication:</p>
-                $$\mathbf{\frac{\partial \mathcal{L}}{\partial W} = X^T \left( \frac{\partial \mathcal{L}}{\partial Y} \right)} \quad \blacksquare$$
-                <p><em>Dimension Check:</em> $(D_{\text{in}} \times B) \times (B \times D_{\text{out}}) = (D_{\text{in}} \times D_{\text{out}})$. Perfect!</p>
-
-                <h4>3. Derivation of $\frac{\partial \mathcal{L}}{\partial X}$</h4>
-                <p>Input activation $X_{i, k}$ affects loss through all output features $j \in \{1, \dots, D_{\text{out}}\}$ for sample $i$:</p>
-                $$\frac{\partial \mathcal{L}}{\partial X_{i, k}} = \sum_{j=1}^{D_{\text{out}}} \frac{\partial \mathcal{L}}{\partial Y_{i, j}} \frac{\partial Y_{i, j}}{\partial X_{i, k}} = \sum_{j=1}^{D_{\text{out}}} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} W_{k, j} = \sum_{j=1}^{D_{\text{out}}} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} (W^T)_{j, k}$$
-                <p>In matrix notation:</p>
-                $$\mathbf{\frac{\partial \mathcal{L}}{\partial X} = \left( \frac{\partial \mathcal{L}}{\partial Y} \right) W^T} \quad \blacksquare$$
-                <p><em>Dimension Check:</em> $(B \times D_{\text{out}}) \times (D_{\text{out}} \times D_{\text{in}}) = (B \times D_{\text{in}})$. Perfect!</p>
-
-                <h4>4. Derivation of Bias Gradient $\frac{\partial \mathcal{L}}{\partial b}$</h4>
-                <p>The parameter $b_j$ is shared across all batch items $i \in \{1, \dots, B\}$:</p>
-                $$\frac{\partial \mathcal{L}}{\partial b_j} = \sum_{i=1}^B \frac{\partial \mathcal{L}}{\partial Y_{i, j}} \frac{\partial Y_{i, j}}{\partial b_j} = \sum_{i=1}^B \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} \cdot 1$$
-                <p>Vectorized across all output units:</p>
-                $$\mathbf{\frac{\partial \mathcal{L}}{\partial b} = \sum_{i=1}^B \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, :}}$$
-
-                <div class="takeaway">
-                    <strong>The Deep Learning Triad:</strong>
-                    Every dense linear layer in modern hardware (PyTorch, JAX, CUDA) executes these three tensor operations:
-                    <ol>
-                        <li><strong>Forward:</strong> $Y = XW + b$</li>
-                        <li><strong>Backward Weights:</strong> $\nabla_W = X^T \nabla_Y$</li>
-                        <li><strong>Backward Inputs:</strong> $\nabla_X = \nabla_Y W^T$</li>
-                    </ol>
+                <div class="step-box">
+                    <strong>1. Summation Formula:</strong>
+                    $Y_{i, j} = \sum_{k=1}^{D_{\text{in}}} X_{i, k} W_{k, j} + b_j$.
+                </div>
+                <div class="step-box">
+                    <strong>2. Weight Matrix Gradient:</strong>
+                    $$\frac{\partial \mathcal{L}}{\partial W_{k, j}} = \sum_{i=1}^B \frac{\partial \mathcal{L}}{\partial Y_{i, j}} X_{i, k} = \sum_{i=1}^B (X^T)_{k, i} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} \implies \mathbf{\frac{\partial \mathcal{L}}{\partial W} = X^T \left( \frac{\partial \mathcal{L}}{\partial Y} \right)}$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Input Feature Gradient:</strong>
+                    $$\frac{\partial \mathcal{L}}{\partial X_{i, k}} = \sum_{j=1}^{D_{\text{out}}} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} W_{k, j} = \sum_{j=1}^{D_{\text{out}}} \left(\frac{\partial \mathcal{L}}{\partial Y}\right)_{i, j} (W^T)_{j, k} \implies \mathbf{\frac{\partial \mathcal{L}}{\partial X} = \left( \frac{\partial \mathcal{L}}{\partial Y} \right) W^T}$$
+                </div>
+                <div class="step-box">
+                    <strong>4. Bias Gradient:</strong>
+                    $\frac{\partial \mathcal{L}}{\partial b} = \sum_{i=1}^B \left( \frac{\partial \mathcal{L}}{\partial Y} \right)_{i, :}$ (Sum across batch dimension 0).
                 </div>
             </div>
         </details>
     </div>
+
 </body>
 </html>

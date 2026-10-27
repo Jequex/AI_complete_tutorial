@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 5.5: Bayesian Inference & Conjugate Priors</title>
+    <title>Topic 5.5: Bayesian Inference & Conjugate Priors — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -20,6 +20,8 @@
             --accent-bg: #ecfdf5;
             --danger: #dc2626;
             --danger-bg: #fef2f2;
+            --warning-bg: #fffbeb;
+            --warning-border: #fef3c7;
             --code-bg: #1e1e2e;
             --code-text: #cdd6f4;
         }
@@ -35,6 +37,8 @@
                 --accent-bg: #064e3b;
                 --danger: #f87171;
                 --danger-bg: #450a0a;
+                --warning-bg: #451a03;
+                --warning-border: #78350f;
                 --code-bg: #0b0f19;
                 --code-text: #e2e8f0;
             }
@@ -50,8 +54,6 @@
         }
         h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
         h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
-        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
-        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -61,12 +63,20 @@
             font-weight: 600;
             margin-bottom: 1.5rem;
         }
+        .back-link:hover { text-decoration: underline; }
         .callout {
             background-color: var(--card-bg);
             border-left: 4px solid var(--primary);
-            padding: 1.25rem;
+            padding: 1.25rem 1.5rem;
             margin: 1.5rem 0;
             border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .callout-story {
+            background-color: var(--primary-light);
+            border-left-color: var(--primary);
         }
         .callout-success {
             background-color: var(--accent-bg);
@@ -76,130 +86,194 @@
             background-color: var(--danger-bg);
             border-left-color: var(--danger);
         }
+        .callout-warning {
+            background-color: var(--warning-bg);
+            border-left-color: #d97706;
+            border-top: 1px solid var(--warning-border);
+            border-right: 1px solid var(--warning-border);
+            border-bottom: 1px solid var(--warning-border);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
+            font-size: 0.95rem;
         }
         th, td {
+            padding: 0.85rem 1rem;
             border: 1px solid var(--border);
-            padding: 0.75rem 1rem;
             text-align: left;
         }
         th {
-            background-color: var(--primary-light);
+            background-color: var(--card-bg);
             color: var(--primary);
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre, code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         pre {
             background-color: var(--code-bg);
             color: var(--code-text);
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             overflow-x: auto;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        p code {
-            background-color: rgba(125, 125, 125, 0.15);
+            background-color: var(--card-bg);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
+            font-size: 0.88em;
+            border: 1px solid var(--border);
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
-    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 5: Statistics & Estimation</a>
 
     <h1>Topic 5.5: Bayesian Inference & Conjugate Priors</h1>
-    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
-        Beyond point estimates: maintaining full posterior distributions, posterior predictive ensembles, Beta-Binomial conjugate updating, and the intractability of deep networks.
-    </p>
+    <p><em>Maintaining living belief distributions to endow AI systems with calibrated uncertainty.</em></p>
 
-    <h2>1. Executive Summary & The Video Game Skill Tracker</h2>
-    <p>
-        In point estimation (MLE and MAP), models output a single weight vector. But when facing rare out-of-distribution inputs, point models suffer from dangerous overconfidence.
-        <strong>Full Bayesian Inference maintains the entire probability curve over possible weights: $P(\mathbf{w} \mid D)$.</strong>
-    </p>
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;">
+
+    <h2>1. Executive Summary: Beyond Single-Number Guesses</h2>
+    <p>Standard neural networks pick a single best weight vector $\hat{\mathbf{w}}$. But on novel, bizarre data, single-point models make wildly confident errors because they have zero self-awareness of their own uncertainty.</p>
+    <p><strong>Full Bayesian Inference</strong> maintains the complete probability distribution $P(\mathbf{w} \mid D)$ across all possible models. Every time a new data point arrives, our belief distribution updates, sharpens, and concentrates!</p>
+
+    <div class="callout callout-story">
+        <h3>🧒 The 12-Year-Old Analogy: Maya's Video Game "Belief Meter"</h3>
+        <p>Imagine <strong>Maya</strong> plays a competitive online game. The matchmaking server tracks her skill $\theta \in [0, 1]$:</p>
+        <ol>
+            <li><strong>Before any games (The Prior):</strong> The server has a broad, gentle curve centered at $50\%$ ($\text{Beta}(2, 2)$). It doesn't know if Maya is a pro or a beginner.</li>
+            <li><strong>Match 1: Maya wins!</strong>
+                <ul>
+                    <li><em>Gullible MLE:</em> Declares $\hat{\theta} = 100\%$, assuming Maya is an invincible goddess who will never lose a game!</li>
+                    <li><em>Wise Bayesian Belief Meter:</em> Gently nudges its confidence slider to $\approx 60\%$, knowing 1 game could easily be beginner's luck.</li>
+                </ul>
+            </li>
+            <li><strong>After 10 matches (8 wins, 2 losses):</strong> The curve shifts toward $75\%$ and grows narrower and taller.</li>
+            <li><strong>After 100 matches (75 wins, 25 losses):</strong> The belief curve becomes a razor-sharp spike at $75\% \pm 3\%$.</li>
+        </ol>
+    </div>
 
     <div class="callout">
-        <h3>The 12-Year-Old Analogy: The Live Video Game Skill Tracker</h3>
-        <p>A new player enters an online lobby. The server estimates their win-rate $\theta$:</p>
-        <ol>
-            <li><strong>Before any matches (The Prior):</strong> The server has a broad, flat bell curve centered at $50\%$. Uncertainty is massive.</li>
-            <li><strong>After 10 matches (8 wins, 2 losses):</strong> The curve shifts toward $80\%$ and grows narrower (confidence builds).</li>
-            <li><strong>After 100 matches (82 wins, 18 losses):</strong> The curve sharpens into a tight spike centered at $82\%$.</li>
-        </ol>
-        <p>
-            The server does not pretend to hold a single magic number; it maintains a living distribution of belief that updates with every single match!
-        </p>
+        <h3>🧒 The Infinite Committee Vote (Posterior Predictive)</h3>
+        <p>When predicting a label, Bayesian AI does not trust a single model. It convenes a <strong>committee of thousands of plausible models</strong> weighted by the posterior $P(\mathbf{w} \mid D)$. If they agree, the system acts with high confidence. If they disagree, the AI alerts the human: <em>"High epistemic uncertainty!"</em></p>
     </div>
 
-    <h2>2. The Bayesian Framework & The Predictive Distribution</h2>
-    <p>Bayes' Theorem for continuous parameter distributions:</p>
-    $$P(\mathbf{w} \mid D) = \frac{P(D \mid \mathbf{w}) P(\mathbf{w})}{\int P(D \mid \mathbf{w}) P(\mathbf{w}) d\mathbf{w}}$$
+    <h2>2. 📋 Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\theta$</td>
+                <td><em>"THAY-tuh"</em></td>
+                <td><strong>Unknown Parameter</strong></td>
+                <td>Maya's true hidden win-rate skill, or ad click probability.</td>
+            </tr>
+            <tr>
+                <td>$P(\theta)$</td>
+                <td><em>"P of theta"</em></td>
+                <td><strong>Prior Distribution</strong></td>
+                <td>What our belief meter looked like before seeing new match results.</td>
+            </tr>
+            <tr>
+                <td>$P(D \mid \theta)$</td>
+                <td><em>"P of D given theta"</em></td>
+                <td><strong>Likelihood Function</strong></td>
+                <td>The physical evidence: probability of getting $k$ wins in $n$ games given skill $\theta$.</td>
+            </tr>
+            <tr>
+                <td>$P(D)$</td>
+                <td><em>"P of D"</em></td>
+                <td><strong>Marginal Likelihood (Evidence)</strong></td>
+                <td>The normalizer: total data probability averaged over all possible parameters.</td>
+            </tr>
+            <tr>
+                <td>$P(\theta \mid D)$</td>
+                <td><em>"P of theta given D"</em></td>
+                <td><strong>Posterior Distribution</strong></td>
+                <td>Our updated belief meter after synthesizing evidence with our prior.</td>
+            </tr>
+            <tr>
+                <td>$\alpha, \beta$</td>
+                <td><em>"AL-fuh, BAY-tuh"</em></td>
+                <td><strong>Beta Hyperparameters</strong></td>
+                <td>Prior imaginary "pseudo-counts" of successes ($\alpha$) and failures ($\beta$).</td>
+            </tr>
+            <tr>
+                <td>$\text{B}(\alpha, \beta)$</td>
+                <td><em>"Beta of alpha, beta"</em></td>
+                <td><strong>Beta Function Normalizer</strong></td>
+                <td>Scale factor ensuring the area under the Beta curve equals $1.0$.</td>
+            </tr>
+            <tr>
+                <td>$P(x_{\text{new}} \mid D)$</td>
+                <td><em>"P of x-new given D"</em></td>
+                <td><strong>Posterior Predictive</strong></td>
+                <td>The prediction averaged across the infinite committee of plausible models.</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <h3>The Posterior Predictive Distribution (The Infinite Ensemble)</h3>
-    <p>
-        To make a prediction for a new test input $\mathbf{x}_{\text{new}}$, Bayesian AI integrates over all possible models:
-    </p>
-    $$\mathbf{P(y_{\text{new}} \mid \mathbf{x}_{\text{new}}, D) = \int P(y_{\text{new}} \mid \mathbf{x}_{\text{new}}, \mathbf{w}) P(\mathbf{w} \mid D) d\mathbf{w}}$$
-    <p>
-        This acts as an infinite ensemble of neural networks! If the models disagree, the system accurately reports high epistemic uncertainty.
-    </p>
+    <h2>3. The Magic of Conjugate Priors: Calculus Without Integrals</h2>
+    <p>A prior is <strong>conjugate</strong> to a likelihood if the resulting posterior belongs to the exact same algebraic family. Updating your belief becomes pure addition!</p>
 
-    <h2>3. The Algebraic Magic of Conjugate Priors</h2>
+    <h3>Line-by-Line Breakdown: The Beta-Binomial Update</h3>
+    $$P(\theta \mid D) \propto \underbrace{\Big[ \theta^k (1 - \theta)^{n - k} \Big]}_{\text{Binomial likelihood (k wins, n-k losses)}} \times \underbrace{\Big[ \theta^{\alpha - 1} (1 - \theta)^{\beta - 1} \Big]}_{\text{Beta prior (\alpha wins, \beta losses)}}$$
+    $$\mathbf{\theta \mid D \sim \text{Beta}\Big(\underbrace{\alpha + k}_{\text{new successes}}, \quad \underbrace{\beta + (n - k)}_{\text{new failures}}\Big)} \quad \blacksquare$$
+
+    <h3>Expected Posterior Mean & Laplace's Rule of Succession</h3>
+    $$\mathbf{\mathbb{E}[\theta \mid D] = \frac{\alpha_{\text{new}}}{\alpha_{\text{new}} + \beta_{\text{new}}} = \frac{\alpha + k}{\alpha + \beta + n}}$$
+    <p>Starting from an uninformative uniform prior ($\alpha=1, \beta=1$), the chance that the next event succeeds is $\frac{k + 1}{n + 2}$ (Laplace's Rule of Succession), which safely prevents $0\%$ or $100\%$ extremes.</p>
+
+    <h2>4. Concrete Numerical Walkthrough: The 3-Click Recommender Trap</h2>
+    <p>A new movie thumbnail is tested. Prior belief: $\text{Beta}(\alpha_0 = 2, \beta_0 = 2)$ ($\approx 50\%$). It is shown $n = 3$ times and clicked $k = 3$ times.</p>
     <div class="callout callout-success">
-        <strong>Definition:</strong> A prior distribution $P(\theta)$ is called <strong>conjugate</strong> to a likelihood $P(D \mid \theta)$ if the resulting posterior $P(\theta \mid D)$ belongs to the exact same distribution family as the prior!
-    </div>
-    <p>When using conjugate priors, Bayesian updating requires zero calculus: you simply add observation counts directly to the prior parameters!</p>
-
-    <h2>4. Master Derivation: The Beta-Binomial Conjugate Model</h2>
-    <p>
-        We want to infer an unknown success probability $\theta \in [0, 1]$ (e.g. ad click rate or LLM benchmark accuracy).
-    </p>
-    <p><strong>1. Prior:</strong> We choose a $\text{Beta}(\alpha, \beta)$ prior:</p>
-    $$P(\theta) \propto \theta^{\alpha - 1} (1 - \theta)^{\beta - 1}$$
-    <p><strong>2. Likelihood:</strong> We observe $k$ successes in $n$ independent trials (Binomial):</p>
-    $$P(D \mid \theta) \propto \theta^k (1 - \theta)^{n - k}$$
-    <p><strong>3. Posterior Calculation:</strong> Multiplying prior and likelihood:</p>
-    $$P(\theta \mid D) \propto \Big[ \theta^k (1 - \theta)^{n - k} \Big] \cdot \Big[ \theta^{\alpha - 1} (1 - \theta)^{\beta - 1} \Big]$$
-    $$\mathbf{P(\theta \mid D) \propto \theta^{(\alpha + k) - 1} (1 - \theta)^{(\beta + n - k) - 1}}$$
-    <p>
-        This is identically another Beta distribution:
-    </p>
-    $$\mathbf{\theta \mid D \sim \text{Beta}(\alpha + k, \quad \beta + n - k)} \quad \blacksquare$$
-
-    <h2>5. Streaming Bayesian Updates in $O(1)$ Memory</h2>
-    <p>
-        Because the posterior is also a Beta distribution, updating is completely sequential. Today's posterior becomes tomorrow's prior:
-    </p>
-    $$\text{Beta}(\alpha, \beta) \xrightarrow{+k \text{ wins, } +(n-k) \text{ losses}} \text{Beta}(\alpha + k, \, \beta + n - k)$$
-    <p>
-        The posterior expected value of the parameter is simply:
-    </p>
-    $$\mathbb{E}[\theta \mid D] = \mathbf{\frac{\alpha + k}{(\alpha + k) + (\beta + n - k)}}$$
-
-    <h2>6. Why Deep Learning Uses Approximations</h2>
-    <div class="callout callout-danger">
-        <h3>The High-Dimensional Integral Wall</h3>
-        <p>
-            For a billion-parameter transformer, calculating the denominator $P(D) = \int P(D|\mathbf{w})P(\mathbf{w})d\mathbf{w}$ requires integrating over a 1-billion-dimensional space, which is analytically and numerically impossible.
-        </p>
-        <p>
-            Therefore, modern deep learning uses powerful approximations:
-        </p>
         <ul>
-            <li><strong>Variational Inference (VI):</strong> Approximates the posterior with an analytical Gaussian family $q_\phi(\mathbf{w})$ by optimizing the ELBO (the foundation of <strong>VAEs</strong>!).</li>
-            <li><strong>Monte Carlo Dropout (MC Dropout):</strong> Keeps dropout active at test-time to generate samples from an approximate Bayesian posterior.</li>
+            <li><strong>Pure MLE:</strong> $\frac{3}{3} = \mathbf{1.00 \quad (100\% \text{ - Dangerous Overconfidence!})}$</li>
+            <li><strong>MAP (Mode):</strong> $\frac{\alpha_{\text{new}} - 1}{\alpha_{\text{new}} + \beta_{\text{new}} - 2} = \frac{5 - 1}{5 + 2 - 2} = \frac{4}{5} = \mathbf{0.80 \quad (80\%)}$</li>
+            <li><strong>Full Bayes (Mean):</strong> $\frac{\alpha + k}{\alpha + \beta + n} = \frac{2 + 3}{2 + 2 + 3} = \frac{5}{7} \approx \mathbf{0.714 \quad (71.4\%)}$</li>
+            <li><strong>Uncertainty:</strong> Carrying the posterior standard deviation ($\approx 16\%$) tells the system not to bet the entire company on 3 data points!</li>
         </ul>
     </div>
 
-    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
-        <a href="../04_map_estimation_and_regularization/lecture.html" class="back-link">← Previous: 5.4 MAP & Regularization</a>
-        <a href="exercises_and_solutions.html" class="back-link">Next: 5.5 Exercises & Solutions →</a>
+    <h2>5. Streaming Sequential Bayesian Updating</h2>
+    <p>Bayesian learning is completely online and recursive: past posteriors become future priors!</p>
+    <ul>
+        <li><strong>Day 0:</strong> $\text{Beta}(2, 2) \implies$ Mean CTR = $50.0\%$</li>
+        <li><strong>Day 1 (3 clicks, 1 skip):</strong> $\text{Beta}(2 + 3, \, 2 + 1) = \text{Beta}(5, 3) \implies$ Mean CTR = $5/8 = 62.5\%$</li>
+        <li><strong>Day 2 (4 clicks, 0 skips):</strong> $\text{Beta}(5 + 4, \, 3 + 0) = \text{Beta}(9, 3) \implies$ Mean CTR = $9/12 = 75.0\%$</li>
+    </ul>
+
+    <div class="nav-links">
+        <a href="../04_map_estimation_and_regularization/lecture.html">&larr; Topic 5.4</a>
+        <a href="exercises_and_solutions.html">Exercises &amp; Solutions &rarr;</a>
     </div>
+
 </body>
 </html>
-

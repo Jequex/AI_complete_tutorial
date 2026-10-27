@@ -1,168 +1,110 @@
 # Topic 1.3: Exercises & Solutions — The Scientific Python Ecosystem
 
----
+Welcome to the problem set for **Topic 1.3: The Scientific Python Ecosystem**!
 
-## Problem Set Overview
-
-| Problem | Focus | Difficulty |
-| :--- | :--- | :--- |
-| **1** | **NumPy Memory Buffers, Strides, and Slicing Views** | Medium |
-| **2** | **pandas Tabular Data Sanitization & Feature Engineering** | Medium |
-| **3** | **End-to-End JSON Lines (.jsonl) Fine-Tuning Pipeline** | Challenging |
+Practice stride calculations, vectorization speedups, and DataFrame indexing. Work through each exercise before opening the collapsible solution.
 
 ---
 
-## Problem 1: NumPy Memory Buffers, Strides, and Slicing Views
+## 📝 Problem Set
 
-### The Context
-NumPy's speed comes from manipulating contiguous byte buffers through metadata (`shape`, `strides`, and `dtype`). Slicing an array creates a *view* rather than copying data in memory.
+### Problem 1: Hand-Calculating Stride Offsets and Zero-Copy Transposition
 
-### Part A: Stride Arithmetic
-Consider a 2D array of 32-bit floats (`float32`, which occupies 4 bytes per number) with shape `(4, 5)` in standard C-contiguous (row-major) order.
-1. How many total bytes does this array consume in physical RAM?
-2. What are the strides of this array in units of bytes?
-3. If we slice every other row and every other column with `A[::2, ::2]`, what is the resulting shape and the new stride tuple? Does this operation allocate a new array in RAM?
+Consider a 2D matrix $A$ of shape $(3, 4)$ stored in row-major order:
+$$A = \begin{bmatrix}
+1 & 2 & 3 & 4 \\
+5 & 6 & 7 & 8 \\
+9 & 10 & 11 & 12
+\end{bmatrix}$$
 
-### Part B: Vectorized Dot Product vs Loop
-Write a clean NumPy function `vectorized_cosine_similarity(a: np.ndarray, b: np.ndarray) -> float` without writing any for-loops.
+1. In contiguous flat memory, what is the exact index list of these 12 values?
+2. State the initial row stride $S_0$ and column stride $S_1$ assuming 1 element = 1 stride unit.
+3. Compute by hand the flat index of entry $A[2, 3]$ (the number $12$).
+4. When transposed into $A^T$ of shape $(4, 3)$, what are the new strides? Compute the flat index for $A^T[3, 2]$ and confirm it accesses the exact same number $12$ with zero memory copies.
+
+<details>
+<summary>Click to view solution for Problem 1</summary>
+
+### Solution 1: Stride Calculations & Zero-Copy Transposition
+
+#### Step 1: Flat Memory Layout
+Row-major storage packs rows one after another:
+`[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]`
+
+#### Step 2: Initial Strides
+- Number of columns $C = 4$.
+- Moving down 1 row steps over 4 elements: $S_0 = 4$.
+- Moving right 1 column steps over 1 element: $S_1 = 1$.
+- Shape: `(3, 4)`, Strides: `(4, 1)`.
+
+#### Step 3: Flat Index for $A[2, 3]$
+$$\text{flat\_index}(r=2, c=3) = (r \times S_0) + (c \times S_1) = (2 \times 4) + (3 \times 1) = 8 + 3 = \mathbf{11}$$
+Index 11 in 0-indexed flat memory points to the 12th element: **$12$**!
+
+#### Step 4: Transposition to $A^T$
+- Transposing simply swaps dimensions and strides!
+- New Shape: `(4, 3)`, New Strides: `(1, 4)`.
+- Coordinate in transposed matrix: $(r=3, c=2)$.
+$$\text{flat\_index}_{A^T}(3, 2) = (3 \times S_0^{\text{new}}) + (2 \times S_1^{\text{new}}) = (3 \times 1) + (2 \times 4) = 3 + 8 = \mathbf{11}$$
+Both coordinate lookups land on flat memory index **$11$**, giving value **$12$** in $\mathcal{O}(1)$ time without copying any data!
+</details>
 
 ---
 
-### Solution 1
+### Problem 2: Vectorization vs. Loop Asymptotics
 
-#### Part A: Strides
-1. **Total Memory Bytes:**
-   $$\text{Elements} = 4 \times 5 = 20$$
-   $$\text{Bytes} = 20 \times 4 \text{ bytes} = 80 \text{ bytes}$$
-2. **C-Contiguous Strides:**
-   Moving one column right advances by 1 element = 4 bytes.
-   Moving one row down advances by 5 columns = $5 \times 4 = 20$ bytes.
-   $$\text{Strides} = (20, 4)$$
-3. **Subsampled Slicing `A[::2, ::2]`:**
-   - Rows: $4 \to 2$
-   - Columns: $5 \to 3$ (indices 0, 2, 4)
-   - Resulting shape: `(2, 3)`
-   - Step sizes doubled: Row stride $= 20 \times 2 = 40$ bytes. Col stride $= 4 \times 2 = 8$ bytes.
-   - New strides: `(40, 8)`
-   - **Memory allocation:** Zero new data allocated! NumPy creates a new lightweight view pointing to the same memory buffer with updated strides.
+A neural network layer computes an activation vector $y_i = \max(0.0, x_i)$ for $N = 10,000,000$ floating-point numbers.
+- A pure Python loop takes $42\text{ ns}$ per element due to type-checking overhead and heap pointer dereferencing.
+- A SIMD vectorized instruction on an AVX-512 CPU processes 16 single-precision floats per CPU cycle ($0.25\text{ ns}$ per cycle).
 
-#### Part B: Vectorized Cosine Similarity
-```python
-import numpy as np
+1. Calculate the total wall-clock runtime for the pure Python loop in seconds.
+2. Calculate the theoretical wall-clock runtime for the SIMD vectorized operation in seconds.
+3. What is the overall speedup factor?
 
-def vectorized_cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
-    """Computes cosine similarity cos(theta) = (a . b) / (||a|| * ||b||) using SIMD."""
-    dot_product = np.dot(a, b)
-    norm_a = np.linalg.norm(a)
-    norm_b = np.linalg.norm(b)
-    if norm_a == 0 or norm_b == 0:
-        return 0.0
-    return float(dot_product / (norm_a * norm_b))
+<details>
+<summary>Click to view solution for Problem 2</summary>
+
+### Solution 2: Vectorization Speedup Calculation
+
+#### Step 1: Pure Python Runtime
+$$\text{Time}_{\text{Python}} = 10,000,000 \times 42 \times 10^{-9}\text{ s} = \mathbf{0.42\text{ seconds}}$$
+
+#### Step 2: SIMD Vectorized Runtime
+$$\text{Total Cycles} = \frac{10,000,000}{16} = 625,000\text{ cycles}$$
+$$\text{Time}_{\text{SIMD}} = 625,000 \times 0.25 \times 10^{-9}\text{ s} = 0.00015625\text{ seconds} \approx \mathbf{0.156\text{ ms}}$$
+
+#### Step 3: Speedup Factor
+$$\text{Speedup} = \frac{\text{Time}_{\text{Python}}}{\text{Time}_{\text{SIMD}}} = \frac{0.42}{0.00015625} \approx \mathbf{2,688\times \text{ faster!}}$$
+*Takeaway:* This is why neural network libraries strictly rely on vectorized contiguous memory.
+</details>
+
+---
+
+### Problem 3: DataFrame Indexing Precision (`.loc` vs. `.iloc`)
+
+Given the following pandas DataFrame `df`:
+```text
+           loss   accuracy
+epoch_3    0.45       0.88
+epoch_1    0.92       0.64
+epoch_2    0.61       0.79
 ```
 
----
+1. What will `df.loc['epoch_1', 'loss']` return?
+2. What will `df.iloc[1, 0]` return?
+3. What will `df.iloc[0, 1]` return?
+4. Write the one-line boolean filter to select all epochs where `accuracy > 0.70`.
 
-## Problem 2: pandas Tabular Data Sanitization for AI
+<details>
+<summary>Click to view solution for Problem 3</summary>
 
-### The Context
-Raw datasets downloaded from internet web scrapers frequently contain corrupted rows, missing strings, extreme outliers, and duplicate prompts.
+### Solution 3: DataFrame Indexing Precision
 
-### Requirements
-Write a pandas preprocessing function `clean_prompt_dataset(df: pd.DataFrame) -> pd.DataFrame` that:
-1. Drops any row where the `'prompt'` column is null/NaN or an empty whitespace string.
-2. Creates a new column `'token_estimate'` equal to the word count of `'prompt'`.
-3. Filters out extreme outliers where `'token_estimate' < 2` or `'token_estimate' > 2048`.
-4. Drops duplicate rows based on `'prompt'`, keeping the first occurrence.
-5. Resets the index to be contiguous.
-
----
-
-### Solution 2
-
-```python
-import pandas as pd
-
-def clean_prompt_dataset(df: pd.DataFrame) -> pd.DataFrame:
-    """Sanitizes raw text prompt dataframes for LLM pretraining/fine-tuning."""
-    # 1. Drop nulls
-    df_clean = df.dropna(subset=["prompt"]).copy()
-    
-    # Strip whitespace and drop empty strings
-    df_clean["prompt"] = df_clean["prompt"].astype(str).str.strip()
-    df_clean = df_clean[df_clean["prompt"] != ""]
-    
-    # 2. Add word count token estimate
-    df_clean["token_estimate"] = df_clean["prompt"].apply(lambda p: len(p.split()))
-    
-    # 3. Filter length outliers
-    df_clean = df_clean[
-        (df_clean["token_estimate"] >= 2) & (df_clean["token_estimate"] <= 2048)
-    ]
-    
-    # 4. Remove duplicate prompts
-    df_clean = df_clean.drop_duplicates(subset=["prompt"], keep="first")
-    
-    # 5. Reset index
-    df_clean = df_clean.reset_index(drop=True)
-    return df_clean
-```
-
----
-
-## Problem 3: End-to-End JSON Lines (.jsonl) Fine-Tuning Pipeline
-
-### The Context
-Training fine-tuned LLMs requires splitting datasets into training and validation sets formatted as `.jsonl` files with specific keys: `{"messages": [{"role": "user", ...}, {"role": "assistant", ...}]}`.
-
-### Requirements
-Implement a streaming function `split_jsonl_dataset(input_path: str, train_path: str, val_path: str, val_ratio: float = 0.2, seed: int = 42)` that:
-1. Streams `input_path` line-by-line without loading the whole file into RAM.
-2. Uses deterministic random assignment based on `seed` to send `(1 - val_ratio)` to `train_path` and `val_ratio` to `val_path`.
-3. Returns a tuple `(num_train_samples, num_val_samples)`.
-
----
-
-### Solution 3
-
-```python
-import json
-import random
-
-def split_jsonl_dataset(
-    input_path: str,
-    train_path: str,
-    val_path: str,
-    val_ratio: float = 0.2,
-    seed: int = 42
-) -> tuple[int, int]:
-    """Streams and splits a large JSONL dataset into train and validation sets with zero RAM spikes."""
-    random.seed(seed)
-    train_count = 0
-    val_count = 0
-
-    with open(input_path, "r", encoding="utf-8") as in_f, \
-         open(train_path, "w", encoding="utf-8") as train_f, \
-         open(val_path, "w", encoding="utf-8") as val_f:
-        
-        for line in in_f:
-            line_str = line.strip()
-            if not line_str:
-                continue
-            
-            # Verify valid JSON
-            try:
-                record = json.loads(line_str)
-            except json.JSONDecodeError:
-                continue  # Skip corrupted rows
-
-            # Deterministic split assignment
-            if random.random() < val_ratio:
-                val_f.write(json.dumps(record) + "\n")
-                val_count += 1
-            else:
-                train_f.write(json.dumps(record) + "\n")
-                train_count += 1
-
-    return (train_count, val_count)
-```
-
+1. **`df.loc['epoch_1', 'loss']`:** Returns **`0.92`** (label lookup on row `'epoch_1'`, column `'loss'`).
+2. **`df.iloc[1, 0]`:** Returns **`0.92`** (row index 1 is `'epoch_1'`, column index 0 is `'loss'`).
+3. **`df.iloc[0, 1]`:** Returns **`0.88`** (row index 0 is `'epoch_3'`, column index 1 is `'accuracy'`).
+4. **Boolean Filter:**
+   ```python
+   df[df["accuracy"] > 0.70]
+   ```
+</details>

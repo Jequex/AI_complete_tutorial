@@ -65,8 +65,8 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .problem-header {
@@ -74,21 +74,16 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.75rem;
         }
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -97,36 +92,38 @@
             overflow: hidden;
         }
         summary {
-            padding: 0.85rem 1.2rem;
+            padding: 0.85rem 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            background-color: var(--primary-light);
             color: var(--primary);
             user-select: none;
+            background-color: var(--primary-light);
+            border-bottom: 1px solid transparent;
+        }
+        details[open] summary {
+            border-bottom-color: var(--border);
         }
         .solution-content {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+            padding: 1.25rem;
         }
         .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
+        }
+        .step-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
 
     <a href="lecture.html" class="back-link">← Back to Lecture 3.2</a>
-    <header>
-        <h1>Topic 3.2: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: MSE Loss Gradients, Directional Derivatives &amp; Manual Descent Steps</p>
-    </header>
+
+    <h1>Topic 3.2: Exercises & Solutions</h1>
+    <p>Work through each problem with pen and paper before revealing the collapsible solutions below.</p>
 
     <!-- PROBLEM 1 -->
     <div class="problem-card">
@@ -134,23 +131,30 @@
             <h3>Problem 1: Gradient Derivation of Linear Regression MSE Loss</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>For model $\hat{y}_i = w x_i + b$ and loss $\mathcal{L} = \frac{1}{N}\sum (w x_i + b - y_i)^2$:</p>
+        <p><strong>🧒 The Context:</strong> Maya and Timmy are predicting lemonade sales $\hat{y} = w x + b$ minimizing $\mathcal{L} = \frac{1}{N}\sum (wx_i + b - y_i)^2$.</p>
         <ol>
-            <li>Derive $\frac{\partial \mathcal{L}}{\partial w}$ and $\frac{\partial \mathcal{L}}{\partial b}$.</li>
-            <li>For a sample $(x = 2, y = 5)$ with current $w = 1, b = 0$, compute the exact gradient vector.</li>
+            <li>Compute partial derivative $\frac{\partial \mathcal{L}}{\partial w}$.</li>
+            <li>Compute partial derivative $\frac{\partial \mathcal{L}}{\partial b}$.</li>
+            <li>For a sample $(x = 2.0, y = 5.0)$ with $w = 1.0, b = 0.0$, compute $\nabla \mathcal{L}$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Partial Derivatives:</strong>
-                    $$\frac{\partial \mathcal{L}}{\partial w} = \frac{2}{N} \sum_{i=1}^N (w x_i + b - y_i) x_i, \quad \frac{\partial \mathcal{L}}{\partial b} = \frac{2}{N} \sum_{i=1}^N (w x_i + b - y_i)$$
+                    <strong>1. Partial w.r.t $w$:</strong>
+                    $$\frac{\partial \mathcal{L}}{\partial w} = \frac{2}{N}\sum_{i=1}^N (w x_i + b - y_i) x_i$$
                 </div>
                 <div class="step-box">
-                    <strong>2. Numerical Evaluation:</strong>
-                    Residual $e = (1)(2) + 0 - 5 = -3$.
-                    $$\nabla \mathcal{L} = \begin{bmatrix} 2(-3)(2) \\ 2(-3) \end{bmatrix} = \begin{bmatrix} -12.0 \\ -6.0 \end{bmatrix}$$
+                    <strong>2. Partial w.r.t $b$:</strong>
+                    $$\frac{\partial \mathcal{L}}{\partial b} = \frac{2}{N}\sum_{i=1}^N (w x_i + b - y_i)$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Numerical Calculation:</strong>
+                    $\hat{y} = 1.0(2.0) + 0 = 2.0$. Error $e = 2.0 - 5.0 = -3.0$.
+                    $$\frac{\partial \mathcal{L}}{\partial w} = 2(-3.0)(2.0) = -12.0, \quad \frac{\partial \mathcal{L}}{\partial b} = 2(-3.0) = -6.0$$
+                    $$\nabla \mathcal{L} = \begin{bmatrix} -12.0 \\ -6.0 \end{bmatrix}$$
+                    Negative gradient is $[+12.0, +6.0]^T$, increasing $w$ and $b$ to raise prediction toward 5.0!
                 </div>
             </div>
         </details>
@@ -159,31 +163,36 @@
     <!-- PROBLEM 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 2: Directional Derivatives &amp; Orthogonal Contours</h3>
+            <h3>Problem 2: Directional Derivatives & Orthogonal Contour Tangents</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>For surface $f(x, y) = 2x^2 + y^2$ at point $(1, 2)$:</p>
+        <p><strong>🧒 The Context:</strong> Hiking on crater lake $f(x, y) = 2x^2 + y^2$ at point $P = (1, 2)$.</p>
         <ol>
-            <li>Find gradient $\nabla f(1, 2)$.</li>
-            <li>Compute the slope along direction $\mathbf{v} = [3, 4]^T$.</li>
-            <li>Find a unit vector along which altitude does not change ($D_{\mathbf{u}} f = 0$).</li>
+            <li>Compute gradient $\nabla f(1, 2)$.</li>
+            <li>Compute unit direction $\mathbf{u}$ for $\mathbf{v} = [3, 4]^T$.</li>
+            <li>Calculate directional derivative $D_{\mathbf{u}} f(1, 2)$.</li>
+            <li>Find a flat walking direction $\mathbf{u}_{\text{flat}}$ orthogonal to $\nabla f$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
                 <div class="step-box">
                     <strong>1. Gradient:</strong>
-                    $$\nabla f(1, 2) = \begin{bmatrix} 4(1) \\ 2(2) \end{bmatrix} = \begin{bmatrix} 4 \\ 4 \end{bmatrix}$$
+                    $\nabla f(x, y) = [4x, 2y]^T \implies \nabla f(1, 2) = \begin{bmatrix} 4 \\ 4 \end{bmatrix}$.
                 </div>
                 <div class="step-box">
-                    <strong>2. Directional Derivative:</strong>
-                    Unit direction: $\mathbf{u} = [0.6, 0.8]^T$.
-                    $$D_{\mathbf{u}} f = 4(0.6) + 4(0.8) = \mathbf{5.6}$$
+                    <strong>2. Unit Direction:</strong>
+                    $\|\mathbf{v}\| = \sqrt{3^2 + 4^2} = 5 \implies \mathbf{u} = \begin{bmatrix} 0.6 \\ 0.8 \end{bmatrix}$.
                 </div>
                 <div class="step-box">
-                    <strong>3. Zero Slope Contour Direction:</strong>
-                    $$\mathbf{u}_{\text{flat}} = \begin{bmatrix} 1/\sqrt{2} \\ -1/\sqrt{2} \end{bmatrix} \implies \nabla f \cdot \mathbf{u}_{\text{flat}} = \frac{4}{\sqrt{2}} - \frac{4}{\sqrt{2}} = 0$$
+                    <strong>3. Directional Derivative:</strong>
+                    $$D_{\mathbf{u}} f = \begin{bmatrix} 4 \\ 4 \end{bmatrix} \cdot \begin{bmatrix} 0.6 \\ 0.8 \end{bmatrix} = 2.4 + 3.2 = \mathbf{5.6}$$
+                </div>
+                <div class="step-box">
+                    <strong>4. Flat Walking Direction:</strong>
+                    $4 u_x + 4 u_y = 0 \implies u_x = -u_y$.
+                    Normalizing gives $\mathbf{u}_{\text{flat}} = \begin{bmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix} \approx \begin{bmatrix} -0.7071 \\ 0.7071 \end{bmatrix}$, which walks tangent to the contour ellipse!
                 </div>
             </div>
         </details>
@@ -192,25 +201,35 @@
     <!-- PROBLEM 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 3: Manual Gradient Descent Steps on an Elliptical Bowl</h3>
+            <h3>Problem 3: Manual Gradient Descent Trajectory on an Elliptical Bowl</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>Optimize $f(x, y) = x^2 + 4y^2$ starting at $\mathbf{w}_0 = [4, 2]^T$ with learning rate $\eta = 0.1$. Compute two full iterations ($\mathbf{w}_1, \mathbf{w}_2$) and verify strict loss decrease.</p>
+        <p><strong>🧒 The Context:</strong> Minimizing $f(x, y) = x^2 + 4y^2$ starting at $\mathbf{w}_0 = [4.0, 2.0]^T$ with $\eta = 0.1$.</p>
+        <ol>
+            <li>Derive coordinate update formulas.</li>
+            <li>Perform two full manual iterations ($\mathbf{w}_1$ and $\mathbf{w}_2$).</li>
+            <li>Verify loss strictly decreases.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>Update Equations:</strong>
-                    $$x_{t+1} = x_t - 0.1(2x_t) = 0.8 x_t, \quad y_{t+1} = y_t - 0.1(8y_t) = 0.2 y_t$$
+                    <strong>1. Update Rules:</strong>
+                    $\nabla f = [2x, 8y]^T$.
+                    $$x_{t+1} = x_t - 0.1(2x_t) = \mathbf{0.8 x_t}, \quad y_{t+1} = y_t - 0.1(8y_t) = \mathbf{0.2 y_t}$$
                 </div>
                 <div class="step-box">
-                    <strong>Calculations:</strong>
+                    <strong>2. Iteration Calculations:</strong>
                     <ul>
-                        <li>$\mathbf{w}_0 = [4.0, 2.0]^T \implies f(\mathbf{w}_0) = 4^2 + 4(4) = \mathbf{32.0}$</li>
-                        <li>$\mathbf{w}_1 = [0.8(4), 0.2(2)]^T = [3.2, 0.4]^T \implies f(\mathbf{w}_1) = 10.24 + 4(0.16) = \mathbf{10.88}$</li>
-                        <li>$\mathbf{w}_2 = [0.8(3.2), 0.2(0.4)]^T = [2.56, 0.08]^T \implies f(\mathbf{w}_2) = 6.5536 + 4(0.0064) = \mathbf{6.5792}$</li>
+                        <li>$\mathbf{w}_0 = [4.0, 2.0]^T \implies f(\mathbf{w}_0) = 4^2 + 4(2^2) = \mathbf{32.0}$</li>
+                        <li>$\mathbf{w}_1 = [0.8(4), 0.2(2)]^T = \mathbf{[3.2, 0.4]^T} \implies f(\mathbf{w}_1) = 3.2^2 + 4(0.4^2) = \mathbf{10.88}$</li>
+                        <li>$\mathbf{w}_2 = [0.8(3.2), 0.2(0.4)]^T = \mathbf{[2.56, 0.08]^T} \implies f(\mathbf{w}_2) = 2.56^2 + 4(0.08^2) = \mathbf{6.5792}$</li>
                     </ul>
+                </div>
+                <div class="step-box">
+                    <strong>3. Geometric Insight:</strong>
+                    Loss dropped by $80\%$ across 2 steps. The steep $y$-axis shrunk $4\times$ faster than the shallow $x$-axis, illustrating why momentum and adaptive optimizers (Adam) are crucial in deep learning!
                 </div>
             </div>
         </details>

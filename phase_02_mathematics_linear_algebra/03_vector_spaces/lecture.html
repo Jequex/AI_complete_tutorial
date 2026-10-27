@@ -19,6 +19,8 @@
       --border-callout: #22c55e;
       --bg-tech: #eff6ff;
       --border-tech: #3b82f6;
+      --bg-warn: #fef2f2;
+      --border-warn: #ef4444;
       --text: #0f172a;
       --text-muted: #475569;
       --border: #e2e8f0;
@@ -35,6 +37,8 @@
         --border-callout: #10b981;
         --bg-tech: #1e3a8a33;
         --border-tech: #60a5fa;
+        --bg-warn: #7f1d1d33;
+        --border-warn: #f87171;
         --text: #f8fafc;
         --text-muted: #94a3b8;
         --border: #334155;
@@ -70,11 +74,13 @@
       text-decoration: none;
     }
     .breadcrumbs a:hover { text-decoration: underline; }
-
+    
     h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
     h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
     h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
 
+    p, li { font-size: 1.05rem; }
+    
     .callout {
       border-left: 4px solid;
       padding: 1.2rem 1.5rem;
@@ -101,17 +107,10 @@
       border-radius: 0.5rem;
       padding: 1rem 1.25rem;
       overflow-x: auto;
-      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 0.95rem;
+      line-height: 1.5;
     }
-    code {
-      background-color: var(--code-bg);
-      padding: 0.15rem 0.35rem;
-      border-radius: 0.25rem;
-      font-family: ui-monospace, monospace;
-      font-size: 0.9em;
-    }
-    pre code { background: none; padding: 0; }
 
     table {
       width: 100%;
@@ -170,85 +169,85 @@
       <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.3</span>
     </div>
     <h1>Topic 2.3: Vector Spaces, Span, Basis, and Rank</h1>
-    <p style="color: var(--text-muted); margin-bottom: 0;">Deconstructing vector spaces, linear independence, the Column and Null spaces, and Rank-Nullity in AI.</p>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Linear combinations, spanning sets, matrix column spaces, null spaces, rank-nullity theorem, and LoRA.</p>
   </header>
 
   <main>
     <section>
-      <h2>1. The 12-Year-Old Analogy: The Redundant Teammate</h2>
+      <h2>1. 🧒 The 12-Year-Old Analogy: The Redundant Teammate &amp; The Sandbox</h2>
       <div class="callout callout-kid">
-        <div class="callout-title">🧒 The Video Game Team</div>
-        <p>Imagine your squad is exploring a 2D map:</p>
-        <ul>
-          <li><strong>Player 1</strong> can only move East/West ($[1, 0]$).</li>
-          <li><strong>Player 2</strong> can only move North/South ($[0, 1]$).</li>
-        </ul>
-        <p>Together, they can reach <strong>every single square on the map</strong> by combining steps!</p>
-        <p>Now, <strong>Player 3</strong> arrives, moving Northeast ($[1, 1]$). Does Player 3 let the team reach any new ground? <strong>No!</strong> Player 3 is a combination of Player 1 and Player 2:</p>
-        <p>$$\begin{bmatrix} 1 \\ 1 \end{bmatrix} = 1 \cdot \begin{bmatrix} 1 \\ 0 \end{bmatrix} + 1 \cdot \begin{bmatrix} 0 \\ 1 \end{bmatrix}$$</p>
-        <p>Player 3 is <strong>linearly dependent (redundant)</strong>!</p>
+        <div class="callout-title">🧒 The Island Game</div>
+        <p>Timmy can move East/West ($[1, 0]^T$), and Maya can move North/South ($[0, 1]^T$). Together, they can explore every square of a 2D island!</p>
+        <p>If Barnaby the puppy joins and can run Northeast ($[1, 1]^T$), he adds <strong>zero new territory</strong> because $[1, 1]^T = 1[1, 0]^T + 1[0, 1]^T$. Barnaby is <strong>linearly dependent</strong> (redundant)!</p>
       </div>
     </section>
 
     <section>
-      <h2>2. Linear Combinations &amp; Span</h2>
-      <p>A linear combination scales and sums vectors: $\mathbf{w} = \sum_{i=1}^k c_i \mathbf{v}_i$.</p>
-      <p>The <strong>Span</strong> is the entire geometric region reachable by all possible combinations:</p>
-      <p>$$\text{Span}(\mathbf{v}_1, \dots, \mathbf{v}_k) = \left\{ \sum_{i=1}^k c_i \mathbf{v}_i \;\middle|\; c_i \in \mathbb{R} \right\}$$</p>
-    </section>
-
-    <section>
-      <h2>3. Linear Independence &amp; Basis</h2>
-      <div class="callout callout-tech">
-        <div class="callout-title">🔬 Formal Definition of Independence</div>
-        <p>Vectors $\{\mathbf{v}_1, \dots, \mathbf{v}_k\}$ are linearly independent if and only if:</p>
-        <p>$$c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \dots + c_k \mathbf{v}_k = \mathbf{0} \implies c_1 = c_2 = \dots = c_k = 0$$</p>
-        <p>A <strong>Basis</strong> is the minimal set of linearly independent vectors that spans the entire space. The <strong>Dimension</strong> is the count of basis vectors.</p>
-      </div>
-    </section>
-
-    <section>
-      <h2>4. The Column Space &amp; Null Space of Matrix $A$</h2>
-      <pre>
-       INPUT SPACE (ℝⁿ)                               OUTPUT SPACE (ℝᵐ)
-       
-       ┌────────────────────────┐                    ┌────────────────────────┐
-       │                        │                    │                        │
-       │    x ──────────────────┼── Matrix A ───────►│  Ax ∈ C(A)             │
-       │                        │                    │  (Column Space)        │
-       │   [ Null Space N(A) ]  │                    │                        │
-       │   all inputs squashed  │                    │                        │
-       │   straight to zero! ───┼── Matrix A ───────►│  0 (Origin)            │
-       │                        │                    │                        │
-       └────────────────────────┘                    └────────────────────────┘
-      </pre>
-
-      <ul>
-        <li><strong>Column Space $\mathcal{C}(A)$:</strong> The span of all column vectors. It is the set of all possible outputs $A\mathbf{x}$.</li>
-        <li><strong>Null Space $\mathcal{N}(A)$:</strong> The set of all input vectors squashed to zero: $\{\mathbf{x} \mid A\mathbf{x} = \mathbf{0}\}$.</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>5. The Rank-Nullity Theorem &amp; LoRA</h2>
+      <h2>2. Rank-Nullity Theorem &amp; Subspaces</h2>
       <div class="callout callout-tech">
         <div class="callout-title">🔬 Conservation of Dimensions</div>
-        <p>$$\boxed{\text{Rank}(A) + \text{Nullity}(A) = n}$$</p>
-        <p>where $n$ is the number of input columns. Every dimension either survives into the output or collapses into the null space.</p>
+        $$\text{Rank}(A) + \text{Nullity}(A) = n$$
+        <p><strong>🧒 What the math is actually doing:</strong> Every input dimension must either survive into the output column space $\mathcal{C}(A)$ or get squashed into the null space $\mathcal{N}(A)$.</p>
+        <p>For $A = \begin{bmatrix} 1 & 2 \\ 2 & 4 \end{bmatrix}$, Col 2 is $2 \times$ Col 1. $\text{Rank} = 1$, and $\text{Nullity} = 1$ (the line $x_1 = -2x_2$ squashes to 0). $1 + 1 = 2$ dimensions!</p>
       </div>
+    </section>
 
-      <div class="callout callout-kid">
-        <div class="callout-title">🧒 Real AI Application: LoRA (Low-Rank Adaptation)</div>
-        <p>In a 70B parameter LLM, updating full $4096 \times 4096$ matrices requires 16.7 million numbers per layer. By factoring the update into a low-rank matrix product $\Delta W = B \cdot A$ with rank $r = 16$, we only train $131,072$ numbers—a <strong>99.2% parameter reduction</strong>!</p>
-      </div>
+    <section>
+      <h2>3. 📋 Mathematical & Technical Symbol Decoder Table</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Pronunciation</th>
+            <th>Plain English Meaning</th>
+            <th>Concrete Real-World Analogy / Flashcard Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$\text{Span}(\mathbf{v}_1, \dots)$</td>
+            <td>"span of v1 to vk"</td>
+            <td>All reachable destinations formed by linear combinations</td>
+            <td>The entire territory your team can explore on an island</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{B} = \{\mathbf{b}_1, \dots\}$</td>
+            <td>"basis B"</td>
+            <td>Minimal set of non-redundant arrows that span a space</td>
+            <td>The standard compass arrows (East and North)</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{C}(A)$</td>
+            <td>"column space of A"</td>
+            <td>The span of all columns of matrix $A$</td>
+            <td>All possible output targets the neural net layer can produce</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{N}(A)$</td>
+            <td>"null space of A"</td>
+            <td>The set of all input vectors squashed to complete zero</td>
+            <td>Inputs that disappear completely into a black hole</td>
+          </tr>
+          <tr>
+            <td>$\text{rank}(A)$</td>
+            <td>"rank of A"</td>
+            <td>Number of linearly independent columns in $A$</td>
+            <td>Number of true independent skills on a project team</td>
+          </tr>
+          <tr>
+            <td>$\Delta W = BA$</td>
+            <td>"delta W equals B times A"</td>
+            <td>Low-Rank Adaptation (LoRA) matrix factorization</td>
+            <td>Replacing a massive 16M table with two slender matrices</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <div class="nav-buttons">
-      <a href="../02_linear_transformations/exercises_and_solutions.html" class="btn">← Topic 2.2</a>
-      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+      <a href="../02_linear_transformations/lecture.html" class="btn">← Previous: Topic 2.2</a>
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Topic 2.3 Exercises & Solutions →</a>
     </div>
   </main>
-
 </body>
 </html>
-

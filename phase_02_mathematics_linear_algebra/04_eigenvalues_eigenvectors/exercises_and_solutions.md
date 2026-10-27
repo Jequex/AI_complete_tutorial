@@ -1,133 +1,106 @@
-# Exercises & Detailed Solutions: Topic 2.4
+# Topic 2.4: Exercises & Solutions — Eigenvalues and Eigenvectors
 
-Welcome to the problem set for **Topic 2.4: Eigenvalues and Eigenvectors**.
+Welcome to the problem set for **Topic 2.4: Eigenvalues and Eigenvectors**!
+
+Work through each problem carefully before clicking to reveal the complete step-by-step arithmetic and proof breakdown.
 
 ---
 
 ## 📝 Problem Set
 
 ### Problem 1: Full Eigendecomposition by Hand
+
 Consider the symmetric $2 \times 2$ matrix:
 $$B = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$$
 
-- **Part A:** Form $(B - \lambda I)$ and compute the characteristic polynomial $\det(B - \lambda I) = 0$.
-- **Part B:** Solve for the eigenvalues $\lambda_1$ and $\lambda_2$.
-- **Part C:** Find the corresponding eigenvectors $\mathbf{v}_1$ and $\mathbf{v}_2$.
-- **Part D:** Verify that $\mathbf{v}_1$ and $\mathbf{v}_2$ are mutually orthogonal ($\mathbf{v}_1 \cdot \mathbf{v}_2 = 0$).
+1. Form $(B - \lambda I)$ and compute the characteristic equation $\det(B - \lambda I) = 0$.
+2. Solve for eigenvalues $\lambda_1$ and $\lambda_2$.
+3. Find the corresponding eigenvectors $\mathbf{v}_1$ and $\mathbf{v}_2$.
+4. Verify that $\mathbf{v}_1$ and $\mathbf{v}_2$ are mutually orthogonal ($\mathbf{v}_1 \cdot \mathbf{v}_2 = 0$).
+
+<details>
+<summary>Click to view solution for Problem 1</summary>
+
+### Solution 1: Full Eigendecomposition by Hand
+
+#### Part 1: Characteristic Equation
+$$B - \lambda I = \begin{bmatrix} 2 - \lambda & 1 \\ 1 & 2 - \lambda \end{bmatrix}$$
+$$\det(B - \lambda I) = (2 - \lambda)^2 - 1 = 0 \implies \lambda^2 - 4\lambda + 4 - 1 = 0$$
+$$\lambda^2 - 4\lambda + 3 = 0$$
+
+#### Part 2: Eigenvalues
+Factor the quadratic equation:
+$$(\lambda - 3)(\lambda - 1) = 0 \implies \mathbf{\lambda_1 = 3, \quad \lambda_2 = 1}$$
+
+#### Part 3: Eigenvectors
+- **For $\lambda_1 = 3$:**
+  $$(B - 3I)\mathbf{v} = \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies -v_1 + v_2 = 0 \implies \mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$$
+- **For $\lambda_2 = 1$:**
+  $$(B - 1I)\mathbf{v} = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies v_1 + v_2 = 0 \implies \mathbf{v}_2 = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$$
+
+#### Part 4: Orthogonality Verification
+$$\mathbf{v}_1 \cdot \mathbf{v}_2 = (1 \times 1) + (1 \times -1) = 1 - 1 = \mathbf{0}$$
+*Theorem Confirmed:* Symmetric real matrices always produce mutually orthogonal eigenvectors!
+</details>
 
 ---
 
 ### Problem 2: Fast Matrix Powers via Diagonalization
-Using your results from Problem 1:
-- **Part A:** Construct the eigenvector matrix $Q$ and the diagonal eigenvalue matrix $\Lambda$ such that $B = Q \Lambda Q^{-1}$.
-- **Part B:** Compute $Q^{-1}$.
-- **Part C:** Compute $B^4$ using the diagonalization formula:
-  $$B^4 = Q \Lambda^4 Q^{-1}$$
-  Show every step of the matrix arithmetic.
 
----
+Using $B = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}$ from Problem 1:
+1. Construct eigenvector matrix $Q$ and diagonal matrix $\Lambda$.
+2. Compute $Q^{-1}$.
+3. Calculate $B^4 = Q \Lambda^4 Q^{-1}$ step-by-step.
 
-### Problem 3: The Mathematics of RNN Gradient Explosion
-In a simple Recurrent Neural Network (RNN), the hidden state evolves over time according to:
-$$\mathbf{h}_t = W \mathbf{h}_{t-1}$$
-Assume the initial hidden state $\mathbf{h}_0$ happens to align with an eigenvector $\mathbf{v}$ of $W$ with eigenvalue $\lambda$.
-
-- **Part A:** Prove by induction that $\mathbf{h}_t = \lambda^t \mathbf{h}_0$.
-- **Part B:** If $\lambda = 1.10$, compute the scaling factor after $t = 100$ time steps ($\lambda^{100}$). What happens to the signal?
-- **Part C:** If $\lambda = 0.90$, compute the scaling factor after $t = 100$ time steps ($\lambda^{100}$). What happens to the signal?
-
----
-
-# 💡 Complete Solutions & Walkthroughs
-
----
-
-### Solution 1: Full Eigendecomposition by Hand
-
-#### Part A: Characteristic Polynomial
-$$B - \lambda I = \begin{bmatrix} 2 - \lambda & 1 \\ 1 & 2 - \lambda \end{bmatrix}$$
-$$\det(B - \lambda I) = (2 - \lambda)(2 - \lambda) - (1 \times 1) = 0$$
-$$(4 - 4\lambda + \lambda^2) - 1 = 0 \implies \lambda^2 - 4\lambda + 3 = 0$$
-
-#### Part B: Eigenvalues
-Factor the quadratic:
-$$(\lambda - 3)(\lambda - 1) = 0$$
-$$\mathbf{\lambda_1 = 3, \qquad \lambda_2 = 1}$$
-
----
-
-#### Part C: Eigenvectors
-
-1. **For $\lambda_1 = 3$:**
-   $$(B - 3I)\mathbf{v}_1 = \begin{bmatrix} 2 - 3 & 1 \\ 1 & 2 - 3 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} -1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
-   $$-v_1 + v_2 = 0 \implies v_1 = v_2$$
-   $$\mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$$
-
-2. **For $\lambda_2 = 1$:**
-   $$(B - 1I)\mathbf{v}_2 = \begin{bmatrix} 2 - 1 & 1 \\ 1 & 2 - 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
-   $$v_1 + v_2 = 0 \implies v_2 = -v_1$$
-   $$\mathbf{v}_2 = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$$
-
----
-
-#### Part D: Orthogonality Verification
-Compute the dot product between $\mathbf{v}_1$ and $\mathbf{v}_2$:
-$$\mathbf{v}_1 \cdot \mathbf{v}_2 = (1 \times 1) + (1 \times -1) = 1 - 1 = \mathbf{0}$$
-The eigenvectors are **orthogonal**! *(The Spectral Theorem guarantees that any real symmetric matrix has mutually orthogonal eigenvectors).*
-
----
+<details>
+<summary>Click to view solution for Problem 2</summary>
 
 ### Solution 2: Fast Matrix Powers via Diagonalization
 
-#### Part A: Matrices $Q$ and $\Lambda$
-$$Q = \begin{bmatrix} \mathbf{v}_1 & \mathbf{v}_2 \end{bmatrix} = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}, \qquad \Lambda = \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix}$$
+#### Part 1: Constructing $Q$ and $\Lambda$
+$$Q = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}, \qquad \Lambda = \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix}$$
 
-#### Part B: Computing $Q^{-1}$
-For a $2 \times 2$ matrix $M = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$, the inverse is:
-$$M^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
+#### Part 2: Computing $Q^{-1}$
+For $2 \times 2$ matrix $Q = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$, $Q^{-1} = \frac{1}{ad - bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$:
+$$\det(Q) = (1)(-1) - (1)(1) = -2$$
+$$Q^{-1} = -\frac{1}{2} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix} = \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & -0.5 \end{bmatrix}$$
 
-For $Q$: $\det(Q) = (1)(-1) - (1)(1) = -1 - 1 = -2$.
-$$Q^{-1} = \frac{1}{-2} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix} = \begin{bmatrix} 1/2 & 1/2 \\ 1/2 & -1/2 \end{bmatrix} = \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$$
-
----
-
-#### Part C: Computing $B^4 = Q \Lambda^4 Q^{-1}$
-1. Calculate $\Lambda^4$:
-   $$\Lambda^4 = \begin{bmatrix} 3^4 & 0 \\ 0 & 1^4 \end{bmatrix} = \begin{bmatrix} 81 & 0 \\ 0 & 1 \end{bmatrix}$$
-
-2. Multiply $Q \Lambda^4$:
-   $$Q \Lambda^4 = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} 81 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 81 & 1 \\ 81 & -1 \end{bmatrix}$$
-
-3. Multiply by $Q^{-1} = \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$:
-   $$B^4 = \frac{1}{2} \begin{bmatrix} 81 & 1 \\ 81 & -1 \end{bmatrix} \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$$
-   $$\text{Entry (1,1): } \frac{1}{2} (81 \times 1 + 1 \times 1) = \frac{82}{2} = \mathbf{41}$$
-   $$\text{Entry (1,2): } \frac{1}{2} (81 \times 1 + 1 \times -1) = \frac{80}{2} = \mathbf{40}$$
-   $$\text{Entry (2,1): } \frac{1}{2} (81 \times 1 + -1 \times 1) = \frac{80}{2} = \mathbf{40}$$
-   $$\text{Entry (2,2): } \frac{1}{2} (81 \times 1 + -1 \times -1) = \frac{82}{2} = \mathbf{41}$$
-
-$$\mathbf{B^4 = \begin{bmatrix} 41 & 40 \\ 40 & 41 \end{bmatrix}}$$
+#### Part 3: Computing $B^4$
+$$\Lambda^4 = \begin{bmatrix} 3^4 & 0 \\ 0 & 1^4 \end{bmatrix} = \begin{bmatrix} 81 & 0 \\ 0 & 1 \end{bmatrix}$$
+$$Q \Lambda^4 = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} 81 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 81 & 1 \\ 81 & -1 \end{bmatrix}$$
+$$B^4 = (Q \Lambda^4) Q^{-1} = \begin{bmatrix} 81 & 1 \\ 81 & -1 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & -0.5 \end{bmatrix}$$
+- Row 1, Col 1: $(81 \times 0.5) + (1 \times 0.5) = 40.5 + 0.5 = \mathbf{41}$
+- Row 1, Col 2: $(81 \times 0.5) + (1 \times -0.5) = 40.5 - 0.5 = \mathbf{40}$
+- Row 2, Col 1: $(81 \times 0.5) + (-1 \times 0.5) = 40.5 - 0.5 = \mathbf{40}$
+- Row 2, Col 2: $(81 \times 0.5) + (-1 \times -0.5) = 40.5 + 0.5 = \mathbf{41}$
+$$B^4 = \begin{bmatrix} 41 & 40 \\ 40 & 41 \end{bmatrix}$$
+</details>
 
 ---
 
-### Solution 3: The Mathematics of RNN Gradient Stability
+### Problem 3: The Mathematics of RNN Gradient Explosion & Collapse
 
-#### Part A: Proof by Induction
-- **Base Case ($t=1$):**
-  $$\mathbf{h}_1 = W \mathbf{h}_0 = W \mathbf{v} = \lambda \mathbf{v} = \lambda \mathbf{h}_0 \quad \text{✓ (Holds)}$$
-- **Inductive Step:**
-  Assume $\mathbf{h}_k = \lambda^k \mathbf{h}_0$. Then:
-  $$\mathbf{h}_{k+1} = W \mathbf{h}_k = W (\lambda^k \mathbf{h}_0) = \lambda^k (W \mathbf{h}_0) = \lambda^k (\lambda \mathbf{h}_0) = \lambda^{k+1} \mathbf{h}_0 \quad \text{✓}$$
-  Therefore, $\mathbf{h}_t = \lambda^t \mathbf{h}_0$ for all integers $t \ge 1$. $\blacksquare$
+In an RNN, hidden state evolves as $\mathbf{h}_t = W \mathbf{h}_{t-1}$. Assume $\mathbf{h}_0$ aligns with an eigenvector $\mathbf{v}$ with eigenvalue $\lambda$.
 
----
+1. Prove by induction that $\mathbf{h}_t = \lambda^t \mathbf{h}_0$.
+2. For $\lambda = 1.10$, compute $\lambda^{100}$. What happens to the signal?
+3. For $\lambda = 0.90$, compute $\lambda^{100}$. What happens to the signal?
 
-#### Part B: Behavior for $\lambda = 1.10$
+<details>
+<summary>Click to view solution for Problem 3</summary>
+
+### Solution 3: RNN Gradient Dynamics
+
+#### Part 1: Proof by Induction
+- **Base case ($t = 1$):** $\mathbf{h}_1 = W \mathbf{h}_0 = W \mathbf{v} = \lambda \mathbf{v} = \lambda^1 \mathbf{h}_0$.
+- **Inductive step:** Assume $\mathbf{h}_k = \lambda^k \mathbf{h}_0$. Then:
+  $$\mathbf{h}_{k+1} = W \mathbf{h}_k = W (\lambda^k \mathbf{h}_0) = \lambda^k (W \mathbf{h}_0) = \lambda^k (\lambda \mathbf{h}_0) = \lambda^{k+1} \mathbf{h}_0 \quad \blacksquare$$
+
+#### Part 2: Exploding Signal ($\lambda = 1.10$)
 $$\lambda^{100} = (1.10)^{100} \approx \mathbf{13,780.6}$$
-The signal magnitude explodes by over **$13,780$ times**! In a neural network, this causes floating-point overflow (`NaN` or `inf`) and ruins training.
+*Result:* The signal explodes exponentially by over 13,000x, causing gradient saturation and NaN overflow!
 
----
-
-#### Part C: Behavior for $\lambda = 0.90$
-$$\lambda^{100} = (0.90)^{100} \approx \mathbf{0.00002656} = 2.656 \times 10^{-5}$$
-The signal is attenuated to near zero. The network completely "forgets" the past inputs, preventing it from learning long-term dependencies.
-
+#### Part 3: Vanishing Signal ($\lambda = 0.90$)
+$$\lambda^{100} = (0.90)^{100} \approx \mathbf{0.00002656}$$
+*Result:* The signal collapses to virtually zero ($0.0026\%$), destroying long-term memory!
+</details>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 4.5: Exercises & Solutions — Limit Theorems & LLM Sampling</title>
+    <title>Topic 4.5: Exercises & Solutions — Limit Theorems & Sampling</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -65,8 +65,8 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .problem-header {
@@ -74,21 +74,16 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.75rem;
         }
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -97,56 +92,67 @@
             overflow: hidden;
         }
         summary {
-            padding: 0.85rem 1.2rem;
+            padding: 0.85rem 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            background-color: var(--primary-light);
             color: var(--primary);
             user-select: none;
+            background-color: var(--primary-light);
+            border-bottom: 1px solid transparent;
+        }
+        details[open] summary {
+            border-bottom-color: var(--border);
         }
         .solution-content {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+            padding: 1.25rem;
         }
         .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
+        }
+        .step-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
 
     <a href="lecture.html" class="back-link">← Back to Lecture 4.5</a>
-    <header>
-        <h1>Topic 4.5: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Benchmark Sizing with CLT, Monte Carlo, and LLM Decoding</p>
-    </header>
+
+    <h1>Topic 4.5: Exercises & Solutions</h1>
+    <p>Work through each problem with pen and paper before revealing the collapsible solutions below.</p>
 
     <!-- PROBLEM 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 1: CLT &amp; Benchmark Test Suite Sample Sizing</h3>
+            <h3>Problem 1: CLT & Benchmark Sample Sizing ($\pm 1\%$ Margin of Error)</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>A lab benchmarks model accuracy ($p \approx 0.80$). Using the Central Limit Theorem, calculate how many benchmark questions $n$ are required to guarantee a margin of error within $\pm 1\%$ ($E \le 0.01$) with $95\%$ confidence ($Z = 1.96$).</p>
+        <p><strong>🧒 The Context:</strong> Evaluating model accuracy $p \approx 0.80$ with $95\%$ confidence ($Z = 1.96$) to achieve margin of error $E \le 0.01$.</p>
+        <ol>
+            <li>State standard error $\text{SE}(\hat{p}) = \sqrt{p(1-p)/n}$.</li>
+            <li>Calculate minimum required sample size $n$.</li>
+            <li>Compute worst-case sample size when $p$ is unknown.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Standard Error Formula:</strong>
-                    $$\text{SE}(\hat{p}) = \sqrt{\frac{p(1-p)}{n}}$$
+                    <strong>1. Standard Error:</strong>
+                    $\text{SE}(\hat{p}) = \sqrt{\frac{p(1-p)}{n}}$.
                 </div>
                 <div class="step-box">
-                    <strong>2. Margin of Error Inversion:</strong>
-                    $$E = 1.96 \sqrt{\frac{0.80 \times 0.20}{n}} \le 0.01 \implies n \ge \frac{1.96^2 \times 0.16}{0.0001} \approx \mathbf{6{,}147 \text{ questions}}$$
-                    Evaluating models on small test sets (e.g. 100 questions) leaves wide margins of error ($\pm 10\%$).
+                    <strong>2. Sample Size for $p = 0.80$:</strong>
+                    $$n \ge \frac{1.96^2 \times (0.80)(0.20)}{0.01^2} = \frac{3.8416 \times 0.16}{0.0001} \approx \mathbf{6{,}147 \text{ questions}}.$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Worst-Case Sample Size:</strong>
+                    Max variance is $0.5 \times 0.5 = 0.25$.
+                    $$n_{\text{worst}} \ge \frac{3.8416 \times 0.25}{0.0001} = \mathbf{9{,}604 \text{ questions}}.$$
                 </div>
             </div>
         </details>
@@ -155,18 +161,30 @@
     <!-- PROBLEM 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 2: Monte Carlo Integration for Gaussian Error Integral</h3>
+            <h3>Problem 2: Monte Carlo Integration for Gaussian Error Function</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Estimate $\int_0^1 e^{-x^2} dx$ using Monte Carlo with $N = 4$ uniform samples: $u = [0.2, 0.5, 0.8, 0.1]$.</p>
+        <p><strong>🧒 The Context:</strong> Estimating $I = \int_0^1 e^{-x^2} dx$ using 4 uniform samples $x = [0.2, 0.5, 0.7, 0.9]$.</p>
+        <ol>
+            <li>Compute $g(x_i) = e^{-x_i^2}$ for all 4 points.</li>
+            <li>Calculate the sample mean estimate $\hat{I}_4$.</li>
+            <li>Compare with true integral $I \approx 0.7468$.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>Hand Calculation:</strong>
-                    $$\hat{I}_4 = \frac{e^{-0.2^2} + e^{-0.5^2} + e^{-0.8^2} + e^{-0.1^2}}{4} = \frac{0.9608 + 0.7788 + 0.5273 + 0.9901}{4} \approx \mathbf{0.8142}$$
-                    True integral is $\approx 0.7468$.
+                    <strong>1. Sample Evaluations:</strong>
+                    $e^{-(0.2)^2} \approx 0.9608, \quad e^{-(0.5)^2} \approx 0.7788, \quad e^{-(0.7)^2} \approx 0.6126, \quad e^{-(0.9)^2} \approx 0.4449$.
+                </div>
+                <div class="step-box">
+                    <strong>2. Monte Carlo Average:</strong>
+                    $$\hat{I}_4 = \frac{0.9608 + 0.7788 + 0.6126 + 0.4449}{4} = \frac{2.7971}{4} = \mathbf{0.6993}.$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Accuracy Comparison:</strong>
+                    True value is $0.7468$. With just 4 samples, error is $< 6\%$!
                 </div>
             </div>
         </details>
@@ -175,37 +193,36 @@
     <!-- PROBLEM 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 3: LLM Decoding by Hand (Temperature, Top-K &amp; Top-P)</h3>
+            <h3>Problem 3: LLM Decoding Arithmetic: Temperature, Top-K & Top-P</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>Given raw logits $[3.0, 2.0, 1.0, 0.0]$ for {"apple", "banana", "carrot", "donut"}:</p>
+        <p><strong>🧒 The Context:</strong> Candidate words with raw logits $\mathbf{z} = [4.0, 3.0, 2.0, 1.0, 0.0]^T$ for {"apple", "banana", "cherry", "date", "eggplant"}.</p>
         <ol>
-            <li>Compute probabilities under standard Softmax ($T = 1.0$).</li>
-            <li>Compute probabilities under high temperature ($T = 2.0$).</li>
-            <li>Compute probabilities under Top-2 truncation.</li>
-            <li>Compute probabilities under Nucleus Top-P ($P = 0.85$).</li>
+            <li>Compute baseline Softmax probabilities at $T = 1.0$.</li>
+            <li>Compute low temperature probabilities at $T = 0.5$.</li>
+            <li>Apply Top-$k = 2$ Truncation.</li>
+            <li>Apply Top-$p = 0.85$ (Nucleus) Sampling.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Standard Softmax ($T = 1.0$):</strong>
-                    $$p = [64.39\%, 23.69\%, 8.71\%, 3.21\%]$$
+                    <strong>1. Baseline Softmax ($T = 1.0$):</strong>
+                    Sum of exponentials is $85.79$. Probabilities are:
+                    apple: $63.6\%$, banana: $23.4\%$, cherry: $8.6\%$, date: $3.2\%$, eggplant: $1.2\%$.
                 </div>
                 <div class="step-box">
-                    <strong>2. High Temp ($T = 2.0$):</strong>
-                    Scaled logits: $[1.5, 1.0, 0.5, 0.0] \implies p = [45.51\%, 27.60\%, 16.74\%, 10.15\%]$
+                    <strong>2. Low Temperature ($T = 0.5$):</strong>
+                    Logits doubled to $[8, 6, 4, 2, 0]$. "Apple" jumps from $63.6\%$ to $\mathbf{86.5\%}$ dominance!
                 </div>
                 <div class="step-box">
-                    <strong>3. Top-2 Truncation:</strong>
-                    Keep {"apple", "banana"}, re-normalize: $p = [73.11\%, 26.89\%, 0\%, 0\%]$
+                    <strong>3. Top-$k = 2$ Truncation:</strong>
+                    Keep {"apple", "banana"}. Normalized: apple $\approx \mathbf{73.1\%}$, banana $\approx \mathbf{26.9\%}$.
                 </div>
                 <div class="step-box">
-                    <strong>4. Top-P ($P = 0.85$):</strong>
-                    Cumulative: Apple ($0.6439$) + Banana ($0.2369$) $= 0.8808 \ge 0.85$.
-                    Keeps {"apple", "banana"}, pruning carrot and donut!
-                    $$p_{\text{apple}} = 73.10\%, \quad p_{\text{banana}} = 26.90\%$$
+                    <strong>4. Top-$p = 0.85$ Nucleus Sampling:</strong>
+                    $p(\text{apple}) + p(\text{banana}) = 63.6\% + 23.4\% = 87.0\% \ge 85\%$. Surviving nucleus is {"apple", "banana"}, trimming the tail to prevent hallucinations!
                 </div>
             </div>
         </details>
@@ -213,4 +230,3 @@
 
 </body>
 </html>
-

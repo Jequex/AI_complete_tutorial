@@ -85,67 +85,121 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 3 Index</a>
-    <header>
-        <h1>Topic 3.3: The Chain Rule &amp; Backpropagation</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Composite Functions, Computational Graphs, Forward vs Reverse Autodiff &amp; Backprop Derivation</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Multivariable Calculus</a>
 
-    <section>
-        <h2>1. The Multivariable Chain Rule</h2>
-        <div class="concept-card">
-            <h3>Paths Multiply, Forks Add</h3>
-            <p>If input $x$ influences loss $z$ through intermediate channels $u_1, u_2, \dots, u_K$:</p>
-            <p>$$\mathbf{\frac{\partial z}{\partial x} = \sum_{k=1}^K \frac{\partial z}{\partial u_k} \frac{\partial u_k}{\partial x}}$$</p>
-            <ul>
-                <li>Along any single serial chain: derivatives <strong>multiply</strong>.</li>
-                <li>Across multiple parallel branches: derivatives <strong>add</strong>!</li>
-            </ul>
-        </div>
-    </section>
+    <h1>Topic 3.3: The Chain Rule, Computational Graphs & Backpropagation</h1>
+    <p>If artificial intelligence has a single master equation, it is the <strong>Chain Rule</strong>. Backpropagation is a reverse-order evaluation of the multivariable chain rule on a computational graph.</p>
 
-    <section>
-        <h2>2. Forward-Mode vs Reverse-Mode Autodiff</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Mode</th>
-                    <th>Direction</th>
-                    <th>Complexity</th>
-                    <th>Application</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Forward-Mode</strong></td>
-                    <td>Inputs $\to$ Outputs</td>
-                    <td>$\mathcal{O}(N)$ passes</td>
-                    <td>Few inputs, many outputs ($N \ll M$)</td>
-                </tr>
-                <tr>
-                    <td><strong>Reverse-Mode (Backprop)</strong></td>
-                    <td>Loss $\to$ Inputs</td>
-                    <td>$\mathcal{O}(1)$ pass</td>
-                    <td>Billions of weights, single scalar loss ($N \gg 1$)</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: Toy Clock Gears & Branching Water Pipes</h3>
+        <p>Maya and Timmy build a giant machine with gears and water hoses:</p>
+        <ul>
+            <li><strong>The Clock Gears (Multiply along a line):</strong> Gear A turns Gear B at $3\times$ speed ($\frac{dy}{dx} = 3$). Gear B turns Gear C at $4\times$ speed ($\frac{dz}{dy} = 4$). Turning Gear A spins Gear C at $3 \times 4 = \mathbf{12\times}$ speed! <em>Derivatives along a sequence multiply.</em></li>
+            <li><strong>Branching Water Hoses (Add across parallel branches):</strong> Faucet $x$ splits into Hose 1 (gives 2 cups) and Hose 2 (gives 5 cups), both pouring into Bucket $z$. Opening the faucet adds $2 + 5 = \mathbf{7}$ extra cups! <em>Derivatives along parallel paths add.</em></li>
+            <li><strong>Backpropagation (Whispering Blame Backwards):</strong> When water spills at the end, Maya walks backwards along the pipes, whispering to each gear how much to turn to prevent the spill!</li>
+        </ul>
+        <pre>
+   Gear A (x)              Gear B (y)              Gear C (z)
+    ╭─────╮                 ╭─────╮                 ╭─────╮
+    │  1  │ ──(x3 speed)──▶ │  3  │ ──(x4 speed)──▶ │ 12  │
+    ╰─────╯                 ╰─────╯                 ╰─────╯
+             dy/dx = 3               dz/dy = 4
+                       dz/dx = 3 * 4 = 12
+        </pre>
+    </div>
 
-    <section>
-        <h2>3. The Backpropagation Node Update Rule</h2>
-        <div class="tip-box">
-            <strong>Adjoint Accumulation:</strong><br>
-            For any node $i$, with adjoint $\bar{v}_i = \frac{\partial \mathcal{L}}{\partial v_i}$:
-            $$\bar{v}_i = \sum_{j \in \text{Children}(i)} \bar{v}_j \cdot \frac{\partial v_j}{\partial v_i}$$
-            Initialized with $\bar{v}_{\text{loss}} = 1.0$ at the terminal loss node.
-        </div>
-    </section>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\frac{dz}{dx}$</td>
+                <td>"d z d x"</td>
+                <td>Total composite rate of change</td>
+                <td>How fast clock hands turn when main gear is spun</td>
+            </tr>
+            <tr>
+                <td>$\frac{\partial z}{\partial u_k}$</td>
+                <td>"del z del u k"</td>
+                <td>Partial derivative along path $k$</td>
+                <td>Flow change in bucket from adjusting Hose $k$ alone</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{G} = (\mathcal{V}, \mathcal{E})$</td>
+                <td>"Graph G"</td>
+                <td>Computational graph of mathematical steps</td>
+                <td>A recipe diagram showing flour & eggs mixing into batter</td>
+            </tr>
+            <tr>
+                <td>$\bar{v}_i$</td>
+                <td>"v bar sub i"</td>
+                <td>Adjoint: sensitivity $\frac{\partial \mathcal{L}}{\partial v_i}$</td>
+                <td>Blame assigned to worker $i$ for the recipe mistake</td>
+            </tr>
+            <tr>
+                <td>$\text{Reverse Mode}$</td>
+                <td>"Reverse mode autodiff"</td>
+                <td>One backward pass to find all parameter gradients</td>
+                <td>Tracing breadcrumbs backwards from treasure to start</td>
+            </tr>
+            <tr>
+                <td>$X^T$</td>
+                <td>"X transpose"</td>
+                <td>Flipped matrix with rows swapped to columns</td>
+                <td>Turning an attendance sheet on its side</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- MULTIVARIABLE CHAIN RULE -->
+    <h2>3. The Multivariable Chain Rule</h2>
+    $$\underbrace{\frac{\partial z}{\partial x}}_{\text{Total effect}} = \sum_{k=1}^K \underbrace{\left(\frac{\partial z}{\partial u_k}\right)}_{\text{Path effect on output}} \times \underbrace{\left(\frac{\partial u_k}{\partial x}\right)}_{\text{Input effect on path}}$$
+    <p>🧒 <strong>What the math is actually doing:</strong> We multiply gear ratios along each path, and sum across all parallel paths!</p>
+
+    <!-- FORWARD VS REVERSE AUTODIFF -->
+    <h2>4. Forward-Mode vs Reverse-Mode: The Trillion-Dollar Difference</h2>
+    <div class="tip-box">
+        <strong>Why Backpropagation Won:</strong> An LLM has <strong>70 Billion parameters</strong> and <strong>1 scalar loss</strong>.
+        <ul>
+            <li><strong>Forward Mode:</strong> Requires 70 Billion separate forward runs (takes centuries!).</li>
+            <li><strong>Reverse Mode (Backprop):</strong> Requires 1 forward pass and 1 backward pass (takes milliseconds!).</li>
+        </ul>
+    </div>
+
+    <!-- NUMERICAL WALKTHROUGH -->
+    <h2>5. Concrete Numerical Walkthrough</h2>
+    <p>For $f(x, y, z) = (x + y) \cdot z$ at $x = 2, y = 3, z = 4$:</p>
+    <ul>
+        <li><strong>Forward Pass:</strong> $q = 2 + 3 = 5.0$; &nbsp; $f = 5.0 \times 4.0 = \mathbf{20.0}$.</li>
+        <li><strong>Backward Pass:</strong> $\bar{f} = 1.0 \implies \bar{z} = 1.0 \times 5.0 = \mathbf{5.0}$; &nbsp; $\bar{q} = 1.0 \times 4.0 = \mathbf{4.0}$.</li>
+        <li><strong>Inputs:</strong> $\bar{x} = 4.0 \times 1.0 = \mathbf{4.0}$; &nbsp; $\bar{y} = 4.0 \times 1.0 = \mathbf{4.0}$.</li>
+    </ul>
+
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>

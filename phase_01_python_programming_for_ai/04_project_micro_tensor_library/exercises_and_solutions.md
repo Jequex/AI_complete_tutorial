@@ -1,164 +1,106 @@
 # Topic 1.4: Exercises & Solutions — Capstone Micro-Tensor Library
 
----
+Welcome to the problem set for **Topic 1.4: Capstone Project — Building a Micro-Tensor Library**!
 
-## Problem Set Overview
-
-| Problem | Focus | Difficulty |
-| :--- | :--- | :--- |
-| **1** | **Stride Calculus & Zero-Copy Tensor Reshaping** | Medium |
-| **2** | **Broadcasting Mechanics for Bias Addition $(M, N) + (N,)$** | Medium |
-| **3** | **Mean Squared Error (MSE) Loss Implementation from Scratch** | Challenging |
+Test your understanding of stride mechanics, tensor broadcasting, and neural network forward passes. Work through each problem carefully before opening the collapsible solution.
 
 ---
 
-## Problem 1: Stride Calculus & Zero-Copy Tensor Reshaping
+## 📝 Problem Set
 
-### The Context
-In PyTorch and NumPy, calling `.reshape()` or `.view()` does not copy data if the underlying buffer is C-contiguous. However, if a tensor has been transposed (`.T`), its strides are non-contiguous, meaning an eager copy must be performed before reshaping.
+### Problem 1: Stride Calculus & Contiguous Memory Views
 
-### Part A: Mathematical Stride Derivation
-A tensor has shape $(D_0, D_1, \dots, D_{k-1})$.
-1. Write the recurrence relation for C-contiguous strides $(S_0, S_1, \dots, S_{k-1})$.
-2. Calculate the strides for shape `(2, 3, 4)`.
-3. If tensor $A$ with shape `(2, 3)` has strides `(3, 1)`, and is transposed to $A^T$ with shape `(3, 2)` and strides `(1, 3)`, explain why $A^T$ is no longer C-contiguous.
+#### The Context
+In deep learning frameworks, calling `.view()` or `.reshape()` avoids copying memory if the tensor is C-contiguous. If the tensor has been transposed (`.T`), its strides are non-contiguous, requiring `.contiguous()` before reshaping.
 
-### Part B: Implementing `.reshape()`
-Write the method `reshape(self, new_shape: tuple[int, ...]) -> Tensor` for our `Tensor` class:
-- If the tensor is contiguous, return a new `Tensor` view sharing `self.storage` with new strides.
-- If the tensor is non-contiguous (e.g. after transposition), allocate a new contiguous copy of storage.
+#### Tasks
+1. State the general recurrence relation for row-major C-contiguous strides $(S_0, S_1, \dots, S_{k-1})$ given dimensions $(D_0, D_1, \dots, D_{k-1})$.
+2. Calculate the exact strides for a 3D tensor of shape $(B=2, T=3, D=4)$.
+3. If matrix $A$ of shape $(2, 3)$ has strides $(3, 1)$ and is transposed to $A^T$ of shape $(3, 2)$ with strides $(1, 3)$, prove why $A^T$ is not C-contiguous.
 
----
+<details>
+<summary>Click to view solution for Problem 1</summary>
 
-### Solution 1
+### Solution 1: Stride Calculus & Contiguous Memory Views
 
-#### Part A: Stride Derivation
-1. **Recurrence Relation:**
-   $$S_{k-1} = 1$$
-   $$S_{i} = S_{i+1} \times D_{i+1} \quad \text{for } i = k-2, k-3, \dots, 0$$
-2. **For Shape `(2, 3, 4)`:**
-   - $S_2 = 1$
-   - $S_1 = S_2 \times 4 = 4$
-   - $S_0 = S_1 \times 3 = 12$
-   $$\text{Strides} = (12, 4, 1)$$
-3. **Contiguity of $A^T$:**
-   A 2D tensor of shape $(3, 2)$ is C-contiguous if its stride tuple is $(2, 1)$ (moving down a row skips 2 elements).
-   However, $A^T$ has strides $(1, 3)$. Moving to the next column skips 3 elements in memory instead of 1. Because elements in a row are not adjacent in RAM, it is non-contiguous.
+#### Part 1: Stride Recurrence Relation
+For a $k$-dimensional tensor with shape $(D_0, D_1, \dots, D_{k-1})$:
+$$S_{k-1} = 1$$
+$$S_i = S_{i+1} \times D_{i+1} \quad \text{for } i = k-2, k-3, \dots, 0$$
+$$\underbrace{S_i}_{\text{Stride for dimension } i} = \prod_{j=i+1}^{k-1} D_j$$
 
-#### Part B: Method Implementation
-```python
-def is_contiguous(self) -> bool:
-    """Checks if current strides match canonical C-contiguous strides."""
-    return self.strides == self._default_strides(self.shape)
+#### Part 2: Calculation for Shape `(2, 3, 4)`
+- $S_2 = 1$
+- $S_1 = S_2 \times D_2 = 1 \times 4 = \mathbf{4}$
+- $S_0 = S_1 \times D_1 = 4 \times 3 = \mathbf{12}$
+$$\text{Strides} = (12, 4, 1)$$
 
-def reshape(self, new_shape: tuple[int, ...]) -> "Tensor":
-    # Verify element count matches
-    expected_count = 1
-    for d in new_shape:
-        expected_count *= d
-    
-    current_count = 1
-    for d in self.shape:
-        current_count *= d
-        
-    if expected_count != current_count:
-        raise ValueError(f"Cannot reshape {self.shape} ({current_count} elements) into {new_shape} ({expected_count} elements).")
-
-    if self.is_contiguous():
-        # Zero-copy view!
-        return Tensor(None, shape=new_shape, storage=self.storage, strides=self._default_strides(new_shape), offset=self.offset)
-    else:
-        # Non-contiguous: materialize contiguous copy
-        new_storage = self._to_contiguous_list()
-        return Tensor(None, shape=new_shape, storage=new_storage)
-```
+#### Part 3: Contiguity Proof of $A^T$
+- A 2D matrix of shape $(3, 2)$ is C-contiguous if and only if its elements along rows are adjacent in memory:
+  $$S_1^{\text{contiguous}} = 1, \qquad S_0^{\text{contiguous}} = D_1 = 2 \implies (2, 1)$$
+- But $A^T$ has strides $(1, 3)$: moving right by 1 column steps by 3 elements in memory! Because adjacent column entries are separated by 3 units in RAM, $A^T$ is non-contiguous.
+</details>
 
 ---
 
-## Problem 2: Broadcasting Mechanics for Bias Addition $(M, N) + (N,)$
+### Problem 2: Broadcasting Mechanics for Bias Addition $(M, N) + (N,)$
 
-### The Context
-In neural networks, the linear layer output $Z = X W$ produces a 2D matrix of shape $(M, N)$, where $M$ is the batch size and $N$ is the number of neurons. The bias $b$ is a 1D vector of shape $(N,)$. Adding $Z + b$ requires *broadcasting* the bias vector across all $M$ rows of $Z$.
+In deep learning, neural network layers add a 1D bias vector $\mathbf{b} \in \mathbb{R}^N$ to a 2D batch output $Z \in \mathbb{R}^{M \times N}$:
+$$Y_{i, j} = Z_{i, j} + b_j$$
 
-### Mathematical Verification
-Given matrix $Z \in \mathbb{R}^{2 \times 3}$ and bias $b \in \mathbb{R}^3$:
-$$Z = \begin{bmatrix} 1.0 & 2.0 & 3.0 \\ 4.0 & 5.0 & 6.0 \end{bmatrix}, \quad b = \begin{bmatrix} 0.5 \\ -0.5 \\ 1.0 \end{bmatrix}$$
+1. If $Z = \begin{bmatrix} 1.0 & 2.0 \\ 3.0 & 4.0 \end{bmatrix}$ and $\mathbf{b} = \begin{bmatrix} 10.0 & 20.0 \end{bmatrix}$, compute $Y = Z + \mathbf{b}$ step-by-step.
+2. How does stride manipulation allow broadcasting $\mathbf{b}$ across $M$ rows with **zero memory copies**?
 
-1. State the resulting shape of $Z + b$.
-2. Compute the exact resulting numerical values of $Z + b$ by hand.
-3. Write the flat memory loop that computes this sum into an output buffer of size $M \times N$.
+<details>
+<summary>Click to view solution for Problem 2</summary>
 
----
+### Solution 2: Broadcasting Mechanics
 
-### Solution 2
+#### Step 1: Step-by-Step Calculation
+Add $b_j$ across each row $i$:
+- Row 0: $[1.0 + 10.0, \quad 2.0 + 20.0] = [\mathbf{11.0}, \mathbf{22.0}]$
+- Row 1: $[3.0 + 10.0, \quad 4.0 + 20.0] = [\mathbf{13.0}, \mathbf{24.0}]$
+$$Y = \begin{bmatrix} 11.0 & 22.0 \\ 13.0 & 24.0 \end{bmatrix}$$
 
-1. **Resulting Shape:**
-   $$\text{Shape}(Z + b) = (2, 3)$$
-2. **Hand Calculation:**
-   $$\text{Row 0: } [1.0 + 0.5, 2.0 + (-0.5), 3.0 + 1.0] = [1.5, 1.5, 4.0]$$
-   $$\text{Row 1: } [4.0 + 0.5, 5.0 + (-0.5), 6.0 + 1.0] = [4.5, 4.5, 7.0]$$
-   $$Z + b = \begin{bmatrix} 1.5 & 1.5 & 4.0 \\ 4.5 & 4.5 & 7.0 \end{bmatrix}$$
-
-3. **Flat Memory Implementation:**
-```python
-def add_bias(Z: Tensor, b: Tensor) -> Tensor:
-    M, N = Z.shape
-    out = [0.0] * (M * N)
-    for i in range(M):
-        for j in range(N):
-            out[i * N + j] = Z[i, j] + b[j]
-    return Tensor(None, shape=(M, N), storage=out)
-```
+#### Step 2: Zero-Copy Stride Broadcasting
+To broadcast $\mathbf{b}$ from shape $(N,)$ to $(M, N)$ without duplicating memory:
+- Set Shape to: $(M, N)$
+- Set Strides to: $(0, 1)$!
+- Notice that stride $S_0 = 0$: when row index $r$ increases, the flat memory pointer advances by $r \times 0 = 0$! Every row re-reads the exact same $N$ numbers in memory!
+</details>
 
 ---
 
-## Problem 3: Mean Squared Error (MSE) Loss Function
+### Problem 3: End-to-End Hand Calculation of a 2-Layer Neural Network
 
-### The Context
-During supervised learning, a loss function quantifies how far predictions $\hat{y}$ deviate from true targets $y$. For $N$ samples and $K$ output dimensions, the Mean Squared Error (MSE) is:
-$$\mathcal{L}_{\text{MSE}}(y, \hat{y}) = \frac{1}{N \times K} \sum_{i=1}^N \sum_{j=1}^K (\hat{y}_{i, j} - y_{i, j})^2$$
+Consider a 2-layer MLP:
+$$z_1 = x @ W_1 + b_1, \qquad a_1 = \text{ReLU}(z_1), \qquad \hat{y} = a_1 @ W_2 + b_2$$
+Given:
+$$x = \begin{bmatrix} 2.0 & -1.0 \end{bmatrix}, \qquad W_1 = \begin{bmatrix} 1.0 & 2.0 \\ -3.0 & 0.5 \end{bmatrix}, \qquad b_1 = \begin{bmatrix} 0.5 & -1.0 \end{bmatrix}$$
+$$W_2 = \begin{bmatrix} 2.0 \\ -1.0 \end{bmatrix}, \qquad b_2 = \begin{bmatrix} 1.5 \end{bmatrix}$$
 
-### Requirements
-1. Implement a standalone function `mse_loss(y_true: Tensor, y_pred: Tensor) -> float` using our `Tensor` class.
-2. Verify with test inputs:
-   $$y = \begin{bmatrix} 1.0 & 0.0 \\ 0.0 & 1.0 \end{bmatrix}, \quad \hat{y} = \begin{bmatrix} 0.8 & 0.1 \\ 0.2 & 0.9 \end{bmatrix}$$
-3. Calculate the exact theoretical loss value by hand.
+1. Compute $z_1 = x @ W_1 + b_1$.
+2. Compute $a_1 = \text{ReLU}(z_1)$.
+3. Compute final prediction $\hat{y}$.
 
----
+<details>
+<summary>Click to view solution for Problem 3</summary>
 
-### Solution 3
+### Solution 3: End-to-End Neural Network Hand Calculation
 
-#### 1. Hand Calculation
-Differences $\hat{y} - y$:
-- $(0, 0)$: $0.8 - 1.0 = -0.2 \implies (-0.2)^2 = 0.04$
-- $(0, 1)$: $0.1 - 0.0 = 0.1 \implies (0.1)^2 = 0.01$
-- $(1, 0)$: $0.2 - 0.0 = 0.2 \implies (0.2)^2 = 0.04$
-- $(1, 1)$: $0.9 - 1.0 = -0.1 \implies (-0.1)^2 = 0.01$
+#### Step 1: Layer 1 Linear Transformation
+- Dot product with Col 0 of $W_1$: $(2.0 \times 1.0) + (-1.0 \times -3.0) = 2.0 + 3.0 = 5.0$.
+  Add bias $b_{1, 0}$: $5.0 + 0.5 = \mathbf{5.5}$.
+- Dot product with Col 1 of $W_1$: $(2.0 \times 2.0) + (-1.0 \times 0.5) = 4.0 - 0.5 = 3.5$.
+  Add bias $b_{1, 1}$: $3.5 + (-1.0) = \mathbf{2.5}$.
+$$z_1 = \begin{bmatrix} 5.5 & 2.5 \end{bmatrix}$$
 
-Sum of Squared Errors:
-$$\sum = 0.04 + 0.01 + 0.04 + 0.01 = 0.10$$
-Mean over $N \times K = 2 \times 2 = 4$ elements:
-$$\mathcal{L}_{\text{MSE}} = \frac{0.10}{4} = 0.0250$$
+#### Step 2: ReLU Non-linearity
+$$a_1 = \text{ReLU}(z_1) = [\max(0, 5.5), \max(0, 2.5)] = \begin{bmatrix} 5.5 & 2.5 \end{bmatrix}$$
 
-#### 2. Code Implementation
-```python
-def mse_loss(y_true: Tensor, y_pred: Tensor) -> float:
-    """Calculates Mean Squared Error loss between two identical-shaped tensors."""
-    if y_true.shape != y_pred.shape:
-        raise ValueError(f"Shape mismatch: {y_true.shape} != {y_pred.shape}")
-    
-    # Elementwise subtraction
-    diff_storage = [
-        (yp - yt) ** 2 
-        for yt, yp in zip(y_true._to_contiguous_list(), y_pred._to_contiguous_list())
-    ]
-    return sum(diff_storage) / len(diff_storage)
-
-# Verification
-y_true = Tensor([[1.0, 0.0], [0.0, 1.0]])
-y_pred = Tensor([[0.8, 0.1], [0.2, 0.9]])
-loss = mse_loss(y_true, y_pred)
-assert abs(loss - 0.0250) < 1e-6
-print(f"Calculated MSE Loss: {loss:.4f} (Matches exact theoretical 0.0250!)")
-```
-
+#### Step 3: Layer 2 Output
+- Matrix product $a_1 @ W_2$:
+  $$(5.5 \times 2.0) + (2.5 \times -1.0) = 11.0 - 2.5 = 8.5$$
+- Add output bias $b_2$:
+  $$\hat{y} = 8.5 + 1.5 = \mathbf{10.0}$$
+</details>

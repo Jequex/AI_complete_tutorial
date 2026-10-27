@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 1.3: Scientific Python Ecosystem — Complete AI Tutorial</title>
+    <title>Topic 1.3: The Scientific Python Ecosystem — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -68,13 +68,6 @@
             margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        .tip-box {
-            background-color: var(--accent-bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 0 8px 8px 0;
-        }
         pre {
             background-color: var(--code-bg);
             color: var(--code-text);
@@ -91,103 +84,142 @@
         }
         p code, li code {
             background-color: var(--primary-light);
-            color: var(--primary);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
         }
     </style>
 </head>
 <body>
+    <a href="../index.html" class="back-link">← Back to Phase 1: Python Programming for AI</a>
+    
+    <h1>Topic 1.3: The Scientific Python Ecosystem</h1>
+    <p>Welcome to <strong>Topic 1.3</strong>! While pure Python provides general programming constructs, deep learning workloads require multi-gigabyte numerical computations executing at bare-metal hardware speeds. The quartet of <strong>NumPy, pandas, Matplotlib, and SciPy</strong> forms the foundation.</p>
 
-    <a href="../index.html" class="back-link">← Back to Phase 1 Index</a>
-    <header>
-        <h1>Topic 1.3: The Scientific Python Ecosystem</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">NumPy Vectorization, pandas DataFrames, Matplotlib Visuals, SciPy &amp; JSON APIs</p>
-    </header>
+    <h2>1. 🧒 The 12-Year-Old Analogy: The Scavenger Hunt vs. The Solid Pack of Crayons</h2>
+    <div class="concept-card">
+        <h3>Why Python Lists are Slow vs. NumPy's Speed</h3>
+        <p>A standard Python list of numbers is a <strong>scavenger hunt</strong>: pointers scattered across random rooms in RAM. The CPU has to run all over the house to collect each number.</p>
+        <p>A <strong>NumPy <code>ndarray</code></strong> is a <strong>solid pack of crayons</strong> stored tightly in contiguous physical RAM. With CPU SIMD (Single Instruction, Multiple Data), a giant wooden ruler pushes 8 or 16 numbers through addition circuits simultaneously, giving a <strong>50x to 200x speedup</strong>!</p>
+    </div>
 
-    <section>
-        <h2>1. NumPy: Contiguous Memory &amp; SIMD Acceleration</h2>
-        <div class="concept-card">
-            <h3>The 12-Year-Old Analogy: Pointer Lists vs Solid Crayon Boxes</h3>
-            <p>In standard Python, a <code>list</code> of numbers is a list of pointers pointing to separate heap-allocated objects scattered in RAM. Accessing them requires chasing pointers and unpacking C structures.</p>
-            <p>A <strong>NumPy array</strong> is a <strong>solid box of crayons</strong>: contiguous bytes aligned in physical memory. The CPU loads them into fast L1/L2 cache and processes them using <strong>SIMD (Single Instruction, Multiple Data)</strong> instructions—often 100x faster than pure Python loops!</p>
-        </div>
+    <h3>🔬 The Stride Index Formula</h3>
+    $$\text{flat\_index}(r, c) = r \times S_{\text{row}} + c \times S_{\text{col}}$$
+    <p><strong>🧒 What the math is actually doing:</strong> To find a number in a grid flattened into memory, skip down $r$ entire rows of length $S_{\text{row}}$, then take $c$ steps to the right.</p>
 
-        <pre><code>import numpy as np
+    <h2>2. pandas: The Ultimate Classroom Gradebook & Detective Filter</h2>
+    <div class="concept-card">
+        <h3><code>.loc</code> vs. <code>.iloc</code></h3>
+        <ul>
+            <li><strong><code>.loc</code> (Label-based):</strong> Finding Timmy's grade by reading his actual name in the ledger: <code>df.loc["Timmy", "Math"]</code>.</li>
+            <li><strong><code>.iloc</code> (Integer position-based):</strong> Counting rows with your physical finger regardless of names: <code>df.iloc[0, 1]</code>.</li>
+        </ul>
+    </div>
 
-# Creating contiguous multidimensional arrays
-x = np.array([[1.0, 2.0], [3.0, 4.0]], dtype=np.float32)
+    <h2>3. Matplotlib: The Architect's Drafting Table (<code>Figure</code> vs. <code>Axes</code>)</h2>
+    <div class="concept-card">
+        <p>The <strong><code>Figure</code></strong> is the entire wooden drafting table. The <strong><code>Axes</code></strong> are the individual sheets of graph paper pinned onto the table. Always use the object-oriented API for publication-quality figures!</p>
+    </div>
 
-# Vectorized matrix multiplication (@)
-y = x @ x
-print("Result:\n", y)</code></pre>
-    </section>
+    <h2>4. 📋 Mathematical & Technical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>ndarray</code></td>
+                <td>"n-d array"</td>
+                <td>Contiguous, fixed-type n-dimensional numerical block in RAM</td>
+                <td>A solid pack of crayons sitting side-by-side in a box</td>
+            </tr>
+            <tr>
+                <td><code>strides</code></td>
+                <td>"strides"</td>
+                <td>Tuple of byte steps required to advance by 1 in each dimension</td>
+                <td>Number of floor tiles you must step over to enter the next room</td>
+            </tr>
+            <tr>
+                <td><code>SIMD</code></td>
+                <td>"sim-dee"</td>
+                <td>Single Instruction, Multiple Data hardware execution</td>
+                <td>Using a wide wooden board to push 8 crayons across a desk at once</td>
+            </tr>
+            <tr>
+                <td><code>.loc</code></td>
+                <td>"dot lock"</td>
+                <td>Label-based DataFrame indexing by row/column names</td>
+                <td>Finding a student's grade by reading the name "Timmy" in a ledger</td>
+            </tr>
+            <tr>
+                <td><code>.iloc</code></td>
+                <td>"dot eye-lock"</td>
+                <td>Integer-based DataFrame indexing by 0-based coordinate</td>
+                <td>Counting down 3 rows and 2 columns with your physical finger</td>
+            </tr>
+            <tr>
+                <td><code>Figure</code></td>
+                <td>"figure"</td>
+                <td>The top-level graphical canvas or window</td>
+                <td>The entire wooden architect drafting table</td>
+            </tr>
+            <tr>
+                <td><code>Axes</code></td>
+                <td>"axes"</td>
+                <td>A specific subplot with coordinate x/y axes</td>
+                <td>A single sheet of graph paper pinned onto the drafting table</td>
+            </tr>
+            <tr>
+                <td><code>dumps / loads</code></td>
+                <td>"dump-s / load-s"</td>
+                <td>Convert Python dict to JSON string / Parse JSON string to dict</td>
+                <td>Translating thoughts onto a postcard / Reading a postcard</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <section>
-        <h2>2. pandas: Data Cleaning &amp; Feature Engineering</h2>
-        <p>Before training deep neural networks, raw data must be loaded, sanitized, and transformed.</p>
-        <div class="tip-box">
-            <strong>Key Indexing Distinction:</strong>
-            <ul>
-                <li><code>df.loc['row_label', 'column_name']</code>: Look up by explicit label name.</li>
-                <li><code>df.iloc[row_idx, col_idx]</code>: Look up strictly by integer position <code>0, 1, 2...</code>.</li>
-            </ul>
-        </div>
-
-        <pre><code>import pandas as pd
-
-df = pd.DataFrame({
-    "prompt": ["hello", "tell me a joke", "summarize doc"],
-    "tokens": [1, 4, 2],
-    "latency_ms": [12.4, 35.2, 19.8]
-})
-
-# Filter fast responses under 20ms
-fast_df = df[df["latency_ms"] &lt; 20.0]
-# Impute missing values
-df_cleaned = df.fillna(0)</code></pre>
-    </section>
-
-    <section>
-        <h2>3. Matplotlib: Publication-Ready AI Curves</h2>
-        <p>Using the object-oriented <code>Figure</code> and <code>Axes</code> hierarchy ensures full control over charts, subplots, and export resolutions.</p>
-        <pre><code>import matplotlib.pyplot as plt
-
-fig, ax = plt.subplots(figsize=(8, 4), dpi=150)
-epochs = [1, 2, 3, 4, 5]
-loss = [2.3, 1.4, 0.8, 0.45, 0.32]
-
-ax.plot(epochs, loss, marker='o', color='#4338ca', lw=2, label="Train Loss")
-ax.set_title("Training Loss Convergence", fontweight="bold")
-ax.set_xlabel("Epoch")
-ax.set_ylabel("Cross Entropy Loss")
-ax.grid(True, alpha=0.3)
-ax.legend()
-plt.tight_layout()</code></pre>
-    </section>
-
-    <section>
-        <h2>4. SciPy: Mathematical Optimization</h2>
-        <p>SciPy provides high-performance scientific routines for convex optimization, probability distributions, and sparse matrix representations.</p>
-        <pre><code>from scipy.optimize import minimize
-
-# Finding the minimum of a parabolic loss function f(w) = (w - 3.5)^2 + 10
-result = minimize(lambda w: (w[0] - 3.5)**2 + 10.0, x0=[0.0], method="BFGS")
-print("Optimized parameter:", result.x[0])  # ~3.5000</code></pre>
-    </section>
-
-    <section>
-        <h2>5. REST APIs &amp; Streaming JSON Lines (.jsonl)</h2>
-        <p>Fine-tuning datasets for modern LLMs are formatted as <code>.jsonl</code> files where each line is an independent JSON record:</p>
-        <pre><code>import json
-
-# Streaming JSONL without loading full file into memory
-with open("fine_tuning_data.jsonl", "r") as f:
-    for line in f:
-        sample = json.loads(line)
-        prompt, completion = sample["prompt"], sample["completion"]</code></pre>
-    </section>
-
+    <div class="nav-buttons">
+        <a href="../02_python_tooling_and_engineering/lecture.html" class="btn btn-outline">← Previous: Topic 1.2</a>
+        <a href="exercises_and_solutions.html" class="btn">Topic 1.3 Exercises & Solutions →</a>
+    </div>
 </body>
 </html>
-

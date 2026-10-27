@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 4.5: Limit Theorems, Monte Carlo & LLM Sampling</title>
+    <title>Topic 4.5: Limit Theorems, Monte Carlo & LLM Sampling — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -85,77 +85,127 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 4 Index</a>
-    <header>
-        <h1>Topic 4.5: Limit Theorems, Monte Carlo &amp; LLM Sampling</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Law of Large Numbers, Central Limit Theorem, Monte Carlo, and Temperature / Nucleus Decoding</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Probability Foundations</a>
 
-    <section>
-        <h2>1. The Two Foundational Pillars: LLN and CLT</h2>
-        <div class="concept-card">
-            <h3>1. The Law of Large Numbers (LLN)</h3>
-            <p>As sample size $n \to \infty$, the sample average $\bar{X}_n$ converges to the true expected value $\mu$:</p>
-            <p>$$\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i \xrightarrow{P} \mu$$</p>
-            <p><em>Why AI Works:</em> Training loss on large empirical datasets converges to real-world population risk!</p>
-        </div>
+    <h1>Topic 4.5: Limit Theorems, Monte Carlo & LLM Sampling</h1>
+    <p>Limit theorems explain why training on empirical data succeeds (<strong>Law of Large Numbers</strong>), why Gaussian curves appear everywhere (<strong>Central Limit Theorem</strong>), how AI calculates high-dimensional integrals (<strong>Monte Carlo</strong>), and how LLMs generate human-quality text (<strong>Temperature, Top-K, and Top-P</strong>).</p>
 
-        <div class="concept-card">
-            <h3>2. The Central Limit Theorem (CLT)</h3>
-            <p>The sum or average of independent random variables from <em>any</em> arbitrary distribution converges to a Gaussian bell curve:</p>
-            <p>$$\frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1)$$</p>
-        </div>
-    </section>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: The Popcorn Dartboard & The Storytelling Robot</h3>
+        <p>Maya and Timmy explore three magical probability systems:</p>
+        <ul>
+            <li><strong>The Galton Board (Central Limit Theorem):</strong> Dropping 10,000 chaotic steel balls through pegs always stacks into a perfect, smooth Gaussian bell curve at the bottom!</li>
+            <li><strong>The Popcorn Dartboard (Monte Carlo Integration):</strong> Measuring the area of an irregular pond by throwing 1,000 popcorn kernels at the board and counting what fraction splash inside.</li>
+            <li><strong>The Storytelling Robot (LLM Decoding):</strong>
+                <ul>
+                    <li><strong>Freezing Cold ($T = 0.2$):</strong> Robotic, stiff, repeats the safest word every time.</li>
+                    <li><strong>Warm & Balanced ($T = 0.7$):</strong> Engaging, fluent, creative stories.</li>
+                    <li><strong>Boiling Hot ($T = 2.0$):</strong> Unhinged, random, chaotic hallucinations!</li>
+                </ul>
+            </li>
+        </ul>
+        <pre>
+       1. THE GALTON BOARD (CLT)                 2. MONTE CARLO DARTBOARD
+             (Drop Marbles)                             ┌─────────────────┐
+                   ▼                                    │  ●      ●       │
+                  / \                                   │    ╭───────╮    │
+                 / ● \                                  │   │  ★   ★ │    │ ◀ Dartboard
+                / ● ● \                                 │   │  ★ ★   │    │   (Circle in Square)
+               / ● ● ● \                                │    ╰───────╯    │
+              ╭─────────╮                               │  ●     ●      ● │
+             │ █ █ █ █ █ │ ◀ Perfect Bell Curve!        └─────────────────┘
+        </pre>
+    </div>
 
-    <section>
-        <h2>2. Monte Carlo Methods: Escaping the Curse of Dimensionality</h2>
-        <div class="tip-box">
-            <strong>The Monte Carlo Approximation:</strong><br>
-            $$\mathbb{E}_{x \sim p}[g(x)] = \int_{\mathbb{R}^D} g(x) p(x) \, dx \approx \frac{1}{N} \sum_{i=1}^N g(x_i)$$
-            The error decreases at rate $\mathcal{O}(1/\sqrt{N})$, completely independent of the dimension $D$!
-        </div>
-    </section>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\bar{X}_n$</td>
+                <td>"X bar sub n"</td>
+                <td>Sample Mean: average of $n$ observations</td>
+                <td>Running average score after rolling a die $n$ times</td>
+            </tr>
+            <tr>
+                <td>$\text{LLN}$</td>
+                <td>"Law of Large Numbers"</td>
+                <td>Sample average converges to true expected value $\mu$</td>
+                <td>Flipping 10,000 coins converges to within 0.1% of 50% Heads</td>
+            </tr>
+            <tr>
+                <td>$\text{CLT}$</td>
+                <td>"Central Limit Theorem"</td>
+                <td>Sum of independent noise sources becomes Gaussian</td>
+                <td>Dropping chaotic marbles on pegs always creates a bell curve</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{O}(1/\sqrt{N})$</td>
+                <td>"big-O of one over root N"</td>
+                <td>Monte Carlo error convergence rate</td>
+                <td>To cut error in half, you must throw $4\times$ as many darts</td>
+            </tr>
+            <tr>
+                <td>$T$</td>
+                <td>"Temperature"</td>
+                <td>Softmax scaling parameter controlling entropy</td>
+                <td>Creativity dial: cold ($0.2$) is rigid, warm ($0.7$) is natural</td>
+            </tr>
+            <tr>
+                <td>$\text{Top-}p$</td>
+                <td>"Top p" or "Nucleus"</td>
+                <td>Dynamic probability cutoff (smallest set with sum $\ge p$)</td>
+                <td>Keeping only the candidate words sharing 90% of probability</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <section>
-        <h2>3. LLM Token Generation Strategies</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Decoding Strategy</th>
-                    <th>Formula / Algorithm</th>
-                    <th>Behavior &amp; Optimal AI Use Case</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Greedy</strong></td>
-                    <td>$y = \arg\max_k z_k$</td>
-                    <td>Deterministic, highly repetitive, prone to loops</td>
-                </tr>
-                <tr>
-                    <td><strong>Temperature ($T$)</strong></td>
-                    <td>$p_k = \frac{e^{z_k / T}}{\sum_j e^{z_j / T}}$</td>
-                    <td>Low $T$: factual/coding; High $T$: creative writing</td>
-                </tr>
-                <tr>
-                    <td><strong>Top-$K$</strong></td>
-                    <td>Truncate to top $K$ probabilities</td>
-                    <td>Cuts off the bizarre long tail of garbage tokens</td>
-                </tr>
-                <tr>
-                    <td><strong>Top-$P$ (Nucleus)</strong></td>
-                    <td>Keep smallest set with $\sum p_i \ge P$</td>
-                    <td>Dynamically adjusts candidate pool based on model certainty</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <!-- CENTRAL LIMIT THEOREM -->
+    <h2>3. The Central Limit Theorem Master Formula</h2>
+    $$\mathbf{Z_n = \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} \mathcal{N}(0, 1) \quad \text{as } n \to \infty}$$
+    <p>🧒 <strong>What the math is actually doing:</strong> Whatever arbitrary distribution you start with, summing up $30+$ random draws guarantees that the sum approaches a symmetric Gaussian bell curve!</p>
+
+    <!-- MONTE CARLO INTEGRATION -->
+    <h2>4. Monte Carlo Integration</h2>
+    $$\int g(x) f(x) \, dx = \mathbb{E}_{X \sim f}[g(X)] \approx \mathbf{\frac{1}{N} \sum_{i=1}^N g(x_i)}$$
+    <div class="tip-box">
+        <strong>Beating the Curse of Dimensionality:</strong> Standard numerical grid integration explodes exponentially in high dimensions ($10^{100}$). Monte Carlo converges at rate $\mathcal{O}(1/\sqrt{N})$ <strong>independent of dimension $D$</strong>!
+    </div>
+
+    <!-- LLM SAMPLING -->
+    <h2>5. LLM Token Decoding: Temperature, Top-K & Top-P</h2>
+    $$p_i = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$
+    <ul>
+        <li><strong>Low Temperature ($T < 1.0$):</strong> Sharpen probabilities, favoring top choices (factual).</li>
+        <li><strong>Top-$k$:</strong> Retain strictly the top $k$ highest-ranked tokens.</li>
+        <li><strong>Top-$p$ (Nucleus):</strong> Retain the dynamic smallest set of tokens whose cumulative probability reaches $p$ (e.g. $90\%$).</li>
+    </ul>
+
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>
-

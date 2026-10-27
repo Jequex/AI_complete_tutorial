@@ -19,6 +19,8 @@
       --border-callout: #22c55e;
       --bg-tech: #eff6ff;
       --border-tech: #3b82f6;
+      --bg-warn: #fef2f2;
+      --border-warn: #ef4444;
       --text: #0f172a;
       --text-muted: #475569;
       --border: #e2e8f0;
@@ -35,6 +37,8 @@
         --border-callout: #10b981;
         --bg-tech: #1e3a8a33;
         --border-tech: #60a5fa;
+        --bg-warn: #7f1d1d33;
+        --border-warn: #f87171;
         --text: #f8fafc;
         --text-muted: #94a3b8;
         --border: #334155;
@@ -70,11 +74,13 @@
       text-decoration: none;
     }
     .breadcrumbs a:hover { text-decoration: underline; }
-
+    
     h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
     h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
     h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
 
+    p, li { font-size: 1.05rem; }
+    
     .callout {
       border-left: 4px solid;
       padding: 1.2rem 1.5rem;
@@ -101,17 +107,10 @@
       border-radius: 0.5rem;
       padding: 1rem 1.25rem;
       overflow-x: auto;
-      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 0.95rem;
+      line-height: 1.5;
     }
-    code {
-      background-color: var(--code-bg);
-      padding: 0.15rem 0.35rem;
-      border-radius: 0.25rem;
-      font-family: ui-monospace, monospace;
-      font-size: 0.9em;
-    }
-    pre code { background: none; padding: 0; }
 
     table {
       width: 100%;
@@ -161,9 +160,6 @@
       color: #ffffff;
       border-color: var(--primary);
     }
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
   </style>
 </head>
 <body>
@@ -173,103 +169,90 @@
       <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.5</span>
     </div>
     <h1>Topic 2.5: Singular Value Decomposition (SVD)</h1>
-    <p style="color: var(--text-muted); margin-bottom: 0;">The Swiss Army knife of linear algebra: $A = U \Sigma V^T$, low-rank approximation, and Eckart-Young data compression.</p>
+    <p style="color: var(--text-muted); margin-bottom: 0;">The crown jewel of matrix factorization: geometric rotations, low-rank image compression, and pseudoinverses.</p>
   </header>
 
   <main>
     <section>
-      <h2>1. The 12-Year-Old Analogy: The 3-Step Space Dance</h2>
+      <h2>1. 🧒 The 12-Year-Old Analogy: The 3-Step Space Dance</h2>
       <div class="callout callout-kid">
-        <div class="callout-title">🧒 The Stretchy Dough Dance</div>
-        <p>Any matrix transformation $A$ can be decomposed into <strong>three simple dance steps</strong>:</p>
-        <ol>
-          <li><strong>Step 1 (Rotate via $V^T$):</strong> Spin the ball of dough without changing its spherical shape.</li>
-          <li><strong>Step 2 (Stretch via $\Sigma$):</strong> Pull and squash the dough into an oval along coordinate axes by factors $\sigma_1 \ge \sigma_2 \ge \dots \ge 0$.</li>
-          <li><strong>Step 3 (Rotate via $U$):</strong> Spin the stretched ellipse into its final output orientation.</li>
-        </ol>
+        <div class="callout-title">🧒 Rotate → Stretch → Rotate</div>
+        <p>Imagine spinning a dough ball ($V^T$), squashing it into an ellipse ($\Sigma$), and orienting it in space ($U$). Every matrix in the universe can be factored into this exact 3-step dance:</p>
+        $$A = U \Sigma V^T$$
       </div>
-
-      <pre>
-       Unit Circle              Rotated Circle           Stretched Ellipse            Final Output
-            y                         y                          y                         y
-            ▲                         ▲                          ▲                         ▲
-         ┌──●──┐                   ┌──●──┐                    ┌───●───┐                 /───●───\
-         │     │  ───( Vᵀ )───►    │     │   ───( Σ )───►     │       │  ───( U )───►  /         \
-         └──●──┘                   └──●──┘                    └───●───┘                \───●───/
-            └─────► x                 └─────► x                  └────────► x              └─────► x
-      </pre>
-
-      <p>$$\boxed{A = U \Sigma V^T}$$</p>
     </section>
 
     <section>
-      <h2>2. Deconstructing the Components</h2>
+      <h2>2. Sum of Outer Products View &amp; Data Compression</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Stacking Cellophane Layers</div>
+        $$A = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T = \sigma_1 \mathbf{u}_1 \mathbf{v}_1^T + \sigma_2 \mathbf{u}_2 \mathbf{v}_2^T + \dots$$
+        <p><strong>🧒 What the math is actually doing:</strong> SVD decomposes a complex matrix into a sum of simple rank-1 layers, ordered by how much information ($\sigma_i$) they carry. Keeping only the top 20 terms compresses a 1,000,000-pixel image by 96% with almost zero visible loss!</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. 📋 Mathematical & Technical Symbol Decoder Table</h2>
       <table>
         <thead>
           <tr>
             <th>Symbol</th>
-            <th>Matrix Dimension</th>
-            <th>Mathematical Properties</th>
-            <th>Geometric Meaning</th>
+            <th>Pronunciation</th>
+            <th>Plain English Meaning</th>
+            <th>Concrete Real-World Analogy / Flashcard Example</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>$A$</td>
-            <td>$m \times n$</td>
-            <td>Any real matrix</td>
-            <td>Full linear mapping</td>
+            <td>$A = U \Sigma V^T$</td>
+            <td>"A equals U Sigma V transpose"</td>
+            <td>Singular Value Decomposition of any matrix $A$</td>
+            <td>Rotate $\to$ Stretch $\to$ Rotate space dance</td>
           </tr>
           <tr>
             <td>$U$</td>
-            <td>$m \times m$</td>
-            <td>Orthogonal ($U^T U = I$)</td>
-            <td>Output rotation matrix (eigenvectors of $A A^T$)</td>
+            <td>"U matrix (left singular vectors)"</td>
+            <td>Orthogonal matrix containing output rotation axes</td>
+            <td>The final orientation spin of the stretched ellipse</td>
           </tr>
           <tr>
             <td>$\Sigma$</td>
-            <td>$m \times n$</td>
-            <td>Rectangular diagonal</td>
-            <td>Sorted singular values ($\sigma_1 \ge \sigma_2 \ge \dots \ge 0$)</td>
+            <td>"capital Sigma"</td>
+            <td>Rectangular diagonal matrix containing singular values</td>
+            <td>The stretch multipliers along each principal axis</td>
           </tr>
           <tr>
             <td>$V^T$</td>
-            <td>$n \times n$</td>
-            <td>Orthogonal ($V^T V = I$)</td>
-            <td>Input rotation matrix (eigenvectors of $A^T A$)</td>
+            <td>"V transpose (right singular vectors)"</td>
+            <td>Orthogonal matrix containing input rotation axes</td>
+            <td>The initial spin of the dough ball before stretching</td>
+          </tr>
+          <tr>
+            <td>$\sigma_i$</td>
+            <td>"sigma-i"</td>
+            <td>The $i$-th singular value ($\sigma_i = \sqrt{\lambda_i(A^T A)}$)</td>
+            <td>The brightness/importance of the $i$-th cellophane sheet</td>
+          </tr>
+          <tr>
+            <td>$A_k$</td>
+            <td>"A sub k (rank-k truncated SVD)"</td>
+            <td>The optimal rank-$k$ approximation of matrix $A$</td>
+            <td>Compressing an image by keeping only the top 20 color layers</td>
+          </tr>
+          <tr>
+            <td>$A^+$</td>
+            <td>"A-plus / A-dagger / pseudoinverse"</td>
+            <td>Moore-Penrose generalized inverse</td>
+            <td>An undo button that works even on rectangular or collapsed matrices</td>
           </tr>
         </tbody>
       </table>
     </section>
 
-    <section>
-      <h2>3. The Sum of Outer Products View</h2>
-      <p>SVD represents any matrix as a weighted sum of simple rank-1 layers:</p>
-      <p>$$\boxed{A = \sum_{i=1}^r \sigma_i \mathbf{u}_i \mathbf{v}_i^T = \sigma_1 \mathbf{u}_1 \mathbf{v}_1^T + \sigma_2 \mathbf{u}_2 \mathbf{v}_2^T + \dots + \sigma_r \mathbf{u}_r \mathbf{v}_r^T}$$</p>
-      <p>Because singular values decay rapidly ($\sigma_1 \gg \sigma_2 \gg \dots$), keeping only the top $k$ terms provides the **optimal low-rank approximation**:</p>
-      <p>$$A_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^T \approx A$$</p>
-    </section>
-
-    <section>
-      <h2>4. The Eckart-Young Theorem &amp; AI Compression</h2>
-      <div class="callout callout-tech">
-        <div class="callout-title">🔬 Mathematical Optimality of Truncated SVD</div>
-        <p>The Eckart-Young-Mirsky Theorem guarantees that $A_k$ is the absolute best rank-$k$ approximation of $A$ under the Frobenius norm:</p>
-        <p>$$\min_{\text{rank}(B) \le k} \|A - B\|_F = \|A - A_k\|_F = \sqrt{\sum_{j=k+1}^r \sigma_j^2}$$</p>
-      </div>
-
-      <div class="callout callout-kid">
-        <div class="callout-title">🧒 Real AI Application: Image Compression</div>
-        <p>For a $1000 \times 1000$ image ($1,000,000$ pixels), keeping the top $k = 20$ singular values requires storing only $U_k$ ($20,000$), $\Sigma_k$ ($20$), and $V_k^T$ ($20,000$) = <strong>40,020 numbers</strong>. That is a <strong>96% compression ratio</strong> with virtually no loss of human-perceptible details!</p>
-      </div>
-    </section>
-
     <div class="nav-buttons">
-      <a href="../04_eigenvalues_eigenvectors/exercises_and_solutions.html" class="btn">← Topic 2.4</a>
-      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+      <a href="../04_eigenvalues_eigenvectors/lecture.html" class="btn">← Previous: Topic 2.4</a>
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Topic 2.5 Exercises & Solutions →</a>
     </div>
   </main>
-
 </body>
 </html>
-

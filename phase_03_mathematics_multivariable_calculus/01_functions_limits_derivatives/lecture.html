@@ -85,87 +85,144 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 3 Index</a>
-    <header>
-        <h1>Topic 3.1: Functions, Limits, Continuity &amp; Derivatives</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Instantaneous Rate of Change, Derivative Rules, Sigmoid Derivation &amp; Finite Differences</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Multivariable Calculus</a>
 
-    <section>
-        <h2>1. Symbol Decoder Table</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symbol</th>
-                    <th>Name</th>
-                    <th>Formal Meaning</th>
-                    <th>Child-Friendly Analogy</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>$f(x)$</td>
-                    <td>Function</td>
-                    <td>Maps input $x$ to output $y$</td>
-                    <td>A vending machine dropping a snack when coins are inserted</td>
-                </tr>
-                <tr>
-                    <td>$\lim_{x \to c} f(x)$</td>
-                    <td>Limit</td>
-                    <td>The value $f(x)$ approaches as $x \to c$</td>
-                    <td>Walking toward a doorway to see where it leads</td>
-                </tr>
-                <tr>
-                    <td>$\frac{df}{dx}$ or $f'(x)$</td>
-                    <td>Derivative</td>
-                    <td>Instantaneous rate of change of $f$ w.r.t $x$</td>
-                    <td>The speedometer needle showing exact speed at this instant</td>
-                </tr>
-                <tr>
-                    <td>$\sigma(x)$</td>
-                    <td>Sigmoid Function</td>
-                    <td>$1 / (1 + e^{-x})$ squashing into $(0, 1)$</td>
-                    <td>A smooth dimmer switch turning light from off (0) to on (1)</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <h1>Topic 3.1: Functions, Limits, Continuity & Derivatives</h1>
+    <p>Calculus is the mathematical steering wheel of modern AI. When an AI misclassifies an image or mispredicts text, it uses derivatives to determine: <em>"If I tweak this parameter by a tiny hair, will error go up or down, and by how much?"</em></p>
 
-    <section>
-        <h2>2. The Limit Definition of the Derivative</h2>
-        <div class="concept-card">
-            <h3>From Secant to Tangent Line</h3>
-            <p>The derivative measures the slope of the curve when zoomed in under a microscope:</p>
-            <p>$$f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}$$</p>
-            <p><strong>Sensitivity Interpretation:</strong> If you nudge $x$ by a tiny hair $\Delta x$, the output changes by $\Delta f \approx f'(x) \cdot \Delta x$.</p>
-        </div>
-    </section>
-
-    <section>
-        <h2>3. The Sigmoid Activation Derivative</h2>
-        <p>In neural networks, the Sigmoid activation has a uniquely elegant derivative:</p>
-        <p>$$\sigma(x) = \frac{1}{1 + e^{-x}} \implies \mathbf{\sigma'(x) = \sigma(x) \cdot (1 - \sigma(x))}$$</p>
-        <div class="tip-box">
-            <strong>Computational Efficiency in Deep Learning:</strong><br>
-            If a neuron cached forward output $y = \sigma(x)$, backpropagation computes the gradient without evaluating exponentials:
-            $$dy = y \cdot (1 - y)$$
-        </div>
-    </section>
-
-    <section>
-        <h2>4. Numerical Differentiation: Finite Differences</h2>
-        <p>To verify that analytical gradient code in PyTorch is free of bugs, we perform numerical gradient checks:</p>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: Maya's Roller Coaster & The Super-Microscope</h3>
+        <p>Imagine 12-year-old Maya and Timmy visiting an amusement park to ride the legendary <strong>"Hyper-Drop"</strong> roller coaster:</p>
         <ul>
-            <li><strong>Forward Difference:</strong> $\frac{f(x + h) - f(x)}{h} \quad (\text{Error: } \mathcal{O}(h))$</li>
-            <li><strong>Central Difference:</strong> $\frac{f(x + h) - f(x - h)}{2h} \quad (\text{Error: } \mathcal{O}(h^2))$</li>
+            <li><strong>The Macro View:</strong> From the ground, the coaster tracks twist, loop, and drop unpredictably. Trying to describe the steepness of the entire ride with a single number is impossible.</li>
+            <li><strong>The Super-Microscope:</strong> Maya takes out a magical pocket microscope that zooms in $50{,}000\times$ on point $P$. At that extreme zoom level, the curving rail no longer looks curved—<strong>it looks like a perfectly straight, flat ramp</strong>!</li>
+            <li><strong>The Speedometer:</strong> The slope of that straight line is the <strong>derivative</strong> $\frac{df}{dx}$! In AI, neural networks use this exact slope microscope to adjust internal weights one tiny nudge at a time.</li>
         </ul>
-        <p>Central difference cancels first-order error terms, yielding $100{,}000\times$ higher precision for $h = 10^{-5}$!</p>
-    </section>
+        <pre>
+     Macro View (Full Curve)               Micro View (Zoomed In 50,000x)
+            ▲                                      ▲
+            │       ╭────╮                         │       ╱ Tangent Line
+            │     ╭─╯    ╰╮                        │      ╱  Slope: m = df/dx
+            │   ╭─╯       ╰─╮                      │     ╱   (Instantaneous Slope)
+            └───┴───────────┴──▶ x                 └────┴────────▶ x
+        </pre>
+    </div>
+
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$f(x)$</td>
+                <td>"f of x"</td>
+                <td>Function rule converting input $x$ into output $y$</td>
+                <td>Vending machine: enter code B4 ($x$), out drops a candy bar ($y$)</td>
+            </tr>
+            <tr>
+                <td>$\lim_{x \to c} f(x)$</td>
+                <td>"limit of f of x as x approaches c"</td>
+                <td>The target value that $f(x)$ approaches as $x$ sneaks toward $c$</td>
+                <td>Walking toward a glass door to see where it leads without bumping into it</td>
+            </tr>
+            <tr>
+                <td>$\Delta x$</td>
+                <td>"delta x"</td>
+                <td>A small finite change in $x$</td>
+                <td>Taking a short 2-inch baby step forward along the sidewalk</td>
+            </tr>
+            <tr>
+                <td>$h$</td>
+                <td>"h"</td>
+                <td>An ultra-tiny nudge or step size (approaching 0)</td>
+                <td>Tiptoeing forward by a single microscopic grain of sand</td>
+            </tr>
+            <tr>
+                <td>$\frac{df}{dx}$ or $f'(x)$</td>
+                <td>"d f d x" or "f prime of x"</td>
+                <td>Instantaneous rate of change / slope at point $x$</td>
+                <td>Car speedometer reading showing exact speed at this millisecond</td>
+            </tr>
+            <tr>
+                <td>$\sigma(x)$</td>
+                <td>"sigma of x"</td>
+                <td>Sigmoid activation squashing inputs into $(0, 1)$</td>
+                <td>A smooth dimmer switch adjusting room lights from off (0) to on (1)</td>
+            </tr>
+            <tr>
+                <td>$\sigma'(x)$</td>
+                <td>"sigma prime of x"</td>
+                <td>Derivative of Sigmoid; sensitivity of the switch</td>
+                <td>How fast brightness changes when you turn the dial slightly</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{O}(h^2)$</td>
+                <td>"big-O of h squared"</td>
+                <td>Error shrinks with the square of step size</td>
+                <td>Shrink step by $10\times$, error drops by $100\times$!</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- LIMITS & CONTINUITY -->
+    <h2>3. Limits & Continuity</h2>
+    <p>To avoid dividing by zero ($\frac{0}{0}$ crash), we define the derivative as a limit:</p>
+    $$\underbrace{\frac{df}{dx}}_{\text{Instantaneous slope}} = \lim_{h \to 0} \frac{\overbrace{f(x + h)}^{\text{Height after nudge}} - \overbrace{f(x)}^{\text{Starting height}}}{\underbrace{h}_{\text{Width of nudge}}}$$
+    <p>🧒 <strong>What the math is actually doing:</strong> We evaluate the average slope over tiny intervals $h = 0.1, 0.01, 0.0001$. As $h \to 0$, the slope stabilizes onto the tangent line slope.</p>
+
+    <!-- DIFFERENTIATION RULES -->
+    <h2>4. Fundamental Differentiation Rules</h2>
+    <div class="concept-card">
+        <h3>Power Rule: $\frac{d}{dx}(x^n) = n x^{n-1}$</h3>
+        <p><strong>First-Principles Proof for $f(x) = x^2$:</strong></p>
+        $$f'(x) = \lim_{h \to 0} \frac{(x + h)^2 - x^2}{h} = \lim_{h \to 0} \frac{x^2 + 2xh + h^2 - x^2}{h} = \lim_{h \to 0} (2x + h) = \mathbf{2x}$$
+        <p><strong>Concrete Walkthrough at $x = 3$:</strong> Analytical slope is $2(3) = 6.0$. A finite step $h = 0.01$ gives $\frac{(3.01)^2 - 3^2}{0.01} = \frac{9.0601 - 9.0}{0.01} = 6.01 \approx 6.0$.</p>
+    </div>
+
+    <div class="concept-card">
+        <h3>Product Rule: $(uv)' = u'v + uv'$</h3>
+        <p>🧒 <strong>Expanding Carpet Analogy:</strong> A carpet of width $u$ and height $v$ has area $A = uv$. Nudging both dimensions adds two rectangular strips ($v \Delta u$ and $u \Delta v$) plus a microscopic corner ($\Delta u \Delta v$) that vanishes as $\Delta \to 0$.</p>
+    </div>
+
+    <!-- ACTIVATION FUNCTIONS -->
+    <h2>5. Deep Learning Activation Function Derivatives</h2>
+    <p>For the Sigmoid function $\sigma(x) = \frac{1}{1 + e^{-x}}$, the derivative simplifies to:</p>
+    $$\mathbf{\sigma'(x) = \sigma(x) \cdot (1 - \sigma(x))}$$
+    <div class="tip-box">
+        <strong>🚀 AI Speed Secret:</strong> If a neuron caches its forward output $y = 0.70$, backprop computes $dy = 0.70 \times (1 - 0.70) = \mathbf{0.21}$ with zero slow exponential calculations!
+    </div>
+
+    <!-- FINITE DIFFERENCE -->
+    <h2>6. Numerical Gradient Checking: Forward vs Central Difference</h2>
+    <ul>
+        <li><strong>Forward Difference:</strong> $\frac{f(x+h) - f(x)}{h}$ &nbsp; [Error: $\mathcal{O}(h)$]</li>
+        <li><strong>Central Difference:</strong> $\frac{f(x+h) - f(x-h)}{2h}$ &nbsp; [Error: $\mathcal{O}(h^2)$ — <strong>100,000x more accurate!</strong>]</li>
+    </ul>
+
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>

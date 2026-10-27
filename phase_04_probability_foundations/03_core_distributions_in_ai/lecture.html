@@ -85,77 +85,106 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 4 Index</a>
-    <header>
-        <h1>Topic 4.3: Core Probability Distributions in AI</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Bernoulli, Categorical, Gaussian, and Multivariate Gaussians in VAEs &amp; Diffusion</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Probability Foundations</a>
 
-    <section>
-        <h2>1. Symbol Decoder Table</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Distribution</th>
-                    <th>Parameters</th>
-                    <th>Formula / PMF / PDF</th>
-                    <th>Primary AI Role</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>$\text{Bernoulli}(p)$</td>
-                    <td>$p \in [0, 1]$</td>
-                    <td>$P(X=k) = p^k (1-p)^{1-k}$</td>
-                    <td>Binary Classification, Sigmoid, BCE loss</td>
-                </tr>
-                <tr>
-                    <td>$\text{Categorical}(\mathbf{p})$</td>
-                    <td>$\sum p_k = 1$</td>
-                    <td>$P(X=k) = p_k$</td>
-                    <td>LLM next-token generation, Softmax</td>
-                </tr>
-                <tr>
-                    <td>$\mathcal{N}(\mu, \sigma^2)$</td>
-                    <td>$\mu \in \mathbb{R}, \sigma > 0$</td>
-                    <td>$f(x) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$</td>
-                    <td>Weight initialization, residual error modeling</td>
-                </tr>
-                <tr>
-                    <td>$\mathcal{N}(\mu, \Sigma)$</td>
-                    <td>$\mu \in \mathbb{R}^D, \Sigma \succ 0$</td>
-                    <td>$f(\mathbf{x}) = \frac{1}{(2\pi)^{D/2}|\Sigma|^{1/2}} e^{-\frac{1}{2}(\mathbf{x}-\mu)^T \Sigma^{-1} (\mathbf{x}-\mu)}$</td>
-                    <td>Latent space in VAEs &amp; Diffusion Models</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <h1>Topic 4.3: Core Probability Distributions in AI</h1>
+    <p>Neural networks output probability distribution parameters. Understanding the shapes and properties of <strong>Bernoulli, Categorical, and Gaussian</strong> distributions is essential for choosing loss functions and designing generative architectures.</p>
 
-    <section>
-        <h2>2. Multivariate Gaussian in Generative AI</h2>
-        <div class="concept-card">
-            <h3>Why $\mathcal{N}(\mu, \Sigma)$ Shapes Generative Models</h3>
-            <p>In high dimensions, the covariance matrix $\Sigma$ governs how variables stretch and correlate with each other:</p>
-            <ul>
-                <li><strong>Spherical ($\Sigma = \sigma^2 I$):</strong> Symmetrical, isotropic circular contours.</li>
-                <li><strong>Diagonal ($\Sigma = \text{diag}(\sigma_1^2, \dots, \sigma_D^2)$):</strong> Axis-aligned ellipses with independent coordinates.</li>
-                <li><strong>Full Covariance:</strong> Rotated ellipses capturing complex cross-feature dependencies.</li>
-            </ul>
-        </div>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: Maya & Barnaby at the Golden Retriever Kennel</h3>
+        <p>Maya visits a kennel with 100 puppies:</p>
+        <ul>
+            <li><strong>The Bandana Check (Bernoulli):</strong> Does a puppy wear a red bandana? Yes ($1$) or No ($0$). That is <strong>Binary Classification</strong> (Sigmoid + BCE).</li>
+            <li><strong>The Food Bowl Choice (Categorical):</strong> Choosing one of 5 colored bowls is <strong>Multi-Class Prediction</strong> (Softmax + Cross-Entropy in LLMs).</li>
+            <li><strong>Puppy Heights (Gaussian Bell Curve):</strong> Measuring heights of 1,000 puppies clusters around the average height of 20 inches with a symmetric spread $\mathcal{N}(\mu, \sigma^2)$.</li>
+            <li><strong>Height AND Weight Together (Multivariate Gaussian $\mathcal{N}(\mu, \Sigma)$):</strong> Taller puppies weigh more, creating a correlated 2D point cloud. Used in VAE and Diffusion latent spaces!</li>
+        </ul>
+        <pre>
+               THE GOLDEN RETRIEVER PUPPY BELL CURVE
+                                ▲  
+                           ╭────┴────╮  ◀ Average Height: 20 inches
+                         ╭─╯         ╰─╮
+                       ╭─╯             ╰─╮
+               ──────┴─────────┬─────────┴──────▶ Puppy Height (inches)
+                              20
+                     68% of puppies within ±1σ;  95% within ±2σ
+        </pre>
+    </div>
 
-        <div class="tip-box">
-            <strong>The VAE Reparameterization Trick:</strong><br>
-            To backpropagate through stochastic Gaussian sampling:
-            $$\mathbf{z} = \mu + \sigma \odot \epsilon \quad \text{where } \epsilon \sim \mathcal{N}(0, I)$$
-            This separates stochastic noise $\epsilon$ from trainable parameters $\mu$ and $\sigma$!
-        </div>
-    </section>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\text{Bernoulli}(p)$</td>
+                <td>"Bernoulli of p"</td>
+                <td>Coin flip with success probability $p$</td>
+                <td>Asking if Barnaby is wearing a red bandana (Yes/No)</td>
+            </tr>
+            <tr>
+                <td>$\text{Cat}(p_1, \dots, p_K)$</td>
+                <td>"Categorical"</td>
+                <td>Choice among $K$ distinct categories</td>
+                <td>Puppy choosing one of 5 colored food bowls</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{N}(\mu, \sigma^2)$</td>
+                <td>"Normal / Gaussian"</td>
+                <td>1D symmetric bell curve with mean $\mu$ and spread $\sigma^2$</td>
+                <td>The height distribution of 1,000 golden retriever puppies</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{N}(\mu, \Sigma)$</td>
+                <td>"Multivariate normal"</td>
+                <td>$D$-dimensional bell curve with covariance matrix $\Sigma$</td>
+                <td>Measuring puppy height, weight, and ear length together</td>
+            </tr>
+            <tr>
+                <td>$d_M^2$</td>
+                <td>"Mahalanobis distance"</td>
+                <td>$(\mathbf{x} - \mu)^T \Sigma^{-1} (\mathbf{x} - \mu)$</td>
+                <td>Measuring how unusual a puppy is, adjusted for correlation</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- GAUSSIAN FORMULA -->
+    <h2>3. The Gaussian PDF Formula</h2>
+    $$f(x) = \frac{1}{\underbrace{\sigma \sqrt{2\pi}}_{\text{Normalizer}}} \exp\left( -\frac{\overbrace{(x - \mu)^2}^{\text{Squared distance}}}{\underbrace{2\sigma^2}_{\text{Spread}}} \right)$$
+    <p>🧒 <strong>What the math is actually doing:</strong> When $x = \mu$, distance is zero and $e^0 = 1$ (the highest peak). As $x$ moves away from the mean, $e^{-\text{distance}}$ smoothly tapers off symmetrically to zero.</p>
+
+    <!-- VAE REPARAMETERIZATION TRICK -->
+    <h2>4. The VAE Reparameterization Trick</h2>
+    $$\mathbf{\mathbf{z} = \mu + \sigma \odot \epsilon \quad \text{where } \epsilon \sim \mathcal{N}(0, I)}$$
+    <div class="tip-box">
+        <strong>Why Deep Learning Needs This:</strong> You cannot backpropagate gradients through a random sampling node! By drawing external noise $\epsilon$, the latent code $\mathbf{z}$ becomes a fully differentiable function of $\mu$ and $\sigma$.
+    </div>
+
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>
-

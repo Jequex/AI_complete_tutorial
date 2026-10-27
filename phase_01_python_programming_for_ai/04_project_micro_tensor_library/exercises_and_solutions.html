@@ -86,9 +86,6 @@
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -122,115 +119,78 @@
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
             font-size: 0.9em;
         }
-        .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+        p code, li code {
+            background-color: var(--primary-light);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-
     <a href="lecture.html" class="back-link">← Back to Lecture 1.4</a>
-    <header>
-        <h1>Topic 1.4: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Capstone Practice: Stride Calculus, Reshaping, Broadcasting &amp; MSE Loss</p>
-    </header>
 
-    <!-- PROBLEM 1 -->
+    <h1>Topic 1.4: Exercises & Solutions</h1>
+    <p>Practice problem set covering stride calculus, broadcasting mechanics, and neural network forward passes.</p>
+
+    <!-- Problem 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 1: Stride Calculus &amp; Zero-Copy Reshaping</h3>
+            <h3>Problem 1: Stride Calculus & Contiguous Memory Views</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>In PyTorch, calling <code>.view()</code> requires the underlying tensor to be C-contiguous in memory.</p>
-        <ol>
-            <li>State the general formula for C-contiguous strides $(S_0, \dots, S_{k-1})$.</li>
-            <li>Compute the strides for a 3D tensor of shape $(2, 3, 4)$.</li>
-            <li>Explain why a transposed matrix $A^T$ with shape $(3, 2)$ and strides $(1, 3)$ is non-contiguous.</li>
-            <li>Implement <code>reshape(new_shape)</code> that returns a zero-copy view if contiguous, or copies storage if non-contiguous.</li>
-        </ol>
+        <p>Calculate the row-major strides for a 3D tensor of shape $(B=2, T=3, D=4)$, and explain why transposing a 2D matrix of shape $(2, 3)$ with strides $(3, 1)$ into $A^T$ with shape $(3, 2)$ and strides $(1, 3)$ produces a non-contiguous tensor view.</p>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
-                <div class="step-box">
-                    <strong>1. Formula:</strong>
-                    $$S_{k-1} = 1, \quad S_{i} = S_{i+1} \times D_{i+1}$$
-                </div>
-                <div class="step-box">
-                    <strong>2. Shape (2, 3, 4) Strides:</strong>
-                    $$S_2 = 1, \quad S_1 = 4, \quad S_0 = 12 \implies (12, 4, 1)$$
-                </div>
-                <div class="step-box">
-                    <strong>3. Contiguity Explanation:</strong>
-                    In a contiguous $3 \times 2$ matrix, adjacent columns must be 1 element apart in RAM (strides $(2, 1)$). In $A^T$, column step is 3, breaking memory continuity.
-                </div>
-                <div class="step-box">
-                    <strong>4. Code Implementation:</strong>
-                    <pre><code>def reshape(self, new_shape):
-    if self.is_contiguous():
-        return Tensor(None, shape=new_shape, storage=self.storage, strides=self._default_strides(new_shape))
-    return Tensor(None, shape=new_shape, storage=self._to_contiguous_list())</code></pre>
-                </div>
+                <h4>Part 1: Strides for (2, 3, 4)</h4>
+                $$S_2 = 1, \quad S_1 = 1 \times 4 = 4, \quad S_0 = 4 \times 3 = 12 \implies \mathbf{(12, 4, 1)}$$
+                <h4>Part 2: Contiguity Explanation</h4>
+                <p>A C-contiguous $(3, 2)$ matrix requires strides $(2, 1)$ so adjacent column items sit next to each other in RAM. Strides $(1, 3)$ separate adjacent items in a row by 3 memory slots, making it non-contiguous.</p>
             </div>
         </details>
     </div>
 
-    <!-- PROBLEM 2 -->
+    <!-- Problem 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 2: Broadcasting Mechanics for Bias Addition</h3>
+            <h3>Problem 2: Zero-Copy Stride Broadcasting</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Calculate by hand the broadcasted addition of matrix $Z \in \mathbb{R}^{2 \times 3}$ and bias $b \in \mathbb{R}^3$:</p>
-        <p>$$Z = \begin{bmatrix} 1.0 & 2.0 & 3.0 \\ 4.0 & 5.0 & 6.0 \end{bmatrix}, \quad b = \begin{bmatrix} 0.5 \\ -0.5 \\ 1.0 \end{bmatrix}$$</p>
+        <p>How does setting stride $S_0 = 0$ allow broadcasting a 1D bias vector $\mathbf{b} \in \mathbb{R}^N$ across $M$ rows of a batch matrix without allocating duplicate memory?</p>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
-                <div class="step-box">
-                    <strong>Hand Calculation:</strong>
-                    $$Z + b = \begin{bmatrix} 1.0 + 0.5 & 2.0 - 0.5 & 3.0 + 1.0 \\ 4.0 + 0.5 & 5.0 - 0.5 & 6.0 + 1.0 \end{bmatrix} = \begin{bmatrix} 1.5 & 1.5 & 4.0 \\ 4.5 & 4.5 & 7.0 \end{bmatrix}$$
-                    $$\text{Resulting Shape: } (2, 3)$$
-                </div>
+                <p>When shape is $(M, N)$ and strides are $(0, 1)$, moving down row $r$ advances flat index by $r \times 0 = 0$. Every row re-reads the exact same $N$ floats in memory in $\mathcal{O}(1)$ time!</p>
             </div>
         </details>
     </div>
 
-    <!-- PROBLEM 3 -->
+    <!-- Problem 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 3: Mean Squared Error (MSE) Loss Function</h3>
+            <h3>Problem 3: 2-Layer Neural Network Forward Pass</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>Implement <code>mse_loss(y_true, y_pred)</code> and compute the loss between:</p>
-        <p>$$y = \begin{bmatrix} 1.0 & 0.0 \\ 0.0 & 1.0 \end{bmatrix}, \quad \hat{y} = \begin{bmatrix} 0.8 & 0.1 \\ 0.2 & 0.9 \end{bmatrix}$$</p>
+        <p>Calculate the output $\hat{y} = \text{ReLU}(x @ W_1 + b_1) @ W_2 + b_2$ for:</p>
+        $$x = \begin{bmatrix} 2.0 & -1.0 \end{bmatrix}, \quad W_1 = \begin{bmatrix} 1.0 & 2.0 \\ -3.0 & 0.5 \end{bmatrix}, \quad b_1 = \begin{bmatrix} 0.5 & -1.0 \end{bmatrix}$$
+        $$W_2 = \begin{bmatrix} 2.0 \\ -1.0 \end{bmatrix}, \quad b_2 = \begin{bmatrix} 1.5 \end{bmatrix}$$
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
-                <div class="step-box">
-                    <strong>Hand Calculation:</strong>
-                    $$\text{Squared Errors} = (-0.2)^2 + (0.1)^2 + (0.2)^2 + (-0.1)^2 = 0.04 + 0.01 + 0.04 + 0.01 = 0.10$$
-                    $$\mathcal{L}_{\text{MSE}} = \frac{0.10}{4} = 0.0250$$
-                </div>
-                <div class="step-box">
-                    <pre><code>def mse_loss(y_true: Tensor, y_pred: Tensor) -> float:
-    diffs = [(yp - yt) ** 2 for yt, yp in zip(y_true._to_contiguous_list(), y_pred._to_contiguous_list())]
-    return sum(diffs) / len(diffs)
-
-# Exact match: mse_loss(y, y_hat) -> 0.0250</code></pre>
-                </div>
+                <ol>
+                    <li>$z_1 = [(2.0 \times 1.0) + (-1.0 \times -3.0) + 0.5, \quad (2.0 \times 2.0) + (-1.0 \times 0.5) - 1.0] = [\mathbf{5.5}, \mathbf{2.5}]$</li>
+                    <li>$a_1 = \text{ReLU}([5.5, 2.5]) = [\mathbf{5.5}, \mathbf{2.5}]$</li>
+                    <li>$\hat{y} = (5.5 \times 2.0) + (2.5 \times -1.0) + 1.5 = 11.0 - 2.5 + 1.5 = \mathbf{10.0}$</li>
+                </ol>
             </div>
         </details>
     </div>
 
+    <div style="margin-top: 2rem;">
+        <a href="lecture.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">← Back to Lecture 1.4</a>
+    </div>
 </body>
 </html>
-

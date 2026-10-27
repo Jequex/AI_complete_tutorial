@@ -1,164 +1,167 @@
 # Topic 3.5: Exercises & Solutions — Hessians, Curvature & Optimization
 
----
+Welcome to the problem set for **Topic 3.5: Hessians, Curvature & Optimization in Deep Learning**.
 
-## Problem Set Overview
-
-| Problem | Focus | Difficulty |
-| :--- | :--- | :--- |
-| **1** | **Multivariable Critical Point Discovery & Hessian Classification** | Medium |
-| **2** | **Hand-Crafted Newton Optimization Step on a Quadratic Bowl** | Medium |
-| **3** | **Condition Number $\kappa(H)$ & The Gradient Descent Stability Limit** | Challenging |
+Grab paper and pencil. Solve each problem before revealing the step-by-step solutions below.
 
 ---
 
-## Problem 1: Multivariable Critical Point Discovery & Hessian Classification
+## 📝 Problem Set Overview
 
-### The Context
-Consider the non-linear multivariable function:
+| Problem | Focus | Difficulty | Practical AI Connection |
+| :---: | :--- | :---: | :--- |
+| **1** | **Critical Point Discovery & Hessian Eigenvalue Classification** | Medium | Identifying saddle points vs true minima in deep learning landscapes |
+| **2** | **Hand-Crafted Newton Optimization Step on a Quadratic Bowl** | Medium | The theoretical foundation of natural gradient and quasi-Newton optimizers |
+| **3** | **Condition Number $\kappa(H)$ & Gradient Descent Stability Limit** | Challenging | Explaining why loss explodes when learning rates exceed $\eta = 2/\lambda_{\max}$ |
+
+---
+
+## Problem 1: Critical Point Discovery & Hessian Eigenvalue Classification
+
+### 🧒 The Context: Maya & Barnaby's Concrete Skatepark
+Maya and her puppy Barnaby are exploring a terrain surface given by:
 $$f(x, y) = x^3 - 3x + y^2$$
 
-### Task
-1. Calculate the gradient vector $\nabla f(x, y)$.
+### Tasks:
+1. Compute the gradient vector $\nabla f(x, y)$.
 2. Set $\nabla f(x, y) = \mathbf{0}$ to find all critical points $(x^*, y^*)$ in the 2D plane.
 3. Compute the general $2 \times 2$ Hessian matrix $H(x, y)$.
-4. Evaluate $H$ at each critical point, compute its eigenvalues, and classify each critical point as a **local minimum**, **local maximum**, or **saddle point**.
+4. Evaluate $H$ at each critical point, compute its eigenvalues, and classify each point as a **local minimum**, **local maximum**, or **saddle point**.
 
 ---
 
-### Solution 1
+<details>
+<summary>Click to view solution for Problem 1</summary>
 
-#### 1. Gradient Vector
+### Detailed Step-by-Step Solution:
+
+#### Step 1: Compute Gradient Vector
 $$\nabla f(x, y) = \begin{bmatrix} \frac{\partial f}{\partial x} \\ \frac{\partial f}{\partial y} \end{bmatrix} = \begin{bmatrix} 3x^2 - 3 \\ 2y \end{bmatrix}$$
 
-#### 2. Critical Points
-Setting $\nabla f(x, y) = \mathbf{0}$:
-$$3x^2 - 3 = 0 \implies x^2 = 1 \implies x = \pm 1$$
+#### Step 2: Find Critical Points
+Set both components to zero:
+$$3x^2 - 3 = 0 \implies 3(x^2 - 1) = 0 \implies x = +1 \text{ or } x = -1$$
 $$2y = 0 \implies y = 0$$
-Thus, there are **two critical points**:
+
+There are two critical points:
 - **Point A:** $(+1, 0)$
 - **Point B:** $(-1, 0)$
 
-#### 3. General Hessian Matrix
-$$H(x, y) = \begin{bmatrix} \frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\ \frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2} \end{bmatrix} = \begin{bmatrix} 6x & 0 \\ 0 & 2 \end{bmatrix}$$
+#### Step 3: Compute General Hessian Matrix
+$$H(x, y) = \begin{bmatrix}
+\frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\
+\frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2}
+\end{bmatrix} = \begin{bmatrix} 6x & 0 \\ 0 & 2 \end{bmatrix}$$
 
-#### 4. Classification of Critical Points
+#### Step 4: Evaluate and Classify Each Critical Point
 
 **At Point A $(+1, 0)$:**
 $$H(1, 0) = \begin{bmatrix} 6(1) & 0 \\ 0 & 2 \end{bmatrix} = \begin{bmatrix} 6 & 0 \\ 0 & 2 \end{bmatrix}$$
-- The eigenvalues are the diagonal entries: $\lambda_1 = +6, \quad \lambda_2 = +2$.
+- Eigenvalues: $\lambda_1 = +6, \quad \lambda_2 = +2$.
 - Since both eigenvalues are strictly positive ($\lambda_1 > 0, \lambda_2 > 0$), $H \succ 0$ is **Positive Definite**.
-- **Conclusion:** Point A $(+1, 0)$ is a **Local Minimum** (bowl shape).
+- **Conclusion:** Point A is a **Local Minimum** (a soup bowl where Barnaby's ball settles)!
 
 **At Point B $(-1, 0)$:**
 $$H(-1, 0) = \begin{bmatrix} 6(-1) & 0 \\ 0 & 2 \end{bmatrix} = \begin{bmatrix} -6 & 0 \\ 0 & 2 \end{bmatrix}$$
-- The eigenvalues are: $\lambda_1 = -6, \quad \lambda_2 = +2$.
-- The eigenvalues have opposite signs ($\lambda_1 < 0$ while $\lambda_2 > 0$). Thus, $H$ is **Indefinite**.
-- **Conclusion:** Point B $(-1, 0)$ is a **Saddle Point** (Pringle chip shape: curves down along $x$, curves up along $y$).
+- Eigenvalues: $\lambda_1 = -6, \quad \lambda_2 = +2$.
+- The eigenvalues have opposite signs (curves downward along $x$, curves upward along $y$).
+- **Conclusion:** Point B is a **Saddle Point** (a Pringle potato chip)!
+</details>
 
 ---
 
 ## Problem 2: Hand-Crafted Newton Optimization Step on a Quadratic Bowl
 
-### The Context
-Consider the quadratic objective function:
-$$f(x, y) = 2x^2 + 4xy + 5y^2 - 6x - 8y$$
+### 🧒 The Context: Maya's One-Shot Optimization Magic
+Consider the quadratic loss surface:
+$$f(x, y) = 2x^2 + 8y^2$$
+Notice that the $y$-axis has $4\times$ greater curvature than the $x$-axis.
+We start at point $\mathbf{w}_0 = \begin{bmatrix} 4.0 \\ 2.0 \end{bmatrix}$.
 
-### Task
-1. Calculate the gradient vector $\nabla f(x, y)$.
-2. Calculate the Hessian matrix $H$. Verify that $H$ is constant everywhere.
-3. Compute the matrix inverse $H^{-1}$.
-4. Start at the origin $\mathbf{w}_0 = [0, 0]^T$. Compute the gradient $\nabla f(\mathbf{w}_0)$ and execute a single Newton step:
+### Tasks:
+1. Compute the gradient vector $\nabla f(\mathbf{w}_0)$.
+2. Compute the constant Hessian matrix $H$ and its matrix inverse $H^{-1}$.
+3. Perform **one single Newton's optimization step**:
    $$\mathbf{w}_1 = \mathbf{w}_0 - H^{-1} \nabla f(\mathbf{w}_0)$$
-5. Verify that $\nabla f(\mathbf{w}_1) = \mathbf{0}$, proving that Newton's method converged to the exact global minimum in a single jump!
+4. Show that Newton's method reaches the global minimum $[0, 0]^T$ in **exactly one step**, whereas Gradient Descent would require dozens of zig-zagging steps!
 
 ---
 
-### Solution 2
+<details>
+<summary>Click to view solution for Problem 2</summary>
 
-#### 1. Gradient Vector
-$$\frac{\partial f}{\partial x} = 4x + 4y - 6$$
-$$\frac{\partial f}{\partial y} = 4x + 10y - 8$$
-$$\nabla f(x, y) = \begin{bmatrix} 4x + 4y - 6 \\ 4x + 10y - 8 \end{bmatrix}$$
+### Detailed Step-by-Step Solution:
 
-#### 2. Hessian Matrix
-$$H = \begin{bmatrix} 
-\frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\ 
-\frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2} 
-\end{bmatrix} = \begin{bmatrix} 4 & 4 \\ 4 & 10 \end{bmatrix}$$
-Notice that $H$ contains only constants and is symmetric ($H_{12} = H_{21} = 4$).
+#### Step 1: Gradient Vector at $\mathbf{w}_0$
+$$\nabla f(x, y) = \begin{bmatrix} 4x \\ 16y \end{bmatrix} \implies \nabla f(4.0, 2.0) = \begin{bmatrix} 4(4.0) \\ 16(2.0) \end{bmatrix} = \begin{bmatrix} 16.0 \\ 32.0 \end{bmatrix}$$
 
-#### 3. Inverting $H$
-For a $2 \times 2$ matrix $M = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$:
-$$\det(H) = ad - bc = (4)(10) - (4)(4) = 40 - 16 = \mathbf{24}$$
-$$H^{-1} = \frac{1}{\det(H)} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} = \frac{1}{24} \begin{bmatrix} 10 & -4 \\ -4 & 4 \end{bmatrix} = \begin{bmatrix} \frac{5}{12} & -\frac{1}{6} \\ -\frac{1}{6} & \frac{1}{6} \end{bmatrix}$$
+#### Step 2: Compute Hessian and Inverse
+$$H = \begin{bmatrix} \frac{\partial^2 f}{\partial x^2} & \frac{\partial^2 f}{\partial x \partial y} \\ \frac{\partial^2 f}{\partial y \partial x} & \frac{\partial^2 f}{\partial y^2} \end{bmatrix} = \begin{bmatrix} 4 & 0 \\ 0 & 16 \end{bmatrix}$$
 
-#### 4. Executing the Newton Step from $\mathbf{w}_0 = [0, 0]^T$
-At $\mathbf{w}_0 = [0, 0]^T$:
-$$\nabla f(0, 0) = \begin{bmatrix} -6 \\ -8 \end{bmatrix}$$
-The Newton step is:
-$$\Delta\mathbf{w} = -H^{-1} \nabla f(\mathbf{w}_0) = - \frac{1}{24} \begin{bmatrix} 10 & -4 \\ -4 & 4 \end{bmatrix} \begin{bmatrix} -6 \\ -8 \end{bmatrix}$$
-$$\Delta\mathbf{w} = - \frac{1}{24} \begin{bmatrix} (10)(-6) + (-4)(-8) \\ (-4)(-6) + (4)(-8) \end{bmatrix} = - \frac{1}{24} \begin{bmatrix} -60 + 32 \\ 24 - 32 \end{bmatrix} = - \frac{1}{24} \begin{bmatrix} -28 \\ -8 \end{bmatrix} = \begin{bmatrix} \frac{28}{24} \\ \frac{8}{24} \end{bmatrix} = \mathbf{\begin{bmatrix} \frac{7}{6} \\ \frac{1}{3} \end{bmatrix}}$$
+For a diagonal matrix, the inverse simply inverts each diagonal entry:
+$$H^{-1} = \begin{bmatrix} 1/4 & 0 \\ 0 & 1/16 \end{bmatrix} = \begin{bmatrix} 0.25 & 0 \\ 0 & 0.0625 \end{bmatrix}$$
 
-Thus:
-$$\mathbf{w}_1 = \mathbf{w}_0 + \Delta\mathbf{w} = \mathbf{\begin{bmatrix} 7/6 \\ 1/3 \end{bmatrix}} \approx \begin{bmatrix} 1.1667 \\ 0.3333 \end{bmatrix}$$
+#### Step 3: Newton's Optimization Step
+$$\mathbf{w}_1 = \mathbf{w}_0 - H^{-1} \nabla f(\mathbf{w}_0)$$
+$$\mathbf{w}_1 = \begin{bmatrix} 4.0 \\ 2.0 \end{bmatrix} - \begin{bmatrix} 0.25 & 0 \\ 0 & 0.0625 \end{bmatrix} \begin{bmatrix} 16.0 \\ 32.0 \end{bmatrix}$$
 
-#### 5. Verification
-Check the gradient at $\mathbf{w}_1$:
-$$\frac{\partial f}{\partial x}\left(\frac{7}{6}, \frac{1}{3}\right) = 4\left(\frac{7}{6}\right) + 4\left(\frac{1}{3}\right) - 6 = \frac{14}{3} + \frac{4}{3} - 6 = \frac{18}{3} - 6 = 6 - 6 = \mathbf{0}$$
-$$\frac{\partial f}{\partial y}\left(\frac{7}{6}, \frac{1}{3}\right) = 4\left(\frac{7}{6}\right) + 10\left(\frac{1}{3}\right) - 8 = \frac{14}{3} + \frac{10}{3} - 8 = \frac{24}{3} - 8 = 8 - 8 = \mathbf{0}$$
-$\nabla f(\mathbf{w}_1) = \mathbf{0}$. The global minimum was reached in exactly **one step**!
+Multiplying $H^{-1} \nabla f$:
+$$H^{-1} \nabla f = \begin{bmatrix} 0.25 \times 16.0 \\ 0.0625 \times 32.0 \end{bmatrix} = \begin{bmatrix} 4.0 \\ 2.0 \end{bmatrix}$$
+
+Now subtract:
+$$\mathbf{w}_1 = \begin{bmatrix} 4.0 \\ 2.0 \end{bmatrix} - \begin{bmatrix} 4.0 \\ 2.0 \end{bmatrix} = \mathbf{\begin{bmatrix} 0.0 \\ 0.0 \end{bmatrix}}$$
+
+#### Step 4: The Takeaway
+The global minimum is $[0, 0]^T$. Newton's method converged to the exact optimal solution in **a single step**!
+By multiplying by $H^{-1}$, the step along the shallow $x$-axis was stretched ($0.25 \times 16 = 4.0$) and the step along the steep $y$-axis was compressed ($0.0625 \times 32 = 2.0$), eliminating all ravine distortion!
+</details>
 
 ---
 
-## Problem 3: Condition Number $\kappa(H)$ & The Gradient Descent Stability Limit
+## Problem 3: Condition Number $\kappa(H)$ & Gradient Descent Stability Limit
 
-### The Context
-Consider the anisotropic canyon loss function:
-$$f(x, y) = \frac{1}{2} \left( 1000 x^2 + y^2 \right)$$
+### 🧒 The Context: Timmy's Exploding Learning Rate
+Consider an elliptical loss ravine:
+$$f(x, y) = \frac{1}{2} x^2 + 50 y^2$$
 
-### Task
-1. Compute the Hessian matrix $H$, find its eigenvalues $\lambda_1, \lambda_2$, and calculate the condition number $\kappa(H) = \frac{\lambda_{\max}}{\lambda_{\min}}$.
-2. Write the 1-step Gradient Descent update rule along each coordinate axis with learning rate $\eta$:
-   $$x_{t+1} = (1 - \eta \lambda_1) x_t, \quad y_{t+1} = (1 - \eta \lambda_2) y_t$$
-3. What is the maximum learning rate $\eta_{\text{max}}$ before Gradient Descent diverges (explodes to infinity) along the $x$-axis?
-4. If you set $\eta = \frac{1}{1000} = 0.001$ to ensure stability along the $x$-axis, by what multiplier does the error along the $y$-axis shrink at each step? How many steps are needed to reduce $y$ to $1\%$ of its initial value?
+### Tasks:
+1. Compute the Hessian matrix $H$ and its condition number $\kappa(H) = \frac{\lambda_{\max}}{\lambda_{\min}}$.
+2. The mathematical stability criterion for Gradient Descent states that the learning rate must satisfy:
+   $$\eta < \frac{2}{\lambda_{\max}}$$
+   What is the maximum stable learning rate $\eta_{\max}$ for this function?
+3. If Timmy chooses learning rate $\eta = 0.025$:
+   - Is the update stable along the $y$-axis?
+   - How much progress is made per step along the $x$-axis ($x_{t+1} = (1 - \eta \lambda_{\min}) x_t$)?
+   - What happens if Timmy sets $\eta = 0.030$?
 
 ---
 
-### Solution 3
+<details>
+<summary>Click to view solution for Problem 3</summary>
 
-#### 1. Hessian, Eigenvalues & Condition Number
-$$\frac{\partial f}{\partial x} = 1000x, \quad \frac{\partial f}{\partial y} = y$$
-$$H = \begin{bmatrix} 1000 & 0 \\ 0 & 1 \end{bmatrix}$$
-- Eigenvalues: $\lambda_1 = 1000$ (steep wall), $\lambda_2 = 1$ (flat floor).
-- Condition number:
-  $$\kappa(H) = \frac{\lambda_{\max}}{\lambda_{\min}} = \frac{1000}{1} = \mathbf{1000}$$
+### Detailed Step-by-Step Solution:
 
-#### 2. Gradient Descent Coordinate Recurrence
-Using $\nabla f = [1000x, y]^T$:
-$$x_{t+1} = x_t - \eta (1000 x_t) = (1 - 1000\eta) x_t = (1 - \eta \lambda_1) x_t$$
-$$y_{t+1} = y_t - \eta (1 y_t) = (1 - 1\eta) y_t = (1 - \eta \lambda_2) y_t$$
+#### Step 1: Hessian and Condition Number
+$$\frac{\partial^2 f}{\partial x^2} = 1.0, \quad \frac{\partial^2 f}{\partial y^2} = 100.0, \quad \frac{\partial^2 f}{\partial x \partial y} = 0$$
+$$H = \begin{bmatrix} 1 & 0 \\ 0 & 100 \end{bmatrix}$$
+- Eigenvalues: $\lambda_{\min} = 1.0, \quad \lambda_{\max} = 100.0$.
+- Condition Number:
+  $$\kappa(H) = \frac{\lambda_{\max}}{\lambda_{\min}} = \frac{100.0}{1.0} = \mathbf{100.0}$$
+The ravine walls are $100\times$ steeper than the riverbed!
 
-#### 3. Maximum Learning Rate Stability Limit
-For a geometric sequence $x_{t+1} = c \cdot x_t$ to converge to 0 without exploding, we must have $|c| < 1$:
-$$|1 - \eta \lambda_1| < 1 \implies -1 < 1 - 1000\eta < 1$$
-$$-2 < -1000\eta < 0 \implies 0 < \eta < \frac{2}{1000} = \mathbf{0.002}$$
-If $\eta \ge 0.002$, Gradient Descent will oscillate with ever-increasing amplitude and blow up!
+#### Step 2: Maximum Stable Learning Rate
+$$\eta_{\max} = \frac{2}{\lambda_{\max}} = \frac{2}{100.0} = \mathbf{0.020}$$
 
-#### 4. Sluggish Convergence along Flat Coordinate
-With $\eta = 0.001$:
-- For $x$: $x_{t+1} = (1 - 0.001 \times 1000) x_t = (1 - 1) x_t = 0$ (converges in 1 step!).
-- For $y$: $y_{t+1} = (1 - 0.001 \times 1) y_t = \mathbf{0.999 \, y_t}$.
+#### Step 3: Analysis with $\eta = 0.025$
+- **Along the $y$-axis:**
+  The update factor is $1 - \eta \lambda_y = 1 - 0.025(100) = 1 - 2.5 = \mathbf{-1.5}$.
+  Since $|-1.5| > 1$, the $y$-coordinate alternates signs and grows exponentially ($y_0 \to -1.5 y_0 \to +2.25 y_0 \to -3.375 y_0 \dots$)!
+  **The loss explodes to `NaN` / `inf`!**
+- **Along the $x$-axis:**
+  The update factor is $1 - \eta \lambda_x = 1 - 0.025(1) = 0.975$.
+  The model shrinks $x$ by only $2.5\%$ per step, requiring hundreds of iterations to reach zero!
+- **If Timmy sets $\eta = 0.030$:**
+  Update factor is $1 - 0.03(100) = -2.0$. Oscillations double in magnitude every step, resulting in catastrophic numerical blowout within 15 steps.
 
-At each step, the error along the $y$-axis only shrinks by $0.1\%$ ($0.999$).
-To reach $1\%$ ($0.01$) of initial error:
-$$0.999^t = 0.01$$
-$$t \cdot \ln(0.999) = \ln(0.01)$$
-$$t \approx \frac{-4.60517}{-0.0010005} \approx \mathbf{4603 \text{ steps!}}$$
-
-<div class="takeaway">
-    <strong>Key Takeaway for AI Optimizers:</strong>
-    Because the condition number is $\kappa = 1000$, standard SGD is trapped: it cannot use a larger learning rate without exploding on $x$, but the small learning rate forces it to take 4,600 steps on $y$!
-    This is why optimizers like <strong>Adam</strong> adapt the step size per coordinate: Adam scales the effective step size by $1/\sqrt{g^2}$, moving aggressively along $y$ and safely along $x$ simultaneously!
-</div>
+**Deep Learning Connection:** This is why learning rate schedules, gradient clipping, and adaptive optimizers (Adam) are mandatory for training neural networks—they prevent high-curvature directions from blowing up!
+</details>

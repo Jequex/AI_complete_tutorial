@@ -65,8 +65,8 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .problem-header {
@@ -74,196 +74,164 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.75rem;
         }
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
         }
-        .badge-medium { background-color: #fef3c7; color: #b45309; }
+        .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
         details {
-            margin-top: 1.25rem;
+            background-color: var(--solution-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
+            margin-top: 1.25rem;
             overflow: hidden;
-            background: var(--solution-bg);
         }
         summary {
             padding: 0.85rem 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            background-color: var(--primary-light);
             color: var(--primary);
             user-select: none;
-            transition: background 0.2s;
+            background-color: var(--primary-light);
+            border-bottom: 1px solid transparent;
         }
-        summary:hover {
-            opacity: 0.9;
+        details[open] summary {
+            border-bottom-color: var(--border);
         }
         .solution-content {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+            padding: 1.25rem;
         }
-        .takeaway {
-            background-color: var(--accent-bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
+        .step-box {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
+        }
+        .step-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-link">← Back to Phase 3 Portal</a>
-    <a href="lecture.html" class="back-link" style="margin-left: 1.5rem;">📖 Read Lecture 3.4</a>
+
+    <a href="lecture.html" class="back-link">← Back to Lecture 3.4</a>
 
     <h1>Topic 3.4: Exercises & Solutions</h1>
-    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
-        Master Softmax Jacobian computation, column-sum conservation, cross-entropy gradient collapse, and flow transformation determinants.
-    </p>
+    <p>Work through each problem with pen and paper before revealing the collapsible solutions below.</p>
 
-    <!-- Problem 1 -->
+    <!-- PROBLEM 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3 style="margin: 0;">Problem 1: Softmax Jacobian Calculation & The Zero Column-Sum Invariant</h3>
+            <h3>Problem 1: Softmax Jacobian & Zero Column-Sum Invariant</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Suppose a 3-class classification model outputs predicted probabilities:</p>
-        $$\mathbf{p} = \begin{bmatrix} p_1 \\ p_2 \\ p_3 \end{bmatrix} = \begin{bmatrix} 0.50 \\ 0.30 \\ 0.20 \end{bmatrix}$$
-        <p>Recall the Softmax Jacobian formula:</p>
-        $$J_{ij} = \frac{\partial p_i}{\partial z_j} = p_i (\delta_{ij} - p_j) = \begin{cases} p_i(1 - p_i) & \text{if } i = j \\ -p_i p_j & \text{if } i \neq j \end{cases}$$
+        <p><strong>🧒 The Context:</strong> Maya's 3-class animal classifier outputs probabilities $\mathbf{p} = [0.50, 0.30, 0.20]^T$.</p>
         <ol>
-            <li>Calculate all 9 numerical entries of the $3 \times 3$ Jacobian matrix $J$.</li>
-            <li>Compute the sum of the entries in <strong>each column</strong> of $J$: $\sum_{i=1}^3 J_{ij}$ for $j \in \{1, 2, 3\}$.</li>
-            <li>Provide the deep mathematical reason why every column of the Softmax Jacobian must sum to exactly zero.</li>
+            <li>Compute the 9 entries of the $3 \times 3$ Softmax Jacobian matrix $J$.</li>
+            <li>Sum the entries in each column.</li>
+            <li>Explain the deep mathematical reason why every column sums to zero.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
-                <h4>1. Calculating Entries of the $3 \times 3$ Jacobian</h4>
-                <p><strong>Diagonal Elements ($i = j$):</strong></p>
-                <ul>
-                    <li>$J_{11} = p_1(1 - p_1) = 0.50 \times 0.50 = \mathbf{0.25}$</li>
-                    <li>$J_{22} = p_2(1 - p_2) = 0.30 \times 0.70 = \mathbf{0.21}$</li>
-                    <li>$J_{33} = p_3(1 - p_3) = 0.20 \times 0.80 = \mathbf{0.16}$</li>
-                </ul>
-                <p><strong>Off-Diagonal Elements ($i \neq j$):</strong></p>
-                <ul>
-                    <li>$J_{12} = J_{21} = -p_1 p_2 = -(0.50)(0.30) = \mathbf{-0.15}$</li>
-                    <li>$J_{13} = J_{31} = -p_1 p_3 = -(0.50)(0.20) = \mathbf{-0.10}$</li>
-                    <li>$J_{23} = J_{32} = -p_2 p_3 = -(0.30)(0.20) = \mathbf{-0.06}$</li>
-                </ul>
-                <p>Writing the full matrix:</p>
-                $$J = \begin{bmatrix}
-                +0.25 & -0.15 & -0.10 \\
-                -0.15 & +0.21 & -0.06 \\
-                -0.10 & -0.06 & +0.16
-                \end{bmatrix}$$
-
-                <h4>2. Summing Each Column</h4>
-                <ul>
-                    <li><strong>Column 1:</strong> $+0.25 - 0.15 - 0.10 = \mathbf{0.00}$</li>
-                    <li><strong>Column 2:</strong> $-0.15 + 0.21 - 0.06 = \mathbf{0.00}$</li>
-                    <li><strong>Column 3:</strong> $-0.10 - 0.06 + 0.16 = \mathbf{0.00}$</li>
-                </ul>
-
-                <h4>3. Mathematical Proof</h4>
-                <p>Because the sum of probabilities is identically constant for any input vector $\mathbf{z}$:</p>
-                $$\sum_{i=1}^K p_i(\mathbf{z}) \equiv 1.0 \implies \frac{\partial}{\partial z_j}\left( \sum_{i=1}^K p_i \right) = \frac{\partial}{\partial z_j}(1.0) = 0 \implies \mathbf{\sum_{i=1}^K J_{ij} = 0} \quad \blacksquare$$
-
-                <div class="takeaway">
-                    <strong>Physical Meaning:</strong> The Softmax layer is a closed conservation system. If you perturb logit $z_j$ to increase probability $p_j$, that extra probability mass must be borrowed from the other classes so the total probability stays strictly 100%!
+                <div class="step-box">
+                    <strong>1. Jacobian Entries:</strong>
+                    <ul>
+                        <li>$J_{11} = 0.50(1 - 0.50) = \mathbf{0.25}$, &nbsp; $J_{22} = 0.30(1 - 0.30) = \mathbf{0.21}$, &nbsp; $J_{33} = 0.20(1 - 0.20) = \mathbf{0.16}$</li>
+                        <li>$J_{12} = J_{21} = -(0.50)(0.30) = \mathbf{-0.15}$</li>
+                        <li>$J_{13} = J_{31} = -(0.50)(0.20) = \mathbf{-0.10}$</li>
+                        <li>$J_{23} = J_{32} = -(0.30)(0.20) = \mathbf{-0.06}$</li>
+                    </ul>
+                    $$J = \begin{bmatrix} +0.25 & -0.15 & -0.10 \\ -0.15 & +0.21 & -0.06 \\ -0.10 & -0.06 & +0.16 \end{bmatrix}$$
+                </div>
+                <div class="step-box">
+                    <strong>2. Column Sums:</strong>
+                    Col 1: $+0.25 - 0.15 - 0.10 = \mathbf{0.00}$; &nbsp; Col 2: $-0.15 + 0.21 - 0.06 = \mathbf{0.00}$; &nbsp; Col 3: $-0.10 - 0.06 + 0.16 = \mathbf{0.00}$.
+                </div>
+                <div class="step-box">
+                    <strong>3. Mathematical Reason:</strong>
+                    Since $\sum_{i=1}^K p_i = 1.0$ (constant sum), $\frac{\partial}{\partial z_j}(\sum p_i) = \sum J_{ij} = 0$. Total probability is strictly conserved!
                 </div>
             </div>
         </details>
     </div>
 
-    <!-- Problem 2 -->
+    <!-- PROBLEM 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3 style="margin: 0;">Problem 2: Softmax + Cross-Entropy Step-by-Step Gradient Collapse</h3>
+            <h3>Problem 2: Softmax + Cross-Entropy Step-by-Step Gradient Collapse</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>A classifier receives an input and predicts 3 class probabilities:</p>
-        $$\mathbf{p} = \begin{bmatrix} 0.10 \\ 0.70 \\ 0.20 \end{bmatrix}$$
-        <p>The ground-truth label is class 2 ($\mathbf{y} = [0, 1, 0]^T$). The Cross-Entropy Loss is $\mathcal{L} = -\sum_{k=1}^3 y_k \ln(p_k) = -\ln(p_2) \approx 0.3567$.</p>
+        <p><strong>🧒 The Context:</strong> For $\mathbf{p} = [0.50, 0.30, 0.20]^T$ and true label $\mathbf{y} = [0, 1, 0]^T$ (Cat):</p>
         <ol>
-            <li>Compute the loss gradient with respect to probabilities: $\frac{\partial \mathcal{L}}{\partial \mathbf{p}}$.</li>
-            <li>Using the multivariable chain rule $\frac{\partial \mathcal{L}}{\partial z_j} = \sum_{i=1}^3 \frac{\partial \mathcal{L}}{\partial p_i} J_{ij}$, calculate each entry of $\nabla_{\mathbf{z}} \mathcal{L}$.</li>
-            <li>Verify that the result equals $\mathbf{p} - \mathbf{y}$.</li>
+            <li>Compute upstream gradient $\mathbf{v} = \frac{\partial \mathcal{L}}{\partial \mathbf{p}}$.</li>
+            <li>Evaluate Vector-Jacobian Product $\nabla_{\mathbf{z}} \mathcal{L} = \mathbf{v} J$.</li>
+            <li>Verify match with collapsed formula $\mathbf{p} - \mathbf{y}$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
-                <h4>1. Upstream Gradient $\frac{\partial \mathcal{L}}{\partial \mathbf{p}}$</h4>
-                $$\frac{\partial \mathcal{L}}{\partial p_1} = 0, \quad \frac{\partial \mathcal{L}}{\partial p_2} = -\frac{1}{0.70} \approx -1.42857, \quad \frac{\partial \mathcal{L}}{\partial p_3} = 0$$
-
-                <h4>2. Step-by-Step Chain Rule</h4>
-                <p>Only $i = 2$ contributes since $y_1 = y_3 = 0$:</p>
-                $$\frac{\partial \mathcal{L}}{\partial z_j} = \left(-\frac{1}{p_2}\right) J_{2j}$$
-                <ul>
-                    <li>$j = 1$: $\left(-\frac{1}{p_2}\right)(-p_2 p_1) = p_1 = \mathbf{+0.10}$</li>
-                    <li>$j = 2$: $\left(-\frac{1}{p_2}\right)[p_2(1 - p_2)] = p_2 - 1 = 0.70 - 1 = \mathbf{-0.30}$</li>
-                    <li>$j = 3$: $\left(-\frac{1}{p_2}\right)(-p_2 p_3) = p_3 = \mathbf{+0.20}$</li>
-                </ul>
-
-                <h4>3. Direct Check with $\mathbf{p} - \mathbf{y}$</h4>
-                $$\nabla_{\mathbf{z}} \mathcal{L} = \begin{bmatrix} 0.10 \\ 0.70 \\ 0.20 \end{bmatrix} - \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} = \begin{bmatrix} +0.10 \\ -0.30 \\ +0.20 \end{bmatrix} \quad \blacksquare$$
-
-                <div class="takeaway">
-                    <strong>Interpretation:</strong>
-                    The correct class (index 2) receives a negative gradient $-0.30$ (pushing its logit higher), while incorrect classes receive positive gradients $+0.10$ and $+0.20$ (suppressing them).
+                <div class="step-box">
+                    <strong>1. Upstream Gradient:</strong>
+                    $\mathbf{v} = [0, -1/p_2, 0] = [0, -1/0.30, 0]$.
+                </div>
+                <div class="step-box">
+                    <strong>2. Vector-Jacobian Product:</strong>
+                    $$\mathbf{v} J = [0, -3.333, 0] \begin{bmatrix} +0.25 & -0.15 & -0.10 \\ -0.15 & +0.21 & -0.06 \\ -0.10 & -0.06 & +0.16 \end{bmatrix} = \mathbf{[+0.50, -0.70, +0.20]}^T$$
+                </div>
+                <div class="step-box">
+                    <strong>3. Direct Verification:</strong>
+                    $\mathbf{p} - \mathbf{y} = [0.50, 0.30, 0.20]^T - [0, 1, 0]^T = \mathbf{[+0.50, -0.70, +0.20]}^T$ ✅!
                 </div>
             </div>
         </details>
     </div>
 
-    <!-- Problem 3 -->
+    <!-- PROBLEM 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3 style="margin: 0;">Problem 3: 2D Coordinate Transformation Jacobian & Determinant in Generative Flows</h3>
+            <h3>Problem 3: 2D Coordinate Transformation Jacobian & Determinant</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>In Normalizing Flows (e.g. RealNVP, Glow), invertible mappings $\mathbf{x} = \mathbf{g}(\mathbf{z})$ transform simple Gaussian noise into complex data distributions. Evaluating densities requires the <strong>Jacobian determinant</strong> $|\det(J)|$.</p>
-        <p>Consider the polar-to-Cartesian coordinate mapping:</p>
-        $$\mathbf{g}(r, \theta) = \begin{bmatrix} x(r, \theta) \\ y(r, \theta) \end{bmatrix} = \begin{bmatrix} r \cos \theta \\ r \sin \theta \end{bmatrix}$$
+        <p><strong>🧒 The Context:</strong> Normalizing flow mapping $y_1 = x_1^2 + x_2$ and $y_2 = 3x_1 + 2x_2$.</p>
         <ol>
-            <li>Compute the $2 \times 2$ Jacobian matrix $J = \frac{\partial(x, y)}{\partial(r, \theta)}$.</li>
-            <li>Compute the determinant $\det(J)$ and simplify using $\cos^2\theta + \sin^2\theta = 1$.</li>
-            <li>Explain the physical/geometric meaning of $\det(J) = r$ for volume scaling in Generative AI.</li>
+            <li>Compute $2 \times 2$ Jacobian matrix $J(\mathbf{x})$.</li>
+            <li>Compute determinant $\det(J(\mathbf{x}))$.</li>
+            <li>Evaluate at $\mathbf{x} = [2, 1]^T$.</li>
+            <li>Explain the physical expansion factor on a noise patch of area $0.02$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
-                <h4>1. Computing the Jacobian Matrix</h4>
-                $$J = \begin{bmatrix} 
-                \frac{\partial x}{\partial r} & \frac{\partial x}{\partial \theta} \\
-                \frac{\partial y}{\partial r} & \frac{\partial y}{\partial \theta} 
-                \end{bmatrix} = \begin{bmatrix} 
-                \cos\theta & -r \sin\theta \\ 
-                \sin\theta & r \cos\theta 
-                \end{bmatrix}$$
-
-                <h4>2. Computing the Determinant</h4>
-                $$\det(J) = (\cos\theta)(r \cos\theta) - (-r \sin\theta)(\sin\theta) = r \cos^2\theta + r \sin^2\theta = r(\cos^2\theta + \sin^2\theta) = \mathbf{r} \quad \blacksquare$$
-
-                <h4>3. Geometric Meaning in Generative AI</h4>
-                <div class="takeaway">
-                    <strong>Local Volume Factor:</strong>
-                    The Jacobian determinant $\det(J)$ measures the ratio of output area to input area. A tiny box of dimensions $dr \times d\theta$ in polar space maps to a physical Cartesian area of:
-                    $$dA = |\det(J)| \, dr \, d\theta = \mathbf{r \, dr \, d\theta}$$
-                    When a neural network stretches latent space ($|\det(J)| > 1$), probability density dilutes. When it compresses space ($|\det(J)| < 1$), probability density concentrates.
+                <div class="step-box">
+                    <strong>1. Jacobian Matrix:</strong>
+                    $J = \begin{bmatrix} 2x_1 & 1 \\ 3 & 2 \end{bmatrix}$.
+                </div>
+                <div class="step-box">
+                    <strong>2. Determinant Formula:</strong>
+                    $\det(J) = (2x_1)(2) - (1)(3) = \mathbf{4x_1 - 3}$.
+                </div>
+                <div class="step-box">
+                    <strong>3. Evaluation at $[2, 1]^T$:</strong>
+                    $J(2, 1) = \begin{bmatrix} 4 & 1 \\ 3 & 2 \end{bmatrix} \implies \det(J) = 8 - 3 = \mathbf{5}$.
+                </div>
+                <div class="step-box">
+                    <strong>4. Area Expansion Factor:</strong>
+                    $\text{New Area} = |\det(J)| \times \text{Old Area} = 5 \times 0.02 = \mathbf{0.10}$.
+                    In normalizing flows, probability density drops by factor $5$ so total probability remains conserved at 1.0!
                 </div>
             </div>
         </details>
     </div>
+
 </body>
 </html>

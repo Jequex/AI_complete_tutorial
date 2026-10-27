@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 4.1: Exercises & Solutions — Probability Fundamentals & Bayes' Theorem</title>
+    <title>Topic 4.1: Exercises & Solutions — Probability & Bayes</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -65,8 +65,8 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .problem-header {
@@ -74,21 +74,16 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.75rem;
         }
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -97,66 +92,71 @@
             overflow: hidden;
         }
         summary {
-            padding: 0.85rem 1.2rem;
+            padding: 0.85rem 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            background-color: var(--primary-light);
             color: var(--primary);
             user-select: none;
+            background-color: var(--primary-light);
+            border-bottom: 1px solid transparent;
+        }
+        details[open] summary {
+            border-bottom-color: var(--border);
         }
         .solution-content {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+            padding: 1.25rem;
         }
         .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
+        }
+        .step-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
 
     <a href="lecture.html" class="back-link">← Back to Lecture 4.1</a>
-    <header>
-        <h1>Topic 4.1: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Kolmogorov Axioms, Sequential Bayes &amp; Naive Bayes</p>
-    </header>
+
+    <h1>Topic 4.1: Exercises & Solutions</h1>
+    <p>Work through each problem with pen and paper before revealing the collapsible solutions below.</p>
 
     <!-- PROBLEM 1 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 1: Kolmogorov Axiom Proofs &amp; 3-Set Inclusion-Exclusion</h3>
+            <h3>Problem 1: Kolmogorov Axiom Proofs & 3-Set Inclusion-Exclusion</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Using only Kolmogorov's three axioms:</p>
+        <p><strong>🧒 The Context:</strong> Proving foundational probability theorems from Kolmogorov's 3 axioms ($P(A) \ge 0$, $P(\Omega) = 1$, additivity for disjoint sets).</p>
         <ol>
-            <li>Prove that $P(\emptyset) = 0$.</li>
-            <li>Prove that $P(A^c) = 1 - P(A)$.</li>
-            <li>Derive the 3-Set Inclusion-Exclusion formula for $P(A \cup B \cup C)$.</li>
+            <li>Prove $P(\emptyset) = 0$.</li>
+            <li>Prove $P(A^c) = 1 - P(A)$.</li>
+            <li>Prove Monotonicity: $A \subseteq B \implies P(A) \le P(B)$.</li>
+            <li>Derive 3-set Inclusion-Exclusion $P(A \cup B \cup C)$.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Proof that $P(\emptyset) = 0$:</strong>
-                    $$\Omega \cup \emptyset = \Omega \quad (\text{with } \Omega \cap \emptyset = \emptyset)$$
-                    $$P(\Omega \cup \emptyset) = P(\Omega) + P(\emptyset) \implies 1 = 1 + P(\emptyset) \implies P(\emptyset) = 0$$
+                    <strong>1. Empty Set:</strong>
+                    $P(\Omega \cup \emptyset) = P(\Omega) + P(\emptyset) \implies 1 = 1 + P(\emptyset) \implies P(\emptyset) = \mathbf{0}$.
                 </div>
                 <div class="step-box">
-                    <strong>2. Proof that $P(A^c) = 1 - P(A)$:</strong>
-                    $$A \cup A^c = \Omega \quad (\text{with } A \cap A^c = \emptyset)$$
-                    $$P(A) + P(A^c) = P(\Omega) = 1 \implies P(A^c) = 1 - P(A)$$
+                    <strong>2. Complement:</strong>
+                    $P(A \cup A^c) = P(A) + P(A^c) \implies 1 = P(A) + P(A^c) \implies \mathbf{P(A^c) = 1 - P(A)}$.
                 </div>
                 <div class="step-box">
-                    <strong>3. 3-Set Inclusion-Exclusion:</strong>
-                    $$P(A \cup B \cup C) = P(A) + P(B) + P(C) - P(A \cap B) - P(A \cap C) - P(B \cap C) + P(A \cap B \cap C)$$
+                    <strong>3. Monotonicity:</strong>
+                    $B = A \cup (B \setminus A) \implies P(B) = P(A) + P(B \setminus A) \ge P(A)$ since probabilities are non-negative.
+                </div>
+                <div class="step-box">
+                    <strong>4. 3-Set Formula:</strong>
+                    $$P(A \cup B \cup C) = P(A) + P(B) + P(C) - P(AB) - P(AC) - P(BC) + P(ABC)$$
                 </div>
             </div>
         </details>
@@ -168,21 +168,24 @@
             <h3>Problem 2: Bayesian Sequential Updating: The Two-Test Miracle</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>In a disease with prevalence $P(D) = 0.0001$, a test with 99% sensitivity and 1% false positive rate yielded an initial positive test: $P(D \mid \text{Test}_1 = +) \approx 0.98\%$.</p>
-        <p>Suppose the patient is retested with an independent test that also comes back positive. Compute the new updated posterior $P(D \mid \text{Test}_1 = +, \text{Test}_2 = +)$.</p>
+        <p><strong>🧒 The Context:</strong> After Barnaby tested positive on Test 1 ($P(\text{Sick}) = 0.09016$), Maya orders an independent Test 2 that also comes back positive.</p>
+        <ol>
+            <li>Using Test 1's posterior as the new prior, compute $P(\text{Sick} \mid \text{Test}_1^+, \text{Test}_2^+)$.</li>
+            <li>Show how two consecutive tests eliminate the false positive trap.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Updated Prior:</strong>
-                    $$P(\text{Disease}) = 0.009804, \quad P(\text{Healthy}) = 0.990196$$
+                    <strong>1. Setup New Evidence:</strong>
+                    Prior $P(\text{Sick}) = 0.09016, \quad P(\text{Healthy}) = 0.90984$.
+                    $$P(\text{Test}_2^+) = (0.99 \times 0.09016) + (0.01 \times 0.90984) = 0.089258 + 0.009098 = \mathbf{0.098356}$$
                 </div>
                 <div class="step-box">
-                    <strong>2. Updated Bayesian Calculation:</strong>
-                    $$\text{Numerator} = 0.99 \times 0.009804 \approx 0.009706$$
-                    $$\text{Denominator} = (0.99 \times 0.009804) + (0.01 \times 0.990196) \approx 0.019608$$
-                    $$P(D \mid +, +) = \frac{0.009706}{0.019608} \approx \mathbf{49.5\%}$$
+                    <strong>2. Sequential Posterior:</strong>
+                    $$P(\text{Sick} \mid \text{Test}_1^+, \text{Test}_2^+) = \frac{0.089258}{0.098356} \approx \mathbf{90.8\%}!$$
+                    Starting from a tiny $0.1\%$ prevalence, two positive tests boost confidence to $>90\%$!
                 </div>
             </div>
         </details>
@@ -191,24 +194,30 @@
     <!-- PROBLEM 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 3: Naive Bayes Classification &amp; Laplace Smoothing</h3>
+            <h3>Problem 3: Naive Bayes Math & Laplace Smoothing from Scratch</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>Calculate by hand the probability of the message <em>"buy cash prize"</em> being SPAM given $P(\text{Spam}) = 0.60$, $P(\text{Ham}) = 0.40$, $V=100$, and Laplace (+1) smoothing.</p>
+        <p><strong>🧒 The Context:</strong> Timmy trains a spam filter on 4 Spam and 6 Ham emails. Word "lottery" is in 3 Spam, 0 Ham. Word "lunch" is in 0 Spam, 4 Ham.</p>
+        <ol>
+            <li>Explain why raw Naive Bayes fails on an email containing "lottery" and "lunch".</li>
+            <li>Apply Laplace Smoothing ($\alpha = 1, |V| = 2$) and compute smoothed posterior $P(\text{Spam} \mid \text{Email})$.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>Smoothed Likelihoods:</strong>
-                    $$\text{Spam: } P(\text{buy}) = \frac{41}{600}, \quad P(\text{cash}) = \frac{26}{600}, \quad P(\text{prize}) = \frac{36}{600}$$
-                    $$\text{Ham: } P(\text{buy}) = \frac{11}{1100}, \quad P(\text{cash}) = \frac{3}{1100}, \quad P(\text{prize}) = \frac{2}{1100}$$
+                    <strong>1. The Zero-Probability Disaster:</strong>
+                    $P(\text{"lunch"} \mid \text{Spam}) = 0$ and $P(\text{"lottery"} \mid \text{Ham}) = 0$. Both class scores multiply to zero ($0/0$ crash!).
                 </div>
                 <div class="step-box">
-                    <strong>Posterior Scores:</strong>
-                    $$\text{Score}_{\text{spam}} \approx 0.60 \times 0.06833 \times 0.04333 \times 0.06000 \approx 1.066 \times 10^{-4}$$
-                    $$\text{Score}_{\text{ham}} \approx 0.40 \times 0.01000 \times 0.00273 \times 0.00182 \approx 1.983 \times 10^{-8}$$
-                    $$P(\text{Spam} \mid \text{message}) = \frac{1.066 \times 10^{-4}}{1.066 \times 10^{-4} + 1.983 \times 10^{-8}} \approx \mathbf{99.98\%}$$
+                    <strong>2. Laplace Smoothing ($\alpha = 1, |V| = 2$):</strong>
+                    <ul>
+                        <li>$\text{Score}(\text{Spam}) = 0.40 \times \frac{3+1}{4+2} \times \frac{0+1}{4+2} = 0.40 \times \frac{4}{6} \times \frac{1}{6} \approx \mathbf{0.0444}$</li>
+                        <li>$\text{Score}(\text{Ham}) = 0.60 \times \frac{0+1}{6+2} \times \frac{4+1}{6+2} = 0.60 \times \frac{1}{8} \times \frac{5}{8} \approx \mathbf{0.0469}$</li>
+                    </ul>
+                    $$P(\text{Spam} \mid \text{Email}) = \frac{0.0444}{0.0444 + 0.0469} \approx \mathbf{48.6\%}, \quad P(\text{Ham}) \approx \mathbf{51.4\%}$$
+                    Laplace smoothing recovers a sensible, balanced decision without dividing by zero!
                 </div>
             </div>
         </details>
@@ -216,4 +225,3 @@
 
 </body>
 </html>
-

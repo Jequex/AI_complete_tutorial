@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 5.4: Maximum A Posteriori (MAP) Estimation & Regularization</title>
+    <title>Topic 5.4: MAP Estimation & Regularization — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -20,6 +20,8 @@
             --accent-bg: #ecfdf5;
             --danger: #dc2626;
             --danger-bg: #fef2f2;
+            --warning-bg: #fffbeb;
+            --warning-border: #fef3c7;
             --code-bg: #1e1e2e;
             --code-text: #cdd6f4;
         }
@@ -35,6 +37,8 @@
                 --accent-bg: #064e3b;
                 --danger: #f87171;
                 --danger-bg: #450a0a;
+                --warning-bg: #451a03;
+                --warning-border: #78350f;
                 --code-bg: #0b0f19;
                 --code-text: #e2e8f0;
             }
@@ -50,8 +54,6 @@
         }
         h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
         h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
-        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
-        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -61,12 +63,20 @@
             font-weight: 600;
             margin-bottom: 1.5rem;
         }
+        .back-link:hover { text-decoration: underline; }
         .callout {
             background-color: var(--card-bg);
             border-left: 4px solid var(--primary);
-            padding: 1.25rem;
+            padding: 1.25rem 1.5rem;
             margin: 1.5rem 0;
             border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .callout-story {
+            background-color: var(--primary-light);
+            border-left-color: var(--primary);
         }
         .callout-success {
             background-color: var(--accent-bg);
@@ -76,137 +86,203 @@
             background-color: var(--danger-bg);
             border-left-color: var(--danger);
         }
+        .callout-warning {
+            background-color: var(--warning-bg);
+            border-left-color: #d97706;
+            border-top: 1px solid var(--warning-border);
+            border-right: 1px solid var(--warning-border);
+            border-bottom: 1px solid var(--warning-border);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
+            font-size: 0.95rem;
         }
         th, td {
+            padding: 0.85rem 1rem;
             border: 1px solid var(--border);
-            padding: 0.75rem 1rem;
             text-align: left;
         }
         th {
-            background-color: var(--primary-light);
+            background-color: var(--card-bg);
             color: var(--primary);
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre, code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         pre {
             background-color: var(--code-bg);
             color: var(--code-text);
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             overflow-x: auto;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        p code {
-            background-color: rgba(125, 125, 125, 0.15);
+            background-color: var(--card-bg);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
+            font-size: 0.88em;
+            border: 1px solid var(--border);
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
-    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 5: Statistics & Estimation</a>
 
     <h1>Topic 5.4: Maximum A Posteriori (MAP) Estimation & Regularization</h1>
-    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
-        Preventing overfitting through Bayesian prior beliefs: proving that Weight Decay is a Gaussian prior and Lasso sparsity is a Laplace prior.
-    </p>
+    <p><em>Taming wild neural networks by anchoring data likelihood with Bayesian prior wisdom.</em></p>
 
-    <h2>1. Executive Summary & The Detective with Common Sense</h2>
-    <p>
-        In Topic 5.3, Maximum Likelihood Estimation (MLE) fit weights purely to explain the training data.
-        However, when data is small or noisy, MLE overfits wildly, exploding parameters to $\pm 100{,}000$ to memorize noise artifacts.
-    </p>
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;">
+
+    <h2>1. Executive Summary & Intuitive Foundations</h2>
+    <p>Pure Maximum Likelihood Estimation is completely gullible. On small, noisy datasets, an unconstrained neural network will contort itself into wild rollercoasters with weights of $\pm 100{,}000$ to memorize every speck of noise. This is <strong>overfitting</strong>.</p>
+    <p>To keep models grounded, machine learning engineers use <strong>Regularization</strong> (L2 weight decay and L1 Lasso). Regularization is not an ad-hoc hack: it is the direct mathematical manifestation of <strong>Maximum A Posteriori (MAP) estimation</strong> under Bayesian priors!</p>
+
+    <div class="callout callout-story">
+        <h3>🧒 The 12-Year-Old Analogy: Detective Holmes & Grandma's Common-Sense Wisdom</h3>
+        <p>A window is broken, and a tiny metallic shard lies on the lawn (the <strong>Data $D$</strong>).</p>
+        <ul>
+            <li><strong>The Overfitting MLE Detective:</strong> Computes a 20-variable equation proving a time-traveling alien cyborg traveling at warp speed dropped the shard. <em>Conclusion: Aliens!</em></li>
+            <li><strong>The Wise MAP Detective:</strong> Listens to Grandma rocking on the porch: <em>"Darling, in 80 years I've never seen an alien cyborg. But I saw Timmy and Maya playing baseball in the front yard with an aluminum bat 15 minutes ago!"</em></li>
+        </ul>
+        <p>The MAP detective multiplies physical evidence (Likelihood) by common-sense prior belief (Prior $P(\mathbf{w})$). Even though the alien theory fits the tiny shard slightly better, its prior is $10^{-50}$! The sensible baseball explanation easily wins.</p>
+    </div>
 
     <div class="callout">
-        <h3>The 12-Year-Old Analogy: The Detective with Common Sense</h3>
-        <p>A school window is found broken. A tiny metal feather lies on the sill.</p>
-        <ul>
-            <li><strong>The MLE Detective (No Prior):</strong> Calculates that a robotic mechanical pterodactyl from the year 3000 dropping from the sky fits the feather perfectly. Concludes: <em>"A time-traveling robot broke the window!"</em></li>
-            <li><strong>The MAP Detective (With Common Sense):</strong> Knows that time-traveling robots have a prior probability of almost $0$, while neighborhood kids playing baseball have a $95\%$ probability. Concludes: <em>"A kid with a metallic toy threw a rock."</em></li>
-        </ul>
-        <p>
-            In AI, the <strong>Data Evidence</strong> is the Likelihood, and <strong>Common Sense</strong> (that weights should remain small and stable) is the <strong>Prior Distribution $P(\mathbf{w})$</strong>!
-        </p>
+        <h3>🧒 Regularization as Barnaby the Puppy's Leash</h3>
+        <p>Without a leash (Pure MLE), <strong>Barnaby the puppy</strong> darts chaotically after every falling leaf, butterfly, and squirrel (random noise in the training set).</p>
+        <p>With a sturdy leash (L2 Regularization / Weight Decay), Barnaby is gently pulled back toward his owner's side ($w = 0$). He can still follow real scents along the trail, but the leash stops him from chasing wild noise!</p>
     </div>
 
-    <h2>2. From Bayes' Theorem to the MAP Formulation</h2>
-    <p>Bayes' Theorem for model weights $\mathbf{w}$ given observed data $D$:</p>
-    $$P(\mathbf{w} \mid D) = \frac{P(D \mid \mathbf{w}) P(\mathbf{w})}{P(D)}$$
-    <p>
-        The marginal data evidence $P(D)$ is a constant with respect to weights $\mathbf{w}$.
-        The <strong>Maximum A Posteriori (MAP)</strong> estimator finds the single mode (peak) of the posterior:
-    </p>
-    $$\hat{\mathbf{w}}_{\text{MAP}} = \arg\max_{\mathbf{w}} P(\mathbf{w} \mid D) = \arg\max_{\mathbf{w}} \Big[ P(D \mid \mathbf{w}) P(\mathbf{w}) \Big]$$
-    <p>Taking the natural logarithm:</p>
-    $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = \arg\max_{\mathbf{w}} \Big[ \ln P(D \mid \mathbf{w}) + \ln P(\mathbf{w}) \Big]}$$
-    <p>Flipping the sign to turn this into a minimization loss function:</p>
-    $$\mathbf{\arg\min_{\mathbf{w}} \Big[ \underbrace{-\ln P(D \mid \mathbf{w})}_{\text{Data Fitting Loss (NLL)}} + \underbrace{\big(-\ln P(\mathbf{w})\big)}_{\text{Regularization Penalty}} \Big]}$$
-
-    <h2>3. Master Derivation 1: Gaussian Prior $\implies$ L2 Regularization (Weight Decay)</h2>
-    <p>Assume an independent zero-mean Gaussian prior on all weights: $w_j \sim \mathcal{N}(0, \sigma_0^2)$:</p>
-    $$P(\mathbf{w}) = \prod_{j=1}^d \frac{1}{\sqrt{2\pi\sigma_0^2}} \exp\left( -\frac{w_j^2}{2\sigma_0^2} \right)$$
-    $$\ln P(\mathbf{w}) = -\frac{d}{2}\ln(2\pi\sigma_0^2) - \frac{1}{2\sigma_0^2}\sum_{j=1}^d w_j^2 = -\frac{1}{2\sigma_0^2}\|\mathbf{w}\|_2^2 + \text{const}$$
-    <p>Combining with the Gaussian regression likelihood (Mean Squared Error):</p>
-    $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = \arg\min_{\mathbf{w}} \left[ \frac{1}{n}\sum_{i=1}^n (y_i - f(\mathbf{x}_i; \mathbf{w}))^2 + \lambda \|\mathbf{w}\|_2^2 \right]}$$
-    <p>where $\lambda = \frac{\sigma^2}{n \sigma_0^2}$.</p>
-
-    <div class="callout callout-success">
-        <strong>The Deep Result:</strong> L2 regularization (Ridge regression / Weight Decay in PyTorch) is mathematically identical to MAP estimation under an independent Gaussian prior on the weights!
-    </div>
-
-    <h2>4. Master Derivation 2: Laplace Prior $\implies$ L1 Regularization (Lasso & Sparsity)</h2>
-    <p>Assume an independent zero-mean Laplace prior: $P(w_j) = \frac{1}{2b} \exp\left(-\frac{|w_j|}{b}\right)$:</p>
-    $$\ln P(\mathbf{w}) = -d\ln(2b) - \frac{1}{b}\sum_{j=1}^d |w_j| = -\frac{1}{b}\|\mathbf{w}\|_1 + \text{const}$$
-    <p>The resulting MAP optimization problem is:</p>
-    $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = \arg\min_{\mathbf{w}} \left[ \text{Loss}(D; \mathbf{w}) + \lambda \|\mathbf{w}\|_1 \right]}$$
-
-    <div class="callout callout-success">
-        <strong>Why L1 Drives Weights to Exact Zero:</strong>
-        The Laplace prior has a sharp cusp at zero. In optimization geometry, the diamond corners of the L1 ball intersect the loss contours directly on the coordinate axes, forcing non-essential weights to become <strong>exactly zero</strong> (automatic feature selection and model compression)!
-    </div>
-
-    <h2>5. The Bayesian Continuum</h2>
+    <h2>2. 📋 Mathematical Symbol Decoder Table</h2>
     <table>
         <thead>
             <tr>
-                <th>Prior Belief $P(\mathbf{w})$</th>
-                <th>Negative Log-Prior</th>
-                <th>Resulting Objective</th>
-                <th>Practical Machine Learning Effect</th>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><strong>Uniform Prior</strong> ($P = c$)</td>
-                <td>$0$ (No penalty)</td>
-                <td><strong>Pure MLE</strong></td>
-                <td>Unconstrained weights, high risk of overfitting</td>
+                <td>$P(\mathbf{w})$</td>
+                <td><em>"P of w"</em></td>
+                <td><strong>Prior Distribution</strong></td>
+                <td>Grandma's common sense before seeing clues. Believing weights should stay small.</td>
             </tr>
             <tr>
-                <td><strong>Gaussian Prior</strong> $\mathcal{N}(0, \sigma_0^2)$</td>
-                <td>$\frac{1}{2\sigma_0^2}\|\mathbf{w}\|_2^2$</td>
-                <td><strong>L2 / Ridge / Weight Decay</strong></td>
-                <td>Smoothly shrinks weights toward zero</td>
+                <td>$P(D \mid \mathbf{w})$</td>
+                <td><em>"P of D given w"</em></td>
+                <td><strong>Likelihood Function</strong></td>
+                <td>The physical clue in the mud. How well candidate weights $\mathbf{w}$ explain the training data.</td>
             </tr>
             <tr>
-                <td><strong>Laplace Prior</strong> $\text{Laplace}(0, b)$</td>
-                <td>$\frac{1}{b}\|\mathbf{w}\|_1$</td>
-                <td><strong>L1 / Lasso</strong></td>
-                <td>Forces weights to exact zero (sparse models)</td>
+                <td>$P(\mathbf{w} \mid D)$</td>
+                <td><em>"P of w given D"</em></td>
+                <td><strong>Posterior Distribution</strong></td>
+                <td>Our updated belief after combining clues with Grandma's wisdom.</td>
+            </tr>
+            <tr>
+                <td>$\hat{\mathbf{w}}_{\text{MAP}}$</td>
+                <td><em>"w-hat MAP"</em></td>
+                <td><strong>MAP Estimator</strong></td>
+                <td>The single weight vector that sits at the tallest peak of the posterior mountain.</td>
+            </tr>
+            <tr>
+                <td>$\lambda$</td>
+                <td><em>"LAM-duh"</em></td>
+                <td><strong>Regularization Strength</strong></td>
+                <td>The tightness of Barnaby's puppy leash. Controls how heavily we penalize large weights.</td>
+            </tr>
+            <tr>
+                <td>$\sigma_0^2$</td>
+                <td><em>"SIG-muh-naught squared"</em></td>
+                <td><strong>Prior Variance</strong></td>
+                <td>How loose Grandma's leash is. If $\sigma_0^2$ is huge, the leash is long and loose.</td>
+            </tr>
+            <tr>
+                <td>$\|\mathbf{w}\|_2^2$</td>
+                <td><em>"L2 norm squared"</em></td>
+                <td><strong>Ridge / L2 Penalty</strong></td>
+                <td>$\sum w_j^2$: A smooth circular rubber band pulling all weights gently toward zero.</td>
+            </tr>
+            <tr>
+                <td>$\|\mathbf{w}\|_1$</td>
+                <td><em>"L1 norm"</em></td>
+                <td><strong>Lasso / L1 Penalty</strong></td>
+                <td>$\sum |w_j|$: A sharp diamond constraint that forces unimportant weights to EXACT ZERO.</td>
+            </tr>
+            <tr>
+                <td>$b$</td>
+                <td><em>"bee"</em></td>
+                <td><strong>Laplace Scale</strong></td>
+                <td>The width parameter of the Laplace distribution that drives sparsity in Lasso.</td>
             </tr>
         </tbody>
     </table>
 
-    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
-        <a href="../03_maximum_likelihood_estimation_mle/lecture.html" class="back-link">← Previous: 5.3 Maximum Likelihood</a>
-        <a href="exercises_and_solutions.html" class="back-link">Next: 5.4 Exercises & Solutions →</a>
+    <h2>3. The MAP Optimization Framework</h2>
+    $$P(\mathbf{w} \mid D) = \frac{P(D \mid \mathbf{w}) P(\mathbf{w})}{P(D)}$$
+    <p>Dropping the constant denominator $P(D)$ and taking the logarithm:</p>
+    $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = \arg\max_{\mathbf{w}} \Big[ \underbrace{\ln P(D \mid \mathbf{w})}_{\text{Fit the training clues}} + \underbrace{\ln P(\mathbf{w})}_{\text{Obey Grandma's wisdom}} \Big]}$$
+    <p>Negating to minimize in PyTorch:</p>
+    $$\mathbf{\arg\min_{\mathbf{w}} \Big[ \underbrace{-\ln P(D \mid \mathbf{w})}_{\text{Data Fitting Loss (NLL)}} + \underbrace{\big(-\ln P(\mathbf{w})\big)}_{\text{Regularization Penalty (Leash)}} \Big]}$$
+
+    <h2>4. Master Derivation 1: Gaussian Prior $\implies$ L2 Weight Decay (Ridge)</h2>
+    <p>Placing a zero-mean Gaussian prior on weights $w_j \sim \mathcal{N}(0, \sigma_0^2)$:</p>
+    $$\ln P(\mathbf{w}) = -\frac{1}{2\sigma_0^2} \|\mathbf{w}\|_2^2 + \text{constant}$$
+    <p>Combining with Mean Squared Error data loss:</p>
+    $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = \arg\min_{\mathbf{w}} \left[ \frac{1}{n}\sum_{i=1}^n \Big(y_i - f(\mathbf{x}_i; \mathbf{w})\Big)^2 + \lambda \|\mathbf{w}\|_2^2 \right] \quad \text{where} \quad \lambda = \frac{\sigma^2}{n \sigma_0^2}} \quad \blacksquare$$
+
+    <h2>5. Master Derivation 2: Laplace Prior $\implies$ L1 Regularization (Lasso & Sparsity)</h2>
+    <p>Placing a sharp, tent-shaped Laplace prior on weights $w_j \sim \text{Laplace}(0, b)$:</p>
+    $$\ln P(\mathbf{w}) = -\frac{1}{b} \|\mathbf{w}\|_1 + \text{constant}$$
+    <p>Yielding the L1 Lasso loss:</p>
+    $$\mathbf{\hat{\mathbf{w}}_{\text{MAP}} = \arg\min_{\mathbf{w}} \left[ \text{Data Loss}(D; \mathbf{w}) + \lambda \|\mathbf{w}\|_1 \right]} \quad \blacksquare$$
+
+    <div class="callout callout-success">
+        <h4>🧒 Why L1 Creates Exact Zeros (Sparsity)</h4>
+        <p>The L1 constraint forms a <strong>sharp diamond with corners on the axes</strong>. When the circular loss contours expand, they hit the pointy diamond corners first, snapping unimportant feature weights to <strong>identically $0.000$</strong>!</p>
     </div>
+
+    <h2>6. Concrete Numerical Walkthrough: 1D Gaussian Mean MAP</h2>
+    <p>Grandma believes temperature $\mu \sim \mathcal{N}(\mu_0 = 70^\circ\text{F}, \sigma_0^2 = 4)$. Thermometer takes $n = 4$ readings: $\bar{X} = 76^\circ\text{F}$ with noise variance $\sigma^2 = 4$.</p>
+    <div class="callout">
+        <ol>
+            <li><strong>Prior Precision:</strong> $\tau_{\text{prior}} = \frac{1}{\sigma_0^2} = \frac{1}{4} = 0.25$</li>
+            <li><strong>Data Precision:</strong> $\tau_{\text{data}} = \frac{n}{\sigma^2} = \frac{4}{4} = 1.00$</li>
+            <li><strong>Total Precision:</strong> $\tau_{\text{total}} = 0.25 + 1.00 = 1.25$</li>
+            <li><strong>MAP Estimate:</strong>
+                $$\hat{\mu}_{\text{MAP}} = \frac{(1.00)(76) + (0.25)(70)}{1.25} = \frac{76 + 17.5}{1.25} = \mathbf{74.8^\circ\text{F}}$$
+            </li>
+            <li><strong>Comparison:</strong> Pure MLE would guess $76.0^\circ\text{F}$. Grandma's prior gently pulled the estimate back to $74.8^\circ\text{F}$, shielding us from thermometer noise!</li>
+        </ol>
+    </div>
+
+    <div class="nav-links">
+        <a href="../03_maximum_likelihood_estimation_mle/lecture.html">&larr; Topic 5.3</a>
+        <a href="exercises_and_solutions.html">Exercises &amp; Solutions &rarr;</a>
+    </div>
+
 </body>
 </html>
-

@@ -20,6 +20,7 @@
       --text: #0f172a;
       --text-muted: #475569;
       --border: #e2e8f0;
+      --code-bg: #f1f5f9;
       --primary: #4338ca;
       --primary-hover: #3730a3;
     }
@@ -33,6 +34,7 @@
         --text: #f8fafc;
         --text-muted: #94a3b8;
         --border: #334155;
+        --code-bg: #0b1120;
         --primary: #818cf8;
         --primary-hover: #a5b4fc;
       }
@@ -123,114 +125,92 @@
       color: #ffffff;
       border-color: var(--primary);
     }
-    .btn-primary {
-      background-color: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
-    }
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="breadcrumbs">
-      <a href="../index.html">Phase 02</a> &gt; <a href="./lecture.html">Topic 2.1</a> &gt; <span>Exercises &amp; Solutions</span>
+      <a href="../index.html">Phase 02</a> &gt; <a href="lecture.html">Topic 2.1</a> &gt; <span>Exercises</span>
     </div>
-    <h1>Topic 2.1: Practice Exercises &amp; Solutions</h1>
-    <p style="color: var(--text-muted); margin-bottom: 0;">Step-by-step arithmetic drills on vector norms, unit normalizations, dot products, and matrix products.</p>
+    <h1>Topic 2.1: Exercises &amp; Detailed Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Master norms, dot products, cosine similarities, and matrix multiplication step-by-step.</p>
   </header>
 
   <main>
-    <!-- PROBLEM 1 -->
+    <!-- Problem 1 -->
     <div class="problem-box">
       <h2>Problem 1: Norms and Unit Vector Normalization</h2>
-      <p>Given the 3D vector $\mathbf{v} = [3, -4, 12]^T$:</p>
-      <ul>
-        <li><strong>Part A:</strong> Compute the $L_1$ Manhattan norm $\|\mathbf{v}\|_1$.</li>
-        <li><strong>Part B:</strong> Compute the $L_2$ Euclidean norm $\|\mathbf{v}\|_2$.</li>
-        <li><strong>Part C:</strong> Compute the $L_\infty$ Max norm $\|\mathbf{v}\|_\infty$.</li>
-        <li><strong>Part D:</strong> Normalize $\mathbf{v}$ into a unit vector $\hat{\mathbf{v}} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2}$ and verify that $\|\hat{\mathbf{v}}\|_2 = 1.0$.</li>
-      </ul>
+      <p>Given the 3-dimensional vector:</p>
+      $$\mathbf{v} = \begin{bmatrix} 3 \\ -4 \\ 12 \end{bmatrix}$$
+      <p>Compute the $L_1$ norm, $L_2$ norm, and $L_\infty$ norm, and normalize $\mathbf{v}$ into a unit vector.</p>
 
       <details class="solution">
-        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
-        <h3>Solution:</h3>
-        <p><strong>Part A: $L_1$ Manhattan Norm</strong></p>
-        <p>$$\|\mathbf{v}\|_1 = |3| + |-4| + |12| = 3 + 4 + 12 = \mathbf{19}$$</p>
+        <summary>Click to view solution</summary>
+        <h4>Part A: $L_1$ Manhattan Norm</h4>
+        $$\|\mathbf{v}\|_1 = |3| + |-4| + |12| = 3 + 4 + 12 = \mathbf{19}$$
 
-        <p><strong>Part B: $L_2$ Euclidean Norm</strong></p>
-        <p>$$\|\mathbf{v}\|_2 = \sqrt{3^2 + (-4)^2 + 12^2} = \sqrt{9 + 16 + 144} = \sqrt{169} = \mathbf{13}$$</p>
+        <h4>Part B: $L_2$ Euclidean Norm</h4>
+        $$\|\mathbf{v}\|_2 = \sqrt{3^2 + (-4)^2 + 12^2} = \sqrt{9 + 16 + 144} = \sqrt{169} = \mathbf{13}$$
 
-        <p><strong>Part C: $L_\infty$ Max Norm</strong></p>
-        <p>$$\|\mathbf{v}\|_\infty = \max(|3|, |-4|, |12|) = \mathbf{12}$$</p>
+        <h4>Part C: $L_\infty$ Max Norm</h4>
+        $$\|\mathbf{v}\|_\infty = \max(|3|, |-4|, |12|) = \mathbf{12}$$
 
-        <p><strong>Part D: Unit Vector Normalization</strong></p>
-        <p>$$\hat{\mathbf{v}} = \frac{1}{13} \begin{bmatrix} 3 \\ -4 \\ 12 \end{bmatrix} = \begin{bmatrix} 3/13 \\ -4/13 \\ 12/13 \end{bmatrix}$$</p>
-        <p>Verification:</p>
-        <p>$$\|\hat{\mathbf{v}}\|_2 = \sqrt{\left(\frac{3}{13}\right)^2 + \left(-\frac{4}{13}\right)^2 + \left(\frac{12}{13}\right)^2} = \sqrt{\frac{9+16+144}{169}} = \sqrt{\frac{169}{169}} = \mathbf{1.0} \quad \blacksquare$$</p>
+        <h4>Part D: Unit Vector Normalization</h4>
+        $$\hat{\mathbf{v}} = \frac{\mathbf{v}}{13} = \begin{bmatrix} 3/13 \\ -4/13 \\ 12/13 \end{bmatrix}$$
+        $$\|\hat{\mathbf{v}}\|_2 = \sqrt{\frac{9 + 16 + 144}{169}} = \sqrt{\frac{169}{169}} = \mathbf{1.0}$$
       </details>
     </div>
 
-    <!-- PROBLEM 2 -->
+    <!-- Problem 2 -->
     <div class="problem-box">
       <h2>Problem 2: Dot Products, Angles, and Orthogonality</h2>
-      <p>Let $\mathbf{a} = [1, 2, 3]^T$ and $\mathbf{b} = [4, -2, 0]^T$ in $\mathbb{R}^3$.</p>
-      <ul>
-        <li><strong>Part A:</strong> Calculate algebraic dot product $\mathbf{a} \cdot \mathbf{b}$.</li>
-        <li><strong>Part B:</strong> Determine the angle $\theta$ between $\mathbf{a}$ and $\mathbf{b}$. Are they orthogonal?</li>
-        <li><strong>Part C:</strong> Compute the cosine similarity between $\mathbf{a}$ and $\mathbf{c} = [2, 4, 6]^T$. What does this illustrate?</li>
-      </ul>
+      <p>Given $\mathbf{a} = [1, 2, 3]^T$ and $\mathbf{b} = [4, -2, 0]^T$:</p>
+      <ol>
+        <li>Compute $\mathbf{a} \cdot \mathbf{b}$.</li>
+        <li>Determine the angle $\theta$ between $\mathbf{a}$ and $\mathbf{b}$.</li>
+        <li>Compute cosine similarity between $\mathbf{a}$ and $\mathbf{c} = [2, 4, 6]^T$.</li>
+      </ol>
 
       <details class="solution">
-        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
-        <h3>Solution:</h3>
-        <p><strong>Part A:</strong> $\mathbf{a} \cdot \mathbf{b} = (1)(4) + (2)(-2) + (3)(0) = 4 - 4 + 0 = \mathbf{0}$.</p>
-        <p><strong>Part B:</strong> Since $\mathbf{a} \cdot \mathbf{b} = \|\mathbf{a}\| \|\mathbf{b}\| \cos\theta = 0$, we have $\cos\theta = 0 \implies \mathbf{\theta = 90^\circ}$. The vectors are perpendicular (orthogonal)!</p>
-        <p><strong>Part C:</strong> Notice $\mathbf{c} = 2\mathbf{a}$.</p>
-        <p>$$\cos\theta = \frac{\mathbf{a} \cdot \mathbf{c}}{\|\mathbf{a}\| \|\mathbf{c}\|} = \frac{28}{\sqrt{14} \times 2\sqrt{14}} = \frac{28}{28} = \mathbf{1.0}$$</p>
-        <p>Since $\cos\theta = 1.0$, the vectors point in the identical direction. Cosine similarity isolates direction while ignoring magnitude.</p>
+        <summary>Click to view solution</summary>
+        <h4>Part A: Dot Product</h4>
+        $$\mathbf{a} \cdot \mathbf{b} = (1)(4) + (2)(-2) + (3)(0) = 4 - 4 + 0 = \mathbf{0}$$
+
+        <h4>Part B: Angle &amp; Orthogonality</h4>
+        <p>Because $\mathbf{a} \cdot \mathbf{b} = 0$, $\cos\theta = 0 \implies \theta = \mathbf{90^\circ}$. The vectors are orthogonal!</p>
+
+        <h4>Part C: Cosine Similarity with $\mathbf{c} = 2\mathbf{a}$</h4>
+        $$\cos\theta = \frac{\mathbf{a} \cdot \mathbf{c}}{\|\mathbf{a}\| \|\mathbf{c}\|} = \frac{28}{\sqrt{14} \times 2\sqrt{14}} = \frac{28}{28} = \mathbf{1.0}$$
+        <p>Scaling a vector leaves its semantic direction completely unchanged ($\theta = 0^\circ$).</p>
       </details>
     </div>
 
-    <!-- PROBLEM 3 -->
+    <!-- Problem 3 -->
     <div class="problem-box">
       <h2>Problem 3: Dimension Compatibility &amp; Matrix Multiplication</h2>
       <p>Let $A \in \mathbb{R}^{2 \times 3}$ and $B \in \mathbb{R}^{3 \times 2}$:</p>
-      <p>$$A = \begin{bmatrix} 1 & 0 & 2 \\ -1 & 3 & 1 \end{bmatrix}, \qquad B = \begin{bmatrix} 3 & 1 \\ 2 & -1 \\ 0 & 4 \end{bmatrix}$$</p>
-      <ul>
-        <li><strong>Part A:</strong> Find the dimensions of $AB$ and $BA$.</li>
-        <li><strong>Part B:</strong> Compute product $C = AB$ step-by-step.</li>
-      </ul>
+      $$A = \begin{bmatrix} 1 & 0 & 2 \\ -1 & 3 & 1 \end{bmatrix}, \qquad B = \begin{bmatrix} 3 & 1 \\ 2 & -1 \\ 0 & 4 \end{bmatrix}$$
+      <p>Calculate $C = AB$.</p>
 
       <details class="solution">
-        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
-        <h3>Solution:</h3>
-        <p><strong>Part A: Dimensions</strong></p>
+        <summary>Click to view solution</summary>
+        <p>Inner dimensions match ($3=3$), yielding a $2 \times 2$ matrix:</p>
         <ul>
-          <li>$AB$: $(2 \times 3) \times (3 \times 2) \implies \mathbf{2 \times 2}$.</li>
-          <li>$BA$: $(3 \times 2) \times (2 \times 3) \implies \mathbf{3 \times 3}$.</li>
+          <li>$c_{11} = (1)(3) + (0)(2) + (2)(0) = \mathbf{3}$</li>
+          <li>$c_{12} = (1)(1) + (0)(-1) + (2)(4) = \mathbf{9}$</li>
+          <li>$c_{21} = (-1)(3) + (3)(2) + (1)(0) = \mathbf{3}$</li>
+          <li>$c_{22} = (-1)(1) + (3)(-1) + (1)(4) = \mathbf{0}$</li>
         </ul>
-
-        <p><strong>Part B: Step-by-Step Matrix Product $C = AB$</strong></p>
-        <ul>
-          <li>$c_{11} = (1 \times 3) + (0 \times 2) + (2 \times 0) = 3 + 0 + 0 = \mathbf{3}$</li>
-          <li>$c_{12} = (1 \times 1) + (0 \times -1) + (2 \times 4) = 1 + 0 + 8 = \mathbf{9}$</li>
-          <li>$c_{21} = (-1 \times 3) + (3 \times 2) + (1 \times 0) = -3 + 6 + 0 = \mathbf{3}$</li>
-          <li>$c_{22} = (-1 \times 1) + (3 \times -1) + (1 \times 4) = -1 - 3 + 4 = \mathbf{0}$</li>
-        </ul>
-        <p>$$C = \begin{bmatrix} 3 & 9 \\ 3 & 0 \end{bmatrix}$$</p>
+        $$C = \begin{bmatrix} 3 & 9 \\ 3 & 0 \end{bmatrix}$$
       </details>
     </div>
 
     <div class="nav-buttons">
-      <a href="./lecture.html" class="btn">← Back to Lecture</a>
-      <a href="../02_linear_transformations/lecture.html" class="btn btn-primary">Next Topic: 2.2 Linear Transformations →</a>
+      <a href="lecture.html" class="btn">← Back to Lecture 2.1</a>
+      <a href="../02_linear_transformations/lecture.html" class="btn btn-primary">Next: Topic 2.2 Linear Transformations →</a>
     </div>
   </main>
 
 </body>
 </html>
-

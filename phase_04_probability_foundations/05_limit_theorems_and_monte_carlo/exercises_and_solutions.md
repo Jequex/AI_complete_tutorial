@@ -1,171 +1,172 @@
 # Topic 4.5: Exercises & Solutions — Limit Theorems, Monte Carlo & LLM Sampling
 
+Welcome to the problem set for **Topic 4.5: Limit Theorems, Monte Carlo Methods & LLM Sampling**.
+
+Grab a pencil and notebook. Work through each problem before revealing the collapsible solutions below.
+
 ---
 
-## Problem Set Overview
+## 📝 Problem Set Overview
 
-| Problem | Focus | Difficulty |
-| :--- | :--- | :--- |
-| **1** | **CLT & Benchmark Sample Sizing ($\pm 1\%$ Margin of Error)** | Medium |
-| **2** | **Monte Carlo Integration for the Gaussian Error Function** | Medium |
-| **3** | **LLM Decoding Arithmetic: Temperature, Top-K & Top-P by Hand** | Challenging |
+| Problem | Focus | Difficulty | Practical AI Connection |
+| :---: | :--- | :---: | :--- |
+| **1** | **CLT & Benchmark Sample Sizing ($\pm 1\%$ Margin of Error)** | Medium | Designing statistically sound AI evaluation leaderboards |
+| **2** | **Monte Carlo Integration for the Gaussian Error Function** | Medium | Estimating intractable integrals in Diffusion and Physics-Informed ML |
+| **3** | **LLM Decoding Arithmetic: Temperature, Top-K & Top-P by Hand** | Challenging | The exact inference generation loop in vLLM, HuggingFace, and Ollama |
 
 ---
 
 ## Problem 1: CLT & Benchmark Sample Sizing
 
-### The Context
-An AI lab evaluates a new reasoning model on a multiple-choice benchmark.
+### 🧒 The Context: Maya's AI Benchmark Leaderboard
+An AI research lab evaluates a new reasoning model on a multiple-choice benchmark.
 Each question outcome is modeled as a Bernoulli random variable:
 - $X_i = 1$ if answered correctly, $X_i = 0$ if incorrect.
-- True accuracy is $p \approx 0.80$.
+- True model accuracy is $p \approx 0.80$.
 
 By the Central Limit Theorem, the sample accuracy $\hat{p} = \frac{1}{n} \sum_{i=1}^n X_i$ is approximately normal:
 $$\hat{p} \sim \mathcal{N}\left( p, \frac{p(1 - p)}{n} \right)$$
 
-### Task
-1. What is the standard error of the sample accuracy $\text{SE}(\hat{p})$ in terms of $p$ and $n$?
+### Tasks:
+1. Write the standard error of the sample accuracy $\text{SE}(\hat{p})$.
 2. For a $95\%$ confidence interval, the margin of error is $E \approx 1.96 \times \text{SE}$.
-   If the lab wants to guarantee that the benchmark report is accurate within a margin of $\pm 1.0\%$ ($E \le 0.01$) with $95\%$ confidence, **how many benchmark questions $n$ must the test set contain?**
-3. If $p$ was completely unknown, what is the worst-case variance $p(1 - p)$, and what would the required sample size be?
+   If Maya wants to guarantee that the reported benchmark accuracy is within $\pm 1.0\%$ ($E \le 0.01$) with $95\%$ confidence, **how many benchmark questions $n$ must the test set contain?**
+3. If accuracy $p$ was completely unknown, what is the worst-case variance $p(1 - p)$, and what would the required sample size be?
 
 ---
 
-### Solution 1
+<details>
+<summary>Click to view solution for Problem 1</summary>
 
-#### 1. Standard Error
+### Detailed Step-by-Step Solution:
+
+#### Step 1: Standard Error Formula
 The variance of a single Bernoulli trial is $\sigma^2 = p(1 - p)$.
 By the Central Limit Theorem, the variance of the sample average $\hat{p}$ is $\frac{\sigma^2}{n}$.
 $$\text{SE}(\hat{p}) = \sqrt{\frac{p(1 - p)}{n}}$$
 
-#### 2. Sample Size for $p = 0.80$
+#### Step 2: Sample Size for $p = 0.80$
 Setting margin of error $E = 1.96 \times \sqrt{\frac{p(1 - p)}{n}} \le 0.01$:
 $$\sqrt{n} \ge \frac{1.96 \times \sqrt{p(1 - p)}}{0.01}$$
 $$n \ge \frac{1.96^2 \times p(1 - p)}{0.01^2} = \frac{3.8416 \times (0.80 \times 0.20)}{0.0001}$$
 $$n \ge \frac{3.8416 \times 0.16}{0.0001} = \frac{0.614656}{0.0001} \approx \mathbf{6{,}147 \text{ questions}}$$
-*Result: The benchmark test suite must contain at least 6,147 questions!*
+Maya's benchmark test suite must contain at least **6,147 questions**!
 
-#### 3. Worst-Case Sample Size (Unknown $p$)
-The product $p(1 - p)$ reaches its maximum when $p = 0.50$:
+#### Step 3: Worst-Case Sample Size (Unknown $p$)
+The variance $p(1 - p)$ reaches its maximum when $p = 0.50$:
 $$\max p(1 - p) = 0.50 \times 0.50 = 0.25$$
 $$n_{\text{worst}} \ge \frac{3.8416 \times 0.25}{0.0001} = \frac{0.9604}{0.0001} = \mathbf{9{,}604 \text{ questions}}$$
-*Takeaway for AI Benchmarking:* Evaluating models on tiny test sets (e.g. 100 questions) yields massive confidence intervals of $\pm 10\%$, rendering minor benchmark gains statistically meaningless!
+
+**AI Engineering Insight:** Evaluating models on tiny test sets (e.g. 100 questions) yields massive confidence intervals of $\pm 10\%$, rendering small benchmark gains statistically meaningless!
+</details>
 
 ---
 
 ## Problem 2: Monte Carlo Integration for the Gaussian Error Function
 
-### The Context
-The Gaussian bell curve $e^{-x^2}$ has no elementary antiderivative. To evaluate:
+### 🧒 The Context: Maya's Popcorn Integral
+The Gaussian curve $e^{-x^2}$ has no elementary antiderivative. To evaluate:
 $$I = \int_0^1 e^{-x^2} \, dx$$
-we use Monte Carlo integration.
+Maya draws $N = 4$ independent uniform samples from $[0, 1]$:
+$$x_1 = 0.2, \quad x_2 = 0.5, \quad x_3 = 0.7, \quad x_4 = 0.9$$
 
-1. Frame $I$ as an expected value $\mathbb{E}_{X \sim \text{Uniform}(0, 1)}[g(X)]$.
-2. State the Monte Carlo estimator $\hat{I}_N$ using $N$ uniform draws $u_i \sim \text{Uniform}(0, 1)$.
-3. If $N = 4$ random draws are $u = [0.2, 0.5, 0.8, 0.1]$, compute the estimate $\hat{I}_4$ by hand.
-4. Compare with the true value $I \approx 0.746824$.
-
----
-
-### Solution 2
-
-#### 1. Expectation Formulation
-Since the uniform density on $[0, 1]$ is $f_X(x) = 1$:
-$$I = \int_0^1 e^{-x^2} \times 1 \, dx = \mathbb{E}_{X \sim \text{Uniform}(0, 1)} \left[ e^{-X^2} \right]$$
-Here, $g(x) = e^{-x^2}$.
-
-#### 2. Monte Carlo Estimator
-$$\hat{I}_N = \frac{1}{N} \sum_{i=1}^N e^{-u_i^2} \quad \text{where } u_i \sim \text{Uniform}(0, 1)$$
-
-#### 3. Hand Calculation for $N = 4$:
-- $u_1 = 0.2 \implies e^{-(0.2)^2} = e^{-0.04} \approx 0.960789$
-- $u_2 = 0.5 \implies e^{-(0.5)^2} = e^{-0.25} \approx 0.778801$
-- $u_3 = 0.8 \implies e^{-(0.8)^2} = e^{-0.64} \approx 0.527292$
-- $u_4 = 0.1 \implies e^{-(0.1)^2} = e^{-0.01} \approx 0.990050$
-
-$$\hat{I}_4 = \frac{0.960789 + 0.778801 + 0.527292 + 0.990050}{4} = \frac{3.256932}{4} \approx \mathbf{0.81423}$$
-
-#### 4. Comparison
-True value is $0.7468$. Even with only 4 random draws, the estimate is within $0.067$ of truth. With $N = 100{,}000$, Monte Carlo matches $0.7468$ to 4 decimal places!
+### Tasks:
+1. State the Monte Carlo estimator formula for $I$.
+2. Compute $g(x_i) = e^{-x_i^2}$ for each of the 4 samples.
+3. Compute the Monte Carlo estimate $\hat{I}_4$.
+4. Compare your estimate to the true numerical value $I \approx 0.746824$.
 
 ---
 
-## Problem 3: LLM Decoding by Hand (Temperature, Top-K & Top-P)
+<details>
+<summary>Click to view solution for Problem 2</summary>
 
-### The Context
-A language model outputs 4 candidate tokens with unnormalized logits:
-- $z_1 = 3.0$ ("apple")
-- $z_2 = 2.0$ ("banana")
-- $z_3 = 1.0$ ("carrot")
-- $z_4 = 0.0$ ("donut")
+### Detailed Step-by-Step Solution:
 
-### Part A: Standard Softmax ($T = 1.0$)
-1. Compute the unnormalized exponentials $e^{z_i}$.
-2. Compute the probabilities $p_1, p_2, p_3, p_4$.
+#### Step 1: Monte Carlo Estimator Formula
+For uniform random variable $X \sim \text{Uniform}(0, 1)$, density is $f(x) = 1$. Therefore:
+$$\hat{I}_N = \frac{1}{N} \sum_{i=1}^N g(x_i) = \frac{1}{N} \sum_{i=1}^N e^{-x_i^2}$$
 
-### Part B: High Temperature ($T = 2.0$)
-1. Scale logits: $z_i / 2.0 = [1.5, 1.0, 0.5, 0.0]$.
-2. Compute the new probabilities $p_1, p_2, p_3, p_4$. How did the distribution change?
+#### Step 2: Compute Sample Values
+- $g(x_1) = e^{-(0.2)^2} = e^{-0.04} \approx \mathbf{0.960789}$
+- $g(x_2) = e^{-(0.5)^2} = e^{-0.25} \approx \mathbf{0.778801}$
+- $g(x_3) = e^{-(0.7)^2} = e^{-0.49} \approx \mathbf{0.612626}$
+- $g(x_4) = e^{-(0.9)^2} = e^{-0.81} \approx \mathbf{0.444858}$
 
-### Part C: Top-K ($K = 2$, $T = 1.0$)
-Apply Top-2 truncation and compute final probabilities.
+#### Step 3: Compute Sample Average
+$$\hat{I}_4 = \frac{0.960789 + 0.778801 + 0.612626 + 0.444858}{4} = \frac{2.797074}{4} = \mathbf{0.699269}$$
 
-### Part D: Top-P (Nucleus $P = 0.85$, $T = 1.0$)
-Find the nucleus subset of tokens whose cumulative sum $\ge 0.85$. Compute the re-normalized probabilities.
-
----
-
-### Solution 3
-
-#### Part A: Standard Softmax ($T = 1.0$)
-- $e^3 \approx 20.0855$
-- $e^2 \approx 7.3891$
-- $e^1 \approx 2.7183$
-- $e^0 = 1.0000$
-- Sum: $20.0855 + 7.3891 + 2.7183 + 1.0000 = 31.1929$
-
-$$p_1 = \frac{20.0855}{31.1929} \approx \mathbf{64.39\%} \quad (\text{apple})$$
-$$p_2 = \frac{7.3891}{31.1929} \approx \mathbf{23.69\%} \quad (\text{banana})$$
-$$p_3 = \frac{2.7183}{31.1929} \approx \mathbf{8.71\%} \quad (\text{carrot})$$
-$$p_4 = \frac{1.0000}{31.1929} \approx \mathbf{3.21\%} \quad (\text{donut})$$
+#### Step 4: Comparison
+- True Value: $0.746824$
+- 4-Sample Monte Carlo Estimate: $0.699269$
+- Absolute Error: $|0.699269 - 0.746824| \approx 0.0475$ (Under $6\%$ error with just 4 points!).
+With $N = 100{,}000$ points, Monte Carlo matches the true integral to 3 decimal places!
+</details>
 
 ---
 
-#### Part B: High Temperature ($T = 2.0$)
-- Scaled logits: $[1.5, 1.0, 0.5, 0.0]$
-- $e^{1.5} \approx 4.4817$
-- $e^{1.0} \approx 2.7183$
-- $e^{0.5} \approx 1.6487$
-- $e^0 = 1.0000$
-- Sum: $4.4817 + 2.7183 + 1.6487 + 1.0000 = 9.8487$
+## Problem 3: LLM Decoding Arithmetic: Temperature, Top-K & Top-P by Hand
 
-$$p_1 = \frac{4.4817}{9.8487} \approx \mathbf{45.51\%}$$
-$$p_2 = \frac{2.7183}{9.8487} \approx \mathbf{27.60\%}$$
-$$p_3 = \frac{1.6487}{9.8487} \approx \mathbf{16.74\%}$$
-$$p_4 = \frac{1.0000}{9.8487} \approx \mathbf{10.15\%}$$
-*Observation: Increasing $T$ flattens the distribution: top token "apple" dropped from 64.4% down to 45.5%, while rare token "donut" tripled from 3.2% up to 10.2%!*
+### 🧒 The Context: Timmy's LLM Vocabulary Selector
+A language model outputs raw logits for 5 candidate words:
+$$\mathbf{z} = \begin{bmatrix} \text{"apple"} \\ \text{"banana"} \\ \text{"cherry"} \\ \text{"date"} \\ \text{"eggplant"} \end{bmatrix} = \begin{bmatrix} 4.0 \\ 3.0 \\ 2.0 \\ 1.0 \\ 0.0 \end{bmatrix}$$
+
+### Tasks:
+1. Compute the baseline Softmax probabilities at Temperature $T = 1.0$.
+2. Compute the scaled probabilities at Low Temperature $T = 0.5$. Show how the top word "apple" increases in dominance.
+3. Starting from the baseline probabilities ($T = 1.0$), apply **Top-$k = 2$ Truncation**. What are the normalized probabilities?
+4. Starting from the baseline probabilities ($T = 1.0$), apply **Top-$p = 0.85$ (Nucleus) Sampling**. Which words survive, and what are their normalized probabilities?
 
 ---
 
-#### Part C: Top-K ($K = 2$, $T = 1.0$)
-Keep only top 2: "apple" ($e^3 \approx 20.0855$) and "banana" ($e^2 \approx 7.3891$).
-Mask "carrot" and "donut" to $0$.
-Sum of kept terms: $20.0855 + 7.3891 = 27.4746$.
-$$p_{\text{apple}} = \frac{20.0855}{27.4746} \approx \mathbf{73.11\%}$$
-$$p_{\text{banana}} = \frac{7.3891}{27.4746} \approx \mathbf{26.89\%}$$
-$$p_{\text{carrot}} = 0\%, \quad p_{\text{donut}} = 0\%$$
+<details>
+<summary>Click to view solution for Problem 3</summary>
 
----
+### Detailed Step-by-Step Solution:
 
-#### Part D: Top-P ($P = 0.85$, $T = 1.0$)
-Sorted standard probabilities:
-1. "apple": $0.6439$ (Cumulative: $0.6439 < 0.85$)
-2. "banana": $0.2369$ (Cumulative: $0.6439 + 0.2369 = 0.8808 \ge 0.85 \implies \text{STOP!}$)
+#### Step 1: Baseline Softmax at $T = 1.0$
+- $e^4 \approx 54.598$
+- $e^3 \approx 20.086$
+- $e^2 \approx 7.389$
+- $e^1 \approx 2.718$
+- $e^0 = 1.000$
+$$\text{Sum} = 54.598 + 20.086 + 7.389 + 2.718 + 1.000 = \mathbf{85.791}$$
 
-The nucleus candidate set is strictly **{"apple", "banana"}**.
-Tokens "carrot" and "donut" are pruned!
-Re-normalizing over {"apple", "banana"}:
-$$p_{\text{apple}} = \frac{0.6439}{0.8808} \approx \mathbf{73.10\%}$$
-$$p_{\text{banana}} = \frac{0.2369}{0.8808} \approx \mathbf{26.90\%}$$
-*(Nucleus sampling dynamically excluded the lower 12% probability tail without needing an arbitrary fixed K!)*
+Probabilities:
+- $p(\text{"apple"}) = 54.598 / 85.791 \approx \mathbf{63.64\%}$
+- $p(\text{"banana"}) = 20.086 / 85.791 \approx \mathbf{23.41\%}$
+- $p(\text{"cherry"}) = 7.389 / 85.791 \approx \mathbf{8.61\%}$
+- $p(\text{"date"}) = 2.718 / 85.791 \approx \mathbf{3.17\%}$
+- $p(\text{"eggplant"}) = 1.000 / 85.791 \approx \mathbf{1.17\%}$
 
+#### Step 2: Low Temperature $T = 0.5$
+Divide logits by $0.5$ (multiply by 2): $[8, 6, 4, 2, 0]$.
+- $e^8 \approx 2980.96$
+- $e^6 \approx 403.43$
+- $e^4 \approx 54.60$
+- $e^2 \approx 7.39$
+- $e^0 = 1.00$
+$$\text{Sum} = 2980.96 + 403.43 + 54.60 + 7.39 + 1.00 = \mathbf{3447.38}$$
+
+Probabilities:
+- $p(\text{"apple"}) = 2980.96 / 3447.38 \approx \mathbf{86.47\%}$!
+- $p(\text{"banana"}) = 403.43 / 3447.38 \approx \mathbf{11.70\%}$
+- $p(\text{"cherry"}) \approx 1.58\%$, &nbsp; $p(\text{"date"}) \approx 0.21\%$, &nbsp; $p(\text{"eggplant"}) \approx 0.03\%$.
+"Apple" jumped from $63.6\%$ to $86.5\%$!
+
+#### Step 3: Top-$k = 2$ Truncation (from $T = 1.0$)
+Keep only top 2: {"apple", "banana"}.
+- Unnormalized sum: $0.6364 + 0.2341 = \mathbf{0.8705}$
+- Normalized $p(\text{"apple"}) = \frac{0.6364}{0.8705} \approx \mathbf{73.1\%}$
+- Normalized $p(\text{"banana"}) = \frac{0.2341}{0.8705} \approx \mathbf{26.9\%}$
+All other words are truncated to $0\%$.
+
+#### Step 4: Top-$p = 0.85$ (Nucleus) Sampling (from $T = 1.0$)
+Accumulate cumulative probability:
+- Word 1: "apple" ($63.64\% < 85\%$)
+- Word 2: "banana" ($63.64\% + 23.41\% = 87.05\% \ge 85\%$)
+The nucleus threshold $0.85$ is satisfied by the first two words!
+- **Surviving Words:** {"apple", "banana"}.
+- Normalized probabilities match Top-$k=2$: **$73.1\%$ apple, $26.9\%$ banana**.
+The tail tokens ("cherry", "date", "eggplant") are pruned away, eliminating hallucination risks!
+</details>

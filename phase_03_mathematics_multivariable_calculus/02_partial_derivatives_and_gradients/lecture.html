@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 3.2: Partial Derivatives & Gradients — Complete AI Tutorial</title>
+    <title>Topic 3.2: Partial Derivatives, Gradients & Steepest Descent — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -85,79 +85,141 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 3 Index</a>
-    <header>
-        <h1>Topic 3.2: Partial Derivatives, Gradients &amp; Steepest Descent</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Multivariable Functions, Directional Derivatives, Steepest Ascent Proof &amp; Gradient Descent</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Multivariable Calculus</a>
 
-    <section>
-        <h2>1. Symbol Decoder Table</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symbol</th>
-                    <th>Name</th>
-                    <th>Formal Meaning</th>
-                    <th>Child-Friendly Analogy</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>$\frac{\partial f}{\partial x}$</td>
-                    <td>Partial Derivative</td>
-                    <td>Slope in the $x$-direction while holding $y$ fixed</td>
-                    <td>Walking strictly East-West on a mountain</td>
-                </tr>
-                <tr>
-                    <td>$\nabla f$</td>
-                    <td>Gradient Vector</td>
-                    <td>Column vector of all partial derivatives</td>
-                    <td>A 3D compass pointing directly uphill toward the peak</td>
-                </tr>
-                <tr>
-                    <td>$-\nabla f$</td>
-                    <td>Negative Gradient</td>
-                    <td>Direction of steepest descent</td>
-                    <td>The path a marble rolls down a foggy mountain valley</td>
-                </tr>
-                <tr>
-                    <td>$D_{\mathbf{u}} f$</td>
-                    <td>Directional Derivative</td>
-                    <td>$\nabla f \cdot \mathbf{u}$ (slope along unit vector $\mathbf{u}$)</td>
-                    <td>Slope experienced when hiking in an arbitrary compass direction</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <h1>Topic 3.2: Partial Derivatives, Gradients & Steepest Descent</h1>
+    <p>In deep learning, neural networks optimize loss functions depending on millions or billions of parameters: $\mathcal{L}(w_1, \dots, w_D)$. We navigate this high-dimensional terrain using <strong>Partial Derivatives</strong> and the <strong>Gradient Vector $\nabla f$</strong>.</p>
 
-    <section>
-        <h2>2. Mathematical Proof: Why $\nabla f$ Points Steepest Uphill</h2>
-        <div class="concept-card">
-            <h3>The Dot Product Maximization</h3>
-            <p>For any unit direction vector $\mathbf{u}$ ($\|\mathbf{u}\| = 1$):</p>
-            <p>$$D_{\mathbf{u}} f = \nabla f \cdot \mathbf{u} = \|\nabla f\| \cdot \|\mathbf{u}\| \cos \theta = \|\nabla f\| \cos \theta$$</p>
-            <ul>
-                <li><strong>Maximum Slope (+Steepest Ascent):</strong> Occurs when $\cos \theta = +1 \implies \theta = 0^\circ$. The walking vector $\mathbf{u}$ must align exactly with $\nabla f$!</li>
-                <li><strong>Minimum Slope (-Steepest Descent):</strong> Occurs when $\cos \theta = -1 \implies \theta = 180^\circ$. Moving along $-\nabla f$ drops altitude as fast as physically possible!</li>
-                <li><strong>Contour / Level Curve ($\Delta f = 0$):</strong> When $\theta = 90^\circ$, $\cos(90^\circ) = 0$. The gradient is always perpendicular to contour lines!</li>
-            </ul>
-        </div>
-    </section>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: Maya Blindfolded on Foggy Mount Mist</h3>
+        <p>Maya is trapped in thick fog on Mount Mist. She must reach the cozy cabin in the valley:</p>
+        <ul>
+            <li><strong>Feeling with Boots (Partial Derivatives):</strong> She taps her boot strictly East-West ($\frac{\partial f}{\partial x}$) and strictly North-South ($\frac{\partial f}{\partial y}$) to feel the slope along each individual axis.</li>
+            <li><strong>The Magic Compass (The Gradient $\nabla f$):</strong> Combining the two boot taps gives $\nabla f = [\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}]^T$, an arrow pointing <strong>straight uphill</strong> toward the mountain summit!</li>
+            <li><strong>Steepest Descent ($-\nabla f$):</strong> To reach the warm cabin, Maya steps in the exact opposite direction: $-\nabla f$. Repeating this step brings her directly to the minimum!</li>
+        </ul>
+        <pre>
+                     Maya at Peak of Foggy Mountain
+                                    ▲
+                                   / \  ▲ ∇f (Gradient: Points Steepest Uphill!)
+                                  /   \ │
+                                 /  ●  \│
+               Maya feels ground ╲     ╱
+               with her hiking boots: ╲
+                                       ╲ -∇f (Negative Gradient: Roll downhill!)
+                                        ▼
+                                   [ Cozy Valley Cabin ★ ]
+        </pre>
+    </div>
 
-    <section>
-        <h2>3. The Gradient Descent Update Rule</h2>
-        <div class="tip-box">
-            <strong>The Universal Machine Learning Update Rule:</strong><br>
-            $$\mathbf{w}_{t+1} = \mathbf{w}_t - \eta \nabla \mathcal{L}(\mathbf{w}_t)$$
-            Where $\eta > 0$ is the learning rate step size.
-        </div>
-    </section>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$f(x, y)$</td>
+                <td>"f of x, y"</td>
+                <td>Surface height depending on 2 coordinates</td>
+                <td>Mountain peak altitude at longitude $x$ and latitude $y$</td>
+            </tr>
+            <tr>
+                <td>$\partial$</td>
+                <td>"del" or "partial"</td>
+                <td>Symbol for partial derivative</td>
+                <td>A camera freeze-frame locking all other dimensions</td>
+            </tr>
+            <tr>
+                <td>$\frac{\partial f}{\partial x}$</td>
+                <td>"del f del x"</td>
+                <td>Slope along $x$-axis while freezing $y$</td>
+                <td>Walking strictly East-West along a mountain path</td>
+            </tr>
+            <tr>
+                <td>$\frac{\partial f}{\partial y}$</td>
+                <td>"del f del y"</td>
+                <td>Slope along $y$-axis while freezing $x$</td>
+                <td>Walking strictly North-South along a mountain path</td>
+            </tr>
+            <tr>
+                <td>$\nabla f$</td>
+                <td>"nabla f" or "grad f"</td>
+                <td>Gradient vector of all partial derivatives</td>
+                <td>A 3D compass pointing directly uphill toward the peak</td>
+            </tr>
+            <tr>
+                <td>$-\nabla f$</td>
+                <td>"negative grad f"</td>
+                <td>Direction of steepest descent</td>
+                <td>The exact route a bowling ball rolls downhill</td>
+            </tr>
+            <tr>
+                <td>$\eta$</td>
+                <td>"eta"</td>
+                <td>Learning rate (step multiplier)</td>
+                <td>Stride length of Maya's hiking boots</td>
+            </tr>
+            <tr>
+                <td>$D_{\mathbf{u}} f$</td>
+                <td>"D sub u of f"</td>
+                <td>Directional derivative along direction $\mathbf{u}$</td>
+                <td>Slope felt when hiking diagonally Northwest</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- THE FREEZE RULE -->
+    <h2>3. The "Freeze" Rule for Partial Derivatives</h2>
+    <p>To differentiate with respect to one variable, treat all other variables as static frozen constants!</p>
+    <div class="concept-card">
+        <h4>Example: $f(x, y) = 3x^2 y + 5y^3 - 4x$</h4>
+        <ul>
+            <li>$\frac{\partial f}{\partial x} = 3y(2x) + 0 - 4 = \mathbf{6xy - 4}$</li>
+            <li>$\frac{\partial f}{\partial y} = 3x^2(1) + 15y^2 - 0 = \mathbf{3x^2 + 15y^2}$</li>
+        </ul>
+        <p>At $(x = 2, y = 1)$: $\frac{\partial f}{\partial x} = 6(2)(1) - 4 = 8$; $\frac{\partial f}{\partial y} = 3(4) + 15(1) = 27$.</p>
+    </div>
+
+    <!-- PROOF OF STEEPEST ASCENT -->
+    <h2>4. Directional Derivatives & Proof of Steepest Ascent</h2>
+    $$D_{\mathbf{u}} f = \nabla f \cdot \mathbf{u} = \|\nabla f\| \underbrace{\|\mathbf{u}\|}_{= 1} \cos\theta = \|\nabla f\| \cos\theta$$
+    <ul>
+        <li><strong>Steepest Ascent ($\theta = 0^\circ$):</strong> $\cos(0^\circ) = +1 \implies$ Points along $+\nabla f$ with slope $+\|\nabla f\|$.</li>
+        <li><strong>Steepest Descent ($\theta = 180^\circ$):</strong> $\cos(180^\circ) = -1 \implies$ Points along $-\nabla f$ with slope $-\|\nabla f\|$.</li>
+        <li><strong>Contour Tangent ($\theta = 90^\circ$):</strong> $\cos(90^\circ) = 0 \implies$ Flat walking contour line!</li>
+    </ul>
+
+    <!-- GRADIENT DESCENT -->
+    <h2>5. Gradient Descent: The Master Equation</h2>
+    $$\underbrace{\mathbf{w}_{t+1}}_{\text{Next position}} = \underbrace{\mathbf{w}_t}_{\text{Current position}} - \underbrace{\eta}_{\text{Learning rate}} \cdot \underbrace{\nabla \mathcal{L}(\mathbf{w}_t)}_{\text{Uphill vector}}$$
+    <div class="tip-box">
+        <strong>Concrete Step:</strong> For $f(x, y) = x^2 + 3y^2$ at $[3.0, 2.0]^T$ with $\eta = 0.1$, $\nabla f = [6.0, 12.0]^T$. The updated position is $[3.0 - 0.6, 2.0 - 1.2]^T = [2.4, 0.8]^T$, dropping loss from $21.0$ down to $7.68$!
+    </div>
+
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>

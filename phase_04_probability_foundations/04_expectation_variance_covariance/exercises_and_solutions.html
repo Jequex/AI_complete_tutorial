@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 4.4: Exercises & Solutions — Expectation, Variance & Covariance</title>
+    <title>Topic 4.4: Exercises & Solutions — Expectation & Variance</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -65,8 +65,8 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.75rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .problem-header {
@@ -74,21 +74,16 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.75rem;
         }
         .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
             border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 600;
         }
         .badge-medium { background-color: #fef3c7; color: #92400e; }
         .badge-hard { background-color: var(--danger-bg); color: var(--danger); }
-        @media (prefers-color-scheme: dark) {
-            .badge-medium { background-color: #78350f; color: #fde68a; }
-        }
         details {
             background-color: var(--solution-bg);
             border: 1px solid var(--border);
@@ -97,36 +92,38 @@
             overflow: hidden;
         }
         summary {
-            padding: 0.85rem 1.2rem;
+            padding: 0.85rem 1.25rem;
             font-weight: 600;
             cursor: pointer;
-            background-color: var(--primary-light);
             color: var(--primary);
             user-select: none;
+            background-color: var(--primary-light);
+            border-bottom: 1px solid transparent;
+        }
+        details[open] summary {
+            border-bottom-color: var(--border);
         }
         .solution-content {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
+            padding: 1.25rem;
         }
         .step-box {
-            background: var(--bg);
-            border-left: 4px solid var(--accent);
-            padding: 1rem 1.25rem;
-            margin: 1rem 0;
-            border-radius: 0 8px 8px 0;
-            border-top: 1px solid var(--border);
-            border-right: 1px solid var(--border);
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed var(--border);
+        }
+        .step-box:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
     </style>
 </head>
 <body>
 
     <a href="lecture.html" class="back-link">← Back to Lecture 4.4</a>
-    <header>
-        <h1>Topic 4.4: Exercises &amp; Solutions</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Practice Problem Sets: Uncorrelated vs Independent, He Initialization &amp; Covariance Math</p>
-    </header>
+
+    <h1>Topic 4.4: Exercises & Solutions</h1>
+    <p>Work through each problem with pen and paper before revealing the collapsible solutions below.</p>
 
     <!-- PROBLEM 1 -->
     <div class="problem-card">
@@ -134,29 +131,28 @@
             <h3>Problem 1: Zero Covariance Does NOT Imply Independence</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>Let $X \sim \text{Uniform}(-1, 1)$ and $Y = X^2$.</p>
+        <p><strong>🧒 The Context:</strong> For $X \sim \text{Uniform}(-1, 1)$ and $Y = X^2$, prove they have zero covariance while being $100\%$ dependent.</p>
         <ol>
             <li>Compute $\mathbb{E}[X]$, $\mathbb{E}[Y]$, and $\mathbb{E}[XY]$.</li>
-            <li>Compute $\text{Cov}(X, Y)$.</li>
-            <li>Explain why $X$ and $Y$ are completely dependent despite having zero linear covariance.</li>
+            <li>Compute covariance $\text{Cov}(X, Y)$.</li>
+            <li>Explain the geometric meaning.</li>
         </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 1</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Expected Values:</strong>
-                    $$\mathbb{E}[X] = \int_{-1}^1 \frac{x}{2} dx = 0$$
-                    $$\mathbb{E}[Y] = \mathbb{E}[X^2] = \int_{-1}^1 \frac{x^2}{2} dx = \frac{1}{3}$$
-                    $$\mathbb{E}[XY] = \mathbb{E}[X^3] = \int_{-1}^1 \frac{x^3}{2} dx = 0$$
+                    <strong>1. Expectations:</strong>
+                    $\mathbb{E}[X] = 0.0$ (by symmetry). $\mathbb{E}[Y] = \mathbb{E}[X^2] = \int_{-1}^1 \frac{1}{2} x^2 dx = \mathbf{1/3}$.
+                    $\mathbb{E}[XY] = \mathbb{E}[X^3] = 0.0$ (odd function integral).
                 </div>
                 <div class="step-box">
                     <strong>2. Covariance:</strong>
-                    $$\text{Cov}(X, Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y] = 0 - (0 \times \frac{1}{3}) = \mathbf{0}$$
+                    $\text{Cov}(X, Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y] = 0 - (0 \times 1/3) = \mathbf{0.0}$.
                 </div>
                 <div class="step-box">
-                    <strong>3. Dependency:</strong>
-                    $Y$ is completely deterministic given $X$ ($Y = X^2$). Covariance only captures linear relationships, making it blind to quadratic dependencies!
+                    <strong>3. Geometric Insight:</strong>
+                    Knowing $X = 0.5$ gives $Y = 0.25$ with certainty ($100\%$ dependent!), but linear covariance cannot detect quadratic parabolas.
                 </div>
             </div>
         </details>
@@ -165,22 +161,31 @@
     <!-- PROBLEM 2 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 2: Derivation of He / Kaiming Weight Initialization</h3>
+            <h3>Problem 2: Derivation of He (Kaiming) Weight Initialization</h3>
             <span class="badge badge-medium">Medium</span>
         </div>
-        <p>For a linear layer $z = \sum_{i=1}^{d_{\text{in}}} w_i x_i$ followed by ReLU $a = \max(0, z)$ where $\text{Var}(a) = \frac{1}{2} \text{Var}(z)$, derive the required weight variance $\sigma_w^2$ to preserve variance $\text{Var}(a) = \text{Var}(x_i) = \sigma_x^2$.</p>
+        <p><strong>🧒 The Context:</strong> Single neuron $y = \sum_{i=1}^{D_{\text{in}}} w_i x_i$ with ReLU activation.</p>
+        <ol>
+            <li>Show $\text{Var}(y) = D_{\text{in}} \text{Var}(w) \text{Var}(x)$.</li>
+            <li>Account for ReLU variance halving ($\frac{1}{2}\text{Var}(y)$).</li>
+            <li>Derive the optimal weight variance $\text{Var}(w) = \frac{2}{D_{\text{in}}}$.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 2</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Variance of Pre-activation $z$:</strong>
-                    $$\text{Var}(z) = \sum_{i=1}^{d_{\text{in}}} \text{Var}(w_i x_i) = d_{\text{in}} \sigma_w^2 \sigma_x^2$$
+                    <strong>1. Variance of Linear Sum:</strong>
+                    For zero-mean independent weights and inputs: $\text{Var}(w_i x_i) = \text{Var}(w)\text{Var}(x) \implies \text{Var}(y) = D_{\text{in}}\text{Var}(w)\text{Var}(x)$.
                 </div>
                 <div class="step-box">
-                    <strong>2. Post-ReLU Activation Variance:</strong>
-                    $$\text{Var}(a) = \frac{1}{2} d_{\text{in}} \sigma_w^2 \sigma_x^2 = \sigma_x^2 \implies \frac{1}{2} d_{\text{in}} \sigma_w^2 = 1 \implies \mathbf{\sigma_w^2 = \frac{2}{d_{\text{in}}}}$$
-                    This yields the famous He / Kaiming normal initialization.
+                    <strong>2. ReLU Variance Halving:</strong>
+                    $\text{Var}(\text{ReLU}(y)) = \frac{1}{2} D_{\text{in}} \text{Var}(w) \text{Var}(x)$.
+                </div>
+                <div class="step-box">
+                    <strong>3. Preserving Variance:</strong>
+                    Setting $\text{Var}(\text{ReLU}(y)) = \text{Var}(x) \implies \frac{1}{2} D_{\text{in}} \text{Var}(w) = 1 \implies \mathbf{\text{Var}(w) = \frac{2}{D_{\text{in}}}} \implies \sigma_w = \sqrt{\frac{2}{D_{\text{in}}}}$.
+                    This is the world-famous Kaiming He initialization formula!
                 </div>
             </div>
         </details>
@@ -189,27 +194,30 @@
     <!-- PROBLEM 3 -->
     <div class="problem-card">
         <div class="problem-header">
-            <h3>Problem 3: Covariance Matrix &amp; Correlation by Hand</h3>
+            <h3>Problem 3: Covariance Matrix & Correlation by Hand</h3>
             <span class="badge badge-hard">Challenging</span>
         </div>
-        <p>Given 3 points in $\mathbb{R}^2$: $x_1 = [1, 2]^T, x_2 = [2, 5]^T, x_3 = [3, 5]^T$. Compute sample variances, sample covariance, the $2 \times 2$ covariance matrix $\Sigma$, and Pearson correlation $\rho$.</p>
+        <p><strong>🧒 The Context:</strong> Centered data vectors $X = [2, 0, -2]^T, Y = [4, 0, -4]^T, Z = [-2, 0, 2]^T$.</p>
+        <ol>
+            <li>Compute sample covariance matrix $\Sigma = \frac{1}{2} A^T A$.</li>
+            <li>Compute Pearson correlation matrix $P$.</li>
+            <li>Interpret correlations $\rho_{12}$ and $\rho_{13}$.</li>
+        </ol>
 
         <details>
-            <summary>Click to Reveal Step-by-Step Solution</summary>
+            <summary>Click to view solution for Problem 3</summary>
             <div class="solution-content">
                 <div class="step-box">
-                    <strong>1. Mean Vector $\mu$:</strong>
-                    $$\mu_1 = \frac{1+2+3}{3} = 2.0, \quad \mu_2 = \frac{2+5+5}{3} = 4.0 \implies \mu = \begin{bmatrix} 2.0 \\ 4.0 \end{bmatrix}$$
+                    <strong>1. Covariance Matrix:</strong>
+                    $$\Sigma = \begin{bmatrix} 4.0 & 8.0 & -4.0 \\ 8.0 & 16.0 & -8.0 \\ -4.0 & -8.0 & 4.0 \end{bmatrix}$$
                 </div>
                 <div class="step-box">
-                    <strong>2. Covariance Matrix $\Sigma$:</strong>
-                    $$s_1^2 = \frac{(-1)^2 + 0^2 + 1^2}{2} = 1.0, \quad s_2^2 = \frac{(-2)^2 + 1^2 + 1^2}{2} = 3.0$$
-                    $$s_{12} = \frac{(-1)(-2) + (0)(1) + (1)(1)}{2} = \frac{3}{2} = 1.5$$
-                    $$\Sigma = \begin{bmatrix} 1.0 & 1.5 \\ 1.5 & 3.0 \end{bmatrix}$$
+                    <strong>2. Pearson Correlation Matrix:</strong>
+                    $$P = \begin{bmatrix} +1.00 & +1.00 & -1.00 \\ +1.00 & +1.00 & -1.00 \\ -1.00 & -1.00 & +1.00 \end{bmatrix}$$
                 </div>
                 <div class="step-box">
-                    <strong>3. Pearson Correlation $\rho$:</strong>
-                    $$\rho = \frac{1.5}{\sqrt{1.0 \times 3.0}} = \frac{1.5}{\sqrt{3}} \approx \mathbf{0.8660}$$
+                    <strong>3. Interpretation:</strong>
+                    $\rho_{12} = +1.00$ indicates perfect positive linear synchronization, while $\rho_{13} = -1.00$ indicates perfect inverse mirror-image lockstep.
                 </div>
             </div>
         </details>
@@ -217,4 +225,3 @@
 
 </body>
 </html>
-

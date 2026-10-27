@@ -19,6 +19,8 @@
       --border-callout: #22c55e;
       --bg-tech: #eff6ff;
       --border-tech: #3b82f6;
+      --bg-warn: #fef2f2;
+      --border-warn: #ef4444;
       --text: #0f172a;
       --text-muted: #475569;
       --border: #e2e8f0;
@@ -35,6 +37,8 @@
         --border-callout: #10b981;
         --bg-tech: #1e3a8a33;
         --border-tech: #60a5fa;
+        --bg-warn: #7f1d1d33;
+        --border-warn: #f87171;
         --text: #f8fafc;
         --text-muted: #94a3b8;
         --border: #334155;
@@ -70,11 +74,13 @@
       text-decoration: none;
     }
     .breadcrumbs a:hover { text-decoration: underline; }
-
+    
     h1 { font-size: 2.25rem; font-weight: 800; line-height: 1.25; margin-bottom: 0.5rem; }
     h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border); }
     h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; }
 
+    p, li { font-size: 1.05rem; }
+    
     .callout {
       border-left: 4px solid;
       padding: 1.2rem 1.5rem;
@@ -101,17 +107,10 @@
       border-radius: 0.5rem;
       padding: 1rem 1.25rem;
       overflow-x: auto;
-      font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
       font-size: 0.95rem;
+      line-height: 1.5;
     }
-    code {
-      background-color: var(--code-bg);
-      padding: 0.15rem 0.35rem;
-      border-radius: 0.25rem;
-      font-family: ui-monospace, monospace;
-      font-size: 0.9em;
-    }
-    pre code { background: none; padding: 0; }
 
     table {
       width: 100%;
@@ -161,9 +160,6 @@
       color: #ffffff;
       border-color: var(--primary);
     }
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
   </style>
 </head>
 <body>
@@ -173,109 +169,77 @@
       <a href="../index.html">Phase 02</a> &gt; <span>Topic 2.6</span>
     </div>
     <h1>Topic 2.6: Tensors &amp; Capstone Project</h1>
-    <p style="color: var(--text-muted); margin-bottom: 0;">Multidimensional arrays, memory strides, broadcasting mechanics, and Principal Component Analysis (PCA).</p>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Multi-dimensional memory layouts, broadcasting mechanics, and Principal Component Analysis (PCA).</p>
   </header>
 
   <main>
     <section>
-      <h2>1. The 12-Year-Old Analogy: The Filing Cabinet of Books</h2>
+      <h2>1. 🧒 The 12-Year-Old Analogy: From a Coin to a Shipping Container</h2>
       <div class="callout callout-kid">
-        <div class="callout-title">🧒 From Lines to Boxes</div>
-        <ul>
-          <li><strong>0D (Scalar):</strong> A single number written in one box ($5$).</li>
-          <li><strong>1D (Vector):</strong> A line of numbers on a page ($[1, 2, 3]$).</li>
-          <li><strong>2D (Matrix):</strong> An entire spreadsheet of rows and columns.</li>
-          <li><strong>3D (Tensor / Book):</strong> A book stacking pages together (e.g. Height $\times$ Width $\times$ 3 Color Channels [R, G, B]).</li>
-          <li><strong>4D (Batch Tensor / Shipping Box):</strong> Stacking 32 books into a crate:
-            $$X \in \mathbb{R}^{B \times C \times H \times W}$$
-            Process 32 images simultaneously on a GPU!
-          </li>
-        </ul>
+        <div class="callout-title">🧒 The Dimensional Ladder</div>
+        <p>A scalar is a coin (0D). A vector is a ruler (1D). A matrix is a sheet of paper (2D). A 3D tensor is a book of color channels. A 4D tensor is a shipping container of books $(B \times C \times H \times W)$ sent in parallel to a GPU!</p>
       </div>
-
-      <pre>
-       0D SCALAR            1D VECTOR               2D MATRIX                3D TENSOR              4D BATCH TENSOR
-      Single Number         List of numbers         Table of numbers         Stack of tables        Batch of stacks
-      
-          [ 42 ]           ┌───┐                  ┌───               ───┐         ┌───────────┐         ┌───┐ ┌───┐ ┌───┐
-                           │ 1 │                  │  1   2   3   4   5  │        /           /│         │   │ │   │ │   │
-                           │ 2 │                  │  6   7   8   9  10  │       /───────────/ │         │ 1 │ │ 2 │ │ 3 │ ...
-                           │ 3 │                  │ 11  12  13  14  15  │       │   RED     │ │         └───┘ └───┘ └───┘
-                           └───┘                  └───               ───┘       │   GREEN   │/          B images in parallel
-                                                                                │   BLUE    │
-                                                                                └───────────┘
-      </pre>
     </section>
 
     <section>
-      <h2>2. Common Tensor Shapes in Modern AI</h2>
+      <h2>2. PCA: The Dinosaur Shadow Puppet</h2>
+      <div class="callout callout-tech">
+        <div class="callout-title">🔬 Finding the Optimal Projection Angle</div>
+        $$C = \frac{1}{N - 1} \tilde{X}^T \tilde{X}, \qquad C \mathbf{v}_1 = \lambda_1 \mathbf{v}_1$$
+        <p><strong>🧒 What the math is actually doing:</strong> Imagine shining a flashlight on a 3D wire dinosaur model. PCA finds the exact angle that projects the largest, most informative 2D shadow onto the wall!</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. 📋 Mathematical & Technical Symbol Decoder Table</h2>
       <table>
         <thead>
           <tr>
-            <th>Application</th>
-            <th>Tensor Shape</th>
-            <th>Dimension Labels</th>
-            <th>Concrete Example</th>
+            <th>Symbol</th>
+            <th>Pronunciation</th>
+            <th>Plain English Meaning</th>
+            <th>Concrete Real-World Analogy / Flashcard Example</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>Computer Vision</strong></td>
             <td>$\mathbb{R}^{B \times C \times H \times W}$</td>
-            <td>Batch $\times$ Channels $\times$ Height $\times$ Width</td>
-            <td>$(32, 3, 224, 224)$</td>
+            <td>"R B-by-C-by-H-by-W"</td>
+            <td>4D batch tensor of images</td>
+            <td>A shipping container of color picture books</td>
           </tr>
           <tr>
-            <td><strong>Transformers / LLMs</strong></td>
             <td>$\mathbb{R}^{B \times T \times D}$</td>
-            <td>Batch $\times$ Token Sequence $\times$ Embedding Dim</td>
-            <td>$(8, 2048, 4096)$</td>
+            <td>"R B-by-T-by-D"</td>
+            <td>3D batch tensor of text sequences</td>
+            <td>A collection of novels with $T$ words per page</td>
           </tr>
           <tr>
-            <td><strong>Audio Modeling</strong></td>
-            <td>$\mathbb{R}^{B \times C \times L}$</td>
-            <td>Batch $\times$ Audio Channels $\times$ Raw Samples</td>
-            <td>$(16, 2, 44100)$</td>
+            <td>$S_j$</td>
+            <td>"stride j"</td>
+            <td>Memory jump in flat RAM to advance by 1 along axis $j$</td>
+            <td>Number of floor tiles to skip to move to the next aisle</td>
+          </tr>
+          <tr>
+            <td>$C = \frac{1}{N-1}\tilde{X}^T\tilde{X}$</td>
+            <td>"covariance matrix C"</td>
+            <td>Matrix measuring pairwise correlations between features</td>
+            <td>How closely students' math scores track science scores</td>
+          </tr>
+          <tr>
+            <td>$Z = \tilde{X} V_k$</td>
+            <td>"Z equals X-tilde V-sub-k"</td>
+            <td>Low-dimensional PCA projected coordinates</td>
+            <td>The 2D shadow cast by a 3D wire dinosaur onto a wall</td>
           </tr>
         </tbody>
       </table>
     </section>
 
-    <section>
-      <h2>3. Flat Physical Memory &amp; Strides</h2>
-      <div class="callout callout-tech">
-        <div class="callout-title">🔬 How PyTorch Represents Multidimensional Arrays in 1D RAM</div>
-        <p>Physical RAM is a flat 1D strip of memory addresses. A tensor is specified by its <strong>Shape</strong> and its <strong>Strides</strong>:</p>
-        <p>$$\text{Physical Address}(i, j) = (i \times \text{stride}_0) + (j \times \text{stride}_1)$$</p>
-        <p>Calling <code>.transpose()</code> or <code>.permute()</code> merely swaps the stride metadata without copying bytes in RAM! This makes tensor manipulation instantaneous.</p>
-      </div>
-    </section>
-
-    <section>
-      <h2>4. Broadcasting Rules</h2>
-      <p>Broadcasting allows elementwise arithmetic between tensors of different shapes by expanding dimensions of size 1:</p>
-      <pre>
-Tensor A: (3, 1)  +  Tensor B: (1, 4)  -->  Broadcasted Output: (3, 4)
-      </pre>
-      <p>Working right-to-left: dimensions must either be identical or one of them must be 1.</p>
-    </section>
-
-    <section>
-      <h2>5. Principal Component Analysis (PCA)</h2>
-      <div class="callout callout-kid">
-        <div class="callout-title">🧒 Maximum Variance Axis</div>
-        <p>Given data spread across high dimensions, PCA finds the axes where the data spread is widest. These axes are the eigenvectors of the covariance matrix, which correspond directly to the right singular vectors $V$ of the SVD!</p>
-      </div>
-      <p>Centered data $\tilde{X} = X - \mu$. SVD decomposition: $\tilde{X} = U \Sigma V^T$. The low-dimensional coordinates are:</p>
-      <p>$$\mathbf{Z = \tilde{X} V_k}$$</p>
-    </section>
-
     <div class="nav-buttons">
-      <a href="../05_singular_value_decomposition/exercises_and_solutions.html" class="btn">← Topic 2.5</a>
-      <a href="./exercises_and_solutions.html" class="btn btn-primary">Exercises &amp; Solutions →</a>
+      <a href="../05_singular_value_decomposition/lecture.html" class="btn">← Previous: Topic 2.5</a>
+      <a href="exercises_and_solutions.html" class="btn btn-primary">Topic 2.6 Exercises & Solutions →</a>
     </div>
   </main>
-
 </body>
 </html>
-

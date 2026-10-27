@@ -41,14 +41,17 @@ Imagine you spin a desktop globe of the Earth as hard as you can:
 
 ## 2. Deconstructing the Master Equation: $A\mathbf{v} = \lambda\mathbf{v}$
 
-Let's dissect every character:
-* $A \in \mathbb{R}^{n \times n}$: A square transformation matrix.
-* $\mathbf{v} \in \mathbb{R}^n$: The **Eigenvector** (must be non-zero: $\mathbf{v} \neq \mathbf{0}$).
-* $\lambda \in \mathbb{R}$: The **Eigenvalue** (pronounced *"lambda"*). A scalar stretch factor.
-  * If $\lambda = 2$: The vector doubles in length in the same direction.
-  * If $\lambda = 0.5$: The vector shrinks in half.
-  * If $\lambda = -1$: The vector flips in the exact opposite direction.
-  * If $\lambda = 0$: The vector is squashed to complete zero (meaning $\mathbf{v}$ lives in the Null Space!).
+Let us break down every term:
+
+$$\underbrace{A}_{\substack{\text{Square Transformation} \\ \text{Matrix }(n \times n)}} \times \underbrace{\mathbf{v}}_{\substack{\text{Eigenvector} \\ (\mathbf{v} \neq \mathbf{0})}} = \underbrace{\lambda}_{\substack{\text{Eigenvalue} \\ \text{(Scalar stretch factor)}}} \times \underbrace{\mathbf{v}}_{\substack{\text{Original} \\ \text{Eigenvector}}}$$
+
+**🧒 What the math is actually doing:**  
+Transforming arrow $\mathbf{v}$ by matrix $A$ produces the exact same result as simply multiplying arrow $\mathbf{v}$ by a single regular number $\lambda$!
+
+- If $\lambda = 2$: The vector doubles in length along its original line.
+- If $\lambda = 0.5$: The vector shrinks in half.
+- If $\lambda = -1$: The vector flips in the exact opposite direction.
+- If $\lambda = 0$: The vector is squashed to complete zero (meaning $\mathbf{v}$ belongs to the Null Space $\mathcal{N}(A)$!).
 
 ---
 
@@ -67,105 +70,104 @@ From Topic 2.2, a matrix can squash a non-zero vector to zero **if and only if i
 
 $$\boxed{\det(A - \lambda I) = 0}$$
 
-This equation is called the **Characteristic Equation**. Expanding the determinant produces an $n$-th degree polynomial in $\lambda$ whose roots are the eigenvalues!
+$$\underbrace{\det(A - \lambda I) = 0}_{\text{The Characteristic Equation}}$$
 
 ---
 
-## 4. Complete Step-by-Step Calculation by Hand
+## 4. Complete Numerical Walkthrough by Hand
 
-Let:
+Let us find the eigenvalues and eigenvectors for matrix $A$:
 $$A = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix}$$
 
 ### Step 1: Form $(A - \lambda I)$
 $$A - \lambda I = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix} - \begin{bmatrix} \lambda & 0 \\ 0 & \lambda \end{bmatrix} = \begin{bmatrix} 4 - \lambda & 1 \\ 2 & 3 - \lambda \end{bmatrix}$$
 
-### Step 2: Compute the Determinant & Set to 0
+### Step 2: Compute Determinant & Solve for $\lambda$
 $$\det(A - \lambda I) = (4 - \lambda)(3 - \lambda) - (1 \times 2) = 0$$
 $$\lambda^2 - 7\lambda + 12 - 2 = 0$$
 $$\lambda^2 - 7\lambda + 10 = 0$$
 
 Factor the quadratic equation:
 $$(\lambda - 5)(\lambda - 2) = 0$$
-We have found our two eigenvalues:
+Our two eigenvalues are:
 $$\boxed{\lambda_1 = 5, \qquad \lambda_2 = 2}$$
 
 ---
 
-### Step 3: Find the Eigenvector for $\lambda_1 = 5$
+### Step 3: Find Eigenvector for $\lambda_1 = 5$
 Plug $\lambda_1 = 5$ into $(A - 5I)\mathbf{v} = \mathbf{0}$:
 $$\begin{bmatrix} 4 - 5 & 1 \\ 2 & 3 - 5 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} -1 & 1 \\ 2 & -2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
-
-This gives the equation:
 $$-v_1 + v_2 = 0 \implies v_1 = v_2$$
-Any multiple of $[1, 1]^T$ is an eigenvector! Let:
+Choose $v_1 = 1 \implies v_2 = 1$:
 $$\mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$$
 
-**Check:**
-$$A \mathbf{v}_1 = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 5 \\ 5 \end{bmatrix} = 5 \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \lambda_1 \mathbf{v}_1 \quad \text{✓ (Matches!)}$$
+**Verify:**
+$$A \mathbf{v}_1 = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 5 \\ 5 \end{bmatrix} = 5 \begin{bmatrix} 1 \\ 1 \end{bmatrix} = 5 \mathbf{v}_1 \quad \text{✅ (Matches!)}$$
 
 ---
 
-### Step 4: Find the Eigenvector for $\lambda_2 = 2$
+### Step 4: Find Eigenvector for $\lambda_2 = 2$
 Plug $\lambda_2 = 2$ into $(A - 2I)\mathbf{v} = \mathbf{0}$:
 $$\begin{bmatrix} 4 - 2 & 1 \\ 2 & 3 - 2 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 2 & 1 \\ 2 & 1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
-
-This gives:
 $$2v_1 + v_2 = 0 \implies v_2 = -2v_1$$
 Choose $v_1 = 1 \implies v_2 = -2$:
 $$\mathbf{v}_2 = \begin{bmatrix} 1 \\ -2 \end{bmatrix}$$
 
-**Check:**
-$$A \mathbf{v}_2 = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix} \begin{bmatrix} 1 \\ -2 \end{bmatrix} = \begin{bmatrix} 2 \\ -4 \end{bmatrix} = 2 \begin{bmatrix} 1 \\ -2 \end{bmatrix} = \lambda_2 \mathbf{v}_2 \quad \text{✓ (Matches!)}$$
+**Verify:**
+$$A \mathbf{v}_2 = \begin{bmatrix} 4 & 1 \\ 2 & 3 \end{bmatrix} \begin{bmatrix} 1 \\ -2 \end{bmatrix} = \begin{bmatrix} 2 \\ -4 \end{bmatrix} = 2 \begin{bmatrix} 1 \\ -2 \end{bmatrix} = 2 \mathbf{v}_2 \quad \text{✅ (Matches!)}$$
 
 ---
 
-## 5. Diagonalization: The Ultimate Shortcut: $A = Q \Lambda Q^{-1}$
+## 5. Diagonalization: The Ultimate Shortcut ($A = Q \Lambda Q^{-1}$)
 
-If an $n \times n$ matrix $A$ has $n$ linearly independent eigenvectors, we can stack them as the columns of a matrix $Q$:
-$$Q = \begin{bmatrix} | & | \\ \mathbf{v}_1 & \mathbf{v}_2 \\ | & | \end{bmatrix} = \begin{bmatrix} 1 & 1 \\ 1 & -2 \end{bmatrix}$$
+Stack the eigenvectors into the columns of matrix $Q$:
+$$Q = \begin{bmatrix} 1 & 1 \\ 1 & -2 \end{bmatrix}$$
+Place eigenvalues along the diagonal of $\Lambda$:
+$$\Lambda = \begin{bmatrix} 5 & 0 \\ 0 & 2 \end{bmatrix}$$
 
-And place the eigenvalues along the diagonal of $\Lambda$:
-$$\Lambda = \begin{bmatrix} \lambda_1 & 0 \\ 0 & \lambda_2 \end{bmatrix} = \begin{bmatrix} 5 & 0 \\ 0 & 2 \end{bmatrix}$$
-
-Then the matrix can be factored as:
+Then:
 $$\boxed{A = Q \Lambda Q^{-1}}$$
 
-### Why is this so magical in AI?
-Imagine you need to compute $A^{100}$ (e.g. running an RNN for 100 time steps):
-$$A^{100} = (Q \Lambda Q^{-1})(Q \Lambda Q^{-1}) \dots (Q \Lambda Q^{-1})$$
-Notice that all interior $Q^{-1} Q$ cancel into the identity matrix $I$!
-$$\boxed{A^{100} = Q \Lambda^{100} Q^{-1}}$$
+### Computing Matrix Powers ($A^{100}$)
+When training deep neural networks or running Recurrent Neural Networks (RNNs) for 100 time steps:
+$$A^{100} = (Q \Lambda Q^{-1})(Q \Lambda Q^{-1}) \dots (Q \Lambda Q^{-1}) = Q \Lambda^{100} Q^{-1}$$
 
-To take $\Lambda^{100}$, you simply raise the individual diagonal numbers to the 100th power:
 $$\Lambda^{100} = \begin{bmatrix} 5^{100} & 0 \\ 0 & 2^{100} \end{bmatrix}$$
-No matrix multiplication loops needed!
 
 ---
 
-## 6. Why Eigenvalues Matter for AI & Deep Learning
+## 6. Why Eigenvalues Matter for AI: Exploding & Vanishing Gradients
 
-### 1. Vanishing and Exploding Gradients
-In deep networks and Recurrent Neural Networks (RNNs), hidden states are repeatedly multiplied by weight matrix $W$ over $T$ steps:
+In deep networks, signals pass through repeated matrix multiplications:
 $$\mathbf{h}_T \approx W^T \mathbf{h}_0$$
-- If the largest eigenvalue $|\lambda_{\max}| > 1$: Activations and gradients **explode exponentially to $\infty$**!
-- If the largest eigenvalue $|\lambda_{\max}| < 1$: Activations and gradients **vanish exponentially to $0$**!
-- Understanding eigenvalues is why AI researchers invented **Spectral Normalization**, **orthogonal initialization**, and **residual skip connections**!
-
-### 2. Principal Component Analysis (PCA)
-In Phase 9, we will see that the directions of maximum variance in high-dimensional data are given by the eigenvectors of the covariance matrix!
+- If the largest eigenvalue $|\lambda_{\max}| > 1$: Signal magnitudes **explode exponentially** to infinity ($1.1^{100} \approx 13,780$).
+- If the largest eigenvalue $|\lambda_{\max}| < 1$: Signal magnitudes **vanish exponentially** to zero ($0.9^{100} \approx 0.000026$).
+- This insight led to **Spectral Normalization**, **orthogonal initialization**, and **residual connections (ResNets)**!
 
 ---
 
-## 📌 Summary Checklist for Topic 2.4
+## 7. 📋 Mathematical & Technical Symbol Decoder Table
 
-- [x] **Eigenvectors ($\mathbf{v}$)** are directions that do not rotate under transformation $A$.
-- [x] **Eigenvalues ($\lambda$)** are the scalar scaling factors along those invariant axes: $A\mathbf{v} = \lambda\mathbf{v}$.
-- [x] To find eigenvalues, solve the **characteristic equation**: $\det(A - \lambda I) = 0$.
-- [x] **Diagonalization ($A = Q \Lambda Q^{-1}$)** decomposes a matrix into rotation $\to$ scaling $\to$ inverse rotation.
-- [x] Powers of a matrix are easily computed: $A^k = Q \Lambda^k Q^{-1}$.
-- [x] If $|\lambda| > 1$, signals explode; if $|\lambda| < 1$, signals vanish.
+| Symbol | Pronunciation | Plain English Meaning | Concrete Real-World Analogy / Flashcard Example |
+| :---: | :---: | :--- | :--- |
+| $A\mathbf{v} = \lambda\mathbf{v}$ | "A v equals lambda v" | The master eigenvalue equation | An arrow that stays on its exact line under a matrix transformation |
+| $\lambda$ | "lambda" | The scalar stretch factor along the eigenvector direction | The zoom factor along the axis of rotation |
+| $\mathbf{v}$ | "eigenvector v" | The special direction that refuses to rotate | The North Pole on a spinning globe |
+| $\det(A - \lambda I) = 0$ | "determinant of A minus lambda I" | Characteristic equation whose roots are eigenvalues | The secret recipe that unlocks the stretch factors |
+| $Q \Lambda Q^{-1}$ | "Q Lambda Q inverse" | Eigendecomposition / Diagonalization of a square matrix | Rotate coordinates to align with eigenvectors, stretch, and rotate back |
+| $\Lambda$ | "capital Lambda" | Diagonal matrix containing eigenvalues | A clean table where each axis scales independently |
+| $|\lambda_{\max}|$ | "lambda max (spectral radius)" | The largest eigenvalue magnitude of a matrix | The maximum speed multiplier of a neural signal |
 
 ---
 
-Next up: **Run `experiment.py` in this folder** to compute eigenvalues using the Power Iteration algorithm from scratch!
+## 8. 📌 Summary & Mathematical Checklist
 
+- [x] **Eigenvectors ($\mathbf{v}$)** are directions that do not rotate under matrix $A$.
+- [x] **Eigenvalues ($\lambda$)** are the scalar stretch multipliers along those invariant axes: $A\mathbf{v} = \lambda\mathbf{v}$.
+- [x] Solve for eigenvalues using the **Characteristic Equation**: $\det(A - \lambda I) = 0$.
+- [x] **Diagonalization ($A = Q \Lambda Q^{-1}$)** simplifies matrix powers to $A^k = Q \Lambda^k Q^{-1}$.
+- [x] If $|\lambda_{\max}| > 1$, neural signals explode; if $|\lambda_{\max}| < 1$, signals vanish.
+
+---
+
+Next up: **Run `python3 experiment.py`** in this folder to observe the Power Iteration algorithm converge to the true dominant eigenvalue!

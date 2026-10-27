@@ -98,7 +98,6 @@
         }
         p code, li code {
             background-color: var(--primary-light);
-            color: var(--primary);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
         }
@@ -112,229 +111,323 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
     </style>
 </head>
 <body>
+    <a href="../index.html" class="back-link">← Back to Phase 1: Python Programming for AI</a>
+    
+    <h1>Topic 1.1: Core and Advanced Python for AI</h1>
+    <p>Welcome to <strong>Topic 1.1</strong>! Before constructing multi-billion parameter neural networks, training transformers, or building autonomous AI agents, we must master Python as a high-performance, object-oriented language for managing data pipelines and computational graphs.</p>
 
-    <a href="../index.html" class="back-link">← Back to Phase 1 Index</a>
-    <header>
-        <h1>Topic 1.1: Core &amp; Advanced Python for AI</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Mastering Memory, OOP Abstractions, Generators, and Decorators for Modern AI</p>
-    </header>
+    <h2>1. 🧒 The 12-Year-Old Analogy: Toy Boxes and Sticky Nametags</h2>
+    <div class="concept-card">
+        <h3>Variables in Memory: Wooden Cubbies vs. Sticky Nametags</h3>
+        <p>In older languages like C or C++, creating a variable is like carving a fixed wooden cubby box into a wall. If you carve an <code>int</code> box, it can only ever hold an integer.</p>
+        <p>In Python, <strong>values are physical toy objects floating on a giant table</strong>, and <strong>variables are sticky nametags</strong> that you peel and stick onto those toys.</p>
+        
+        <p>Imagine <strong>Timmy</strong> and <strong>Maya</strong> in a playroom:</p>
+        <ol>
+            <li>Timmy takes a red plastic bucket containing three marbles: <code>[1, 2, 3]</code>.</li>
+            <li>He writes <code>"a"</code> on a blue sticky note and slaps it onto the bucket: <code>a = [1, 2, 3]</code>.</li>
+            <li>Maya comes along, writes <code>"b"</code> on a yellow sticky note, and slaps it onto the <strong>exact same bucket</strong>: <code>b = a</code>.</li>
+            <li>Now, Barnaby the puppy drops a green marble <code>4</code> into bucket <code>b</code>: <code>b.append(4)</code>.</li>
+            <li>What happens when Timmy looks inside bucket <code>"a"</code>? <strong>He sees all four marbles: <code>[1, 2, 3, 4]</code>!</strong></li>
+        </ol>
+        <p>Timmy did not clone the bucket. There is only one bucket in physical memory, and both nametags are stuck to it. This is called <strong>pass-by-object-reference</strong> (or <em>call-by-sharing</em>).</p>
+    </div>
 
-    <section>
-        <h2>1. The Sticky Nametag Mental Model: Variables and Memory</h2>
-        <div class="concept-card">
-            <h3>The 12-Year-Old Analogy: Toy Boxes &amp; Nametags</h3>
-            <p>In classical languages like C, a variable is like a fixed wooden cubby box carved into your wall. If you declare <code>int x;</code>, you built a wooden box that can only ever store an integer.</p>
-            <p>In Python, <strong>variables are sticky nametags</strong>, and <strong>values are physical toys floating on a table</strong>.</p>
-            <p>When you write <code>a = [1, 2, 3]</code> and then <code>b = a</code>, you did <em>not</em> make a second list! You merely slapped two nametags (<code>a</code> and <code>b</code>) onto the <strong>exact same list object</strong> sitting in computer memory!</p>
-        </div>
+    <h3>Mutability vs. Immutability: Cardboard Boxes vs. Carved Granite Statues</h3>
+    <p>Every object floating on Python's memory table belongs to one of two families:</p>
+    <ul>
+        <li><strong>Mutable (Cardboard Boxes):</strong> You can open the box, add items, or paint the inside without destroying the box itself. Its memory address (<code>id(x)</code>) stays identical. Examples: <code>list</code>, <code>dict</code>, <code>set</code>.</li>
+        <li><strong>Immutable (Carved Granite Statues):</strong> Once chiselled, its value is permanent. If you change a number from 5 to 6, Python chisels a brand-new 6 statue elsewhere in memory and moves your sticky note. Examples: <code>int</code>, <code>float</code>, <code>str</code>, <code>tuple</code>.</li>
+    </ul>
 
-        <p>If you modify <code>b.append(4)</code>, looking at <code>a</code> reveals <code>[1, 2, 3, 4]</code> because both labels point to the same object address in RAM (accessible via <code>id(a)</code>). This is known as <strong>pass-by-object-reference</strong>.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Data Type</th>
+                <th>Mutable?</th>
+                <th>Real-World Analogy</th>
+                <th>Crucial AI Workload Use Case</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>int</code>, <code>float</code></td>
+                <td>❌ No</td>
+                <td>Carved granite coin</td>
+                <td>Loss values, learning rates, epoch counters</td>
+            </tr>
+            <tr>
+                <td><code>str</code></td>
+                <td>❌ No</td>
+                <td>Printed book page</td>
+                <td>Token text, system prompts, file paths</td>
+            </tr>
+            <tr>
+                <td><code>tuple</code></td>
+                <td>❌ No</td>
+                <td>Sealed plastic blister pack</td>
+                <td>Fixed tensor dimensions: <code>(batch_size, channels, height, width)</code></td>
+            </tr>
+            <tr>
+                <td><code>list</code></td>
+                <td>✅ Yes</td>
+                <td>Open cardboard toy box</td>
+                <td>Dynamically accumulating generated token IDs, loss logs</td>
+            </tr>
+            <tr>
+                <td><code>dict</code></td>
+                <td>✅ Yes</td>
+                <td>Filing cabinet with labeled folders</td>
+                <td>Model hyperparameter configs, JSON payload bodies</td>
+            </tr>
+            <tr>
+                <td><code>set</code></td>
+                <td>✅ Yes</td>
+                <td>Drawstring bag of unique marbles</td>
+                <td>Vocabulary token lookup, deduplicating document IDs</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <h3>Mutability vs. Immutability</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Data Type</th>
-                    <th>Mutable?</th>
-                    <th>AI Engineering Use Case</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>int</code>, <code>float</code></td>
-                    <td>❌ No</td>
-                    <td>Scalars: Learning rates, scalar loss values, batch indices</td>
-                </tr>
-                <tr>
-                    <td><code>str</code></td>
-                    <td>❌ No</td>
-                    <td>Tokens, user prompts, prompt templates, system instructions</td>
-                </tr>
-                <tr>
-                    <td><code>tuple</code></td>
-                    <td>❌ No</td>
-                    <td>Tensor shapes: <code>(batch_size, channels, height, width)</code></td>
-                </tr>
-                <tr>
-                    <td><code>list</code></td>
-                    <td>✅ Yes</td>
-                    <td>Accumulating loss curves, generated output token streams</td>
-                </tr>
-                <tr>
-                    <td><code>dict</code></td>
-                    <td>✅ Yes</td>
-                    <td>Hyperparameter configs, JSON requests, model weight registries</td>
-                </tr>
-                <tr>
-                    <td><code>set</code></td>
-                    <td>✅ Yes</td>
-                    <td>Vocabulary token deduplication, fast membership lookup $O(1)$</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="warning-box">
-            <strong>⚠️ The Dangerous Default Mutable Argument Trap</strong><br>
-            Python evaluates default function arguments <em>once</em> at definition time, not on every function call. Never do this:
-            <pre><code># ❌ BUG: The same list accumulates data across separate calls!
-def record_loss(loss_val, history=[]):
-    history.append(loss_val)
+    <div class="warning-box">
+        <h4>⚠️ The Dangerous Mutable Default Argument Trap</h4>
+        <p>In Python, default function arguments are evaluated <strong>only once when the function is defined</strong>, not each time it is called!</p>
+        <pre><code># ❌ CRITICAL BUG: Every training run shares the SAME history list!
+def train_model(loss, history=[]):
+    history.append(loss)
     return history
 
-# ✅ FIX: Use None as an immutable sentinel
-def record_loss(loss_val, history=None):
+# ✅ PRODUCTION FIX: Use None as an immutable sentinel
+def train_model(loss, history=None):
     if history is None:
         history = []
-    history.append(loss_val)
+    history.append(loss)
     return history</code></pre>
-        </div>
-    </section>
+    </div>
 
-    <section>
-        <h2>2. Functions as First-Class Citizens and Closures</h2>
-        <p>In Python, functions are first-class objects. You can pass them into other functions, return them as outputs, and store them in collections.</p>
-        
-        <p>A <strong>closure</strong> occurs when an inner function remembers and retains access to variables in its outer enclosing scope, even after the outer function has finished executing:</p>
+    <h2>2. Functions as First-Class Citizens and Closures</h2>
+    <div class="concept-card">
+        <h3>🧒 The 12-Year-Old Analogy: Maya's Magic Backpack of Recipes</h3>
+        <p>In Python, <strong>functions are physical recipe cards</strong>! You can put a recipe card into a variable nametag, hand it to another chef as an argument, or write a recipe that creates another recipe.</p>
+        <p>A <strong>Closure</strong> is like a recipe card packed inside a <strong>magic backpack</strong>: Maya packs a backpack with an initial learning rate and decay rate. Even when Maya leaves the kitchen, the backpack <strong>remembers the temperature inside it</strong> across all training steps!</p>
+    </div>
 
-        <pre><code>def make_learning_rate_scheduler(initial_lr: float, decay: float):
-    current_lr = initial_lr  # Enclosing scope variable
+    <pre><code>def make_learning_rate_scheduler(initial_lr: float, decay_factor: float):
+    current_lr = initial_lr  # Enclosing backpack scope variable
     
     def step():
-        nonlocal current_lr
-        current_lr *= decay
+        nonlocal current_lr  # Modifies the variable in the backpack
+        current_lr *= decay_factor
         return current_lr
         
     return step
 
-scheduler = make_learning_rate_scheduler(0.1, 0.95)
-print(scheduler())  # 0.095
-print(scheduler())  # 0.09025</code></pre>
-    </section>
+scheduler = make_learning_rate_scheduler(initial_lr=0.1, decay_factor=0.9)
+print(scheduler())  # 0.090
+print(scheduler())  # 0.081
+print(scheduler())  # 0.0729</code></pre>
 
-    <section>
-        <h2>3. Object-Oriented Programming (OOP) and Dunder Methods</h2>
-        <p>Frameworks like PyTorch rely heavily on Python's special "dunder" (double underscore) methods to create intuitive, mathematical syntax for neural networks.</p>
+    <h2>3. Object-Oriented Programming (OOP) & Dunder Magic</h2>
+    <div class="concept-card">
+        <h3>🧒 The 12-Year-Old Analogy: Universal LEGO Snap-On Adapters</h3>
+        <p>Why do LEGO bricks snap together effortlessly? Because LEGO bricks have standard studs and sockets. In Python, <strong>Dunder Methods</strong> (methods with <strong>D</strong>ouble <strong>Under</strong>scores like <code>__call__</code> and <code>__len__</code>) are universal snap-on LEGO adapters!</p>
+        <ul>
+            <li><code>__call__</code>: Adds a big red "Press to Start" button so you can call your object like a function: <code>model(x)</code>.</li>
+            <li><code>__len__</code>: Clicks Python's <code>len(dataset)</code> tape measure right onto your object.</li>
+            <li><code>__getitem__</code>: Adds indexable drawers so you can do <code>dataset[0]</code>.</li>
+        </ul>
+    </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Dunder Method</th>
-                    <th>Invoked When</th>
-                    <th>AI Framework Equivalent</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>__init__(self, ...)</code></td>
-                    <td>Constructing an instance</td>
-                    <td>Allocates weight matrices and layer parameters</td>
-                </tr>
-                <tr>
-                    <td><code>__call__(self, x)</code></td>
-                    <td><code>model(x)</code></td>
-                    <td>Executes the layer or network forward pass $f(x)$</td>
-                </tr>
-                <tr>
-                    <td><code>__getitem__(self, idx)</code></td>
-                    <td><code>dataset[idx]</code></td>
-                    <td>Custom PyTorch <code>Dataset</code> retrieval</td>
-                </tr>
-                <tr>
-                    <td><code>__len__(self)</code></td>
-                    <td><code>len(dataset)</code></td>
-                    <td>Returns total number of training training examples</td>
-                </tr>
-                <tr>
-                    <td><code>__matmul__(self, other)</code></td>
-                    <td><code>A @ B</code></td>
-                    <td>Overloads matrix multiplication operator</td>
-                </tr>
-            </tbody>
-        </table>
+    <h3>🔬 Mathematical Formulation of a Linear Layer</h3>
+    <p>Every fully connected neural network layer transforms an input feature vector $\mathbf{x} \in \mathbb{R}^d$ into an output vector $\mathbf{y} \in \mathbb{R}^m$:</p>
+    $$\mathbf{y} = \mathbf{W}\mathbf{x} + \mathbf{b}$$
+    $$\underbrace{\mathbf{y}}_{\substack{\text{Output Vector} \\ (m \times 1)}} = \underbrace{\mathbf{W}}_{\substack{\text{Weight Matrix (Knobs)} \\ (m \times d)}} \times \underbrace{\mathbf{x}}_{\substack{\text{Input Feature Vector} \\ (d \times 1)}} + \underbrace{\mathbf{b}}_{\substack{\text{Bias Offset Vector} \\ (m \times 1)}}$$
+    
+    <p>For each individual output neuron $j$:</p>
+    $$y_j = \left( \sum_{i=1}^d W_{ji} x_i \right) + b_j$$
+    <p><strong>🧒 What the math is actually doing:</strong> For each output neuron, we take all incoming clues ($x_i$), multiply each clue by how much we trust it ($W_{ji}$), sum them up into a single score, and give it a final baseline nudge ($b_j$).</p>
 
-        <pre><code>class LinearLayer:
-    """A minimal PyTorch-style linear transformation layer: y = Wx + b"""
+    <h3>🔢 Concrete Numerical Hand Walkthrough</h3>
+    <p>Given parameters:</p>
+    $$\mathbf{W} = \begin{bmatrix} 0.5 & -0.2 \\ 0.1 & 0.8 \end{bmatrix}, \qquad \mathbf{x} = \begin{bmatrix} 1.0 \\ 2.0 \end{bmatrix}, \qquad \mathbf{b} = \begin{bmatrix} 0.10 \\ -0.05 \end{bmatrix}$$
+    <ol>
+        <li><strong>Neuron 1 ($y_1$):</strong> $(0.5 \times 1.0) + (-0.2 \times 2.0) + 0.10 = 0.50 - 0.40 + 0.10 = \mathbf{0.20}$</li>
+        <li><strong>Neuron 2 ($y_2$):</strong> $(0.1 \times 1.0) + (0.8 \times 2.0) - 0.05 = 0.10 + 1.60 - 0.05 = \mathbf{1.65}$</li>
+        <li><strong>Final Output:</strong> $\mathbf{y} = [0.20, 1.65]^T$</li>
+    </ol>
+
+    <pre><code>class LinearLayer:
+    """A fully connected neural network layer: y = Wx + b"""
     def __init__(self, weights: list[list[float]], bias: list[float]):
-        self.weights = weights  # Shape: (out_features, in_features)
-        self.bias = bias        # Shape: (out_features)
+        self.weights = weights
+        self.bias = bias
 
     def __call__(self, x: list[float]) -> list[float]:
         out = []
         for row, b in zip(self.weights, self.bias):
-            # Compute dot product sum(w_i * x_i) + b
-            val = sum(w * xi for w, xi in zip(row, x)) + b
-            out.append(val)
+            dot_product = sum(w * xi for w, xi in zip(row, x)) + b
+            out.append(dot_product)
         return out
 
-layer = LinearLayer(weights=[[0.5, -0.2], [0.1, 0.8]], bias=[0.1, -0.05])
-print(layer([1.0, 2.0]))  # Invokes __call__ -> [0.2, 1.65]</code></pre>
-    </section>
+layer = LinearLayer(weights=[[0.5, -0.2], [0.1, 0.8]], bias=[0.10, -0.05])
+print("Layer Output:", layer([1.0, 2.0]))  # [0.2, 1.65]</code></pre>
 
-    <section>
-        <h2>4. Iterators &amp; Generators: Streaming Big Data with <code>yield</code></h2>
-        <div class="tip-box">
-            <strong>💡 The Golden Rule of AI Data Engineering:</strong> Never load a 100 GB training corpus into RAM all at once. Use <em>lazy evaluation</em> to stream batches one at a time.
-        </div>
+    <h2>4. Streaming Big Data with Generators and <code>yield</code></h2>
+    <div class="concept-card">
+        <h3>🧒 The 12-Year-Old Analogy: The Candy Dump Truck vs. The Pez Dispenser</h3>
+        <p>If Timmy orders 10,000,000 candies and a dump truck dumps them into his bedroom at once, the floor collapses under the weight (<strong>Out Of Memory - OOM</strong>). A Pez dispenser (<code>yield</code>) clicks out one candy at a time on demand. Timmy can eat 10 billion candies without his floor ever collapsing!</p>
+    </div>
 
-        <p>A <strong>generator</strong> uses the <code>yield</code> keyword instead of <code>return</code>. When Python hits <code>yield</code>, it freezes the entire execution state, passes the value to the caller, and pauses until the next item is requested via <code>next()</code>.</p>
+    $$\underbrace{\text{RAM}_{\text{list}} = \mathcal{O}(N)}_{\text{Memory scales with data size}} \qquad \longleftrightarrow \qquad \underbrace{\text{RAM}_{\text{generator}} = \mathcal{O}(1)}_{\text{Memory stays constant forever!}}$$
 
-        <pre><code>def stream_dataset(data: list, batch_size: int):
-    """Streams mini-batches lazily with virtually zero RAM footprint."""
-    for i in range(0, len(data), batch_size):
-        yield data[i : i + batch_size]
+    <h2>5. Decorators: Coach Sarah's Stopwatch Cloak</h2>
+    <div class="concept-card">
+        <h3>🧒 The 12-Year-Old Analogy: Coach Sarah's Stopwatch Cloak</h3>
+        <p>Timmy doesn't want to carry a heavy stopwatch while sprinting. Instead, Coach Sarah stands by the track, starts her stopwatch when Timmy begins, stops it when he crosses the line, and yells his time. A <strong>Decorator</strong> wraps your function with timing or validation like a protective cloak without touching its inner code!</p>
+    </div>
 
-# Usage
-batch_stream = stream_dataset(range(100), batch_size=32)
-batch_1 = next(batch_stream)  # [0, 1, ..., 31]
-batch_2 = next(batch_stream)  # [32, 33, ..., 63]</code></pre>
-    </section>
-
-    <section>
-        <h2>5. Decorators: Instrumenting &amp; Monitoring AI Pipelines</h2>
-        <p>Decorators wrap functions with reusable behavioral logic. In production AI, decorators measure inference latency, log token throughput, and check input tensor dimensions.</p>
-
-        <pre><code>import time
+    <pre><code>import time
 import functools
 
 def measure_latency(func):
-    """Measures execution latency of an AI inference function in milliseconds."""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        t0 = time.perf_counter()
+        start = time.perf_counter()
         result = func(*args, **kwargs)
-        elapsed_ms = (time.perf_counter() - t0) * 1000
-        print(f"⏱️ [{func.__name__}] Latency: {elapsed_ms:.3f} ms")
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        print(f"⏱️ [{func.__name__}] Executed in {elapsed_ms:.4f} ms")
         return result
-    return wrapper
+    return wrapper</code></pre>
 
-@measure_latency
-def generate_tokens(prompt: str):
-    # Simulated token generation workload
-    time.sleep(0.02)
-    return f"Response to: {prompt}"
+    <h2>6. 📋 Mathematical & Technical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>id(x)</code></td>
+                <td>"I-D of x"</td>
+                <td>The physical memory address where an object lives in RAM</td>
+                <td>The GPS coordinate or house street number of a toy box</td>
+            </tr>
+            <tr>
+                <td><code>==</code></td>
+                <td>"equals-equals"</td>
+                <td>Checks whether two objects contain the same values</td>
+                <td>Two puppies that have identical fur color and weight</td>
+            </tr>
+            <tr>
+                <td><code>is</code></td>
+                <td>"is"</td>
+                <td>Checks whether two variables point to the exact same physical object</td>
+                <td>The exact same puppy tagged with two different collar tags</td>
+            </tr>
+            <tr>
+                <td><code>*args</code></td>
+                <td>"star-args"</td>
+                <td>Packs extra positional arguments into a tuple</td>
+                <td>Timmy's picnic bag of unwrapped snacks in a row</td>
+            </tr>
+            <tr>
+                <td><code>**kwargs</code></td>
+                <td>"star-star kwargs"</td>
+                <td>Packs extra keyword arguments into a key-value dictionary</td>
+                <td>Maya's bento box with labeled compartments (<code>sauce="tamari"</code>)</td>
+            </tr>
+            <tr>
+                <td><code>__init__</code></td>
+                <td>"dunder init"</td>
+                <td>Class constructor that sets up new instance variables</td>
+                <td>Assembling a new LEGO kit out of the box</td>
+            </tr>
+            <tr>
+                <td><code>__call__</code></td>
+                <td>"dunder call"</td>
+                <td>Makes a class instance directly callable with parentheses <code>obj(x)</code></td>
+                <td>Adding a big red "Press to Start" button on a toy</td>
+            </tr>
+            <tr>
+                <td><code>__getitem__</code></td>
+                <td>"dunder get-item"</td>
+                <td>Allows indexing via square brackets <code>obj[i]</code></td>
+                <td>Pulling drawer number $i$ out of a dresser</td>
+            </tr>
+            <tr>
+                <td><code>__len__</code></td>
+                <td>"dunder len"</td>
+                <td>Returns the total count of elements via <code>len(obj)</code></td>
+                <td>Snapping a tape measure onto your dataset</td>
+            </tr>
+            <tr>
+                <td><code>yield</code></td>
+                <td>"yield"</td>
+                <td>Pauses a generator function and streams out a single value lazily</td>
+                <td>A Pez candy dispenser clicking out one treat at a time</td>
+            </tr>
+            <tr>
+                <td><code>@decorator</code></td>
+                <td>"at decorator"</td>
+                <td>Wraps and augments a function without altering its internal code</td>
+                <td>Coach Sarah standing by with a stopwatch timing your run</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{O}(1)$</td>
+                <td>"Big-O of 1"</td>
+                <td>Constant time or memory (never grows, no matter how big data gets)</td>
+                <td>Looking at the single candy currently held in your hand</td>
+            </tr>
+            <tr>
+                <td>$\mathcal{O}(N)$</td>
+                <td>"Big-O of N"</td>
+                <td>Linear resource usage (doubling data doubles required memory/time)</td>
+                <td>Trying to store 10 million candies on your bedroom floor</td>
+            </tr>
+            <tr>
+                <td>$\mathbf{W}\mathbf{x} + \mathbf{b}$</td>
+                <td>"W x plus b"</td>
+                <td>Linear transformation: matrix-vector product plus bias offset</td>
+                <td>Scaling each clue by trust, summing, and giving a final nudge</td>
+            </tr>
+        </tbody>
+    </table>
 
-generate_tokens("Explain attention mechanisms")</code></pre>
-    </section>
-
-    <section>
-        <h2>6. Domain-Specific AI Exceptions</h2>
-        <p>Clear, domain-specific exception classes simplify debugging complex neural network pipelines.</p>
-
-        <pre><code>class ShapeMismatchError(Exception):
-    """Raised when tensor dimensions are incompatible for linear algebra operations."""
-    def __init__(self, shape_a, shape_b, op):
-        super().__init__(f"Cannot perform {op} between {shape_a} and {shape_b}.")
-
-def matmul(shape_a: tuple, shape_b: tuple):
-    if shape_a[1] != shape_b[0]:
-        raise ShapeMismatchError(shape_a, shape_b, op="matrix multiplication (@)")
-    return (shape_a[0], shape_b[1])</code></pre>
-    </section>
-
+    <div class="nav-buttons">
+        <a href="../index.html" class="btn btn-outline">← Course Index</a>
+        <a href="exercises_and_solutions.html" class="btn">Topic 1.1 Exercises & Solutions →</a>
+    </div>
 </body>
 </html>
-

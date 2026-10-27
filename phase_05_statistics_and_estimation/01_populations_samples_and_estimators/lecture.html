@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topic 5.1: Populations, Samples & Statistical Estimators</title>
+    <title>Topic 5.1: Populations, Samples & Statistical Estimators — Complete AI Tutorial</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
@@ -20,6 +20,8 @@
             --accent-bg: #ecfdf5;
             --danger: #dc2626;
             --danger-bg: #fef2f2;
+            --warning-bg: #fffbeb;
+            --warning-border: #fef3c7;
             --code-bg: #1e1e2e;
             --code-text: #cdd6f4;
         }
@@ -35,6 +37,8 @@
                 --accent-bg: #064e3b;
                 --danger: #f87171;
                 --danger-bg: #450a0a;
+                --warning-bg: #451a03;
+                --warning-border: #78350f;
                 --code-bg: #0b0f19;
                 --code-text: #e2e8f0;
             }
@@ -50,8 +54,6 @@
         }
         h1, h2, h3, h4 { color: var(--text); font-weight: 700; line-height: 1.3; }
         h1 { font-size: 2.2rem; margin-bottom: 0.5rem; color: var(--primary); }
-        h2 { font-size: 1.6rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2.5rem; }
-        h3 { font-size: 1.3rem; margin-top: 1.5rem; }
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -61,12 +63,20 @@
             font-weight: 600;
             margin-bottom: 1.5rem;
         }
+        .back-link:hover { text-decoration: underline; }
         .callout {
             background-color: var(--card-bg);
             border-left: 4px solid var(--primary);
-            padding: 1.25rem;
+            padding: 1.25rem 1.5rem;
             margin: 1.5rem 0;
             border-radius: 0 8px 8px 0;
+            border-top: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .callout-story {
+            background-color: var(--primary-light);
+            border-left-color: var(--primary);
         }
         .callout-success {
             background-color: var(--accent-bg);
@@ -76,226 +86,279 @@
             background-color: var(--danger-bg);
             border-left-color: var(--danger);
         }
+        .callout-warning {
+            background-color: var(--warning-bg);
+            border-left-color: #d97706;
+            border-top: 1px solid var(--warning-border);
+            border-right: 1px solid var(--warning-border);
+            border-bottom: 1px solid var(--warning-border);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
+            font-size: 0.95rem;
         }
         th, td {
+            padding: 0.85rem 1rem;
             border: 1px solid var(--border);
-            padding: 0.75rem 1rem;
             text-align: left;
         }
         th {
-            background-color: var(--primary-light);
+            background-color: var(--card-bg);
             color: var(--primary);
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background-color: var(--card-bg); }
+        pre, code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         }
         pre {
             background-color: var(--code-bg);
             color: var(--code-text);
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             overflow-x: auto;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
         code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-        p code {
-            background-color: rgba(125, 125, 125, 0.15);
+            background-color: var(--card-bg);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
+            font-size: 0.88em;
+            border: 1px solid var(--border);
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
         }
     </style>
 </head>
 <body>
-    <a href="../index.html" class="back-link">← Back to Phase 5 Portal</a>
-    <a href="exercises_and_solutions.html" class="back-link" style="margin-left: 1.5rem;">📝 Exercises & Solutions</a>
+
+    <a href="../index.html" class="back-link">&larr; Back to Phase 5: Statistics & Estimation</a>
 
     <h1>Topic 5.1: Populations, Samples & Statistical Estimators</h1>
-    <p class="subtitle" style="font-size: 1.15rem; color: #64748b; margin-bottom: 2rem;">
-        The inverse foundation of machine learning: inferring true data distributions from finite mini-batches, standard errors, and Bessel's correction.
-    </p>
+    <p><em>Mastering the art of using a single spoonful of data to understand the entire universe.</em></p>
 
-    <h2>1. Executive Summary & The Giant Soup Cauldron</h2>
-    <p>
-        In artificial intelligence, our goal is to build models that perform accurately across the entire universe of possible inputs (every photo, every question, every text token). This entire, infinite universe of possibilities is the <strong>Population</strong>.
-    </p>
-    <p>
-        However, computers can only ingest a finite dataset (10,000 images, 1 billion tokens). This finite subset is a <strong>Sample</strong>.
-        <strong>Statistics is the mathematical bridge that allows us to infer true population parameters from finite samples.</strong>
-    </p>
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 2rem 0;">
 
-    <div class="callout">
-        <h3>The 12-Year-Old Analogy: The Giant Soup Cauldron</h3>
-        <p>
-            Imagine a chef cooking a 100-gallon cauldron of vegetable soup for a massive school festival (the <strong>Population</strong>).
-            To know if the soup has enough salt, the chef does not drink all 100 gallons. Instead, they stir the pot thoroughly and taste a single soup spoon (the <strong>Sample</strong>).
-        </p>
+    <h2>1. Executive Summary & The Core Problem of Statistics</h2>
+    <p>In machine learning and artificial intelligence, we want our models to understand the entire universe of data: every sentence ever spoken, every photo of an animal, or every future market price. This complete, infinite set of all entities is the <strong>Population</strong>.</p>
+    <p>However, we can never hold the entire universe on our hard drives. We only have a small training dataset collected from reality: 10,000 photos, 1 billion web tokens, or 500 patient records. This finite slice is a <strong>Sample</strong>.</p>
+    
+    <div class="callout callout-story">
+        <h3>🧒 The 12-Year-Old Analogy: Chef Pierre's 100-Gallon Soup Cauldron</h3>
+        <p>Imagine <strong>Chef Pierre</strong> is cooking a gigantic 100-gallon cauldron of vegetable soup for a massive street festival. The soup contains millions of chopped carrots, celery bits, spices, and salt crystals.</p>
+        <p>Chef Pierre needs to know: <strong>Is the soup salty enough, or does it need more salt?</strong></p>
         <ul>
-            <li>If the pot is stirred well (random sampling), the taste of the spoonful gives an amazingly accurate estimate of the whole cauldron.</li>
-            <li>If you use a microscopic spoon (sample size $n = 2$), your taste test will be erratic.</li>
-            <li>If you use a large soup ladle ($n = 100$), your estimate will be almost perfectly reliable!</li>
+            <li><strong>The Impossible Way (Inspect Population):</strong> Drink all 100 gallons himself! He will know the exact saltiness, but all the soup is gone and he ends up in the hospital.</li>
+            <li><strong>The Statistical Way (Take a Sample):</strong> Chef Pierre stirs the cauldron thoroughly with a big wooden paddle (random sampling). Then, he dips a single metal soup ladle into the pot and tastes just one spoonful.</li>
         </ul>
-        <p>
-            In AI, the <strong>Cauldron</strong> is the true data distribution $P_{\text{data}}$, the <strong>Spoon</strong> is the training batch, and the <strong>Taste</strong> is our estimated model weight $\hat{\theta}$!
-        </p>
+        <p>From that single spoonful, Chef Pierre declares: <em>"Aha! The whole cauldron needs exactly two pinches of salt."</em></p>
+        <ul>
+            <li>The <strong>Cauldron</strong> is the <strong>Population</strong> ($N$).</li>
+            <li>The <strong>Ladle</strong> is the <strong>Sample</strong> ($n$).</li>
+            <li>The taste in the ladle is the <strong>Sample Estimator</strong> ($\hat{\theta}$).</li>
+        </ul>
     </div>
 
-    <h2>2. Mathematical Definition: Population vs Sample</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Property</th>
-                <th>Population (The Reality)</th>
-                <th>Sample (Our Observations)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Definition</strong></td>
-                <td>The entire infinite universe of possible data</td>
-                <td>A finite subset observed in our dataset/batch</td>
-            </tr>
-            <tr>
-                <td><strong>Size</strong></td>
-                <td>$N$ (often infinite)</td>
-                <td>$n$ (finite batch size, e.g., $n = 64$)</td>
-            </tr>
-            <tr>
-                <td><strong>Mean</strong></td>
-                <td>True mean: $\mu = \mathbb{E}[X]$</td>
-                <td>Sample mean: $\bar{X} = \frac{1}{n}\sum_{i=1}^n X_i$</td>
-            </tr>
-            <tr>
-                <td><strong>Variance</strong></td>
-                <td>True variance: $\sigma^2 = \mathbb{E}[(X - \mu)^2]$</td>
-                <td>Sample variance: $S^2 = \frac{1}{n-1}\sum_{i=1}^n (X_i - \bar{X})^2$</td>
-            </tr>
-            <tr>
-                <td><strong>Status</strong></td>
-                <td>Fixed constants (ground truth)</td>
-                <td>Random variables (change from batch to batch)</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="callout">
+        <h3>🧒 Measuring Heights on the Playground</h3>
+        <p>Imagine <strong>Timmy and Maya</strong> go to a school with $N = 1{,}000$ students. Maya stands by the playground gate and randomly measures $n = 5$ kids who walk by: $140\text{ cm}, 145\text{ cm}, 150\text{ cm}, 155\text{ cm}, 160\text{ cm}$.</p>
+        <p>The average of these 5 kids is $\bar{X} = 150\text{ cm}$. Maya's guess is not guaranteed to be the exact school average $\mu$, but on average across many days, it hits the true bullseye!</p>
+    </div>
 
-    <h2>3. Mathematical Decoder Table</h2>
+    <h2>2. 📋 Mathematical Symbol Decoder Table</h2>
     <table>
         <thead>
             <tr>
                 <th>Symbol</th>
-                <th>Mathematical Name</th>
-                <th>Plain-English Meaning</th>
-                <th>Type</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>$\theta$</td>
-                <td>True Parameter</td>
-                <td>The hidden ground truth in the universe ($\mu, \sigma^2$)</td>
-                <td>Fixed Constant</td>
+                <td><em>"THAY-tuh"</em></td>
+                <td><strong>True Population Parameter</strong></td>
+                <td>The secret, true average saltiness of the entire 100-gallon soup pot. Fixed, constant, but hidden.</td>
             </tr>
             <tr>
                 <td>$\hat{\theta}$</td>
-                <td>Estimator</td>
-                <td>A recipe/formula that takes sample data and outputs a guess</td>
-                <td>Random Variable</td>
+                <td><em>"THAY-tuh hat"</em></td>
+                <td><strong>Sample Estimator</strong></td>
+                <td>The chef's guess wearing a party hat. A mathematical formula applied to our sample ladle to guess $\theta$.</td>
+            </tr>
+            <tr>
+                <td>$\mu$</td>
+                <td><em>"myoo"</em></td>
+                <td><strong>Population Mean</strong></td>
+                <td>The exact average height of all 1,000 kids in the school. A single fixed number.</td>
+            </tr>
+            <tr>
+                <td>$\bar{X}$</td>
+                <td><em>"X-bar"</em></td>
+                <td><strong>Sample Mean</strong></td>
+                <td>The average height of the 5 kids Maya measured on the playground. Changes if you pick 5 different kids.</td>
+            </tr>
+            <tr>
+                <td>$\sigma^2$</td>
+                <td><em>"SIG-muh squared"</em></td>
+                <td><strong>Population Variance</strong></td>
+                <td>How spread out the heights of all 1,000 kids are across the entire school.</td>
+            </tr>
+            <tr>
+                <td>$\sigma$</td>
+                <td><em>"SIG-muh"</em></td>
+                <td><strong>Population Standard Deviation</strong></td>
+                <td>The square root of variance: average spread in centimeters from the true mean $\mu$.</td>
+            </tr>
+            <tr>
+                <td>$S^2$</td>
+                <td><em>"S-squared"</em></td>
+                <td><strong>Unbiased Sample Variance</strong></td>
+                <td>The sample spread computed with Bessel's correction (dividing by $n-1$).</td>
+            </tr>
+            <tr>
+                <td>$S_n^2$</td>
+                <td><em>"S-sub-n squared"</em></td>
+                <td><strong>Naive Sample Variance</strong></td>
+                <td>The flawed sample spread computed by dividing by $n$. Systematically underestimates true spread!</td>
+            </tr>
+            <tr>
+                <td>$n$</td>
+                <td><em>"en"</em></td>
+                <td><strong>Sample Size</strong></td>
+                <td>The number of kids Maya measured ($n=5$), or the batch size of images on your GPU ($B=32$).</td>
+            </tr>
+            <tr>
+                <td>$N$</td>
+                <td><em>"capital EN"</em></td>
+                <td><strong>Population Size</strong></td>
+                <td>Total number of all entities in existence ($N=1{,}000$ students, or billions of web images).</td>
             </tr>
             <tr>
                 <td>$\operatorname{Bias}(\hat{\theta})$</td>
-                <td>Estimator Bias</td>
-                <td>Expected systematic error: $\mathbb{E}[\hat{\theta}] - \theta$</td>
-                <td>Scalar</td>
+                <td><em>"bias of theta-hat"</em></td>
+                <td><strong>Systematic Error</strong></td>
+                <td>How far your scale is permanently off-balance: $\mathbb{E}[\hat{\theta}] - \theta$.</td>
             </tr>
             <tr>
                 <td>$\operatorname{Var}(\hat{\theta})$</td>
-                <td>Estimator Variance</td>
-                <td>Fluctuation of estimates across different batches</td>
-                <td>Scalar $\ge 0$</td>
+                <td><em>"variance of theta-hat"</em></td>
+                <td><strong>Estimator Shakiness</strong></td>
+                <td>How wildly your guesses bounce around if you repeat the experiment with different random samples.</td>
             </tr>
             <tr>
-                <td>$\text{SE}(\hat{\theta})$</td>
-                <td>Standard Error</td>
-                <td>Standard deviation of the estimator: $\sqrt{\operatorname{Var}(\hat{\theta})}$</td>
-                <td>Scalar $\ge 0$</td>
+                <td>$\text{SE}(\bar{X})$</td>
+                <td><em>"standard error of X-bar"</em></td>
+                <td><strong>Wiggle Room of the Mean</strong></td>
+                <td>How much Maya's sample average $\bar{X}$ typically fluctuates from the true mean $\mu$: $\sigma / \sqrt{n}$.</td>
             </tr>
             <tr>
                 <td>$\text{MSE}(\hat{\theta})$</td>
-                <td>Mean Squared Error</td>
-                <td>Total error: $\operatorname{Bias}^2 + \operatorname{Var}$</td>
-                <td>Scalar $\ge 0$</td>
+                <td><em>"mean squared error"</em></td>
+                <td><strong>Total Penalty Score</strong></td>
+                <td>Total error combining both systematic bias and shakiness: $\text{Bias}^2 + \text{Variance}$.</td>
             </tr>
         </tbody>
     </table>
 
-    <h2>4. Estimator Properties: Bias and The Error Decomposition</h2>
-    <p>
-        An estimator $\hat{\theta} = g(X_1, \dots, X_n)$ is called <strong>unbiased</strong> if its expected value across all hypothetical samples equals the true parameter $\theta$:
-    </p>
-    $$\operatorname{Bias}(\hat{\theta}) = \mathbb{E}[\hat{\theta}] - \theta = 0 \iff \mathbf{\mathbb{E}[\hat{\theta}] = \theta}$$
+    <h2>3. Estimator Properties: Bias, Variance & The Dartboard</h2>
+    <div class="callout">
+        <h3>🧒 Barnaby the Puppy Plays Darts</h3>
+        <p>Imagine <strong>Barnaby the puppy</strong> throwing darts at a target board:</p>
+        <ul>
+            <li><strong>Low Bias, Low Variance:</strong> Darts land tightly clustered right inside the center red bullseye (The AI Gold Standard!).</li>
+            <li><strong>Low Bias, High Variance:</strong> Darts are scattered all over the board, but their mathematical average center lands directly on the bullseye.</li>
+            <li><strong>High Bias, Low Variance:</strong> Darts are clustered tightly together, but far off in the top-right corner (like a rifle with bent sights).</li>
+            <li><strong>High Bias, High Variance:</strong> Complete chaos: wildly scattered and nowhere near the bullseye.</li>
+        </ul>
+    </div>
 
-    <h3>The Bias-Variance Decomposition</h3>
-    <p>The total expected square error of any statistical estimator decomposes neatly into two independent terms:</p>
-    $$\text{MSE}(\hat{\theta}) = \mathbb{E}[(\hat{\theta} - \theta)^2] = \mathbf{\operatorname{Var}(\hat{\theta}) + \Big( \operatorname{Bias}(\hat{\theta}) \Big)^2}$$
-    <p>
-        This is the mathematical origin of the famous <strong>Bias-Variance Tradeoff</strong>: in many machine learning estimators (like Ridge regression), introducing a small amount of bias allows us to dramatically slash variance, resulting in lower overall error!
-    </p>
+    <h3>Line-by-Line Breakdown: The Bias Formula</h3>
+    $$\operatorname{Bias}(\hat{\theta}) = \underbrace{\mathbb{E}[\hat{\theta}]}_{\substack{\text{Average guess if you repeat} \\ \text{sampling 1,000 times}}} - \underbrace{\theta}_{\substack{\text{The secret true} \\ \text{population bullseye}}}$$
+    <p><strong>🧒 What the math is actually doing:</strong> If you draw thousands of separate samples and your average guess lands dead-center on the true population truth, $\operatorname{Bias}(\hat{\theta}) = 0$. The estimator is <strong>unbiased</strong>!</p>
 
-    <h2>5. The Sample Mean & The $\sqrt{n}$ Law of AI Data Scaling</h2>
-    <p>The sample mean $\bar{X} = \frac{1}{n}\sum_{i=1}^n X_i$ is unconditionally unbiased:</p>
-    $$\mathbb{E}[\bar{X}] = \frac{1}{n}\sum_{i=1}^n \mathbb{E}[X_i] = \frac{1}{n}(n\mu) = \mathbf{\mu}$$
-    <p>Its variance shrinks inversely with sample size:</p>
-    $$\operatorname{Var}(\bar{X}) = \frac{\sigma^2}{n} \implies \mathbf{\text{SE}(\bar{X}) = \frac{\sigma}{\sqrt{n}}}$$
+    <h3>Line-by-Line Breakdown: The Mean Squared Error (MSE) Decomposition</h3>
+    $$\underbrace{\text{MSE}(\hat{\theta})}_{\text{Total Error Score}} = \underbrace{\mathbb{E}\big[(\hat{\theta} - \theta)^2\big]}_{\text{Average squared mistake}} = \underbrace{\operatorname{Bias}(\hat{\theta})^2}_{\text{Aim penalty}} + \underbrace{\operatorname{Var}(\hat{\theta})}_{\text{Shakiness penalty}}$$
+    <p><strong>🧒 What the math is actually doing:</strong> Total mistake is the sum of two independent penalties: how crooked your aim is ($\text{Bias}^2$) plus how shaky your hand is ($\text{Variance}$). In AI, accepting a tiny bit of bias to drastically reduce variance is the secret behind <strong>regularization</strong>!</p>
 
+    <h2>4. The Sample Mean & The $\sqrt{n}$ Law of Scaling</h2>
+    $$\bar{X} = \underbrace{\frac{1}{n}}_{\text{divide by count}} \sum_{i=1}^n \underbrace{X_i}_{\text{each child's height}}$$
+
+    <h3>The Standard Error Formula</h3>
+    $$\text{SE}(\bar{X}) = \frac{\overbrace{\sigma}^{\text{Natural spread of individual kids}}}{\underbrace{\sqrt{n}}_{\text{Dampening shield from sample size}}}$$
+    <div class="callout callout-warning">
+        <strong>⚠️ The Diminishing Returns of AI Data:</strong>
+        Notice the square root $\sqrt{n}$!
+        <ul>
+            <li>To cut uncertainty in <strong>half</strong> ($2\times$ smaller wiggle), you need <strong>$4\times$ more data</strong> ($2^2 = 4$).</li>
+            <li>To cut uncertainty by a factor of <strong>10</strong>, you need <strong>$100\times$ more data</strong> ($10^2 = 100$).</li>
+        </ul>
+    </div>
+
+    <h2>5. Bessel's Correction: Why We Divide by $n - 1$ Instead of $n$</h2>
+    <div class="callout callout-story">
+        <h3>🧒 The "Huddle Around the Leader" Trap</h3>
+        <p>Imagine 3 puppy siblings—Barnaby, Buster, and Bella—standing on a soccer field.</p>
+        <p>The field has an exact center line painted in white: the <strong>True Population Mean ($\mu$)</strong>. But the puppies don't know where the stadium center line is! They only see each other, so they huddle together around their own group center: the <strong>Sample Mean ($\bar{X}$)</strong>.</p>
+        <p>Because the puppies chose their own center point, they look <strong>closer together than they really are</strong> to the true stadium line! Dividing by $n$ cheats and underestimates the true spread. Dividing by $n - 1$ fixes this bias completely.</p>
+    </div>
+
+    <h3>Line-by-Line Algebraic Proof</h3>
+    <p>Expanding the distance to the sample mean:</p>
+    $$(X_i - \bar{X}) = \underbrace{(X_i - \mu)}_{\text{distance to true center}} - \underbrace{(\bar{X} - \mu)}_{\text{error of sample center}}$$
+    <p>Summing squared distances across all $n$ points:</p>
+    $$\sum_{i=1}^n (X_i - \bar{X})^2 = \sum_{i=1}^n (X_i - \mu)^2 - n(\bar{X} - \mu)^2$$
+    <p>Taking mathematical expectation:</p>
+    $$\mathbb{E}\left[\sum_{i=1}^n (X_i - \bar{X})^2\right] = n\sigma^2 - n\left(\frac{\sigma^2}{n}\right) = (n - 1)\sigma^2$$
+    <p>Therefore, dividing by $n$ produces a biased result:</p>
+    $$\mathbb{E}[S_n^2] = \frac{n - 1}{n}\sigma^2 < \sigma^2$$
+    <p>Dividing by $n - 1$ restores strict mathematical unbiasedness:</p>
+    $$S^2 = \frac{1}{n - 1}\sum_{i=1}^n (X_i - \bar{X})^2 \implies \mathbf{\mathbb{E}[S^2] = \sigma^2} \quad \blacksquare$$
+
+    <h2>6. Concrete Numerical Walkthrough</h2>
+    <p>Suppose an AI engineer measures the latency of 4 requests: $X = \{4.0, 7.0, 10.0, 15.0\}\text{ ms}$.</p>
+    <div class="callout">
+        <ol>
+            <li><strong>Sample Mean:</strong> $\bar{X} = \frac{4 + 7 + 10 + 15}{4} = \frac{36}{4} = \mathbf{9.0\text{ ms}}$</li>
+            <li><strong>Deviations from Mean:</strong> $(4 - 9) = -5$, $(7 - 9) = -2$, $(10 - 9) = +1$, $(15 - 9) = +6$</li>
+            <li><strong>Sum of Squared Deviations:</strong> $(-5)^2 + (-2)^2 + (+1)^2 + (+6)^2 = 25 + 4 + 1 + 36 = \mathbf{66.0}$</li>
+            <li><strong>Naive Variance ($S_n^2$):</strong> $\frac{66.0}{4} = \mathbf{16.5\text{ ms}^2}$</li>
+            <li><strong>Bessel-Corrected Variance ($S^2$):</strong> $\frac{66.0}{4 - 1} = \frac{66.0}{3} = \mathbf{22.0\text{ ms}^2}$</li>
+            <li><strong>Ratio:</strong> $\frac{16.5}{22.0} = 0.75 = \frac{n - 1}{n} = \frac{3}{4}$</li>
+            <li><strong>Standard Error:</strong> $\text{SE} = \frac{\sqrt{22.0}}{\sqrt{4}} = \frac{4.69}{2} \approx \mathbf{2.35\text{ ms}}$</li>
+        </ol>
+    </div>
+
+    <h2>7. Practical Implications in Deep Learning & AI</h2>
     <div class="callout callout-success">
-        <strong>The $\sqrt{n}$ Law of AI Data Scaling:</strong>
-        To cut the uncertainty (standard error) of an evaluation metric or a gradient estimate in half, you must collect <strong>4x</strong> ($2^2$) more data points! To reduce error by 10x, you need <strong>100x</strong> more data!
+        <h4>1. PyTorch BatchNorm (`nn.BatchNorm2d`)</h4>
+        <p>In the forward pass, PyTorch calculates batch variance by dividing by $B$ (fast GPU operation). But when updating its running population tracking statistics for test-time (`running_var`), it multiplies by $\frac{B}{B - 1}$ to ensure an unbiased estimate!</p>
+    </div>
+    <div class="callout callout-success">
+        <h4>2. Mini-Batch Gradient Descent (SGD)</h4>
+        <p>A random mini-batch of size $B = 32$ is an unconditionally unbiased estimator of the full loss gradient across 10 million images: $\mathbb{E}[\mathbf{g}_B] = \nabla_{\mathbf{w}}\mathcal{L}_{\text{full}}(\mathbf{w})$.</p>
     </div>
 
-    <h2>6. The Grand Derivation: Why We Divide by $(n - 1)$ (Bessel's Correction)</h2>
-    <p>
-        Why does the sample variance formula divide by $n - 1$ instead of $n$?
-        Let us prove algebraically why dividing by $n$ produces a biased estimate that systematically underestimates the true variance.
-    </p>
-
-    <h3>Step 1: Expanding around the Population Mean</h3>
-    <p>Write each deviation relative to the true mean $\mu$:</p>
-    $$X_i - \bar{X} = (X_i - \mu) - (\bar{X} - \mu)$$
-    <p>Squaring both sides and summing over all $n$ observations:</p>
-    $$\sum_{i=1}^n (X_i - \bar{X})^2 = \sum_{i=1}^n (X_i - \mu)^2 - 2(\bar{X} - \mu)\sum_{i=1}^n(X_i - \mu) + \sum_{i=1}^n (\bar{X} - \mu)^2$$
-    <p>Notice that $\sum_{i=1}^n(X_i - \mu) = n(\bar{X} - \mu)$. Substituting gives:</p>
-    $$\sum_{i=1}^n (X_i - \bar{X})^2 = \sum_{i=1}^n (X_i - \mu)^2 - 2n(\bar{X} - \mu)^2 + n(\bar{X} - \mu)^2$$
-    $$\mathbf{\sum_{i=1}^n (X_i - \bar{X})^2 = \sum_{i=1}^n (X_i - \mu)^2 - n(\bar{X} - \mu)^2}$$
-
-    <div class="callout callout-danger">
-        <strong>The Key Insight:</strong>
-        Because $n(\bar{X} - \mu)^2 \ge 0$, the sum of squared distances to the sample mean $\bar{X}$ is <em>always smaller</em> than the sum of squared distances to the true mean $\mu$.
-        The sample mean sits right at the center of the observed points, artificially making them look closer together than they actually are!
+    <div class="nav-links">
+        <a href="../index.html">&larr; Overview</a>
+        <a href="exercises_and_solutions.html">Exercises &amp; Solutions &rarr;</a>
     </div>
 
-    <h3>Step 2: Taking the Expectation</h3>
-    $$\mathbb{E}\left[\sum_{i=1}^n (X_i - \bar{X})^2\right] = \sum_{i=1}^n \mathbb{E}[(X_i - \mu)^2] - n\mathbb{E}[(\bar{X} - \mu)^2]$$
-    <p>Since $\mathbb{E}[(X_i - \mu)^2] = \sigma^2$ and $\mathbb{E}[(\bar{X} - \mu)^2] = \operatorname{Var}(\bar{X}) = \frac{\sigma^2}{n}$:</p>
-    $$\mathbb{E}\left[\sum_{i=1}^n (X_i - \bar{X})^2\right] = n\sigma^2 - n\left(\frac{\sigma^2}{n}\right) = \mathbf{(n - 1)\sigma^2}$$
-
-    <h3>Step 3: Correcting the Bias</h3>
-    <p>If we had divided by $n$:</p>
-    $$\mathbb{E}[S_n^2] = \frac{n - 1}{n}\sigma^2 < \sigma^2 \quad (\text{Systematically Underestimates Variance!})$$
-    <p>Dividing by $n - 1$ cancels the factor perfectly:</p>
-    $$\mathbf{S^2 = \frac{1}{n - 1}\sum_{i=1}^n (X_i - \bar{X})^2 \implies \mathbb{E}[S^2] = \sigma^2} \quad \blacksquare$$
-
-    <h2>7. Practical AI Applications</h2>
-    <ul>
-        <li><strong>Batch Normalization (BatchNorm):</strong> In PyTorch, BatchNorm uses $\frac{1}{B}$ during training for pure hardware speed, but when tracking the running population variance for inference (`running_var`), it scales by $\frac{B}{B-1}$ to maintain an unbiased estimate!</li>
-        <li><strong>SGD Gradient Noise:</strong> The mini-batch gradient $\mathbf{g}_B = \frac{1}{B}\sum_{i=1}^B \nabla \mathcal{L}_i$ is an unbiased estimator of the full dataset gradient ($\mathbb{E}[\mathbf{g}_B] = \nabla \mathcal{L}$).</li>
-    </ul>
-
-    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 2px solid var(--border); display: flex; justify-content: space-between;">
-        <a href="../index.html" class="back-link">← Phase 5 Portal</a>
-        <a href="exercises_and_solutions.html" class="back-link">5.1 Exercises & Solutions →</a>
-    </div>
 </body>
 </html>
-

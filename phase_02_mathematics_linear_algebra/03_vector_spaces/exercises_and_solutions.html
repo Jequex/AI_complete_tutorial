@@ -20,6 +20,7 @@
       --text: #0f172a;
       --text-muted: #475569;
       --border: #e2e8f0;
+      --code-bg: #f1f5f9;
       --primary: #4338ca;
       --primary-hover: #3730a3;
     }
@@ -33,6 +34,7 @@
         --text: #f8fafc;
         --text-muted: #94a3b8;
         --border: #334155;
+        --code-bg: #0b1120;
         --primary: #818cf8;
         --primary-hover: #a5b4fc;
       }
@@ -123,98 +125,64 @@
       color: #ffffff;
       border-color: var(--primary);
     }
-    .btn-primary {
-      background-color: var(--primary);
-      color: #ffffff;
-      border-color: var(--primary);
-    }
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
   </style>
 </head>
 <body>
 
   <header>
     <div class="breadcrumbs">
-      <a href="../index.html">Phase 02</a> &gt; <a href="./lecture.html">Topic 2.3</a> &gt; <span>Exercises &amp; Solutions</span>
+      <a href="../index.html">Phase 02</a> &gt; <a href="lecture.html">Topic 2.3</a> &gt; <span>Exercises</span>
     </div>
-    <h1>Topic 2.3: Practice Exercises &amp; Solutions</h1>
-    <p style="color: var(--text-muted); margin-bottom: 0;">Testing linear independence, null space dimensions, solution uniqueness, and LoRA parameter math.</p>
+    <h1>Topic 2.3: Exercises &amp; Detailed Solutions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Practice linear independence tests, Rank-Nullity derivations, and LoRA parameter optimization.</p>
   </header>
 
   <main>
-    <!-- PROBLEM 1 -->
+    <!-- Problem 1 -->
     <div class="problem-box">
       <h2>Problem 1: Testing Linear Independence &amp; Redundancy</h2>
-      <p>Given $\mathbf{v}_1 = [1, 2, 3]^T$, $\mathbf{v}_2 = [0, 1, 2]^T$, and $\mathbf{v}_3 = [2, 5, 8]^T$ in $\mathbb{R}^3$:</p>
-      <ul>
-        <li><strong>Part A:</strong> Form the linear system $c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + c_3 \mathbf{v}_3 = \mathbf{0}$.</li>
-        <li><strong>Part B:</strong> Solve for $c_1, c_2, c_3$. Are the vectors independent?</li>
-        <li><strong>Part C:</strong> What is the dimension and geometric shape of $\text{Span}(\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3)$?</li>
-      </ul>
+      <p>Given $\mathbf{v}_1 = [1, 2, 3]^T$, $\mathbf{v}_2 = [0, 1, 2]^T$, and $\mathbf{v}_3 = [2, 5, 8]^T$, determine if they are linearly independent.</p>
 
       <details class="solution">
-        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
-        <h3>Solution:</h3>
-        <p><strong>Part A &amp; B: Solving the System</strong></p>
-        <ol>
-          <li>$c_1 + 2c_3 = 0 \implies c_1 = -2c_3$</li>
-          <li>$2c_1 + c_2 + 5c_3 = 0 \implies 2(-2c_3) + c_2 + 5c_3 = 0 \implies c_2 = -c_3$</li>
-          <li>$3c_1 + 2c_2 + 8c_3 = 3(-2c_3) + 2(-c_3) + 8c_3 = 0$ (Consistent!)</li>
-        </ol>
-        <p>Setting $c_3 = 1$ yields non-trivial solution $(c_1, c_2, c_3) = (-2, -1, 1) \neq (0, 0, 0)$. Thus, the vectors are <strong>Linearly Dependent</strong>! In fact, $\mathbf{v}_3 = 2\mathbf{v}_1 + \mathbf{v}_2$.</p>
-
-        <p><strong>Part C: Dimension &amp; Geometric Shape</strong></p>
-        <p>Since $\mathbf{v}_3$ is redundant, the basis consists of $\{\mathbf{v}_1, \mathbf{v}_2\}$.</p>
-        <p>$$\text{Dimension} = \mathbf{2} \quad (\text{A flat 2D plane passing through } (0,0,0) \text{ in } \mathbb{R}^3)$$</p>
+        <summary>Click to view solution</summary>
+        <p>Solving $c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + c_3 \mathbf{v}_3 = \mathbf{0}$ yields:</p>
+        $$-2\mathbf{v}_1 - \mathbf{v}_2 + \mathbf{v}_3 = \mathbf{0} \implies \mathbf{v}_3 = 2\mathbf{v}_1 + \mathbf{v}_2$$
+        <p>Because $\mathbf{v}_3$ is a linear combination of $\mathbf{v}_1$ and $\mathbf{v}_2$, the set is <strong>Linearly Dependent</strong>. Its span is a 2D plane in $\mathbb{R}^3$.</p>
       </details>
     </div>
 
-    <!-- PROBLEM 2 -->
+    <!-- Problem 2 -->
     <div class="problem-box">
       <h2>Problem 2: The Rank-Nullity Theorem &amp; Solution Uniqueness</h2>
-      <p>A matrix $A \in \mathbb{R}^{5 \times 8}$ has $\text{Rank}(A) = 4$.</p>
-      <ul>
-        <li><strong>Part A:</strong> What is the dimension of input space $n$?</li>
-        <li><strong>Part B:</strong> Calculate $\text{Nullity}(A)$.</li>
-        <li><strong>Part C:</strong> Can any solution to $A\mathbf{x} = \mathbf{b}$ be unique?</li>
-      </ul>
+      <p>For $A \in \mathbb{R}^{5 \times 8}$ with $\text{Rank}(A) = 4$, compute $\text{Nullity}(A)$ and explain why solutions to $A\mathbf{x} = \mathbf{b}$ can never be unique.</p>
 
       <details class="solution">
-        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
-        <h3>Solution:</h3>
-        <p><strong>Part A:</strong> $n = 8$ (number of columns).</p>
-        <p><strong>Part B:</strong> $\text{Rank}(A) + \text{Nullity}(A) = n \implies 4 + \text{Nullity} = 8 \implies \mathbf{\text{Nullity}(A) = 4}$.</p>
-        <p><strong>Part C:</strong> No solution can ever be unique! For any solution $\mathbf{x}_0$, adding any of the infinite vectors $\mathbf{z} \in \mathcal{N}(A)$ gives another valid solution: $A(\mathbf{x}_0 + \mathbf{z}) = A\mathbf{x}_0 + \mathbf{0} = \mathbf{b}$.</p>
+        <summary>Click to view solution</summary>
+        $$\text{Rank}(A) + \text{Nullity}(A) = n \implies 4 + \text{Nullity}(A) = 8 \implies \text{Nullity}(A) = \mathbf{4}$$
+        <p>Because the null space has dimension 4, adding any of the infinite vectors $\mathbf{z} \in \mathcal{N}(A)$ to a solution $\mathbf{x}_0$ gives another valid solution ($A(\mathbf{x}_0 + \mathbf{z}) = \mathbf{b}$). Solutions can never be unique.</p>
       </details>
     </div>
 
-    <!-- PROBLEM 3 -->
+    <!-- Problem 3 -->
     <div class="problem-box">
       <h2>Problem 3: LoRA Parameter Reduction Calculation</h2>
-      <p>A Transformer query matrix $W_Q \in \mathbb{R}^{4096 \times 4096}$ is fine-tuned via LoRA ($\Delta W = B A$) with rank $r = 8$.</p>
-      <ul>
-        <li><strong>Part A:</strong> Count parameters in full fine-tuning.</li>
-        <li><strong>Part B:</strong> Count parameters in LoRA ($r = 8$).</li>
-        <li><strong>Part C:</strong> Calculate the percentage reduction.</li>
-      </ul>
+      <p>Compare full fine-tuning of $W \in \mathbb{R}^{4096 \times 4096}$ against LoRA rank $r = 8$ ($\Delta W = BA$).</p>
 
       <details class="solution">
-        <summary>💡 Click to Reveal Step-by-Step Solution</summary>
-        <h3>Solution:</h3>
-        <p><strong>Part A: Full:</strong> $4096 \times 4096 = \mathbf{16,777,216}$ parameters.</p>
-        <p><strong>Part B: LoRA:</strong> $(4096 \times 8) + (8 \times 4096) = 32,768 + 32,768 = \mathbf{65,536}$ parameters.</p>
-        <p><strong>Part C: Reduction:</strong> $1 - \frac{65,536}{16,777,216} = 1 - 0.0039 = \mathbf{99.61\% \text{ reduction}}$!</p>
+        <summary>Click to view solution</summary>
+        <ul>
+          <li>Full Parameters: $4096 \times 4096 = \mathbf{16,777,216}$</li>
+          <li>LoRA Parameters: $(4096 \times 8) + (8 \times 4096) = \mathbf{65,536}$</li>
+          <li>Parameter Reduction: $\left(1 - \frac{65,536}{16,777,216}\right) \times 100\% = \mathbf{99.609\%}$ reduction!</li>
+        </ul>
       </details>
     </div>
 
     <div class="nav-buttons">
-      <a href="./lecture.html" class="btn">← Back to Lecture</a>
-      <a href="../04_eigenvalues_eigenvectors/lecture.html" class="btn btn-primary">Next Topic: 2.4 Eigenvalues &amp; Eigenvectors →</a>
+      <a href="lecture.html" class="btn">← Back to Lecture 2.3</a>
+      <a href="../04_eigenvalues_eigenvectors/lecture.html" class="btn">Next: Topic 2.4 Eigenvalues &amp; Eigenvectors →</a>
     </div>
   </main>
 
 </body>
 </html>
-

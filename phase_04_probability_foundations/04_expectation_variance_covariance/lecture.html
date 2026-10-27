@@ -85,83 +85,110 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 4 Index</a>
-    <header>
-        <h1>Topic 4.4: Expectation, Variance &amp; Covariance</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Linearity of Expectation, Spread Metrics, Pearson Correlation &amp; Covariance Matrices</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Probability Foundations</a>
 
-    <section>
-        <h2>1. Symbol Decoder Table</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symbol</th>
-                    <th>Name</th>
-                    <th>Formula</th>
-                    <th>Plain-English Meaning</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>$\mathbb{E}[X]$</td>
-                    <td>Expected Value</td>
-                    <td>$\sum x p(x)$ or $\int x f(x) dx$</td>
-                    <td>The balance point / center of mass of the distribution</td>
-                </tr>
-                <tr>
-                    <td>$\text{Var}(X)$</td>
-                    <td>Variance</td>
-                    <td>$\mathbb{E}[X^2] - (\mathbb{E}[X])^2$</td>
-                    <td>The average squared distance of outcomes from the center</td>
-                </tr>
-                <tr>
-                    <td>$\text{Cov}(X, Y)$</td>
-                    <td>Covariance</td>
-                    <td>$\mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y]$</td>
-                    <td>Do two variables move together (+) or opposite (-)?</td>
-                </tr>
-                <tr>
-                    <td>$\rho(X, Y)$</td>
-                    <td>Pearson Correlation</td>
-                    <td>$\frac{\text{Cov}(X, Y)}{\sigma_X \sigma_Y} \in [-1, 1]$</td>
-                    <td>Normalized linear dependency independent of units</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <h1>Topic 4.4: Expectation, Variance & Covariance</h1>
+    <p>Machine learning models summarize high-dimensional distributions into concise, actionable numbers: <strong>Expectation</strong> (center of mass), <strong>Variance</strong> (spread/uncertainty), and <strong>Covariance</strong> (joint interaction).</p>
 
-    <section>
-        <h2>2. Linearity of Expectation</h2>
-        <div class="tip-box">
-            <strong>The Superpower of Machine Learning:</strong><br>
-            $$\mathbb{E}[aX + bY + c] = a\mathbb{E}[X] + b\mathbb{E}[Y] + c$$
-            <em>Crucial Fact: This equality holds true even when $X$ and $Y$ are strongly dependent or non-linearly entangled!</em>
-        </div>
-    </section>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: The Seesaw, The Wobble & The Skaters</h3>
+        <p>Maya, Timmy, and puppy Barnaby at the playground:</p>
+        <ul>
+            <li><strong>Expectation ($\mathbb{E}[X]$):</strong> The seesaw balance point. If Maya sits on one end and Barnaby on the other, the fulcrum position where the board stays perfectly horizontal is the expected value!</li>
+            <li><strong>Variance ($\text{Var}(X)$):</strong> How wildly the swing wobbles! A swing that sways 2 inches has low variance; a swing that flips upside down has high variance.</li>
+            <li><strong>Covariance & Correlation ($\text{Cov}(X, Y)$):</strong> Two synchronized ice skaters holding hands! Positive ($\rho = +1$) means they glide together; Negative ($\rho = -1$) means they mirror each other; Zero ($\rho = 0$) means independent spins.</li>
+        </ul>
+        <pre>
+               1. EXPECTATION: SEESAW FULCRUM
+                     Maya (30 lbs)               Barnaby (10 lbs)
+               ─────────────┼───────────────────────────┼─────────────
+                                          ▲
+                                   Fulcrum: E[X]
 
-    <section>
-        <h2>3. Covariance &amp; Variance of Sums</h2>
-        <div class="concept-card">
-            <h3>Variance of Summed Random Variables:</h3>
-            <p>$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X, Y)$$</p>
-            <p>If $X$ and $Y$ are uncorrelated ($\text{Cov}(X, Y) = 0$), then:</p>
-            <p>$$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$$</p>
-        </div>
-    </section>
+               2. VARIANCE: SWING WOBBLE
+                    Gentle Swing (Low Var)       Wild Ride (High Var)
+                             │                          ╱
+                             ●                         ● 
+        </pre>
+    </div>
 
-    <section>
-        <h2>4. The Covariance Matrix in High-Dimensional AI</h2>
-        <p>For feature vector $\mathbf{x} \in \mathbb{R}^D$:</p>
-        <p>$$\Sigma = \mathbb{E}[(\mathbf{x} - \mu)(\mathbf{x} - \mu)^T]$$</p>
-        <p>Diagonal entries are individual feature variances $\text{Var}(X_i)$, while off-diagonal entries represent interactions $\text{Cov}(X_i, X_j)$. This matrix forms the foundation of <strong>PCA dimensionality reduction</strong> and <strong>Batch Normalization</strong>.</p>
-    </section>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\mathbb{E}[X]$</td>
+                <td>"E of X"</td>
+                <td>Expected Value: long-run weighted average</td>
+                <td>The seesaw fulcrum where all weights balance</td>
+            </tr>
+            <tr>
+                <td>$\text{Var}(X)$</td>
+                <td>"Var of X"</td>
+                <td>Variance: average squared distance from mean</td>
+                <td>How wildly the playground swing wobbles</td>
+            </tr>
+            <tr>
+                <td>$\sigma$</td>
+                <td>"sigma"</td>
+                <td>Standard Deviation ($\sqrt{\text{Var}(X)}$)</td>
+                <td>Average spread measured in normal units (inches, lbs)</td>
+            </tr>
+            <tr>
+                <td>$\text{Cov}(X, Y)$</td>
+                <td>"Cov of X and Y"</td>
+                <td>Tendency of two variables to vary together</td>
+                <td>Two skaters: positive if same way, negative if opposite</td>
+            </tr>
+            <tr>
+                <td>$\rho(X, Y)$</td>
+                <td>"rho"</td>
+                <td>Pearson Correlation in $[-1, +1]$</td>
+                <td>Gauge from $-1$ (pure opposite) to $+1$ (pure lockstep)</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- FORMULAS -->
+    <h2>3. Foundational Formulas</h2>
+    <ul>
+        <li><strong>Variance Shortcut:</strong> $\text{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2$</li>
+        <li><strong>Linearity of Expectation:</strong> $\mathbb{E}[aX + bY + c] = a\mathbb{E}[X] + b\mathbb{E}[Y] + c$ &nbsp; <em>(Holds for ANY dependency!)</em></li>
+        <li><strong>Variance of Sum:</strong> $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\text{Cov}(X, Y)$</li>
+    </ul>
+
+    <!-- BATCH NORMALIZATION -->
+    <h2>4. Batch Normalization: Deep Learning's Variance Anchor</h2>
+    $$\hat{x}_i = \frac{x_i - \mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2 + \epsilon}}$$
+    <div class="tip-box">
+        <strong>Stabilizing Deep Networks:</strong> Batch Normalization recalibrates activations so each layer receives inputs with mean $\approx 0$ and variance $\approx 1$, preventing vanishing and exploding gradients!
+    </div>
+
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>
-

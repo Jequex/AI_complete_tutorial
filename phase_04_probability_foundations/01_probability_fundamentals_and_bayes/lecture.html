@@ -75,27 +75,6 @@
             margin: 1.5rem 0;
             border-radius: 0 8px 8px 0;
         }
-        .warning-box {
-            background-color: var(--danger-bg);
-            border-left: 4px solid var(--danger);
-            padding: 1rem 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 0 8px 8px 0;
-        }
-        pre {
-            background-color: var(--code-bg);
-            color: var(--code-text);
-            padding: 1.2rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin: 1rem 0;
-        }
-        code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.9em;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -106,97 +85,119 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 4 Index</a>
-    <header>
-        <h1>Topic 4.1: Probability Fundamentals &amp; Bayes' Theorem</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Kolmogorov's Axioms, Conditional Probability, Independence, and the False Positive Paradox</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Probability Foundations</a>
 
-    <section>
-        <h2>1. Symbol Decoder Table</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symbol</th>
-                    <th>Name</th>
-                    <th>Formal Meaning</th>
-                    <th>12-Year-Old Analogy</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>$\Omega$</td>
-                    <td>Sample Space</td>
-                    <td>The set of all possible outcomes</td>
-                    <td>A big jar holding every marble that could be picked</td>
-                </tr>
-                <tr>
-                    <td>$P(A)$</td>
-                    <td>Probability</td>
-                    <td>Number in $[0, 1]$ measuring event likelihood</td>
-                    <td>The fraction of the jar filled with blue marbles</td>
-                </tr>
-                <tr>
-                    <td>$P(A \mid B)$</td>
-                    <td>Conditional Probability</td>
-                    <td>Probability of $A$ given that $B$ happened</td>
-                    <td>Looking only at striped marbles, what fraction are blue?</td>
-                </tr>
-                <tr>
-                    <td>$P(\theta \mid D)$</td>
-                    <td>Posterior Probability</td>
-                    <td>Updated belief in hypothesis $\theta$ after seeing data $D$</td>
-                    <td>The detective updating who the culprit is after seeing the footprint</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <h1>Topic 4.1: Probability Fundamentals, Axioms & Bayes' Theorem</h1>
+    <p>AI models rarely operate with complete certainty. They observe clues from the environment, compute likelihoods, and update their beliefs using <strong>Bayes' Theorem</strong>.</p>
 
-    <section>
-        <h2>2. Kolmogorov's Three Axioms</h2>
-        <div class="concept-card">
-            <h3>The Bedrock Rules of Probability</h3>
-            <ol>
-                <li><strong>Non-negativity:</strong> $P(A) \ge 0$ for every event $A$. (No negative chances!)</li>
-                <li><strong>Unitarity:</strong> $P(\Omega) = 1.0$. (Something in the universe is guaranteed to happen).</li>
-                <li><strong>Countable Additivity:</strong> If $A_1, A_2, \dots$ are disjoint ($A_i \cap A_j = \emptyset$):
-                    $$P\left(\bigcup_{i=1}^\infty A_i\right) = \sum_{i=1}^\infty P(A_i)$$
-                </li>
-            </ol>
-        </div>
-    </section>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: Maya & Timmy at the Carnival Mystery Bag</h3>
+        <p>The Carnival Game Master places a giant velvet bag containing 100 mystery marbles:</p>
+        <ul>
+            <li><strong>The Sample Space ($\Omega$):</strong> The entire bag of 100 marbles (all possible outcomes).</li>
+            <li><strong>An Event ($A$):</strong> Pulling a Star marble ($20$ stars out of $100 \implies P(\text{Star}) = 20\%$).</li>
+            <li><strong>Conditional Probability ($P(A \mid B)$):</strong> Timmy whispers: <em>"Your marble is Red!"</em> Suddenly the universe shrinks to only 40 red marbles. Ten of those 40 have stars, so $P(\text{Star} \mid \text{Red}) = \frac{10}{40} = 25\%$.</li>
+            <li><strong>Bayes' Theorem:</strong> When Maya's puppy Barnaby sneezes, Bayes' Theorem blends prior probabilities (rare disease vs common dust) with new clues (the positive test) to find the truth!</li>
+        </ul>
+        <pre>
+                  THE CARNIVAL MYSTERY BAG (Sample Space Ω)
+       ┌────────────────────────────────────────────────────────────┐
+       │     ● 50 Plain Blue Marbles        ★ 10 Golden Star Marbles│
+       │     ▲ 30 Plain Red Marbles         ◆ 10 Red Star Marbles   │
+       └────────────────────────────────────────────────────────────┘
+        </pre>
+    </div>
 
-    <section>
-        <h2>3. Bayes' Theorem: Updating Beliefs with Evidence</h2>
-        <p>Bayes' Theorem defines how an AI agent refines its parameter estimates or class predictions after observing sensory data:</p>
-        
-        <p>$$\underbrace{P(\theta \mid D)}_{\text{Posterior}} = \frac{\overbrace{P(D \mid \theta)}^{\text{Likelihood}} \times \overbrace{P(\theta)}^{\text{Prior}}}{\underbrace{P(D)}_{\text{Evidence / Marginal}}}$$</p>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$\Omega$</td>
+                <td>"omega"</td>
+                <td>Sample Space: set of all possible outcomes</td>
+                <td>The giant velvet bag containing all 100 marbles</td>
+            </tr>
+            <tr>
+                <td>$P(A)$</td>
+                <td>"P of A"</td>
+                <td>Probability that event $A$ happens ($0 \le P \le 1$)</td>
+                <td>Fraction of the bag filled with winning marbles</td>
+            </tr>
+            <tr>
+                <td>$\cap$</td>
+                <td>"AND" / "intersect"</td>
+                <td>Both event $A$ AND event $B$ happen together</td>
+                <td>A marble that is both Red AND has a Star</td>
+            </tr>
+            <tr>
+                <td>$\cup$</td>
+                <td>"OR" / "union"</td>
+                <td>Either event $A$ OR event $B$ happens</td>
+                <td>A marble that is Red OR has a Star</td>
+            </tr>
+            <tr>
+                <td>$P(A \mid B)$</td>
+                <td>"P of A given B"</td>
+                <td>Probability of $A$ given that $B$ is true</td>
+                <td>Looking only at Red marbles, what fraction have stars?</td>
+            </tr>
+            <tr>
+                <td>$\theta$</td>
+                <td>"theta"</td>
+                <td>Hypothesis / Parameter the AI wants to predict</td>
+                <td>Whether puppy Barnaby is truly sick or healthy</td>
+            </tr>
+            <tr>
+                <td>$D$</td>
+                <td>"data / evidence"</td>
+                <td>Sensory clues (symptoms, words, image pixels)</td>
+                <td>The test result or sneeze symptom observed</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <p>Expanding the denominator using the Law of Total Probability:</p>
-        <p>$$P(\theta_j \mid D) = \frac{P(D \mid \theta_j) P(\theta_j)}{\sum_{i=1}^k P(D \mid \theta_i) P(\theta_i)}$$</p>
-    </section>
+    <!-- BAYES THEOREM -->
+    <h2>3. Bayes' Theorem Master Formula</h2>
+    $$\underbrace{P(\theta \mid D)}_{\text{Posterior belief}} = \frac{\overbrace{P(D \mid \theta)}^{\text{Likelihood}} \times \overbrace{P(\theta)}^{\text{Prior belief}}}{\underbrace{P(D)}_{\text{Total evidence}}}$$
+    <p>🧒 <strong>What the math is actually doing:</strong> We multiply our starting belief (Prior) by how well the evidence fits that belief (Likelihood), and divide by the total probability of seeing that evidence.</p>
 
-    <section>
-        <h2>4. The False Positive Paradox</h2>
-        <div class="warning-box">
-            <strong>⚠️ The Medical Test Paradox:</strong><br>
-            A rare disease affects $1$ in $10{,}000$ people ($P(\text{Disease}) = 0.0001$). A rapid test has a <strong>99% True Positive Rate</strong> and a <strong>1% False Positive Rate</strong>.<br>
-            If a patient tests positive, what is the probability they are actually sick?
-        </div>
+    <!-- CONCRETE WALKTHROUGH -->
+    <h2>4. Concrete Numerical Walkthrough: The Rare Disease Paradox</h2>
+    <div class="tip-box">
+        <strong>The Base Rate Fallacy:</strong> Disease prevalence is $1$ in $1,000$ ($P(\text{Sick}) = 0.001$). A test has $99\%$ accuracy. Barnaby tests positive!
+        <ul>
+            <li>$P(\text{Test}^+) = (0.99 \times 0.001) + (0.01 \times 0.999) = 0.01098$.</li>
+            <li>$P(\text{Sick} \mid \text{Test}^+) = \frac{0.00099}{0.01098} \approx \mathbf{9.0\%}$!</li>
+        </ul>
+        A positive test means only a $9\%$ real chance of sickness because healthy puppies are so overwhelmingly common!
+    </div>
 
-        <div class="concept-card">
-            <h3>Step-by-Step Bayesian Solution:</h3>
-            <p>$$P(\text{Disease} \mid \text{Pos}) = \frac{P(\text{Pos} \mid \text{Disease}) P(\text{Disease})}{P(\text{Pos} \mid \text{Disease}) P(\text{Disease}) + P(\text{Pos} \mid \text{Healthy}) P(\text{Healthy})}$$</p>
-            <p>$$P(\text{Disease} \mid \text{Pos}) = \frac{0.99 \times 0.0001}{(0.99 \times 0.0001) + (0.01 \times 0.9999)} = \frac{0.000099}{0.000099 + 0.009999} \approx \mathbf{0.98\%}$$</p>
-            <p>Even with a 99% accurate test, there is less than a 1% chance the patient has the disease! Because healthy people are overwhelmingly more common, 1% false alarms dwarf true positives!</p>
-        </div>
-    </section>
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>
-

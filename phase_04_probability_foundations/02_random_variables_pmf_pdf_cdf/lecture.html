@@ -75,27 +75,6 @@
             margin: 1.5rem 0;
             border-radius: 0 8px 8px 0;
         }
-        .warning-box {
-            background-color: var(--danger-bg);
-            border-left: 4px solid var(--danger);
-            padding: 1rem 1.25rem;
-            margin: 1.5rem 0;
-            border-radius: 0 8px 8px 0;
-        }
-        pre {
-            background-color: var(--code-bg);
-            color: var(--code-text);
-            padding: 1.2rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin: 1rem 0;
-        }
-        code {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            font-size: 0.9em;
-        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -106,95 +85,113 @@
             padding: 0.75rem 1rem;
             text-align: left;
         }
-        th { background-color: var(--primary-light); color: var(--primary); }
+        th { background-color: var(--card-bg); font-weight: 600; }
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <a href="../index.html" class="back-link">← Back to Phase 4 Index</a>
-    <header>
-        <h1>Topic 4.2: Random Variables, PMF, PDF &amp; CDF</h1>
-        <p style="font-size: 1.15rem; color: #64748b; margin-top: 0;">Discrete vs Continuous Uncertainty, The Density Paradox, and Inverse Transform Sampling</p>
-    </header>
+    <a href="../index.html" class="back-link">← Back to Probability Foundations</a>
 
-    <section>
-        <h2>1. Symbol Decoder Table</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Symbol</th>
-                    <th>Name</th>
-                    <th>Formal Meaning</th>
-                    <th>12-Year-Old Analogy</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>$X$</td>
-                    <td>Random Variable</td>
-                    <td>Function mapping outcomes to numbers ($X: \Omega \to \mathbb{R}$)</td>
-                    <td>The video game scorekeeper awarding points for in-game actions</td>
-                </tr>
-                <tr>
-                    <td>$p_X(x)$</td>
-                    <td>PMF</td>
-                    <td>Discrete point probability $P(X = x)$</td>
-                    <td>Handing out exact slices of cake to players</td>
-                </tr>
-                <tr>
-                    <td>$f_X(x)$</td>
-                    <td>PDF</td>
-                    <td>Probability density height for continuous variables</td>
-                    <td>The altitude of a mountain peak above coordinate $x$</td>
-                </tr>
-                <tr>
-                    <td>$F_X(x)$</td>
-                    <td>CDF</td>
-                    <td>Accumulated probability $P(X \le x)$</td>
-                    <td>A progress bar filling from 0% at $-\infty$ to 100% at $+\infty$</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <h1>Topic 4.2: Random Variables, PMF, PDF, and CDF</h1>
+    <p>A <strong>Random Variable</strong> translates real-world physical events into numbers so AI algorithms can calculate distributions, optimize loss functions, and generate synthetic data.</p>
 
-    <section>
-        <h2>2. Discrete vs Continuous Variables</h2>
-        <div class="concept-card">
-            <h3>Discrete: Probability Mass Function (PMF)</h3>
-            <p>Discrete variables take countable values. The PMF yields exact point probabilities:</p>
-            <p>$$p_X(x) \ge 0, \quad \sum_{x} p_X(x) = 1.0$$</p>
-        </div>
+    <!-- 12-YEAR-OLD ANALOGY -->
+    <div class="concept-card">
+        <h3>🧒 1. The 12-Year-Old Analogy: The Carnival Prize Wheel vs The Rain Gauge</h3>
+        <p>Maya and Timmy compare two different ways to measure chance:</p>
+        <ul>
+            <li><strong>Discrete (The Prize Wheel $\to$ PMF):</strong> Wheel has 6 painted slots $\{1, 2, 3, 4, 5, 6\}$. Each slot has an exact probability slice ($P(X = 4) = 1/6$). That is the <strong>Probability Mass Function (PMF)</strong>.</li>
+            <li><strong>Continuous (The Rain Gauge $\to$ PDF):</strong> Water fills smoothly from 0 to 3 inches. The chance of hitting <em>exactly</em> $1.75000000\dots$ inches is zero ($1/\infty = 0$). Instead, we measure the <strong>area under the curve</strong> between 1 and 2 inches using the <strong>Probability Density Function (PDF)</strong>!</li>
+            <li><strong>The Progress Bar (The CDF):</strong> Watching the water level rise from $0\%$ (empty) to $100\%$ (full) is the <strong>Cumulative Distribution Function (CDF)</strong>.</li>
+        </ul>
+        <pre>
+       DISCRETE (The Prize Wheel)             CONTINUOUS (The Rain Gauge)
+              ╭─────────╮                               │        │
+             │   1   2   │ ◀ Discrete slices            │ ~ ~ ~  │ ◀ Continuous water
+             │ 6       3 │   (PMF: Exact chance)        │~ ~ ~ ~ │   level (PDF & CDF)
+              │   5   4  │                              │________│
+               ╰─────────╯                              0    x   3
+        </pre>
+    </div>
 
-        <div class="warning-box">
-            <strong>⚠️ The Continuous PDF Paradox ($P(X = x) = 0$):</strong><br>
-            For a continuous variable, the probability of selecting an exact infinite-precision number (e.g. $1.75000000\dots$) is strictly zero! We can only measure probability over an interval:
-            <p>$$P(a \le X \le b) = \int_a^b f_X(x) \, dx$$</p>
-            <em>Note: The density $f_X(x)$ can exceed 1.0, but the total integrated area is always 1.0!</em>
-        </div>
-    </section>
+    <!-- SYMBOL DECODER TABLE -->
+    <h2>📋 2. Mathematical Symbol Decoder Table</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Pronunciation</th>
+                <th>Plain English Meaning</th>
+                <th>Concrete Real-World Analogy / Flashcard Example</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$X$</td>
+                <td>"capital X"</td>
+                <td>Random Variable rule mapping outcomes to numbers</td>
+                <td>Game referee awarding $+10$ points for coins and $-5$ for traps</td>
+            </tr>
+            <tr>
+                <td>$x$</td>
+                <td>"little x"</td>
+                <td>Specific numerical value that could occur</td>
+                <td>Score displayed on the TV screen ($x = 4$)</td>
+            </tr>
+            <tr>
+                <td>$p_X(x)$</td>
+                <td>"p of x"</td>
+                <td>PMF: exact probability of discrete value $P(X = x)$</td>
+                <td>Slices of birthday cake handed out to kids</td>
+            </tr>
+            <tr>
+                <td>$f_X(x)$</td>
+                <td>"f of x"</td>
+                <td>PDF: probability density (height) of continuous curve</td>
+                <td>Elevation profile of a sand dune at position $x$</td>
+            </tr>
+            <tr>
+                <td>$F_X(x)$</td>
+                <td>"capital F of x"</td>
+                <td>CDF: accumulated probability up to $x$: $P(X \le x)$</td>
+                <td>Loading progress bar filling from 0% to 100%</td>
+            </tr>
+            <tr>
+                <td>$F^{-1}(u)$</td>
+                <td>"F inverse of u"</td>
+                <td>Inverse CDF (Quantile function)</td>
+                <td>Setting progress bar to 50% and finding current level</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <section>
-        <h2>3. The Cumulative Distribution Function (CDF)</h2>
-        <p>The CDF $F_X(x) = P(X \le x)$ connects to the PDF through calculus:</p>
-        <p>$$F_X(x) = \int_{-\infty}^x f_X(t) \, dt \quad \Longleftrightarrow \quad f_X(x) = \frac{d}{dx} F_X(x)$$</p>
-    </section>
+    <!-- CONTINUOUS PDF INTEGRAL -->
+    <h2>3. Continuous Probability as Area Under the Curve</h2>
+    $$P(a \le X \le b) = \int_a^b \underbrace{f_X(x)}_{\text{Curve height}} \underbrace{dx}_{\text{Slice width}} = \underbrace{F_X(b)}_{\text{Accumulated at } b} - \underbrace{F_X(a)}_{\text{Accumulated at } a}$$
+    <p>🧒 <strong>What the math is actually doing:</strong> We integrate (sum up) thin rectangular slices under the density curve to find the total probability between markers $a$ and $b$.</p>
 
-    <section>
-        <h2>4. Inverse Transform Sampling</h2>
-        <div class="tip-box">
-            <strong>How Computers Sample from Distributions:</strong><br>
-            If $U \sim \text{Uniform}(0, 1)$, then $X = F^{-1}(U)$ follows the exact target distribution!
-        </div>
-        <p>For an Exponential distribution with parameter $\lambda$ ($F(x) = 1 - e^{-\lambda x}$):</p>
-        <pre><code>import random
-import math
+    <!-- INVERSE TRANSFORM SAMPLING -->
+    <h2>4. Inverse Transform Sampling: Generating AI Data</h2>
+    <div class="tip-box">
+        <strong>How Computers Sample Distributions:</strong>
+        <ol>
+            <li>Generate flat random number $U \sim \text{Uniform}(0, 1)$.</li>
+            <li>Invert through the CDF: $\mathbf{X = F^{-1}(U)}$.</li>
+        </ol>
+        The resulting numbers follow the exact target probability distribution!
+    </div>
 
-def sample_exponential(lambda_param: float) -> float:
-    # Inverse CDF: x = -ln(1 - u) / lambda
-    u = random.random()
-    return -math.log(1.0 - u) / lambda_param</code></pre>
-    </section>
+    <p style="margin-top: 2rem;">
+        <a href="exercises_and_solutions.html" class="back-link">Go to Exercises & Detailed Solutions →</a>
+    </p>
 
 </body>
 </html>
-
