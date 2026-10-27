@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.1: World Models & Latent Dynamics — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #818cf8;
+      --primary-hover: #a5b4fc;
+      --badge-bg: #312e81;
+      --badge-text: #c7d2fe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="../index.html" class="back-link">&larr; Back to Phase 35 Index</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.1</span>
+    <h1>World Models &amp; Latent Dynamics</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Representing the physical world inside neural latent manifolds: Ha &amp; Schmidhuber, Hafner's DreamerV1-V3, LeCun's JEPA, and latent imagination rollouts.
+    </p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>
+        Imagine you are standing at the top of a steep skateboard ramp. Before your wheels even touch the surface, you can close your eyes and "play a video" in your head:
+      </p>
+      <ul>
+        <li>You imagine yourself leaning forward.</li>
+        <li>You feel your virtual balance shifting as speed builds.</li>
+        <li>You picture what will happen if you tilt your board too far to the left: you would scrape against the railing and fall.</li>
+        <li>You decide to keep your weight centered instead.</li>
+      </ul>
+      <p>
+        You didn't have to crash in the real world 500 times to figure out how to avoid falling. You have a <strong>mental simulator of reality</strong> inside your head. You don't simulate every single atom of the skateboard or every single photon entering your eyes. Instead, your brain boils the world down to a few essential variables—balance, velocity, ramp slope, friction—and rolls forward your possible future moves in this compact mental space.
+      </p>
+      <p>
+        In modern research AI, this is a <strong>World Model</strong>. Instead of trial-and-error in real reality, an agent builds an internal <strong>recurrent latent dynamics model</strong>, dreaming millions of alternative futures inside its own neural network.
+      </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Mathematical Entity</th>
+          <th>Dimensionality</th>
+          <th>Operational Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathbf{x}_t$</td>
+          <td>Observation Vector / Image</td>
+          <td>$\mathbb{R}^D$ ($D \gg 1$)</td>
+          <td>High-dimensional sensory observation (e.g. pixels or radar rays).</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{a}_t$</td>
+          <td>Action Vector</td>
+          <td>$\mathbb{R}^A$</td>
+          <td>Control action applied by agent at time step $t$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{z}_t$</td>
+          <td>Stochastic Latent State</td>
+          <td>$\mathbb{R}^d$ ($d \ll D$)</td>
+          <td>Compact bottleneck state capturing essential physical factors.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{h}_t$</td>
+          <td>Deterministic Recurrent State</td>
+          <td>$\mathbb{R}^H$</td>
+          <td>Hidden state of GRU/LSTM tracking multi-step temporal history.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{s}_t$</td>
+          <td>Combined Model State</td>
+          <td>$(\mathbf{h}_t, \mathbf{z}_t)$</td>
+          <td>Complete model state in Recurrent State Space Models (RSSM).</td>
+        </tr>
+        <tr>
+          <td>$q_\phi(\mathbf{z}_t \mid \mathbf{h}_t, \mathbf{x}_t)$</td>
+          <td>Posterior Representation Model</td>
+          <td>Density</td>
+          <td>Encoder-inferred state given observation $\mathbf{x}_t$ and history $\mathbf{h}_t$.</td>
+        </tr>
+        <tr>
+          <td>$p_\theta(\mathbf{z}_t \mid \mathbf{h}_t)$</td>
+          <td>Prior Transition Dynamics</td>
+          <td>Density</td>
+          <td>Latent dynamics prediction of next state without seeing future pixels.</td>
+        </tr>
+        <tr>
+          <td>$p_\theta(r_t \mid \mathbf{h}_t, \mathbf{z}_t)$</td>
+          <td>Reward Predictor Head</td>
+          <td>Density</td>
+          <td>Predicts scalar environment reward directly in latent space.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Architecture &amp; The Latent Variational Bound (ELBO)</h2>
+    <p>
+      The agent trains its internal world model by maximizing the Evidence Lower Bound (ELBO) over trajectory sequences $\tau = (\mathbf{x}_{1:T}, \mathbf{a}_{1:T}, r_{1:T})$:
+    </p>
+    $$\ln p(\mathbf{x}_{1:T}, r_{1:T} \mid \mathbf{a}_{1:T}) \ge \mathbb{E}_{q_\phi} \left[ \sum_{t=1}^T \underbrace{\ln p_\theta(\mathbf{x}_t \mid \mathbf{h}_t, \mathbf{z}_t)}_{\text{Sensory Reconstruction}} + \underbrace{\ln p_\theta(r_t \mid \mathbf{h}_t, \mathbf{z}_t)}_{\text{Reward Prediction}} - \underbrace{D_{\text{KL}}\left(q_\phi(\mathbf{z}_t \mid \mathbf{h}_t, \mathbf{x}_t) \parallel p_\theta(\mathbf{z}_t \mid \mathbf{h}_t)\right)}_{\text{Information Bottleneck Dynamics Penalty}} \right]$$
+
+    <pre>
+Deterministic Path:   h_{t-1} ──────► GRU(h_{t-1}, z_{t-1}, a_{t-1}) ──────► h_t
+                                                 ▲
+                                                 │
+Stochastic Path:      z_{t-1} ──────────────────┴──────────► p(z_t | h_t) [Prior]
+                                                                     │  KL Divergence
+Observation:                                       x_t ────► q(z_t | h_t, x_t) [Posterior]
+    </pre>
+
+    <h2>4. JEPA: Why Latent Space Beats Pixel Space</h2>
+    <p>
+      Yann LeCun's <strong>Joint Embedding Predictive Architecture (JEPA)</strong> overcomes the critical drawback of pixel generation: unpredictable background entropy. If a tree has fluttering leaves or water ripples on a puddle, a pixel-predictive model wastes 95% of its network parameters trying to reconstruct high-frequency noise.
+    </p>
+    <p>
+      JEPA uses an invariance encoder to project $\mathbf{x}_t \to \mathbf{s}_t$ and predicts directly in $\mathbb{R}^d$ using energy-based metric losses, ignoring chaotic visual noise.
+    </p>
+
+    <h2>5. Latent Trajectory Planning (Model Predictive Control)</h2>
+    <p>
+      Once trained, the agent searches for optimal actions using the <strong>Cross-Entropy Method (CEM)</strong> in latent space:
+    </p>
+    <ol>
+      <li>Encode the current observation $\mathbf{z}_0 = E(\mathbf{x}_0)$.</li>
+      <li>Sample $K$ candidate action trajectories of length $H$.</li>
+      <li>Roll out future latent states $\mathbf{z}_{t+1} = f(\mathbf{z}_t, \mathbf{a}_t)$ and accumulate predicted rewards $\sum_{t=0}^H \gamma^t \hat{r}_t$.</li>
+      <li>Refit the action distribution to the top $15\%$ elite trajectories.</li>
+      <li>Execute the first optimal action $\mathbf{a}_0^*$ in the real environment.</li>
+    </ol>
+
+    <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" class="btn">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../02_test_time_compute_and_reasoning_search/lecture.html" class="btn" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border);">Next Topic: Test-Time Compute &rarr;</a>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

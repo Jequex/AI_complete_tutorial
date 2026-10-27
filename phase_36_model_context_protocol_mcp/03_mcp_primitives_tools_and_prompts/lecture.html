@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 03: MCP Primitives — Tools &amp; Prompts</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; margin: 0.5rem 0; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; color: var(--text); }
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--border); padding: 0.75rem 1rem; text-align: left; }
+    th { background-color: var(--bg-card); color: var(--primary); font-weight: 700; }
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.2rem;
+      border-radius: 0.6rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    p code, li code {
+      background: var(--bg-card);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      border: 1px solid var(--border);
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <a href="../index.html" class="back-link">← Back to Phase 36 Overview</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </div>
+    <h1>Topic 03: MCP Primitives — Tools &amp; Prompts</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">JSON Schema parameter contracts, tool execution error segregation, and user-driven prompt templates.</p>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuitive Analogy: The Robot's Hands vs. Recipe Cards</h2>
+    <p>
+      In Topic 02, we gave the robot eyes to read books in the library (<strong>Resources</strong>). But reading a recipe doesn't bake the cake!
+    </p>
+    <ul>
+      <li><strong>Tools (The Robot's Hands):</strong> Let the robot stir the pot and turn on the oven. But handing a robot hot tools requires a safety contract (<strong>JSON Schema</strong>). If the oven has an error, the robot reports back calmly rather than blowing up the kitchen.</li>
+      <li><strong>Prompts (The Recipe Cards):</strong> Reusable instruction cards stored in a binder (e.g. <code>/bake_cake</code>). The user selects a card, fills in variables (<code>flavor="vanilla"</code>), and hands the plan to the assistant.</li>
+    </ul>
+
+    <h2>2. Complete Protocol Symbol Glossary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol / Term</th>
+          <th>Protocol Method / Field</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\text{tools/list}$</td>
+          <td>Catalog RPC</td>
+          <td>Lists all available tools, their descriptions, and parameter JSON schemas.</td>
+        </tr>
+        <tr>
+          <td>$\text{tools/call}$</td>
+          <td>Invocation RPC</td>
+          <td>Executes a tool with validated parameters. Returns <code>content</code> and <code>isError</code>.</td>
+        </tr>
+        <tr>
+          <td>$\text{isError}$</td>
+          <td>Boolean Field</td>
+          <td>Set to <code>true</code> when execution or schema validation fails. Prevents protocol drop.</td>
+        </tr>
+        <tr>
+          <td>$\text{prompts/list}$</td>
+          <td>Catalog RPC</td>
+          <td>Lists user-accessible prompt workflow templates and arguments.</td>
+        </tr>
+        <tr>
+          <td>$\text{prompts/get}$</td>
+          <td>Template Resolution RPC</td>
+          <td>Injects arguments into template to construct multi-turn LLM messages.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Tool Execution &amp; Error Handling Flow</h2>
+    <pre>
+┌────────────────────────────────────────────────────────────────────────┐
+│                              HOST RUNTIME                              │
+│                                                                        │
+│   1. Tool Discovery:                                                   │
+│      Client ─── tools/list ───► Server                                 │
+│      Client ◄── {tools: [{name: "exec_sql", inputSchema: ...}]} ───────│
+│                                                                        │
+│   2. Model Reasoning:                                                  │
+│      Host passes tool JSON schemas into LLM function calling context.  │
+│      LLM emits tool invocation intent: {"name": "exec_sql", ...}       │
+│                                                                        │
+│   3. Host Permission Gate:                                             │
+│      [HUMAN-IN-THE-LOOP APPROVAL / SECURITY POLICY CHECK]              │
+│                                                                        │
+│   4. Execution Dispatch:                                               │
+│      Client ─── tools/call {name: "exec_sql", arguments: {...}} ──────►│
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ JSON-RPC 2.0
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                              MCP SERVER                                │
+│                                                                        │
+│   Step A: Validate arguments against JSON Schema:                      │
+│           type checks, required field checks, enum checks.             │
+│   Step B: If invalid:                                                  │
+│           return {content: [{text: "Schema error"}], isError: true}    │
+│   Step C: Execute tool inside sandboxed boundary.                      │
+│   Step D: Catch any runtime exception:                                 │
+│           return {content: [{text: str(exc)}], isError: true}          │
+│   Step E: Success:                                                     │
+│           return {content: [{type: "text", text: result}],             │
+│                   isError: false}                                      │
+└────────────────────────────────────────────────────────────────────────┘
+    </pre>
+
+    <h2>4. The Crucial Difference: JSON-RPC Error vs. Tool <code>isError</code></h2>
+    <div class="callout">
+      <strong>Core Architectural Law:</strong> A tool execution failure (e.g. database query syntax error, division by zero, invalid parameter) is returned inside <code>result</code> with <code>"isError": true</code>. It is <strong>NOT</strong> returned as a JSON-RPC <code>-32603</code> error object. This allows the LLM to inspect the error message and adjust its reasoning without severing the transport session.
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('theme', target);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  </script>
+</body>
+</html>

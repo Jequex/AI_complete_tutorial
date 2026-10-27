@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 33.4: Exercises &amp; Solutions — Sparse Autoencoders</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 33.4 Lecture</a>
+    <h1>Topic 33.4: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering high-dimensional spherical packing, L1 scaling degeneracies, and dead latents.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: High-Dimensional Almost-Orthogonal Packing</h3>
+      <p>
+        In $\mathbb{R}^d$, analyze the number of unit vectors with bounded interference $|\langle \mathbf{u}_i, \mathbf{u}_j \rangle| \le \epsilon$.
+      </p>
+      <ol>
+        <li>What is the maximum number of strictly orthogonal vectors?</li>
+        <li>State the asymptotic scaling of almost-orthogonal vectors $M(d, \epsilon)$ under the Johnson-Lindenstrauss lemma.</li>
+        <li>Evaluate this capacity for $d = 4096$ and $\epsilon = 0.1$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Strict Orthogonality</h4>
+          <p>$M_{\text{orth}} = d$ (the dimensionality of the vector space).</p>
+
+          <h4>2. Exponential Scaling</h4>
+          $$M(d, \epsilon) \ge \exp(c \cdot \epsilon^2 d)$$
+          <p>The packing capacity grows exponentially with dimension $d$ when small cross-talk is permitted.</p>
+
+          <h4>3. Capacity at $d = 4096$</h4>
+          <p>With $\epsilon^2 d = 40.96$, $e^{40.96} \approx 6 \times 10^{17}$. Millions of sparse concepts can easily coexist in superposition with negligible pairwise interference.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Scale-Invariance Degeneracy of the L1 Penalty</h3>
+      <p>
+        Consider $\mathcal{L} = \|\mathbf{x} - W_{\text{dec}} \mathbf{z}\|_2^2 + \lambda \sum_j |z_j|$ without norm constraints.
+      </p>
+      <ol>
+        <li>Show that scaling $W_{\text{dec}} \leftarrow \alpha W_{\text{dec}}$ and $\mathbf{z} \leftarrow \frac{1}{\alpha}\mathbf{z}$ preserves reconstruction error.</li>
+        <li>What happens to the $L_1$ penalty as $\alpha \to \infty$?</li>
+        <li>Why does fixing $\|\mathbf{w}_j^{\text{dec}}\|_2 = 1$ resolve this degeneracy?</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Reconstruction Invariance</h4>
+          $$\hat{\mathbf{x}}_{\text{new}} = (\alpha W_{\text{dec}}) \left(\frac{1}{\alpha}\mathbf{z}\right) = W_{\text{dec}} \mathbf{z} = \hat{\mathbf{x}}$$
+
+          <h4>2. Vanishing Sparsity Cost</h4>
+          $$\lim_{\alpha \to \infty} \lambda \sum_{j=1}^D \left| \frac{z_j}{\alpha} \right| = 0$$
+          <p>The optimizer blows up decoder norms while driving latents toward zero, bypassing the sparsity constraint.</p>
+
+          <h4>3. Normalization Fix</h4>
+          <p>Constraining decoder columns to unit norm $\|\mathbf{w}_j^{\text{dec}}\|_2 = 1$ pins the latent activations to the scale of the data, enforcing genuine sparsity.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Dead Latents and Shrinkage Bias</h3>
+      <p>
+        Analyze training failure modes in ReLU Sparse Autoencoders.
+      </p>
+      <ol>
+        <li>How does an excessively large $\lambda$ cause permanently dead latents?</li>
+        <li>Define shrinkage bias caused by the $L_1$ gradient.</li>
+        <li>Name two modern architectural alternatives that eliminate shrinkage bias.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Dead Latent Genesis</h4>
+          <p>When negative biases cause pre-activations to drop $\le 0$, $\text{ReLU}'(u) = 0$ kills gradients completely, leaving the neuron permanently un-updated.</p>
+
+          <h4>2. Shrinkage Bias</h4>
+          <p>The constant $+\lambda$ subgradient systematically shrinks active feature magnitudes by $\approx \lambda / 2$, distorting reconstruction.</p>
+
+          <h4>3. Modern Fixes</h4>
+          <p><strong>TopK SAEs:</strong> Enforce hard top-$k$ sparsity with zero shrinkage. <strong>Gated SAEs:</strong> Decouple the binary gating decision from the feature magnitude pathway.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

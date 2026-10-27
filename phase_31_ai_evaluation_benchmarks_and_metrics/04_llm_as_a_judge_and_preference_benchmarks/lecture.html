@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 04: LLM-as-a-Judge &amp; Preference Benchmarks</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --badge-bg: #fef3c7;
+      --badge-text: #b45309;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #fbbf24;
+        --primary-hover: #fde68a;
+        --badge-bg: #78350f;
+        --badge-text: #fef3c7;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .alert {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 31 Hub</a><br>
+    <span class="badge">Topic 04 &bull; Module 31.4</span>
+    <h1>LLM-as-a-Judge &amp; Preference Benchmarks</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Pairwise Evaluation, Judge Systematic Biases, Position-Swapping De-Biasing, and Bradley-Terry Elo Rating Tournaments.</p>
+  </header>
+
+  <section>
+    <h2>1. The 12-Year-Old Intuition: The Biased Science Fair Judge</h2>
+    <div class="card">
+      <p>Imagine a school science fair with 100 student projects. Asking a judge to score each project from 1 to 10 is notoriously noisy: a judge is generous at 9:00 AM after morning coffee and harsh at 4:00 PM when tired.</p>
+      <p>Pairwise duels (putting Project A and Project B side-by-side and asking <em>"Which is better?"</em>) are vastly more reliable. But judges have human-like flaws:
+        <ul>
+          <li><strong>Position Bias:</strong> They pick the project on the left 65% of the time.</li>
+          <li><strong>Verbosity Bias:</strong> They fall for 20-page posters with pretty pictures over concise, brilliant 1-page solutions.</li>
+          <li><strong>Self-Enhancement Bias:</strong> They prefer students whose style matches their own.</li>
+        </ul>
+      </p>
+      <p>To eliminate bias, benchmarks like <strong>LMSYS Chatbot Arena</strong> swap positions (testing A vs B and B vs A) and use <strong>Bradley-Terry Elo ratings</strong> to determine global rankings.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. The Bradley-Terry Rating Model</h2>
+    <p>Given models $\mathcal{M}_A$ and $\mathcal{M}_B$ with latent Elo ratings $R_A, R_B \in \mathbb{R}$, the expected probability that Model $A$ defeats Model $B$ is:</p>
+    $$\boxed{E_A = \mathbb{P}(\mathcal{M}_A \succ \mathcal{M}_B) = \frac{1}{1 + 10^{(R_B - R_A)/400}}}$$
+    <p>When the actual match result $S_A \in \{1.0 \text{ (win)}, 0.5 \text{ (tie)}, 0.0 \text{ (loss)}\}$ is recorded:</p>
+    $$\boxed{R_A' = R_A + K(S_A - E_A), \qquad R_B' = R_B + K(S_B - E_B)}$$
+    <p>Because $S_B = 1 - S_A$ and $E_B = 1 - E_A$, rating points are strictly conserved: $R_A' + R_B' = R_A + R_B$.</p>
+  </section>
+
+  <section>
+    <h2>3. Systematic Judge Biases &amp; Bidirectional Swapping</h2>
+    <div class="card">
+      <p><strong>Bidirectional Swapping Protocol:</strong></p>
+      <ol>
+        <li>Pass 1: Prompt with <code>[Response 1 = Model A, Response 2 = Model B]</code> &rarr; Outcome $J_1$.</li>
+        <li>Pass 2: Prompt with <code>[Response 1 = Model B, Response 2 = Model A]</code> &rarr; Outcome $J_2$.</li>
+      </ol>
+      $$\text{Final Result} = \begin{cases} 
+      \text{A Wins} & J_1 = A \text{ and } J_2 = A \\
+      \text{B Wins} & J_1 = B \text{ and } J_2 = B \\
+      \text{Tie} & \text{otherwise (position-dependent inconsistency)}
+      \end{cases}$$
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Offline Maximum Likelihood Estimation (MLE)</h2>
+    <p>Rather than online sequence-dependent Elo updates, large-scale leaderboards solve for the global Bradley-Terry vector $\boldsymbol{\pi}$ by maximizing total tournament log-likelihood:</p>
+    $$\boxed{\ln \mathcal{L}(\boldsymbol{\pi}) = \sum_{i < j} \left[ W_{ij} \ln \left(\frac{\pi_i}{\pi_i + \pi_j}\right) + W_{ji} \ln \left(\frac{\pi_j}{\pi_i + \pi_j}\right) \right]}$$
+    <p>Using minorization-maximization (MM algorithm), the update iteration is:</p>
+    $$\pi_i^{(t+1)} = \frac{W_i}{\sum_{j \ne i} \frac{W_{ij} + W_{ji}}{\pi_i^{(t)} + \pi_j^{(t)}}}$$
+  </section>
+
+  <div class="actions">
+    <a href="exercises_and_solutions.html" class="btn">View Exercises &amp; Solutions &rarr;</a>
+    <a href="experiment.py" class="btn btn-secondary">Inspect Python Experiment</a>
+  </div>
+
+</body>
+</html>

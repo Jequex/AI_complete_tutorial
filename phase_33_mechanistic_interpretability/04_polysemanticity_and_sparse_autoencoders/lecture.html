@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 04: Polysemanticity &amp; Sparse Autoencoders — Phase 33</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+      color: var(--primary);
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 33 Overview</a>
+    <div><span class="badge">Topic 33.4</span></div>
+    <h1>Polysemanticity &amp; Sparse Autoencoders (SAEs)</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      The Superposition Hypothesis, overcomplete dictionary learning, and extracting monosemantic latent features with L1 regularization.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+      <p>
+        Imagine a small suitcase that only holds 2 books ($d = 2$). But you want to pack 5 books ($D = 5$). You tear the covers off and interleave the pages at slight angles so that all 5 fit.
+      </p>
+      <p>
+        When you reach into a pocket, you grab a page with Harry Potter, calculus, and a cookie recipe all mixed together! That is <strong>Polysemanticity</strong>: a single neuron responding to multiple unrelated concepts.
+      </p>
+      <p>
+        Why does this work? Because you only read one book at a time (<strong>Feature Sparsity</strong>). The network packs thousands of concepts into high-dimensional space by making them almost perpendicular. A <strong>Sparse Autoencoder (SAE)</strong> is the machine that untangles this suitcase into clean, separate, individual concepts.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Mathematical Symbol Decoder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Entity</th>
+            <th>Domain</th>
+            <th>Interpretability Significance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$d$</td>
+            <td>Residual Stream Dimension</td>
+            <td>Integer</td>
+            <td>The bottleneck dimension of the model activations (e.g., 4096).</td>
+          </tr>
+          <tr>
+            <td>$D$</td>
+            <td>Dictionary Feature Count</td>
+            <td>Integer, $D \gg d$</td>
+            <td>Overcomplete feature space dimension (e.g., $16d$ or $32d$).</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{v}_k$</td>
+            <td>Feature Direction Vector</td>
+            <td>$\mathbb{R}^d, \|\mathbf{v}_k\|=1$</td>
+            <td>True ground-truth latent concept vector packed in superposition.</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{z}$</td>
+            <td>SAE Latent Code</td>
+            <td>$\mathbb{R}^D$</td>
+            <td>Sparse feature activations: $\mathbf{z} = \text{ReLU}(W_{\text{enc}}\mathbf{x} + \mathbf{b}_{\text{enc}})$.</td>
+          </tr>
+          <tr>
+            <td>$W_{\text{dec}}$</td>
+            <td>SAE Decoder Matrix</td>
+            <td>$\mathbb{R}^{d \times D}$</td>
+            <td>Dictionary atoms; columns are constrained to $\|\mathbf{w}_j^{\text{dec}}\|_2 = 1$.</td>
+          </tr>
+          <tr>
+            <td>$\lambda$</td>
+            <td>$L_1$ Sparsity Weight</td>
+            <td>Real scalar $> 0$</td>
+            <td>Loss coefficient penalizing non-zero latent feature activations.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. The Sparse Autoencoder Objective</h2>
+      <p>
+        An SAE maps polysemantic activations $\mathbf{x} \in \mathbb{R}^d$ into an overcomplete sparse latent representation $\mathbf{z} \in \mathbb{R}^D$ and reconstructs $\hat{\mathbf{x}}$:
+      </p>
+      $$\mathbf{z} = \text{ReLU}(W_{\text{enc}} \mathbf{x} + \mathbf{b}_{\text{enc}}), \quad \hat{\mathbf{x}} = W_{\text{dec}} \mathbf{z} + \mathbf{b}_{\text{dec}}$$
+      <p>The optimization loss is:</p>
+      $$\boxed{\mathcal{L}_{\text{SAE}} = \frac{1}{B} \sum_{i=1}^B \left( \|\mathbf{x}^{(i)} - \hat{\mathbf{x}}^{(i)}\|_2^2 + \lambda \sum_{j=1}^D |z_j^{(i)}| \right)}$$
+      <div class="callout">
+        <strong>Unit-Norm Constraint:</strong> The columns of $W_{\text{dec}}$ must be explicitly normalized to $\|\mathbf{w}_j^{\text{dec}}\|_2 = 1$ to prevent the optimizer from arbitrarily shrinking $\mathbf{z}$ while blowing up $W_{\text{dec}}$.
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Python Experiment Quickstart</h2>
+      <pre class="code-block">python3 phase_33_mechanistic_interpretability/04_polysemanticity_and_sparse_autoencoders/experiment.py</pre>
+      <div style="margin-top: 1.5rem;">
+        <a href="exercises_and_solutions.html" class="back-link" style="font-size: 1.05rem;">Go to Topic 04 Exercises &amp; Solutions &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

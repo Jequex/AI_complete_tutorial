@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 03: Attention Head Mechanisms &amp; Induction Heads — Phase 33</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+      color: var(--primary);
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 33 Overview</a>
+    <div><span class="badge">Topic 33.3</span></div>
+    <h1>Attention Head Mechanisms &amp; Induction Heads</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Deconstructing Transformer Circuits: QK-circuits, OV-circuits, and the two-layer induction engine powering in-context learning.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+      <p>
+        Imagine a card game where the dealer lays down:
+        <code>[Red Circle] [Blue Triangle] [Green Square] ... [Red Circle]</code>.
+        What comes next? Your brain immediately responds: <em>"Blue Triangle!"</em>
+      </p>
+      <p>
+        Transformers accomplish this with a 2-head team:
+      </p>
+      <ul>
+        <li><strong>Player 1 (Layer 0 Previous-Token Head):</strong> Every token writes down a note: <em>"The token right before me was X."</em></li>
+        <li><strong>Player 2 (Layer 1 Induction Head):</strong> When token X appears again, Player 2 searches the notes for whoever wrote <em>"Previous was X"</em>, attends to that token, and copies it to the output!</li>
+      </ul>
+      <div class="callout">
+        <strong>The Breakthrough:</strong> In-context learning $[A][B] \dots [A] \to [B]$ is not statistical magic; it is an exact mechanical 2-layer circuit!
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Mathematical Symbol Decoder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Entity</th>
+            <th>Domain</th>
+            <th>Role in Transformer Circuits</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$W_{QK} = W_Q^\top W_K$</td>
+            <td>QK-Circuit Matrix</td>
+            <td>$\mathbb{R}^{d \times d}$</td>
+            <td>Bilinear operator computing attention logits: $\alpha_{i, j} = \mathbf{x}_i^\top W_{QK} \mathbf{x}_j / \sqrt{d_k}$.</td>
+          </tr>
+          <tr>
+            <td>$W_{OV} = W_O W_V$</td>
+            <td>OV-Circuit Matrix</td>
+            <td>$\mathbb{R}^{d \times d}$</td>
+            <td>Linear operator defining what representation is copied to the destination: $\sum_j A_{i, j} W_{OV} \mathbf{x}_j$.</td>
+          </tr>
+          <tr>
+            <td>$H_{0, \text{prev}}$</td>
+            <td>Previous-Token Head</td>
+            <td>Layer 0</td>
+            <td>Copies token identity at $j-1$ into the residual stream at position $j$.</td>
+          </tr>
+          <tr>
+            <td>$H_{1, \text{ind}}$</td>
+            <td>Induction Head</td>
+            <td>Layer 1</td>
+            <td>Matches current token $i$ with previous-token information to attend to $j$ and predict the subsequent token.</td>
+          </tr>
+          <tr>
+            <td>$W_U W_{OV} W_E$</td>
+            <td>End-to-End Direct Path</td>
+            <td>$\mathbb{R}^{V \times V}$</td>
+            <td>Token-to-token projection matrix; positive eigenvalues indicate direct copying behavior.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. The QK and OV Mathematical Decomposition</h2>
+      <p>Anthropic's Transformer Circuits framework divides attention heads into two independent circuits:</p>
+      $$\text{Attention Logits: } \alpha_{i, j} = \frac{\mathbf{x}_i^\top W_{QK} \mathbf{x}_j}{\sqrt{d_{\text{head}}}}, \quad A_{i, :} = \text{softmax}(\boldsymbol{\alpha}_{i, :})$$
+      $$\text{Residual Stream Contribution: } \Delta \mathbf{x}_i = \sum_{j} A_{i, j} W_{OV} \mathbf{x}_j$$
+      <p>
+        Notice that $W_{QK}$ controls <em>where information is routed</em>, while $W_{OV}$ controls <em>what information is transported</em>.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Circuit Composition: Why Two Layers Are Required</h2>
+      <div class="card">
+        <h3>The 1-Layer Impossibility Theorem</h3>
+        <p>
+          A single-layer model cannot implement $[A][B] \dots [A] \to [B]$. If it attends to $[A]$, it can only copy $[A]$. To predict $[B]$, it must attend to $[B]$ based on the fact that $[B]$ follows $[A]$.
+        </p>
+        <p>
+          Layer 0 writes the identity of token $j-1$ into position $j$. Layer 1's $QK$-circuit contains the composite interaction:
+        </p>
+        $$\alpha_{i, j} \supset [A]^\top \left( W_E^\top (W_Q^{(1)})^\top W_K^{(1)} W_{OV}^{(0)} W_E \right) [A]$$
+        <p>
+          This positive interaction causes the induction head at the second $[A]$ to attend directly to $[B]$ with near $100\%$ probability!
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>5. Python Experiment Quickstart</h2>
+      <pre class="code-block">python3 phase_33_mechanistic_interpretability/03_attention_head_mechanisms_and_induction_heads/experiment.py</pre>
+      <div style="margin-top: 1.5rem;">
+        <a href="exercises_and_solutions.html" class="back-link" style="font-size: 1.05rem;">Go to Topic 03 Exercises &amp; Solutions &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

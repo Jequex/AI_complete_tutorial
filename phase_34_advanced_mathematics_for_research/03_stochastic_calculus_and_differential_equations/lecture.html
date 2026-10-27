@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.3: Stochastic Calculus &amp; Differential Equations — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.25rem; font-weight: 800; margin: 0 0 0.5rem; letter-spacing: -0.025em; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 1.25rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="../index.html" class="back-link">&larr; Back to Phase 34 Portal</a>
+      <span class="badge">Topic 34.3 &bull; Probability &amp; SDEs</span>
+      <h1>Stochastic Calculus &amp; Differential Equations</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <div class="callout">
+      <strong>Core Research Question:</strong> Why does stochastic differentiation require the non-vanishing $(dX_t)^2 = \sigma^2 dt$ correction term in Ito's Lemma, and how do continuous score-based diffusion models reverse time to synthesize realistic data from Gaussian noise?
+    </div>
+
+    <h2>1. 12-Year-Old Intuition: The Drop of Dye in Water</h2>
+    <p>Imagine dropping a tiny drop of dark food coloring into a glass of warm water.</p>
+    <p>Under a high-power microscope, the dye molecules undergo violent, chaotic collisions with trillions of jiggling water molecules every microsecond. This jittery random walk is <strong>Brownian motion</strong>.</p>
+    <p>Now take two steps back and watch with your naked eye: the individual random jerks vanish! The dye spreads outwards in a smooth, calm, predictable cloud. The microscopic chaotic jiggle ($dX_t = \mu dt + \sigma dW_t$) manifests macroscopically as a smooth partial differential equation of probability density (the <strong>Fokker-Planck equation</strong>).</p>
+    <p>In modern generative AI, <strong>Diffusion Models</strong> (Stable Diffusion, Imagen) use this exact mathematical duality: they dissolve images into pure Gaussian noise with a forward SDE, and then synthesize brand new images from noise by running the microscopic movie backwards in time!</p>
+
+    <h2>2. Complete Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Entity</th>
+          <th>Domain</th>
+          <th>Operational Role in AI Research</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$W_t$</td>
+          <td>Wiener Process</td>
+          <td>Continuous random process</td>
+          <td>Standard Brownian motion; $W_t - W_s \sim \mathcal{N}(0, t - s)$.</td>
+        </tr>
+        <tr>
+          <td>$dW_t$</td>
+          <td>Brownian Increment</td>
+          <td>Differential</td>
+          <td>Infinitesimal white noise: $\mathbb{E}[dW_t] = 0$, $(dW_t)^2 = dt$.</td>
+        </tr>
+        <tr>
+          <td>$X_t$</td>
+          <td>Stochastic State</td>
+          <td>$\mathbb{R}^d$</td>
+          <td>Continuous latent state or sample path.</td>
+        </tr>
+        <tr>
+          <td>$\boldsymbol{\mu}(X_t, t)$</td>
+          <td>Drift Vector</td>
+          <td>$\mathbb{R}^d$</td>
+          <td>Deterministic velocity pulling the process along a trajectory.</td>
+        </tr>
+        <tr>
+          <td>$\boldsymbol{\sigma}(X_t, t)$</td>
+          <td>Diffusion Matrix</td>
+          <td>$\mathbb{R}^{d \times m}$</td>
+          <td>Noise amplitude scaling the Brownian fluctuations.</td>
+        </tr>
+        <tr>
+          <td>$p(x, t)$</td>
+          <td>Probability Density</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Fokker-Planck distribution of particle location over time.</td>
+        </tr>
+        <tr>
+          <td>$\nabla_x \log p_t(x)$</td>
+          <td>Stein Score Function</td>
+          <td>$\mathbb{R}^d$</td>
+          <td>Vector field pointing toward high-density regions of data.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{s}_\theta(x, t)$</td>
+          <td>Score Model</td>
+          <td>Neural Network</td>
+          <td>Approximator trained via Denoising Score Matching.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Ito's Lemma: The Second-Order Differential</h2>
+    <p>Because $(dW_t)^2 = dt$, the second derivative term in Taylor's series does not vanish when taking differentials of functions of stochastic processes:</p>
+    $$df(t, X_t) = \left( \frac{\partial f}{\partial t} + \mu \frac{\partial f}{\partial x} + \frac{1}{2} \sigma^2 \frac{\partial^2 f}{\partial x^2} \right) dt + \sigma \frac{\partial f}{\partial x} dW_t$$
+
+    <div class="callout">
+      <strong>Geometric Brownian Motion Proof:</strong><br>
+      For $dX_t = \mu X_t dt + \sigma X_t dW_t$, let $f(x) = \ln(x)$.<br>
+      $f'(x) = 1/x$, $f''(x) = -1/x^2$.<br>
+      Substituting into Ito's lemma:<br>
+      $$d(\ln X_t) = \left(\mu - \frac{1}{2}\sigma^2\right) dt + \sigma dW_t$$
+      Integrating from $0$ to $t$ gives the exact closed-form solution:<br>
+      $$X_t = X_0 \exp\left( \left(\mu - \frac{1}{2}\sigma^2\right)t + \sigma W_t \right)$$
+    </div>
+
+    <h2>4. The Fokker-Planck Equation &amp; Stationary Distributions</h2>
+    <p>For an SDE $dX_t = \mu(X_t, t)dt + \sigma(X_t, t)dW_t$, the probability density $p(x, t)$ evolves according to:</p>
+    $$\frac{\partial p(x, t)}{\partial t} = -\frac{\partial}{\partial x}\left[\mu(x, t) p(x, t)\right] + \frac{1}{2} \frac{\partial^2}{\partial x^2}\left[\sigma(x, t)^2 p(x, t)\right]$$
+    <p>For the Ornstein-Uhlenbeck process $dX_t = \theta(\mu - X_t)dt + \sigma dW_t$, the stationary density ($\partial p / \partial t = 0$) converges to:</p>
+    $$p_{\infty}(x) = \mathcal{N}\left(\mu, \frac{\sigma^2}{2\theta}\right)$$
+
+    <h2>5. Reverse-Time SDEs in Diffusion Models</h2>
+    <p>By Anderson's Theorem (1982) and Song et al. (2020), every forward diffusion SDE has an exact analytical reverse-time SDE:</p>
+    $$d\mathbf{x} = \left[ \mathbf{f}(\mathbf{x}, t) - g(t)^2 \nabla_{\mathbf{x}} \log p_t(\mathbf{x}) \right] dt + g(t) d\bar{\mathbf{w}}$$
+    <p>By training a neural network $\mathbf{s}_\theta(\mathbf{x}, t) \approx \nabla_{\mathbf{x}} \log p_t(\mathbf{x})$ using Denoising Score Matching, generative models invert the noise corruption process to produce high-resolution samples from pure Gaussian noise.</p>
+
+    <h2>6. Verified Pure Python Implementation</h2>
+    <p>Run the accompanying zero-dependency script to simulate Euler-Maruyama paths for GBM, verify Fokker-Planck stationary statistics, and execute reverse SDE score-based sampling:</p>
+    <pre class="code-block">python3 phase_34_advanced_mathematics_for_research/03_stochastic_calculus_and_differential_equations/experiment.py</pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 02: MCP Primitives — Resources &amp; Dynamic Context</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; margin: 0.5rem 0; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; color: var(--text); }
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--border); padding: 0.75rem 1rem; text-align: left; }
+    th { background-color: var(--bg-card); color: var(--primary); font-weight: 700; }
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.2rem;
+      border-radius: 0.6rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    p code, li code {
+      background: var(--bg-card);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      border: 1px solid var(--border);
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <a href="../index.html" class="back-link">← Back to Phase 36 Overview</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </div>
+    <h1>Topic 02: MCP Primitives — Resources &amp; Dynamic Context</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">URI schemes, RFC 6570 templates, real-time push subscriptions, and bounded context injection.</p>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuitive Analogy: The Magical Library Barcode Scanner</h2>
+    <p>
+      Imagine visiting an infinite library. If you tried to carry every book in your backpack, you would be crushed by the weight. Instead, each book, database sheet, and live news printer is stamped with a unique barcode (a <strong>URI</strong>).
+    </p>
+    <p>
+      Whenever your AI assistant needs facts, it scans the catalog, retrieves only the exact document required, and when a live news feed prints a new update, the librarian rings a chime so the assistant can re-read the page. In MCP, these uniform, read-only documents are called <strong>Resources</strong>.
+    </p>
+
+    <h2>2. Complete Protocol Symbol Glossary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol / Term</th>
+          <th>Protocol Method / Format</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{U}$</td>
+          <td>URI (RFC 3986)</td>
+          <td>Unique resource identifier (e.g. <code>file:///app.py</code>, <code>db://users/10</code>).</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{T}_{\text{URI}}$</td>
+          <td>RFC 6570 URI Template</td>
+          <td>Parameterized resource pattern with variable placeholders (<code>{var}</code>).</td>
+        </tr>
+        <tr>
+          <td>$\text{resources/list}$</td>
+          <td>Catalog RPC</td>
+          <td>Lists static resources available on the server with cursor-based pagination.</td>
+        </tr>
+        <tr>
+          <td>$\text{resources/read}$</td>
+          <td>Content Retrieval RPC</td>
+          <td>Returns content array containing UTF-8 <code>text</code> or Base64 <code>blob</code>.</td>
+        </tr>
+        <tr>
+          <td>$\text{resources/subscribe}$</td>
+          <td>Subscription RPC</td>
+          <td>Registers interest in receiving change events for a specific resource URI.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{N}_{\text{updated}}$</td>
+          <td><code>notifications/resources/updated</code></td>
+          <td>Push notification sent to subscribed clients when resource contents mutate.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Resource Architecture Diagram</h2>
+    <pre>
+┌────────────────────────────────────────────────────────────────────────┐
+│                              HOST CLIENT                               │
+│                                                                        │
+│  1. Discover Catalog:        resources/list                            │
+│  2. Read Document:           resources/read {uri: "file:///..."}       │
+│  3. Subscribe to Changes:    resources/subscribe {uri: "file:///..."}  │
+│  4. Receive Mutation Alert:  notifications/resources/updated           │
+└─────────────────────────────────┬──────────────────────────────────────┘
+                                  │ JSON-RPC 2.0
+                                  ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                              MCP SERVER                                │
+│                                                                        │
+│   ┌────────────────────────────────────────────────────────────────┐   │
+│   │ Resource Registry:                                             │   │
+│   │  • Static Resources:   file:///workspace/README.md             │   │
+│   │  • Dynamic Templates:  db://orders/{order_id}/summary          │   │
+│   │  • Binary Assets:      custom://assets/diagram.png (base64)    │   │
+│   └────────────────────────────────────────────────────────────────┘   │
+│   ┌────────────────────────────────────────────────────────────────┐   │
+│   │ Subscription Table:                                            │   │
+│   │  • URI -> Set(Client_IDs)                                      │   │
+│   └────────────────────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────────────────────┘
+    </pre>
+
+    <h2>4. Context Window Delimited Framing</h2>
+    <p>To safely incorporate resources into the prompt without vulnerability to prompt injection:</p>
+    <pre><code>System: You are an AI assistant. The following authoritative resources have been retrieved:
+
+--- BEGIN RESOURCE: file:///workspace/config.json (MIME: application/json) ---
+{
+  "environment": "production",
+  "max_workers": 16
+}
+--- END RESOURCE: file:///workspace/config.json ---
+
+User: How many workers are configured?</code></pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('theme', target);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.3: Exercises &amp; Solutions — Continual Learning</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #34d399;
+      --primary-hover: #6ee7b7;
+      --badge-bg: #064e3b;
+      --badge-text: #a7f3d0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 35.3 Lecture</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.3</span>
+    <h1>Exercises &amp; Solutions: Continual Learning</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering the expected Hessian-Fisher identity, quadratic equilibrium point derivations, and full vs diagonal Fisher memory bounds.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Equivalence of Expected Hessian and Fisher Information Matrix</h3>
+      <p>
+        Consider a model likelihood $p_\theta(y \mid x)$ and negative log-likelihood $\mathcal{L}(\boldsymbol{\theta}) = -\mathbb{E}[\ln p_\theta(y \mid x)]$.
+      </p>
+      <ol>
+        <li>Prove that under model expectation: $\mathbb{E}[-\nabla_\theta^2 \ln p_\theta(y \mid x)] = \mathbb{E}[\nabla_\theta \ln p_\theta(y \mid x) \nabla_\theta \ln p_\theta(y \mid x)^\top]$.</li>
+        <li>Explain why the empirical Fisher $\hat{\mathbf{F}}$ is guaranteed to be positive semi-definite everywhere.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Step-by-Step Proof</h4>
+          <p>Differentiating the identity $\int p_\theta(y \mid x) \, dy = 1$ gives $\int p_\theta(y \mid x) \nabla_\theta \ln p_\theta(y \mid x) \, dy = \mathbf{0}$.</p>
+          <p>Differentiating a second time using the product rule:</p>
+          $$\int \left[ \nabla_\theta p_\theta(y \mid x) \nabla_\theta \ln p_\theta(y \mid x)^\top + p_\theta(y \mid x) \nabla_\theta^2 \ln p_\theta(y \mid x) \right] dy = \mathbf{0}$$
+          <p>Substituting $\nabla_\theta p_\theta = p_\theta \nabla_\theta \ln p_\theta$ and taking expectations yields:</p>
+          $$\mathbb{E}[-\nabla_\theta^2 \ln p_\theta(y \mid x)] = \mathbb{E}[\nabla_\theta \ln p_\theta(y \mid x) \nabla_\theta \ln p_\theta(y \mid x)^\top] = \mathbf{F}_x$$
+
+          <h4>2. Positive Semi-Definiteness</h4>
+          <p>For any $\mathbf{v} \neq \mathbf{0}$, $\mathbf{v}^\top \hat{\mathbf{F}} \mathbf{v} = \frac{1}{N} \sum_i (\mathbf{v}^\top \mathbf{g}_i)^2 \ge 0$, ensuring the quadratic EWC penalty is strictly convex with a well-defined global minimum.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Analytical Equilibrium Point Under Quadratic Loss Surfaces</h3>
+      <p>
+        Let $\mathcal{L}_A(\boldsymbol{\theta}) = \frac{1}{2}(\boldsymbol{\theta} - \boldsymbol{\theta}_A^*)^\top \mathbf{F}_A (\boldsymbol{\theta} - \boldsymbol{\theta}_A^*)$ and $\mathcal{L}_B(\boldsymbol{\theta}) = \frac{1}{2}(\boldsymbol{\theta} - \boldsymbol{\theta}_B^*)^\top \mathbf{F}_B (\boldsymbol{\theta} - \boldsymbol{\theta}_B^*)$.
+      </p>
+      <ol>
+        <li>Derive the closed-form equilibrium $\boldsymbol{\theta}_{\text{EWC}}^*$ under the objective $\mathcal{L}_{\text{EWC}} = \mathcal{L}_B + \lambda \mathcal{L}_A$.</li>
+        <li>Evaluate the asymptotic limits as $\lambda \to 0$ and $\lambda \to \infty$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Closed-Form Equilibrium</h4>
+          $$\nabla_\theta \mathcal{L}_{\text{EWC}} = \mathbf{F}_B (\boldsymbol{\theta} - \boldsymbol{\theta}_B^*) + \lambda \mathbf{F}_A (\boldsymbol{\theta} - \boldsymbol{\theta}_A^*) = \mathbf{0}$$
+          $$(\mathbf{F}_B + \lambda \mathbf{F}_A) \boldsymbol{\theta} = \mathbf{F}_B \boldsymbol{\theta}_B^* + \lambda \mathbf{F}_A \boldsymbol{\theta}_A^*$$
+          $$\boldsymbol{\theta}_{\text{EWC}}^* = (\mathbf{F}_B + \lambda \mathbf{F}_A)^{-1} (\mathbf{F}_B \boldsymbol{\theta}_B^* + \lambda \mathbf{F}_A \boldsymbol{\theta}_A^*)$$
+
+          <h4>2. Asymptotic Analysis</h4>
+          <ul>
+            <li><strong>$\lambda \to 0$ (Plasticity / Naive GD):</strong> $\boldsymbol{\theta}_{\text{EWC}}^* \to \boldsymbol{\theta}_B^*$ (complete forgetting of Task A).</li>
+            <li><strong>$\lambda \to \infty$ (Stability / Freeze):</strong> $\boldsymbol{\theta}_{\text{EWC}}^* \to \boldsymbol{\theta}_A^*$ (zero learning on Task B).</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Memory Complexity: Full vs. Diagonal Fisher in LLMs</h3>
+      <p>
+        For a 7B parameter foundation model ($P = 7 \times 10^9$ weights), compare the memory storage required for a full Fisher matrix versus a diagonal Fisher vector (in 32-bit floats).
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Full Fisher Matrix</h4>
+          $$P^2 = (7 \times 10^9)^2 = 4.9 \times 10^{19} \text{ floats} \times 4 \text{ bytes} \approx 196,000 \text{ Petabytes (196 Exabytes)}$$
+          <p>Physically impossible to store in any modern computing infrastructure.</p>
+
+          <h4>2. Diagonal Fisher Vector</h4>
+          $$P = 7 \times 10^9 \text{ floats} \times 4 \text{ bytes} = 2.8 \times 10^{10} \text{ bytes} = 28 \text{ GB}$$
+          <p>Easily fits inside a single 40GB/80GB GPU memory buffer.</p>
+
+          <h4>3. Limitations of Diagonal Assumption</h4>
+          <p>The diagonal approximation neglects cross-parameter covariance ($F_{ij}$ for $i \neq j$), over-constraining pairs of weights that could otherwise co-adapt along flat loss ravines to learn Task B.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

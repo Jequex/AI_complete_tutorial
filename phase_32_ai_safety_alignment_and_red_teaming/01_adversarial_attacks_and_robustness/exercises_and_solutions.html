@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: Exercises &amp; Solutions — Adversarial Attacks &amp; Robustness</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #dc2626;
+      --primary-hover: #b91c1c;
+      --badge-bg: #fee2e2;
+      --badge-text: #991b1b;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #f87171;
+        --primary-hover: #fca5a5;
+        --badge-bg: #450a0a;
+        --badge-text: #fecaca;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.75;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin: 0.5rem 0; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.75rem 1.25rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      outline: none;
+    }
+    summary:hover {
+      color: var(--primary-hover);
+    }
+    .solution-content {
+      margin-top: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 32 Hub</a>
+    <h1>Topic 01: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin: 0;">Practice problems on FGSM, input loss gradients, Lipschitz bounds, and certified robustness radii.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h2>Exercise 1: Closed-Form FGSM Perturbation</h2>
+      <p>Consider a binary logistic neuron with weights $w = [3.0, -4.0]^T$, bias $b = 1.0$, input $x = [1.0, 2.0]^T$, and true label $y = 1$.</p>
+      <ol>
+        <li>Compute logit $z$, probability $\hat{y} = \sigma(z)$, and loss $\mathcal{L}(x, y)$.</li>
+        <li>Derive the analytical input gradient $\nabla_x \mathcal{L}(x, y)$.</li>
+        <li>For $\epsilon = 0.2$ ($\ell_\infty$), compute the FGSM attack $x_{\text{adv}}$.</li>
+        <li>Compute the adversarial logit $z_{\text{adv}}$ and verify that true class probability degraded.</li>
+      </ol>
+
+      <details>
+        <summary>Click to Reveal Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. Clean Predictions:</strong></p>
+          <p>$$z = 3.0(1.0) - 4.0(2.0) + 1.0 = -4.0$$</p>
+          <p>$$\hat{y} = \sigma(-4.0) = \frac{1}{1 + e^{4.0}} \approx 0.017986, \quad \mathcal{L} = -\ln(0.017986) \approx 4.0182$$</p>
+
+          <p><strong>2. Gradient Calculation:</strong></p>
+          <p>$$\nabla_x \mathcal{L} = (\hat{y} - y) w = (0.017986 - 1.0)\begin{bmatrix} 3.0 \\ -4.0 \end{bmatrix} = \begin{bmatrix} -2.9460 \\ 3.9281 \end{bmatrix}$$</p>
+
+          <p><strong>3. FGSM Step ($\epsilon = 0.2$):</strong></p>
+          <p>$$\text{sign}(\nabla_x \mathcal{L}) = \begin{bmatrix} -1.0 \\ +1.0 \end{bmatrix} \implies x_{\text{adv}} = \begin{bmatrix} 1.0 \\ 2.0 \end{bmatrix} + 0.2 \begin{bmatrix} -1.0 \\ 1.0 \end{bmatrix} = \begin{bmatrix} 0.8 \\ 2.2 \end{bmatrix}$$</p>
+
+          <p><strong>4. Adversarial Impact:</strong></p>
+          <p>$$z_{\text{adv}} = 3.0(0.8) - 4.0(2.2) + 1.0 = -5.4$$</p>
+          <p>$$\hat{y}_{\text{adv}} = \sigma(-5.4) \approx 0.004496, \quad \mathcal{L}_{\text{adv}} \approx 5.4045$$</p>
+          <p>The attack successfully increased loss from $4.018$ to $5.405$ and reduced true class confidence by $75\%$.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h2>Exercise 2: Certified Robustness Margin Derivation</h2>
+      <p>For the same classifier $w = [3.0, -4.0]^T, b = 1.0$:</p>
+      <ol>
+        <li>Calculate the Lipschitz constant $L$ with respect to $\ell_2$.</li>
+        <li>For point $x_0 = [3.0, 1.0]^T$, calculate the certified robustness radius $r(x_0)$.</li>
+        <li>Prove that an attacker with Euclidean budget $\|\delta\|_2 = 1.0$ cannot flip the prediction.</li>
+      </ol>
+
+      <details>
+        <summary>Click to Reveal Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. Lipschitz Constant:</strong></p>
+          <p>$$L = \|w\|_2 = \sqrt{3.0^2 + (-4.0)^2} = \sqrt{9 + 16} = 5.0$$</p>
+
+          <p><strong>2. Certified Radius:</strong></p>
+          <p>$$f(x_0) = 3.0(3.0) - 4.0(1.0) + 1.0 = 9 - 4 + 1 = +6.0$$</p>
+          <p>$$r(x_0) = \frac{|f(x_0)|}{\|w\|_2} = \frac{6.0}{5.0} = 1.2$$</p>
+
+          <p><strong>3. Robustness Guarantee:</strong></p>
+          <p>The distance to the decision boundary is $1.2$. For any perturbation $\|\delta\|_2 \le 1.0$:</p>
+          <p>$$\min_{\|\delta\|_2 \le 1.0} f(x_0 + \delta) \ge f(x_0) - L \|\delta\|_2 = 6.0 - 5.0(1.0) = +1.0 > 0$$</p>
+          <p>Since the minimum logit is strictly positive, the prediction is guaranteed to remain Class 1.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h2>Exercise 3: PGD Projection Boundary Clipping</h2>
+      <p>Let 1D feature $x = 0.5$ have physical domain $[0.0, 1.0]$ and perturbation budget $\epsilon = 0.15$.</p>
+      <ol>
+        <li>Identify the feasible adversarial set $\mathcal{S}$.</li>
+        <li>If unconstrained gradient ascent reaches $z = 0.72$, compute $\Pi_{\mathcal{S}}(z)$.</li>
+        <li>If $x = 0.95$ and gradient ascent reaches $1.12$, compute $\Pi_{\mathcal{S}}(1.12)$.</li>
+      </ol>
+
+      <details>
+        <summary>Click to Reveal Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. Feasible Set:</strong> $\mathcal{S} = [\max(0.0, 0.5 - 0.15), \min(1.0, 0.5 + 0.15)] = [0.35, 0.65]$.</p>
+          <p><strong>2. Clipped Projection:</strong> $\Pi_{\mathcal{S}}(0.72) = \text{clip}(0.72, 0.35, 0.65) = 0.65$.</p>
+          <p><strong>3. Boundary Case:</strong> For $x = 0.95$, $\mathcal{S} = [0.80, 1.00]$. Thus $\Pi_{\mathcal{S}}(1.12) = \text{clip}(1.12, 0.80, 1.00) = 1.00$.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

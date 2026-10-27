@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.4: Exercises &amp; Solutions — Multimodal Alignment</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --badge-bg: #fef3c7;
+      --badge-text: #92400e;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #fbbf24;
+      --primary-hover: #fde68a;
+      --badge-bg: #78350f;
+      --badge-text: #fef3c7;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #fbbf24;
+        --primary-hover: #fde68a;
+        --badge-bg: #78350f;
+        --badge-text: #fef3c7;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 35.4 Lecture</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.4</span>
+    <h1>Exercises &amp; Solutions: Multimodal Alignment</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering InfoNCE attractive-repulsive gradient dynamics, SigLIP distributed communication scaling, and the modality gap geometry.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Analytical Gradients of the InfoNCE Loss</h3>
+      <p>
+        Consider the Image-to-Text contrastive loss $\mathcal{L}_{v2t} = -\frac{1}{B}\sum_{i=1}^B \ln P_{ii}$ on normalized unit vectors $\hat{\mathbf{z}}_{v, i}$ and $\hat{\mathbf{z}}_{t, j}$.
+      </p>
+      <ol>
+        <li>Derive the partial gradient $\frac{\partial \mathcal{L}_{v2t}}{\partial \hat{\mathbf{z}}_{v, i}}$.</li>
+        <li>Interpret the update as a balance between attractive and repulsive geometric forces.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Gradient Derivation</h4>
+          <p>Differentiating the loss with respect to $\hat{\mathbf{z}}_{v, i}$:</p>
+          $$\frac{\partial \mathcal{L}_{v2t}}{\partial \hat{\mathbf{z}}_{v, i}} = \frac{1}{B \tau} \left( -(1 - P_{ii}) \hat{\mathbf{z}}_{t, i} + \sum_{j \neq i} P_{ij} \hat{\mathbf{z}}_{t, j} \right)$$
+
+          <h4>2. Attractive vs. Repulsive Dynamics</h4>
+          <p>
+            The gradient descent direction $-\nabla \mathcal{L}$ applies an <strong>attractive pull</strong> $(1 - P_{ii})\hat{\mathbf{z}}_{t, i}$ directly toward the true caption, and a <strong>repulsive push</strong> $-\sum_{j \neq i} P_{ij}\hat{\mathbf{z}}_{t, j}$ driving the vision embedding away from all negative distractors proportional to their misclassified similarity.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: SigLIP vs. CLIP Distributed Communication Scaling</h3>
+      <p>
+        A distributed cluster of $K = 128$ GPUs trains with global batch size $B = 32,768$ and embedding dimension $d = 768$ (FP32).
+      </p>
+      <ol>
+        <li>Calculate the communication footprint of the All-Gather operation required by standard CLIP.</li>
+        <li>Explain how SigLIP eliminates the cross-node synchronization barrier using asynchronous ring chunking.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. CLIP All-Gather Memory</h4>
+          $$32,768 \times 768 \times 4 \text{ bytes} \approx 100.66 \text{ MB per GPU per step}$$
+          <p>Every GPU must synchronously gather $\approx 100 \text{ MB}$ of text embeddings before computing the softmax denominator, stalling execution on slower interconnects.</p>
+
+          <h4>2. SigLIP Asynchronous Pipeline</h4>
+          <p>
+            Because SigLIP computes pairwise binary logistic losses $\sigma(z_v^\top z_t)$ without a global partition function, nodes only exchange small $b = 256$ chunk buffers ($\approx 786 \text{ KB}$) in a non-blocking ring, completely removing the communication bottleneck.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: The Modality Gap Geometry &amp; The Cone Hypothesis</h3>
+      <p>
+        Explain why image and text representations in trained CLIP models occupy distinct non-overlapping cones $\mathcal{C}_v$ and $\mathcal{C}_t$, and why this does not hurt zero-shot classification accuracy.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Origin of the Modality Gap</h4>
+          <p>
+            Caused by inductive bias differences between ViT and Text Transformers at initialization, compounded by temperature $\tau \ll 1$. Because contrastive loss only demands relative pairwise ranking within each batch, gradients vanish once positive pairs are marginally closer than distractors, leaving the modality centroid gap intact.
+          </p>
+
+          <h4>2. Invariance of Zero-Shot Ranking</h4>
+          <p>
+            Zero-shot classification computes $\arg\max_k (\hat{\mathbf{z}}_v^\top \hat{\mathbf{z}}_{t, k})$. Since the modality gap affects all candidates with a nearly uniform geometric bias, the argmax relative rank order is completely preserved, achieving $>95\%$ zero-shot accuracy.
+          </p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

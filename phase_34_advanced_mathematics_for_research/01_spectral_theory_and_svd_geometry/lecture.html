@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.1: Spectral Theory & SVD Geometry — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.25rem; font-weight: 800; margin: 0 0 0.5rem; letter-spacing: -0.025em; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 1.25rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="../index.html" class="back-link">&larr; Back to Phase 34 Portal</a>
+      <span class="badge">Topic 34.1 &bull; Theory &amp; Geometry</span>
+      <h1>Spectral Theory &amp; SVD Geometry</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌓 Theme</button>
+  </header>
+
+  <main>
+    <div class="callout">
+      <strong>Core Research Question:</strong> How does singular value decomposition deconstruct arbitrary high-dimensional mappings into orthogonal rotations and axis stretches, and why is the truncated SVD mathematically optimal for rank-$k$ compression (Eckart-Young Theorem)?
+    </div>
+
+    <h2>1. 12-Year-Old Intuition: The Stretched Rubber Ball</h2>
+    <p>Imagine holding a perfectly round, flexible rubber ball. This ball represents the unit sphere in geometry—every single point on its surface sits at an exact distance of 1 from the center.</p>
+    <p>Now imagine stretching, twisting, and placing this ball onto a table. What shape does it take? It transforms into a smooth <strong>ellipsoid</strong> (an egg-like oval in 3D).</p>
+    <p>No matter how severe or lopsided the transformation, three fundamental geometric facts remain strictly true:</p>
+    <ol>
+      <li><strong>Orthogonal Domain Axes:</strong> Inside the original sphere, there was an orderly set of perpendicular axes ($\mathbf{v}_1, \mathbf{v}_2, \mathbf{v}_3$).</li>
+      <li><strong>Principal Stretches:</strong> The linear transformation stretched each axis by a precise non-negative factor: the longest axis grew by $\sigma_1$, the next by $\sigma_2$, and the shortest by $\sigma_3$.</li>
+      <li><strong>Orthogonal Codomain Orientations:</strong> In the destination space, those stretched axes point in new perpendicular directions ($\mathbf{u}_1, \mathbf{u}_2, \mathbf{u}_3$).</li>
+    </ol>
+    <p>This is the essence of the <strong>Singular Value Decomposition (SVD)</strong>: $\mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^\top$. Every linear mapping is simply a rotation in the domain ($\mathbf{V}^\top$), independent scaling along coordinate axes ($\boldsymbol{\Sigma}$), and a rotation into the range ($\mathbf{U}$).</p>
+
+    <h2>2. Complete Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Entity</th>
+          <th>Domain</th>
+          <th>Operational Role in AI Research</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathbf{A}$</td>
+          <td>Real Matrix</td>
+          <td>$\mathbb{R}^{m \times n}$</td>
+          <td>Arbitrary linear operator (weight matrix, feature map, covariance).</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{S}$</td>
+          <td>Symmetric Matrix</td>
+          <td>$\mathbb{R}^{n \times n}, \mathbf{S}^\top = \mathbf{S}$</td>
+          <td>Self-adjoint operator (Hessian matrix, Gramian, Fisher information).</td>
+        </tr>
+        <tr>
+          <td>$\sigma_i$</td>
+          <td>Singular Value</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Principal semi-axis length: $\sigma_i = \sqrt{\lambda_i(\mathbf{A}^\top \mathbf{A})}$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{u}_i$</td>
+          <td>Left Singular Vector</td>
+          <td>$\mathbb{R}^m, \|\mathbf{u}_i\|_2 = 1$</td>
+          <td>Unit direction along $i$-th principal semi-axis of output hyperellipsoid.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{v}_i$</td>
+          <td>Right Singular Vector</td>
+          <td>$\mathbb{R}^n, \|\mathbf{v}_i\|_2 = 1$</td>
+          <td>Input direction mapped to $\sigma_i \mathbf{u}_i$; eigenvector of $\mathbf{A}^\top \mathbf{A}$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{A}_k$</td>
+          <td>Rank-$k$ Truncation</td>
+          <td>$\mathbb{R}^{m \times n}$</td>
+          <td>Optimal rank-$k$ approximation: $\sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^\top$.</td>
+        </tr>
+        <tr>
+          <td>$\|\mathbf{A}\|_F$</td>
+          <td>Frobenius Norm</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>$\sqrt{\sum_{i,j} A_{ij}^2} = \sqrt{\sum_i \sigma_i^2}$; total energy of singular spectrum.</td>
+        </tr>
+        <tr>
+          <td>$\|\mathbf{A}\|_2$</td>
+          <td>Spectral Norm</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>$\sup_{\mathbf{x} \neq \mathbf{0}} \frac{\|\mathbf{A}\mathbf{x}\|}{\|\mathbf{x}\|} = \sigma_{\max}$; maximum amplification gain.</td>
+        </tr>
+        <tr>
+          <td>$\kappa(\mathbf{A})$</td>
+          <td>Condition Number</td>
+          <td>$[1, \infty]$</td>
+          <td>$\kappa = \sigma_{\max} / \sigma_{\min}$; eccentricity of hypersphere deformation.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Spectral Theorem for Symmetric Matrices</h2>
+    <p>Let $\mathbf{S} \in \mathbb{R}^{n \times n}$ be symmetric ($\mathbf{S}^\top = \mathbf{S}$).</p>
+    <h3>Theorem:</h3>
+    <ol>
+      <li>All eigenvalues $\lambda_1, \dots, \lambda_n$ are strictly real.</li>
+      <li>Eigenvectors corresponding to distinct eigenvalues are mutually orthogonal.</li>
+      <li>$\mathbf{S}$ admits orthogonal diagonalization: $\mathbf{S} = \mathbf{Q} \boldsymbol{\Lambda} \mathbf{Q}^\top$ where $\mathbf{Q}^\top \mathbf{Q} = \mathbf{I}$.</li>
+    </ol>
+
+    <div class="callout">
+      <strong>Proof of Real Eigenvalues:</strong><br>
+      Let $\mathbf{S}\mathbf{x} = \lambda \mathbf{x}$ for non-zero complex vector $\mathbf{x} \in \mathbb{C}^n$. Taking the conjugate transpose:<br>
+      $$\mathbf{x}^\dagger \mathbf{S} \mathbf{x} = \lambda \|\mathbf{x}\|_2^2$$
+      Taking the Hermitian adjoint of the left side (since $\mathbf{S}^\dagger = \mathbf{S}^\top = \mathbf{S}$):<br>
+      $$(\mathbf{x}^\dagger \mathbf{S} \mathbf{x})^\dagger = \mathbf{x}^\dagger \mathbf{S} \mathbf{x}$$
+      Thus $\mathbf{x}^\dagger \mathbf{S} \mathbf{x} \in \mathbb{R}$. Since $\|\mathbf{x}\|_2^2 > 0$ is real positive, $\lambda = \frac{\mathbf{x}^\dagger \mathbf{S} \mathbf{x}}{\|\mathbf{x}\|_2^2} \in \mathbb{R}$. $\blacksquare$
+    </div>
+
+    <h2>4. The Eckart-Young-Mirsky Theorem</h2>
+    <p>For any target rank $k < \text{rank}(\mathbf{A})$, the truncated SVD sum $\mathbf{A}_k = \sum_{i=1}^k \sigma_i \mathbf{u}_i \mathbf{v}_i^\top$ is the globally optimal low-rank approximator across both Frobenius and Spectral matrix norms:</p>
+    $$\min_{\text{rank}(\mathbf{B}) \le k} \|\mathbf{A} - \mathbf{B}\|_F = \|\mathbf{A} - \mathbf{A}_k\|_F = \sqrt{\sum_{i=k+1}^r \sigma_i^2}$$
+    $$\min_{\text{rank}(\mathbf{B}) \le k} \|\mathbf{A} - \mathbf{B}\|_2 = \|\mathbf{A} - \mathbf{A}_k\|_2 = \sigma_{k+1}$$
+
+    <pre class="code-block">
+Eckart-Young Geometry:
+Space of all m x n matrices
+   ▲
+   │        ● A (Full rank-r)
+   │       /│
+   │      / │ Distance = σ_{k+1} (Spectral)
+   │     /  │            = sqrt(sum_{j>k} σ_j^2) (Frobenius)
+   │    /   ▼
+───┼───/────● A_k (Orthogonal projection onto rank-k manifold)
+   │  /
+   ▼ 
+   Manifold of rank-k matrices M_k
+    </pre>
+
+    <h2>5. Condition Numbers and Optimization Geometry</h2>
+    <p>The condition number $\kappa(\mathbf{A}) = \sigma_{\max} / \sigma_{\min}$ measures how severely $\mathbf{A}$ stretches the unit sphere into an elongated needle or flattened pancake.</p>
+    <p>In second-order loss landscapes $L(\mathbf{w}) \approx \frac{1}{2}(\mathbf{w} - \mathbf{w}^*)^\top \mathbf{H} (\mathbf{w} - \mathbf{w}^*)$, the convergence rate of standard gradient descent is bounded by:</p>
+    $$\|\mathbf{w}_t - \mathbf{w}^*\| \le \left(\frac{\kappa(\mathbf{H}) - 1}{\kappa(\mathbf{H}) + 1}\right)^t \|\mathbf{w}_0 - \mathbf{w}^*\|$$
+    <p>When $\kappa(\mathbf{H}) \gg 1$, gradients oscillate violently across steep canyon walls while making negligible progress along the flat principal floor.</p>
+
+    <h2>6. Interactive & Verified Python Implementation</h2>
+    <p>Run the accompanying zero-dependency Python verification script to compute SVD via power iteration, verify the Eckart-Young bound, and measure hypersphere deformation:</p>
+    <pre class="code-block">python3 phase_34_advanced_mathematics_for_research/01_spectral_theory_and_svd_geometry/experiment.py</pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

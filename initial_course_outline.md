@@ -1789,3 +1789,54 @@ Results
  ↓
 Limitations
 ```
+
+---
+
+# Phase 36 — Model Context Protocol (MCP) & Extensible Agent Ecosystems
+
+Understand the open standard protocol connecting AI models to external tools, databases, and environments.
+
+Architecture:
+
+```text
+┌────────────────────────────────────────────────────────┐
+│                      Host Client                       │
+│  (IDE, Desktop App, Agent Runtime, Orchestrator)       │
+│                                                        │
+│   ┌───────────────┐               ┌────────────────┐   │
+│   │   LLM Core    │◄─────────────►│   MCP Client   │   │
+│   └───────────────┘               └───────┬────────┘   │
+└───────────────────────────────────────────┼────────────┘
+                                            │
+                     JSON-RPC 2.0 (stdio / SSE / HTTP)
+                                            │
+      ┌─────────────────────────────────────┴─────────────────────────────────────┐
+      ↓                                     ↓                                     ↓
+┌──────────────┐                      ┌──────────────┐                      ┌──────────────┐
+│  MCP Server  │                      │  MCP Server  │                      │  MCP Server  │
+│  (Database)  │                      │ (Filesystem) │                      │ (Third-Party)│
+├──────────────┤                      ├──────────────┤                      ├──────────────┤
+│ Resources    │                      │ Resources    │                      │ Tools        │
+│ Tools        │                      │ Tools        │                      │ Prompts      │
+└──────────────┘                      └──────────────┘                      └──────────────┘
+```
+
+Study:
+
+### Protocol Foundations
+- Client-Server-Host topology
+- JSON-RPC 2.0 wire format (requests, notifications, responses, error codes)
+- Transports: stdio vs HTTP with Server-Sent Events (SSE)
+- Lifecycle: initialization, capability negotiation, ping, shutdown
+
+### The Three Core Primitives
+- **Resources**: URI-addressable read-only context (files, database records, API schemas)
+- **Prompts**: User-controlled interactive workflows, parameterized prompt templates
+- **Tools**: Model-controlled executable functions with side-effects and JSON Schema contracts
+
+### Advanced Agent Integration
+- Dynamic resource updates and subscriptions (`notifications/resources/updated`)
+- Tool authorization, sandboxing, and security boundaries
+- Multi-server aggregation and agent routing
+- Building production MCP servers and clients from first principles
+

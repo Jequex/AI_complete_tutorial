@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 03: Exercises &amp; Solutions — Tools &amp; Prompts</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <a href="../index.html" class="back-link">← Back to Phase 36 Overview</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </div>
+    <h1>Topic 03: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">Interactive exercises covering tool error containment, JSON Schema parameter contracts, and prompt workflows.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Protocol Errors vs. Tool Execution Failures</h3>
+      <p>When does an MCP server return a JSON-RPC Error object versus a valid Result with <code>isError: true</code>?</p>
+      
+      <details>
+        <summary>Click to Reveal Solution &amp; Explanation</summary>
+        <div class="solution-content">
+          <p><strong>Rule of Thumb:</strong></p>
+          <ul>
+            <li><strong>JSON-RPC Error Object (e.g. -32700, -32601):</strong> Used when wire communication or RPC routing fails (syntax error, non-existent method).</li>
+            <li><strong>Tool Result with <code>isError: true</code>:</strong> Used for all internal tool runtime failures (ZeroDivisionError, database query failure, schema argument validation failure). This allows the LLM to inspect the error string and self-correct without dropping the connection.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: JSON Schema Validation Edge Cases</h3>
+      <p>Given an input schema requiring <code>username</code> and <code>role</code> (enum: viewer, editor, admin), what happens when an unexpected enum value like <code>superadmin</code> is passed?</p>
+      
+      <details>
+        <summary>Click to Reveal Solution &amp; Explanation</summary>
+        <div class="solution-content">
+          <p><strong>Answer:</strong> The tool registry's JSON Schema validator catches the enum violation before executing the tool. It returns <code>isError: true</code> with a descriptive text error:</p>
+          <pre><code>Validation Error: Field 'arguments.role' value 'superadmin' not in allowed enum: ['viewer', 'editor', 'admin']</code></pre>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Multi-Turn Prompt Template Workflow</h3>
+      <p>Why do MCP prompt templates return an array of messages rather than a single raw text string?</p>
+      
+      <details>
+        <summary>Click to Reveal Solution &amp; Explanation</summary>
+        <div class="solution-content">
+          <p><strong>Answer:</strong> Real-world AI workflows frequently require few-shot guidance or multi-turn conversational bootstrapping. By returning an array of structured messages (with roles like <code>user</code>, <code>assistant</code>), an MCP server can prime the model with few-shot demonstrations, expert system personas, and multi-step diagnostic plans.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('theme', target);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  </script>
+</body>
+</html>

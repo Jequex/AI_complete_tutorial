@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.4: Exercises &amp; Solutions — Constrained Optimization &amp; Duality</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 34.4 Lecture</a>
+      <h1>Topic 34.4: Exercises &amp; Solutions</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Dual Derivation of the Support Vector Machine</h3>
+      <p>For the primal hard-margin SVM: $\min_{\mathbf{w}, b} \frac{1}{2}\|\mathbf{w}\|_2^2$ s.t. $y_i(\mathbf{w}^\top \mathbf{x}_i + b) \ge 1$.</p>
+      <ol>
+        <li>Write the Lagrangian $\mathcal{L}(\mathbf{w}, b, \boldsymbol{\alpha})$.</li>
+        <li>Apply KKT stationarity to express $\mathbf{w}^*$ in terms of $\boldsymbol{\alpha}$.</li>
+        <li>Derive the Wolfe dual problem.</li>
+        <li>Show why the decision boundary depends only on support vectors.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Lagrangian Function</h4>
+          $$\mathcal{L}(\mathbf{w}, b, \boldsymbol{\alpha}) = \frac{1}{2}\|\mathbf{w}\|_2^2 + \sum_{i=1}^N \alpha_i (1 - y_i(\mathbf{w}^\top \mathbf{x}_i + b)), \quad \alpha_i \ge 0$$
+
+          <h4>2. KKT Stationarity</h4>
+          $$\nabla_{\mathbf{w}}\mathcal{L} = \mathbf{0} \implies \mathbf{w}^* = \sum_{i=1}^N \alpha_i y_i \mathbf{x}_i, \quad \frac{\partial \mathcal{L}}{\partial b} = 0 \implies \sum_{i=1}^N \alpha_i y_i = 0$$
+
+          <h4>3. Wolfe Dual Problem</h4>
+          $$\max_{\boldsymbol{\alpha} \ge \mathbf{0}} \sum_{i=1}^N \alpha_i - \frac{1}{2}\sum_{i,j=1}^N \alpha_i \alpha_j y_i y_j (\mathbf{x}_i^\top \mathbf{x}_j) \quad \text{s.t.} \quad \sum_{i=1}^N \alpha_i y_i = 0$$
+
+          <h4>4. Support Vector Sparsity</h4>
+          <p>By complementary slackness $\alpha_i (1 - y_i(\mathbf{w}^\top \mathbf{x}_i + b)) = 0$. For points inside the margin ($y_i(\mathbf{w}^\top \mathbf{x}_i + b) > 1$), $\alpha_i = 0$. Multipliers are positive only for points on the margin boundaries.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Water-Filling Capacity via KKT Multipliers</h3>
+      <p>Maximize Shannon capacity $\sum_{k=1}^K \ln(1 + p_k/\sigma_k^2)$ subject to $\sum p_k = P_{\text{total}}$ and $p_k \ge 0$.</p>
+      <ol>
+        <li>State the Lagrangian with multipliers $\nu$ and $\lambda_k \ge 0$.</li>
+        <li>Formulate KKT stationarity.</li>
+        <li>Derive the water-filling solution $p_k^* = \max(0, 1/\nu - \sigma_k^2)$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Lagrangian</h4>
+          $$\mathcal{L} = -\sum_{k=1}^K \ln\left(1 + \frac{p_k}{\sigma_k^2}\right) + \nu \left(\sum p_k - P_{\text{total}}\right) - \sum \lambda_k p_k$$
+
+          <h4>2. Stationarity</h4>
+          $$\frac{\partial \mathcal{L}}{\partial p_k} = -\frac{1}{p_k + \sigma_k^2} + \nu - \lambda_k = 0 \implies \frac{1}{p_k + \sigma_k^2} = \nu - \lambda_k$$
+
+          <h4>3. Water-Filling Threshold</h4>
+          <p>From complementary slackness $\lambda_k p_k = 0$: if $p_k > 0$, $\lambda_k = 0 \implies p_k = 1/\nu - \sigma_k^2$. If $p_k = 0$, $\lambda_k \ge 0 \implies 1/\nu \le \sigma_k^2$. Hence $p_k^* = \max(0, 1/\nu^* - \sigma_k^2)$.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Quadratic Penalty vs Augmented Lagrangian</h3>
+      <p>Compare the Quadratic Penalty $\mathcal{L}_\rho = f(\mathbf{x}) + \frac{\rho}{2}c(\mathbf{x})^2$ against Augmented Lagrangian $\mathcal{L}_{\text{ALM}} = f(\mathbf{x}) + \nu c(\mathbf{x}) + \frac{\rho}{2}c(\mathbf{x})^2$.</p>
+      <ol>
+        <li>Show why quadratic penalties require $\rho \to \infty$ for exact feasibility.</li>
+        <li>Explain how ALM avoids Hessian ill-conditioning at finite $\rho$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Constraint Violation in Pure Penalty</h4>
+          $$\nabla \mathcal{L}_\rho = \nabla f + \rho c(\mathbf{x})\nabla c = \mathbf{0} \implies c(\mathbf{x}_\rho) \approx \frac{\nu^*}{\rho}$$
+          <p>To eliminate constraint violation, $\rho \to \infty$ is strictly required.</p>
+
+          <h4>2. Condition Number Preservation in ALM</h4>
+          <p>As $\rho \to \infty$, the penalty Hessian condition number explodes: $\kappa(\nabla^2 \mathcal{L}_\rho) \sim \mathcal{O}(\rho)$. In contrast, ALM updates dual multiplier $\nu_{k+1} = \nu_k + \rho c(\mathbf{x}_k)$, converging to the exact KKT solution at modest, fixed $\rho$ without numerical ill-conditioning.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

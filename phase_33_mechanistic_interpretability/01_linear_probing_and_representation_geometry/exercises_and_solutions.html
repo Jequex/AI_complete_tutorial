@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 33.1: Exercises &amp; Solutions — Linear Probing</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 33.1 Lecture</a>
+    <h1>Topic 33.1: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering linear probe gradient derivations, signal-to-noise ratio in residual streams, and probe selectivity.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Gradient Derivation &amp; Strict Convexity of Linear Probes</h3>
+      <p>
+        Consider a regularized binary cross-entropy probe objective:
+        $$\mathcal{L}(\mathbf{w}, b) = -\frac{1}{N} \sum_{i=1}^N \left[ y^{(i)} \ln \sigma(z^{(i)}) + (1 - y^{(i)}) \ln(1 - \sigma(z^{(i)})) \right] + \frac{\lambda}{2} \|\mathbf{w}\|_2^2$$
+        with $z^{(i)} = \mathbf{w}^\top \mathbf{h}^{(i)} + b$ and $\lambda > 0$.
+      </p>
+      <ol>
+        <li>Derive the analytical gradients $\frac{\partial \mathcal{L}}{\partial \mathbf{w}}$ and $\frac{\partial \mathcal{L}}{\partial b}$.</li>
+        <li>Compute the Hessian $\mathbf{H} = \nabla^2_{\mathbf{w}} \mathcal{L}$ and prove that $\mathbf{H} \succ 0$.</li>
+        <li>Explain why strict convexity makes linear probes superior to multi-layer non-linear probes for probing latent representations.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Gradient Derivation</h4>
+          <p>For each sample, $\frac{\partial \ell^{(i)}}{\partial z^{(i)}} = p^{(i)} - y^{(i)}$ where $p^{(i)} = \sigma(z^{(i)})$.</p>
+          $$\frac{\partial \mathcal{L}}{\partial \mathbf{w}} = \frac{1}{N}\sum_{i=1}^N (p^{(i)} - y^{(i)})\mathbf{h}^{(i)} + \lambda \mathbf{w}$$
+          $$\frac{\partial \mathcal{L}}{\partial b} = \frac{1}{N}\sum_{i=1}^N (p^{(i)} - y^{(i)})$$
+
+          <h4>2. Hessian &amp; Strict Convexity</h4>
+          $$\mathbf{H} = \frac{1}{N} \sum_{i=1}^N p^{(i)}(1 - p^{(i)}) \mathbf{h}^{(i)} (\mathbf{h}^{(i)})^\top + \lambda \mathbf{I}$$
+          <p>Since $0 < p^{(i)} < 1$, the first term is positive semidefinite. For any non-zero $\mathbf{u} \neq \mathbf{0}$, $\mathbf{u}^\top \mathbf{H} \mathbf{u} \ge \lambda \|\mathbf{u}\|_2^2 > 0$. Hence, $\mathbf{H}$ is strictly positive definite, proving strict convexity.</p>
+
+          <h4>3. Interpretability Significance</h4>
+          <p>Strict convexity guarantees a unique global minimum $\mathbf{w}^*$. There are no local minima or initialization dependencies, ensuring that results directly measure linear information in $\mathbf{h}$ rather than probe artifacts.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Signal-to-Noise Ratio (SNR) in the Residual Stream</h3>
+      <p>
+        Let $\mathbf{h} = s \cdot c \cdot \mathbf{v}_c + \boldsymbol{\epsilon}$, where unit vector $\|\mathbf{v}_c\|=1$, $c \in \{-1, +1\}$, and $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I}_d)$.
+      </p>
+      <ol>
+        <li>Compute $\mathbb{E}[\mathbf{v}_c^\top \mathbf{h} \mid c]$ and $\text{Var}(\mathbf{v}_c^\top \mathbf{h})$.</li>
+        <li>Formulate the theoretical classification error $\mathcal{E}$ in terms of the Gaussian CDF $\Phi(\cdot)$.</li>
+        <li>Compute the theoretical accuracy for $s = 2.0$ and $\sigma = 1.0$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Moments of the 1D Projection</h4>
+          <p>$\mathbf{v}_c^\top \mathbf{h} = s \cdot c + \mathbf{v}_c^\top \boldsymbol{\epsilon}$. Since $\mathbf{v}_c^\top \boldsymbol{\epsilon} \sim \mathcal{N}(0, \sigma^2)$, $\mathbb{E}[\mathbf{v}_c^\top \mathbf{h} \mid c] = s \cdot c$ and $\text{Var}(\mathbf{v}_c^\top \mathbf{h}) = \sigma^2$.</p>
+
+          <h4>2. Theoretical Error Rate</h4>
+          $$\mathcal{E} = P(s + \mathbf{v}_c^\top \boldsymbol{\epsilon} \le 0) = \Phi\left(-\frac{s}{\sigma}\right)$$
+
+          <h4>3. Numerical Value</h4>
+          <p>For $s/\sigma = 2.0$, $\mathcal{E} = \Phi(-2.0) \approx 0.0228$. Thus, theoretical probe accuracy is $\mathbf{97.72\%}$.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Selectivity &amp; Memorization Bounds</h3>
+      <p>
+        A probe trained on activations with $d = 4096$ and $N = 256$ achieves $\text{Acc}_{\text{task}} = 98.4\%$. A control probe trained on randomized labels achieves $\text{Acc}_{\text{control}} = 96.1\%$.
+      </p>
+      <ol>
+        <li>Explain why high accuracy can easily occur when $d \gg N$.</li>
+        <li>Calculate probe selectivity $\text{Sel} = \text{Acc}_{\text{task}} - \text{Acc}_{\text{control}}$ and diagnose whether this representation encodes the concept.</li>
+        <li>State two methodological corrections.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. High-Dimensional Capacity</h4>
+          <p>By Cover's Theorem, when parameter dimension exceeds sample size ($d > N$), random sets of points are linearly separable under almost any arbitrary label assignment. The probe can memorize without discovering genuine structure.</p>
+
+          <h4>2. Selectivity Diagnosis</h4>
+          $$\text{Selectivity} = 98.4\% - 96.1\% = \mathbf{2.3\%}$$
+          <p>A selectivity of 2.3% fails the selectivity threshold ($\ge 35\%$). The representation does <em>not</em> genuinely encode the concept; the probe simply memorized the training set.</p>
+
+          <h4>3. Methodological Corrections</h4>
+          <p>(a) Increase sample size $N \gg d$ and evaluate on a held-out test split. (b) Apply bottleneck dimensionality reduction or stronger regularization $\lambda$ until control accuracy drops to 50% chance level.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

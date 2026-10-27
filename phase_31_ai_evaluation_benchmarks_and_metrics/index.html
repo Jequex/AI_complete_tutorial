@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 31: AI Evaluation, Benchmarks &amp; Metrics — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .header-content {
+      flex: 1;
+    }
+
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 0.9rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background-color 0.15s ease;
+      white-space: nowrap;
+    }
+    .theme-toggle:hover {
+      background-color: var(--border);
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    p.lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-top: 0;
+      line-height: 1.6;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .topic-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.375rem;
+      background-color: var(--border);
+      color: var(--text);
+    }
+
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .topic-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      transition: background-color 0.15s ease;
+    }
+    .link-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+    .link-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .link-secondary {
+      background-color: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .link-secondary:hover {
+      background-color: var(--border);
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9em;
+    }
+
+    footer {
+      margin-top: 4rem;
+      border-top: 1px solid var(--border);
+      padding-top: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <span class="badge">Curriculum Phase 31</span>
+      <h1>AI Evaluation, Benchmarks &amp; Metrics</h1>
+      <p class="lead">Statistical Significance Testing, Classification Calibration, Language Model Generation Metrics, LLM-as-a-Judge Preferences, and Hallucination Robustness Auditing.</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌓 Toggle Mode</button>
+  </header>
+
+  <!-- Architectural Overview -->
+  <div class="card">
+    <h3 style="margin-top: 0; color: var(--primary);">Master Architectural Framework</h3>
+    <p>A machine learning model is only as credible as the statistical foundation of its evaluation. In Phase 31, we transition from naive point metrics to rigorous scientific benchmarking:</p>
+    $$\boxed{\text{Scientific Credibility} = \text{Paired Statistical Significance} + \text{Probability Calibration} + \text{Preference De-Biasing} + \text{Adversarial Factuality}}$$
+    <p style="margin-bottom: 0;">Explore the five foundational syllabus modules below, complete with step-by-step mathematical derivations, interactive problem sets, and zero-dependency Python experiment suites.</p>
+  </div>
+
+  <!-- Topic 1 -->
+  <div class="topic-card">
+    <h2>
+      <span>01. Traditional ML Evaluation &amp; Statistical Testing</span>
+      <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Module 31.1</span>
+    </h2>
+    <p>Parametric Student's paired $t$-test with Dietterich correction, non-parametric Wilcoxon signed-rank test, exact sign-flip permutation tests, Percentile and Basic Bootstrap Confidence Intervals, and Family-Wise Error Rate (FWER) control via Benjamini-Hochberg False Discovery Rate (FDR).</p>
+    <div class="topic-meta">
+      <span class="topic-tag">Paired t-Test</span>
+      <span class="topic-tag">Wilcoxon Rank</span>
+      <span class="topic-tag">Permutation Test</span>
+      <span class="topic-tag">Bootstrap CI</span>
+      <span class="topic-tag">Benjamini-Hochberg FDR</span>
+    </div>
+    <div class="topic-links">
+      <a href="01_traditional_ml_evaluation_and_statistical_testing/lecture.html" class="link-primary">Lecture Notes &rarr;</a>
+      <a href="01_traditional_ml_evaluation_and_statistical_testing/exercises_and_solutions.html" class="link-secondary">Exercises &amp; Solutions</a>
+      <a href="01_traditional_ml_evaluation_and_statistical_testing/experiment.py" class="link-secondary">Inspect Experiment</a>
+    </div>
+  </div>
+
+  <!-- Topic 2 -->
+  <div class="topic-card">
+    <h2>
+      <span>02. Classification, Calibration &amp; Thresholding</span>
+      <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Module 31.2</span>
+    </h2>
+    <p>Confusion matrix trade-offs, trapezoidal ROC-AUC and its exact equivalence to the Mann-Whitney $U$ statistic, Precision-Recall curves under extreme class imbalance, Allan Murphy's canonical 3-component Brier score decomposition (Reliability, Resolution, Uncertainty), Expected Calibration Error (ECE), and logit Temperature Scaling.</p>
+    <div class="topic-meta">
+      <span class="topic-tag">ROC-AUC</span>
+      <span class="topic-tag">Mann-Whitney U</span>
+      <span class="topic-tag">PR-AUC</span>
+      <span class="topic-tag">Brier Decomposition</span>
+      <span class="topic-tag">ECE</span>
+      <span class="topic-tag">Temperature Scaling</span>
+    </div>
+    <div class="topic-links">
+      <a href="02_classification_calibration_and_thresholding/lecture.html" class="link-primary">Lecture Notes &rarr;</a>
+      <a href="02_classification_calibration_and_thresholding/exercises_and_solutions.html" class="link-secondary">Exercises &amp; Solutions</a>
+      <a href="02_classification_calibration_and_thresholding/experiment.py" class="link-secondary">Inspect Experiment</a>
+    </div>
+  </div>
+
+  <!-- Topic 3 -->
+  <div class="topic-card">
+    <h2>
+      <span>03. NLP &amp; Language Model Metrics</span>
+      <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Module 31.3</span>
+    </h2>
+    <p>Language model evaluation via Perplexity ($PPL = 2^{H(p, q)}$) derived from cross-entropy loss, branching factor information theory, BLEU-4 modified clipped precision with brevity penalty, ROUGE-1/2 and Longest Common Subsequence (ROUGE-L) dynamic programming, and SQuAD Exact Match &amp; Token-level F1.</p>
+    <div class="topic-meta">
+      <span class="topic-tag">Perplexity (PPL)</span>
+      <span class="topic-tag">Branching Factor</span>
+      <span class="topic-tag">BLEU-4</span>
+      <span class="topic-tag">Brevity Penalty</span>
+      <span class="topic-tag">ROUGE-L Dynamic Programming</span>
+      <span class="topic-tag">SQuAD F1</span>
+    </div>
+    <div class="topic-links">
+      <a href="03_nlp_and_language_model_metrics/lecture.html" class="link-primary">Lecture Notes &rarr;</a>
+      <a href="03_nlp_and_language_model_metrics/exercises_and_solutions.html" class="link-secondary">Exercises &amp; Solutions</a>
+      <a href="03_nlp_and_language_model_metrics/experiment.py" class="link-secondary">Inspect Experiment</a>
+    </div>
+  </div>
+
+  <!-- Topic 4 -->
+  <div class="topic-card">
+    <h2>
+      <span>04. LLM-as-a-Judge &amp; Preference Benchmarks</span>
+      <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Module 31.4</span>
+    </h2>
+    <p>Pairwise preferences vs absolute grading, pervasive judge systematic biases (position order effect, verbosity bias, self-enhancement bias), bidirectional swapping de-biasing protocol, Bradley-Terry rating model ($P(A \succ B) = \frac{1}{1 + 10^{(R_B - R_A)/400}}$), zero-sum Elo updates, and offline Maximum Likelihood Estimation (MLE).</p>
+    <div class="topic-meta">
+      <span class="topic-tag">Chatbot Arena</span>
+      <span class="topic-tag">Position Bias</span>
+      <span class="topic-tag">Verbosity Bias</span>
+      <span class="topic-tag">Bidirectional Swapping</span>
+      <span class="topic-tag">Bradley-Terry</span>
+      <span class="topic-tag">Elo Rating</span>
+    </div>
+    <div class="topic-links">
+      <a href="04_llm_as_a_judge_and_preference_benchmarks/lecture.html" class="link-primary">Lecture Notes &rarr;</a>
+      <a href="04_llm_as_a_judge_and_preference_benchmarks/exercises_and_solutions.html" class="link-secondary">Exercises &amp; Solutions</a>
+      <a href="04_llm_as_a_judge_and_preference_benchmarks/experiment.py" class="link-secondary">Inspect Experiment</a>
+    </div>
+  </div>
+
+  <!-- Topic 5 -->
+  <div class="topic-card">
+    <h2>
+      <span>05. Hallucination, Factuality &amp; Robustness Auditing</span>
+      <span style="font-size: 0.85rem; font-weight: normal; color: var(--text-muted);">Module 31.5</span>
+    </h2>
+    <p>Atomic proposition decomposition, knowledge triple verification $(s, r, o)$, FActScore and claim-level hallucination rates, prompt perturbation stress-testing (character typos, semantic paraphrases, adversarial distractors), Goodhart's Law failure taxonomy (Regressive, Extremal, Causal, Adversarial), and $N$-gram benchmark contamination detection.</p>
+    <div class="topic-meta">
+      <span class="topic-tag">Atomic Facts</span>
+      <span class="topic-tag">FActScore</span>
+      <span class="topic-tag">Hallucination Rate</span>
+      <span class="topic-tag">Perturbation Testing</span>
+      <span class="topic-tag">Goodhart's Law</span>
+      <span class="topic-tag">Contamination Overlap</span>
+    </div>
+    <div class="topic-links">
+      <a href="05_hallucination_factuality_and_robustness_auditing/lecture.html" class="link-primary">Lecture Notes &rarr;</a>
+      <a href="05_hallucination_factuality_and_robustness_auditing/exercises_and_solutions.html" class="link-secondary">Exercises &amp; Solutions</a>
+      <a href="05_hallucination_factuality_and_robustness_auditing/experiment.py" class="link-secondary">Inspect Experiment</a>
+    </div>
+  </div>
+
+  <!-- Terminal Test Runner Snippet -->
+  <div class="card">
+    <h3 style="margin-top: 0; color: var(--primary);">Terminal Experiment Runner</h3>
+    <p>All experiments are written in pure Python 3 standard library with zero external dependencies. Run the complete validation suite across all five modules:</p>
+    <pre><code># 1. Statistical Testing &amp; Hypothesis Validation
+python3 01_traditional_ml_evaluation_and_statistical_testing/experiment.py
+
+# 2. Calibration, PR-AUC &amp; Temperature Scaling
+python3 02_classification_calibration_and_thresholding/experiment.py
+
+# 3. NLP Metrics: Perplexity, BLEU-4, ROUGE-L &amp; SQuAD F1
+python3 03_nlp_and_language_model_metrics/experiment.py
+
+# 4. LLM-as-a-Judge, Preference Tournaments &amp; Bradley-Terry Elo
+python3 04_llm_as_a_judge_and_preference_benchmarks/experiment.py
+
+# 5. Hallucination Factuality, Robustness &amp; Contamination Scanning
+python3 05_hallucination_factuality_and_robustness_auditing/experiment.py</code></pre>
+  </div>
+
+  <footer>
+    <p>Complete Artificial Intelligence &amp; Machine Learning Engineering Tutorial &bull; Phase 31</p>
+  </footer>
+
+  <script>
+    function toggleTheme() {
+      const root = document.documentElement;
+      const currentTheme = root.getAttribute("data-theme");
+      const targetTheme = currentTheme === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", targetTheme);
+      localStorage.setItem("theme", targetTheme);
+    }
+
+    (function() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    })();
+  </script>
+
+</body>
+</html>

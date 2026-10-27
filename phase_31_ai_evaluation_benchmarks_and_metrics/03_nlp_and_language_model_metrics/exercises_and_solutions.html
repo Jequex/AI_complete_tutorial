@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 03: Exercises &amp; Solutions — NLP &amp; Language Model Metrics</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --badge-bg: #ede9fe;
+      --badge-text: #6d28d9;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #a78bfa;
+        --primary-hover: #c4b5fd;
+        --badge-bg: #4c1d95;
+        --badge-text: #ddd6fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.1rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .exercise-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    .exercise-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+    }
+    summary {
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover {
+      background-color: var(--bg-card);
+    }
+    .solution-body {
+      padding: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Lecture</a><br>
+    <span class="badge">Exercises &amp; Solutions</span>
+    <h1>Topic 03 Practice: Text Generation &amp; NLP Metrics</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Step-by-step problem sets covering Perplexity, BLEU-4 with brevity penalty, ROUGE-L with Dynamic Programming, and SQuAD Token F1.</p>
+  </header>
+
+  <!-- Exercise 1 -->
+  <div class="exercise-card">
+    <h2>Exercise 1: Perplexity and Cross-Entropy Loss</h2>
+    <p>A sequence of $N = 5$ tokens is evaluated by a model with conditional probabilities: $P = [0.20, 0.05, 0.40, 0.10, 0.25]$.</p>
+    <p><strong>Tasks:</strong> Compute sequence joint probability $P(X)$, cross-entropy loss in natural nats and bits, and Perplexity ($PPL$).</p>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Joint Probability:</strong> $P(X) = 0.20 \times 0.05 \times 0.40 \times 0.10 \times 0.25 = \mathbf{1.0 \times 10^{-4}}$.</p>
+        <p><strong>2. Cross-Entropy Loss:</strong></p>
+        $$\mathcal{L}_{\text{CE}} = -\frac{1}{5}\ln(10^{-4}) \approx \mathbf{1.8421 \text{ nats/token}}, \qquad H_2 = \frac{1.8421}{\ln 2} \approx \mathbf{2.6575 \text{ bits/token}}$$
+        <p><strong>3. Perplexity:</strong></p>
+        $$PPL = \exp(1.8421) = (10{,}000)^{0.2} = \mathbf{6.3096}$$
+        <p>The model's uncertainty is equivalent to choosing uniformly among $\approx 6.31$ words at each step.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Exercise 2 -->
+  <div class="exercise-card">
+    <h2>Exercise 2: BLEU-4 Calculation by Hand</h2>
+    <p>Candidate ($c = 7$): <code>"the defense attorney argued the case vigorously"</code>.<br>
+       Reference ($r = 9$): <code>"the defense lawyer argued the case very vigorously yesterday"</code>.</p>
+    <p><strong>Tasks:</strong> Compute modified precisions $p_1, p_2, p_3, p_4$ (with Chen-Cherry smoothing for $p_4$), Brevity Penalty $BP$, and BLEU-4 score.</p>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Precisions:</strong></p>
+        <ul>
+          <li>$p_1 = 6/7 \approx 0.8571$ (clipped matches: <code>the(2), defense(1), argued(1), case(1), vigorously(1)</code>)</li>
+          <li>$p_2 = 3/6 = 0.5000$ (matches: <code>"the defense", "argued the", "the case"</code>)</li>
+          <li>$p_3 = 1/5 = 0.2000$ (match: <code>"argued the case"</code>)</li>
+          <li>$p_4 = 0.1 / 4 = 0.0250$ (smoothed)</li>
+        </ul>
+        <p><strong>2. Brevity Penalty:</strong> Since $c = 7 < r = 9$:</p>
+        $$BP = \exp\left(1 - \frac{9}{7}\right) = \exp\left(-\frac{2}{7}\right) \approx \mathbf{0.7515}$$
+        <p><strong>3. Final BLEU-4:</strong></p>
+        $$\text{BLEU}-4 = 0.7515 \times (0.8571 \times 0.5000 \times 0.2000 \times 0.0250)^{1/4} \approx 0.7515 \times 0.2150 \approx \mathbf{16.16\%}$$
+      </div>
+    </details>
+  </div>
+
+  <!-- Exercise 3 -->
+  <div class="exercise-card">
+    <h2>Exercise 3: ROUGE-L via 2D Dynamic Programming &amp; SQuAD Token F1</h2>
+    <p>Candidate: <code>"machine learning models require data"</code> ($n = 5$).<br>
+       Reference: <code>"modern machine learning algorithms require large clean data"</code> ($m = 8$).</p>
+    <p><strong>Tasks:</strong></p>
+    <ol>
+      <li>Find the Longest Common Subsequence ($\text{LCS}$) length and compute ROUGE-L ($F_{\text{LCS}}$ with $\beta = 1$).</li>
+      <li>For prediction <code>"The Apollo 11 mission"</code> against gold set <code>["Apollo 11", "Apollo eleven mission"]</code>, compute SQuAD Exact Match (EM) and Token-level F1.</li>
+    </ol>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. ROUGE-L:</strong></p>
+        <p>Matching sequence: <code>["machine", "learning", "require", "data"]</code> &rarr; $\text{LCS} = 4$.</p>
+        $$R_{\text{LCS}} = \frac{4}{8} = 0.500, \quad P_{\text{LCS}} = \frac{4}{5} = 0.800 \implies F_{\text{LCS}} = \frac{2 \times 0.500 \times 0.800}{0.500 + 0.800} \approx \mathbf{0.6154}$$
+        <p><strong>2. SQuAD QA Normalization:</strong></p>
+        <p>Normalized prediction: <code>"apollo 11 mission"</code>.</p>
+        <ul>
+          <li>Against <code>"apollo 11"</code>: $\text{EM} = 0$, Shared = 2 &rarr; $\text{Prec} = 2/3$, $\text{Rec} = 2/2 = 1.0 \implies F_1 = \mathbf{0.800}$.</li>
+          <li>Against <code>"apollo eleven mission"</code>: $\text{EM} = 0$, Shared = 2 &rarr; $\text{Prec} = 2/3$, $\text{Rec} = 2/3 \implies F_1 = \mathbf{0.667}$.</li>
+        </ul>
+        $$\mathbf{\text{EM} = 0, \qquad \text{Token } F_1 = \max(0.800, 0.667) = 0.800 \text{ (80.0\%)}}$$
+      </div>
+    </details>
+  </div>
+
+  <div style="margin-top: 2rem;">
+    <a href="lecture.html" class="btn">&larr; Back to Lecture</a>
+  </div>
+
+</body>
+</html>

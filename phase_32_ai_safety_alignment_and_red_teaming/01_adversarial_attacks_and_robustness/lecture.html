@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: Adversarial Attacks &amp; Robustness — AI Safety</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #dc2626;
+      --primary-hover: #b91c1c;
+      --badge-bg: #fee2e2;
+      --badge-text: #991b1b;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #f87171;
+        --primary-hover: #fca5a5;
+        --badge-bg: #450a0a;
+        --badge-text: #fecaca;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.75;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.2; margin: 0.5rem 0 0.75rem; color: var(--text); }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.75rem; margin-bottom: 0.5rem; color: var(--text); }
+    p, li { color: var(--text); font-size: 1.02rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--border); padding: 0.75rem 1rem; text-align: left; }
+    th { background-color: var(--bg-card); font-weight: 700; }
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.75rem 0;
+    }
+    .math-box {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 32 Hub</a>
+    <div><span class="badge">Topic 32.1 &bull; Theory &amp; Foundations</span></div>
+    <h1>Adversarial Attacks and Certified Robustness</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">Formulating adversarial perturbations, Fast Gradient Sign Method (FGSM), Projected Gradient Descent (PGD), and Lipschitz certified robustness bounds.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+      <p>Imagine a loyal guard dog trained to recognize your front door. Rain, shine, or snow, it knows: <em>"That is the front door; do not bark."</em></p>
+      <p>Now, a trickster sprinkles an imperceptible layer of yellow and black glitter across the door. To human eyes, the door looks 100% normal. But when the dog looks at the door, its eyes combine all those micro-reflections, and it barks in terror, convinced your front door is a 10-foot roaring grizzly bear!</p>
+      
+      <div class="callout">
+        <strong>The Geometric Reality:</strong> Deep neural networks operate in high-dimensional vector spaces ($\mathbb{R}^d$ where $d$ can be thousands or millions of dimensions). Tiny directional nudges—each individually smaller than camera sensor noise—accumulate across weight dot products to shift the network's activation across the decision boundary.
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Mathematical Symbol Decoder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Name</th>
+            <th>Domain</th>
+            <th>Description &amp; Operational Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$x$</td>
+            <td>Input Vector</td>
+            <td>$\mathbb{R}^d$</td>
+            <td>Clean input tensor or feature vector.</td>
+          </tr>
+          <tr>
+            <td>$y$</td>
+            <td>Ground Truth Label</td>
+            <td>$\{0, 1\}$ or $\{1, \dots, C\}$</td>
+            <td>True categorical class label.</td>
+          </tr>
+          <tr>
+            <td>$\delta$</td>
+            <td>Adversarial Perturbation</td>
+            <td>$\mathbb{R}^d$</td>
+            <td>Additive perturbation vector added to $x$: $x_{\text{adv}} = x + \delta$.</td>
+          </tr>
+          <tr>
+            <td>$\epsilon$</td>
+            <td>Perturbation Budget</td>
+            <td>$\mathbb{R}^+$</td>
+            <td>Maximum perturbation bound under chosen $\ell_p$ norm: $\|\delta\|_p \le \epsilon$.</td>
+          </tr>
+          <tr>
+            <td>$\nabla_x \mathcal{L}$</td>
+            <td>Input Gradient</td>
+            <td>$\mathbb{R}^d$</td>
+            <td>Gradient of loss function with respect to input features.</td>
+          </tr>
+          <tr>
+            <td>$\Pi_{\mathcal{S}}(\cdot)$</td>
+            <td>Projection Operator</td>
+            <td>Set operator</td>
+            <td>Projects updated coordinates back into constrained feasible set $\mathcal{S}$.</td>
+          </tr>
+          <tr>
+            <td>$L$</td>
+            <td>Lipschitz Constant</td>
+            <td>$\mathbb{R}^+$</td>
+            <td>Upper bound on function rate of change: $\|f(x) - f(x')\| \le L \|x - x'\|$.</td>
+          </tr>
+          <tr>
+            <td>$r(x)$</td>
+            <td>Certified Robustness Radius</td>
+            <td>$\mathbb{R}^+$</td>
+            <td>Exact Euclidean radius guaranteeing prediction invariance: $\|\delta\|_2 < r(x)$.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Fast Gradient Sign Method (FGSM)</h2>
+      <p>Introduced by Goodfellow et al. (2014), FGSM linearizes the loss function $\mathcal{L}(x + \delta, y)$ via first-order Taylor expansion:</p>
+      
+      <div class="math-box">
+        $$\mathcal{L}(x + \delta, y) \approx \mathcal{L}(x, y) + \nabla_x \mathcal{L}(x, y)^T \delta$$
+      </div>
+
+      <p>Under the $\ell_\infty$ constraint $\|\delta\|_\infty \le \epsilon$, maximizing this inner product yields the closed-form FGSM update rule:</p>
+
+      <div class="math-box">
+        $$\boxed{x_{\text{adv}} = x + \epsilon \cdot \text{sign}\left(\nabla_x \mathcal{L}(x, y)\right)}$$
+      </div>
+
+      <p>In high dimensions ($d \gg 1$), even tiny $\epsilon$ shifts activations by $\Delta z \approx \epsilon \sum_i |w_i| = \epsilon \cdot d \cdot \bar{w}$, turning microscopic perturbations into massive logit deviations.</p>
+    </section>
+
+    <section>
+      <h2>4. Projected Gradient Descent (PGD)</h2>
+      <p>Madry et al. (2017) formalized adversarial defense as a robust optimization problem and developed <strong>Projected Gradient Descent (PGD)</strong> as the universal first-order iterative adversary:</p>
+
+      <div class="math-box">
+        $$\boxed{x^{(t+1)} = \Pi_{B_\epsilon(x) \cap \mathcal{X}} \left( x^{(t)} + \alpha \cdot \text{sign}\left(\nabla_{x^{(t)}} \mathcal{L}(x^{(t)}, y)\right) \right)}$$
+      </div>
+
+      <p>Where step size $\alpha < \epsilon$, running for $K$ steps with random restarts inside the $\ell_\infty$ ball $B_\epsilon(x)$.</p>
+    </section>
+
+    <section>
+      <h2>5. Certified Robustness &amp; Lipschitz Bounds</h2>
+      <p>Empirical defenses often suffer from <em>gradient masking</em>. Certified robustness provides mathematical guarantees.</p>
+      
+      <h3>Linear Certified Radius Theorem</h3>
+      <p>For a binary classifier $f(x) = w^T x + b$, the exact Euclidean distance from clean sample $x$ to the decision boundary is:</p>
+
+      <div class="math-box">
+        $$\boxed{r(x) = \frac{|w^T x + b|}{\|w\|_2}}$$
+      </div>
+
+      <p><strong>Guarantee:</strong> Any adversarial perturbation $\delta$ satisfying $\|\delta\|_2 < r(x)$ is mathematically incapable of flipping the model's prediction.</p>
+    </section>
+
+    <section>
+      <h2>6. Run the Pure Python Experiment</h2>
+      <p>Explore FGSM and PGD attacks, decision boundary evasion, and certified radii from scratch in pure Python:</p>
+      <pre>python3 phase_32_ai_safety_alignment_and_red_teaming/01_adversarial_attacks_and_robustness/experiment.py</pre>
+    </section>
+  </main>
+
+</body>
+</html>

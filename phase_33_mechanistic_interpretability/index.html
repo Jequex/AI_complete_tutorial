@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 33: Mechanistic Interpretability — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      position: relative;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.75rem; color: var(--text); }
+    p.lead { font-size: 1.2rem; color: var(--text-muted); margin-top: 0; }
+
+    .topic-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin-bottom: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .topic-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+    .topic-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.95rem;
+    }
+    .topic-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background-color: var(--badge-bg);
+    }
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      color: #ffffff;
+    }
+
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <span class="badge">Curriculum Module</span>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌓</span> <span id="themeText">Toggle Theme</span>
+      </button>
+    </div>
+    <h1>Phase 33: Mechanistic Interpretability</h1>
+    <p class="lead">Reverse-engineering neural networks: residual stream geometry, causal activation patching, the Transformer Circuits framework, two-layer induction heads, Sparse Autoencoders (SAEs), and rank-one model editing (ROME).</p>
+  </header>
+
+  <main>
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Linear Probing &amp; Representation Geometry</h2>
+      <p>The residual stream as a communication bus, the Linear Representation Hypothesis (concepts as directions $\mathbf{v} \in \mathbb{R}^d$), linear probes (logistic regression &amp; ridge classification on intermediate activations), probe accuracy vs cosine similarity, evaluating probe generalization and ruling out probe memorization using the Hewitt &amp; Liang Selectivity control test.</p>
+      <div class="topic-links">
+        <a href="01_linear_probing_and_representation_geometry/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_linear_probing_and_representation_geometry/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_linear_probing_and_representation_geometry/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_linear_probing_and_representation_geometry/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_linear_probing_and_representation_geometry/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Activation Patching &amp; Causal Tracing</h2>
+      <p>Causal intervention methodology: Clean run, Corrupted/Counterfactual run, and Patched run; Causal Tracing (Meng et al. 2022, ROME): isolating the precise layers and attention heads storing and retrieving factual knowledge; Average Treatment Effect (ATE) on logits $\Delta \text{logit} = \text{logit}(y_{\text{clean}}) - \text{logit}(y_{\text{corrupt}})$, and Interchange Intervention Training (IIT).</p>
+      <div class="topic-links">
+        <a href="02_activation_patching_and_causal_tracing/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_activation_patching_and_causal_tracing/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_activation_patching_and_causal_tracing/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_activation_patching_and_causal_tracing/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_activation_patching_and_causal_tracing/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Attention Head Mechanisms &amp; Induction Heads</h2>
+      <p>The Transformer Circuits framework (Elhage et al. 2021): $QK$-circuits (determining where attention is paid, $A = \text{softmax}(x^\top W_Q^\top W_K x)$) and $OV$-circuits (determining what information is copied, $W_O W_V$); Eigenvalue analysis of $W_E^\top W_U$ (unembed-embed matrix); Two-layer Induction Heads executing in-context pattern completion $[A][B] \dots [A] \to [B]$ via previous-token head and induction head composition.</p>
+      <div class="topic-links">
+        <a href="03_attention_head_mechanisms_and_induction_heads/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_attention_head_mechanisms_and_induction_heads/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_attention_head_mechanisms_and_induction_heads/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_attention_head_mechanisms_and_induction_heads/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_attention_head_mechanisms_and_induction_heads/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Polysemanticity &amp; Sparse Autoencoders (SAEs)</h2>
+      <p>The Superposition Hypothesis: Neural networks represent more semantic features than available vector dimensions ($D \gg d$) by packing almost-orthogonal features into high-dimensional space; Polysemanticity: single neurons activating for unrelated concepts; Sparse Autoencoders (SAEs, Bricken et al. 2023): overcomplete dictionary learning ($f(x) = \text{ReLU}(W_{\text{enc}} x + b_{\text{enc}})$) with $L_1$ sparsity penalty $\mathcal{L}_{\text{SAE}} = \|x - \hat{x}\|_2^2 + \lambda \sum_i |f_i(x)|$ recovering monosemantic latent features.</p>
+      <div class="topic-links">
+        <a href="04_polysemanticity_and_sparse_autoencoders/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_polysemanticity_and_sparse_autoencoders/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_polysemanticity_and_sparse_autoencoders/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_polysemanticity_and_sparse_autoencoders/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_polysemanticity_and_sparse_autoencoders/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Model Steering &amp; Weight Editing</h2>
+      <p>Activation steering vectors: Representation engineering (Zou et al. 2023), computing concept steering vectors from contrastive pairs $\mathbf{v}_{\text{steer}} = \frac{1}{N}\sum x_{\text{positive}} - \frac{1}{M}\sum x_{\text{negative}}$, runtime activation intervention $\mathbf{h}' = \mathbf{h} + \alpha \mathbf{v}_{\text{steer}}$; Direct weight editing: Rank-One Model Editing (ROME, Meng et al. 2022) modifying MLP second-layer projection via closed-form rank-1 updates $W' = W + \Lambda k^\top$ preserving existing knowledge covariance.</p>
+      <div class="topic-links">
+        <a href="05_model_steering_and_weight_editing/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_model_steering_and_weight_editing/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_model_steering_and_weight_editing/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_model_steering_and_weight_editing/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_model_steering_and_weight_editing/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 33 Experiments</h2>
+    <p>Every experiment is implemented from first principles in pure Python 3 standard library with zero external dependencies (no PyTorch, no NumPy, no CUDA required):</p>
+    <pre class="code-block">python3 phase_33_mechanistic_interpretability/01_linear_probing_and_representation_geometry/experiment.py
+python3 phase_33_mechanistic_interpretability/02_activation_patching_and_causal_tracing/experiment.py
+python3 phase_33_mechanistic_interpretability/03_attention_head_mechanisms_and_induction_heads/experiment.py
+python3 phase_33_mechanistic_interpretability/04_polysemanticity_and_sparse_autoencoders/experiment.py
+python3 phase_33_mechanistic_interpretability/05_model_steering_and_weight_editing/experiment.py</pre>
+  </section>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      document.getElementById('themeText').textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    // Initialize theme from storage or system preference
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeText').textContent = savedTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      }
+    })();
+  </script>
+
+</body>
+</html>

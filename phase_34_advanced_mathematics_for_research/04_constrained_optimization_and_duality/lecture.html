@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.4: Constrained Optimization &amp; Duality — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.25rem; font-weight: 800; margin: 0 0 0.5rem; letter-spacing: -0.025em; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 1.25rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="../index.html" class="back-link">&larr; Back to Phase 34 Portal</a>
+      <span class="badge">Topic 34.4 &bull; Optimization &amp; Duality</span>
+      <h1>Constrained Optimization &amp; Duality</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <div class="callout">
+      <strong>Core Research Question:</strong> How do Lagrange multipliers enforce constraints as normal contact forces, why does Slater's condition guarantee zero duality gap ($p^* = d^*$), and how do the four KKT conditions characterize constrained optimality?
+    </div>
+
+    <h2>1. 12-Year-Old Intuition: The Marble in the Bowl</h2>
+    <p>Imagine dropping a heavy steel marble into a smooth wooden salad bowl. With no barriers, the marble rolls straight to the lowest point where the ground is flat ($\nabla f = \mathbf{0}$). This is unconstrained minimization.</p>
+    <p>Now insert a stiff cardboard fence vertically through the middle of the bowl. The marble rolls down until it collides with the fence and comes to a complete rest.</p>
+    <p>Why does it stop? Because the downhill gravitational pull is perfectly balanced by the normal reaction force of the cardboard pushing back!</p>
+    <ul>
+      <li><strong>Dual Multipliers:</strong> The outward force exerted by the fence is the Lagrange multiplier $\lambda$.</li>
+      <li><strong>Dual Feasibility:</strong> The cardboard can only push away; it cannot pull the marble through ($\lambda \ge 0$).</li>
+      <li><strong>Complementary Slackness:</strong> If the marble rests away from the fence (slack $> 0$), the fence exerts zero force ($\lambda = 0$). The fence only pushes ($\lambda > 0$) if the marble is touching it (slack $= 0$).</li>
+    </ul>
+
+    <h2>2. Complete Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Entity</th>
+          <th>Domain</th>
+          <th>Operational Role in AI Research</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathbf{x}$</td>
+          <td>Primal Decision Variable</td>
+          <td>$\mathbb{R}^n$</td>
+          <td>Parameters, adversarial perturbations, or policy weights.</td>
+        </tr>
+        <tr>
+          <td>$f_0(\mathbf{x})$</td>
+          <td>Primal Objective</td>
+          <td>$\mathbb{R}^n \to \mathbb{R}$</td>
+          <td>Cost, negative reward, or empirical risk to minimize.</td>
+        </tr>
+        <tr>
+          <td>$f_i(\mathbf{x}) \le 0$</td>
+          <td>Inequality Constraints</td>
+          <td>$\mathbb{R}^n \to \mathbb{R}$</td>
+          <td>Feasibility barriers (e.g. KL divergence limits in TRPO/PPO, parameter bounds).</td>
+        </tr>
+        <tr>
+          <td>$h_j(\mathbf{x}) = 0$</td>
+          <td>Equality Constraints</td>
+          <td>$\mathbb{R}^n \to \mathbb{R}$</td>
+          <td>Manifold constraints (e.g. simplex normalization $\sum p_i = 1$).</td>
+        </tr>
+        <tr>
+          <td>$\lambda_i$</td>
+          <td>Inequality Multiplier</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Shadow price / force exerted by inequality constraint boundary.</td>
+        </tr>
+        <tr>
+          <td>$\nu_j$</td>
+          <td>Equality Multiplier</td>
+          <td>$\mathbb{R}$</td>
+          <td>Reaction force enforcing equality manifold alignment.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{L}(\mathbf{x}, \boldsymbol{\lambda}, \boldsymbol{\nu})$</td>
+          <td>Lagrangian</td>
+          <td>Function</td>
+          <td>$f_0(\mathbf{x}) + \sum \lambda_i f_i(\mathbf{x}) + \sum \nu_j h_j(\mathbf{x})$.</td>
+        </tr>
+        <tr>
+          <td>$g(\boldsymbol{\lambda}, \boldsymbol{\nu})$</td>
+          <td>Dual Function</td>
+          <td>Function</td>
+          <td>$\inf_{\mathbf{x}} \mathcal{L}(\mathbf{x}, \boldsymbol{\lambda}, \boldsymbol{\nu})$; concave lower bound on primal optimum $p^*$.</td>
+        </tr>
+        <tr>
+          <td>$p^* - d^*$</td>
+          <td>Duality Gap</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Difference between primal and dual optima; zero under Slater's condition.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Four Karush-Kuhn-Tucker (KKT) Conditions</h2>
+    <p>For convex optimization problems with differentiable functions and zero duality gap, a point $(\mathbf{x}^*, \boldsymbol{\lambda}^*, \boldsymbol{\nu}^*)$ is globally optimal if and only if it satisfies all four KKT conditions:</p>
+
+    <div class="callout">
+      <strong>The Four KKT Equations:</strong><br>
+      1. <strong>Stationarity:</strong> $\nabla f_0(\mathbf{x}^*) + \sum_{i=1}^m \lambda_i^* \nabla f_i(\mathbf{x}^*) + \sum_{j=1}^p \nu_j^* \nabla h_j(\mathbf{x}^*) = \mathbf{0}$<br>
+      2. <strong>Primal Feasibility:</strong> $f_i(\mathbf{x}^*) \le 0 \quad (\forall i), \quad h_j(\mathbf{x}^*) = 0 \quad (\forall j)$<br>
+      3. <strong>Dual Feasibility:</strong> $\lambda_i^* \ge 0 \quad (\forall i)$<br>
+      4. <strong>Complementary Slackness:</strong> $\lambda_i^* f_i(\mathbf{x}^*) = 0 \quad (\forall i)$
+    </div>
+
+    <h2>4. Slater's Condition &amp; Strong Duality</h2>
+    <p><strong>Weak Duality</strong> ($d^* \le p^*$) holds unconditionally for all optimization problems.</p>
+    <p><strong>Strong Duality</strong> ($d^* = p^*$) holds if the problem is convex and satisfies <strong>Slater's condition</strong>: there exists at least one point in the relative interior of the domain that strictly satisfies all inequalities:</p>
+    $$f_i(\mathbf{x}_{\text{relint}}) < 0 \quad (i = 1, \dots, m), \quad \mathbf{C}\mathbf{x}_{\text{relint}} = \mathbf{d}$$
+
+    <h2>5. Active Set Quadratic Programming (QP)</h2>
+    <p>For quadratic programs $\min \frac{1}{2}\mathbf{x}^\top \mathbf{Q}\mathbf{x} + \mathbf{c}^\top \mathbf{x}$ subject to affine constraints, the <strong>Primal Active Set Method</strong> dynamically tracks which constraints are binding (in the active set $\mathcal{W}$).</p>
+    <p>It solves an unconstrained linear subproblem on the active subspace at each iteration, achieving exact convergence to machine precision ($10^{-16}$) in a finite number of steps.</p>
+
+    <h2>6. Verified Pure Python Implementation</h2>
+    <p>Run the accompanying zero-dependency script to solve a constrained quadratic program, verify all four KKT conditions to $10^{-16}$ precision, and confirm zero duality gap:</p>
+    <pre class="code-block">python3 phase_34_advanced_mathematics_for_research/04_constrained_optimization_and_duality/experiment.py</pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

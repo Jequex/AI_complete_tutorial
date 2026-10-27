@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.3: Continual Learning &amp; Catastrophic Forgetting — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #34d399;
+      --primary-hover: #6ee7b7;
+      --badge-bg: #064e3b;
+      --badge-text: #a7f3d0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="../index.html" class="back-link">&larr; Back to Phase 35 Index</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.3</span>
+    <h1>Continual Learning &amp; Catastrophic Forgetting</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Overcoming the stability-plasticity dilemma with Elastic Weight Consolidation (EWC), Fisher Information geometry, experience replay buffers, and orthogonal gradient projection.
+    </p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>
+        Imagine you spend three years learning to play the acoustic guitar until you know every chord shape by heart. Then you decide to learn the piano. You practice piano for two months, but when you pick up your guitar again, your brain has completely forgotten how to make a single chord!
+      </p>
+      <p>
+        Humans don't work like this: when you learn to ride a bike, you don't forget how to swim. Your brain preserves the critical neural pathways for swimming while using flexible spare neurons for the bicycle.
+      </p>
+      <p>
+        Standard neural networks suffer from <strong>Catastrophic Forgetting</strong>: when trained sequentially on Task A and then Task B, naive gradient descent overwrites the weights essential for Task A. <strong>Elastic Weight Consolidation (EWC)</strong> calculates the <strong>Fisher Information Matrix</strong>, turning vital weights into stiff elastic springs so they cannot be disrupted when learning Task B.
+      </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Mathematical Entity</th>
+          <th>Domain</th>
+          <th>Operational Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{D}_A, \mathcal{D}_B$</td>
+          <td>Task Datasets</td>
+          <td>Sets of $(x, y)$</td>
+          <td>Sequential data streams encountered over time.</td>
+        </tr>
+        <tr>
+          <td>$\boldsymbol{\theta}$</td>
+          <td>Parameter Vector</td>
+          <td>$\mathbb{R}^P$</td>
+          <td>All flattened weights and biases across the network.</td>
+        </tr>
+        <tr>
+          <td>$\boldsymbol{\theta}_A^*$</td>
+          <td>Task A Optimal Weights</td>
+          <td>$\mathbb{R}^P$</td>
+          <td>Converged local minimizer for Task A.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{F}_A$</td>
+          <td>Fisher Information Matrix</td>
+          <td>$\mathbb{R}^{P \times P}$</td>
+          <td>Second-order curvature measuring each parameter's importance to Task A.</td>
+        </tr>
+        <tr>
+          <td>$F_{A, i}$</td>
+          <td>Diagonal Fisher Element</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Stiffness coefficient for parameter $\theta_i$.</td>
+        </tr>
+        <tr>
+          <td>$\lambda$</td>
+          <td>EWC Regularization Hyperparameter</td>
+          <td>Scalar $> 0$</td>
+          <td>Governs the trade-off between stability (retaining Task A) and plasticity (learning Task B).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Bayesian Formulation of EWC</h2>
+    <p>
+      EWC approximates the posterior probability $P(\boldsymbol{\theta} \mid \mathcal{D}_A, \mathcal{D}_B)$ using a second-order Laplace approximation centered at the Task A mode $\boldsymbol{\theta}_A^*$:
+    </p>
+    $$\ln P(\boldsymbol{\theta} \mid \mathcal{D}_A, \mathcal{D}_B) = \ln P(\mathcal{D}_B \mid \boldsymbol{\theta}) + \ln P(\boldsymbol{\theta} \mid \mathcal{D}_A) - \ln P(\mathcal{D}_B)$$
+    <p>
+      Replacing the intractable prior $\ln P(\boldsymbol{\theta} \mid \mathcal{D}_A)$ with its Taylor expansion yields the diagonal EWC optimization loss:
+    </p>
+    $$\mathcal{L}_{\text{EWC}}(\boldsymbol{\theta}) = \mathcal{L}_B(\boldsymbol{\theta}) + \sum_{i=1}^P \frac{\lambda}{2} F_{A, i} \left(\theta_i - \theta_{A, i}^*\right)^2$$
+
+    <pre>
+Parameter Space (theta_1 vs theta_2)
+   theta_2 ▲
+           │
+           │      Task A Minimum (theta_A*)
+           │           (◎)
+           │          /   \  Stiff Fisher Springs (Elastic Barrier)
+           │         /     \
+           │        /   ★   \
+           │       /  Joint  \
+           │      /   Optimum \
+           │     /             \
+           │    ▼               ▼
+           │  (Naive GD)        (◎) Task B Minimum
+           │  Catastrophic
+           │  Forgetting!
+           └────────────────────────────────────────► theta_1
+    </pre>
+
+    <h2>4. Parameter Dynamics: Stiff vs. Flexible Weights</h2>
+    <p>
+      The gradient update for each parameter during Task B training is:
+    </p>
+    $$\frac{\partial \mathcal{L}_{\text{EWC}}}{\partial \theta_i} = \frac{\partial \mathcal{L}_B}{\partial \theta_i} + \lambda F_{A, i} \left(\theta_i - \theta_{A, i}^*\right)$$
+    <ul>
+      <li><strong>Critical Weights ($F_{A, i} \gg 0$):</strong> The restoring spring force $\lambda F_{A, i} (\theta_i - \theta_{A, i}^*)$ dominates, anchoring the weight in place.</li>
+      <li><strong>Redundant Weights ($F_{A, i} \approx 0$):</strong> The restoring force is negligible, allowing the weight to freely adapt to solve Task B.</li>
+    </ul>
+
+    <h2>5. Continual Learning Paradigms Compared</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Paradigm</th>
+          <th>Representative Method</th>
+          <th>Key Mechanism</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Regularization</strong></td>
+          <td>EWC, Synaptic Intelligence</td>
+          <td>Quadratic Fisher penalty anchoring sensitive weights. Zero raw replay memory required.</td>
+        </tr>
+        <tr>
+          <td><strong>Experience Replay</strong></td>
+          <td>GEM, A-GEM, DER++</td>
+          <td>Rehearsing a small stored buffer of past task exemplars alongside new batches.</td>
+        </tr>
+        <tr>
+          <td><strong>Gradient Projection</strong></td>
+          <td>OGD (Orthogonal Gradient Descent)</td>
+          <td>Projecting Task B updates onto the orthogonal null-space of Task A gradients.</td>
+        </tr>
+        <tr>
+          <td><strong>Architecture Isolation</strong></td>
+          <td>PackNet, Progressive Networks</td>
+          <td>Freezing subnetworks for past tasks and dynamically routing new capacity.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" class="btn">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../04_multimodal_alignment_and_representation_binding/lecture.html" class="btn" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border);">Next Topic: Multimodal Alignment &rarr;</a>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

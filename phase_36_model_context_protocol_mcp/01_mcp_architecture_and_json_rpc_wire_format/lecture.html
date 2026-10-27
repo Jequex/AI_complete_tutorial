@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: MCP Architecture &amp; JSON-RPC 2.0 Wire Format — AI Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; margin: 0.5rem 0; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; color: var(--text); }
+    p, li { color: var(--text); font-size: 1.05rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-weight: 700;
+    }
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.2rem;
+      border-radius: 0.6rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    p code, li code {
+      background: var(--bg-card);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      border: 1px solid var(--border);
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <a href="../index.html" class="back-link">← Back to Phase 36 Overview</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </div>
+    <h1>Topic 01: MCP Architecture &amp; JSON-RPC 2.0 Wire Format</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">Client-Host-Server topology, JSON-RPC 2.0 framing, standard error codes, and batch processing.</p>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuitive Analogy: The Universal USB-C Cable for AI</h2>
+    <p>
+      Imagine you have a state-of-the-art gaming console, but every accessory requires a proprietary physical cable. The controller has a 9-pin triangular plug, the headset requires a flat 30-pin connector, and the external storage uses a threaded screw-in connector. Every time a new gadget appears, developers must invent a brand new custom adapter.
+    </p>
+    <p>
+      Before late 2024, AI agents operated in this exact fragmentation nightmare: every LLM application had to create bespoke integration code for PostgreSQL, GitHub, Slack, file trees, and search engines.
+    </p>
+    <div class="callout">
+      <strong>The Solution:</strong> The <strong>Model Context Protocol (MCP)</strong> is the <em>universal USB-C connector</em> for AI models. By standardizing message passing over <strong>JSON-RPC 2.0</strong>, any AI client can communicate with any data provider or tool server across a unified, open specification.
+    </div>
+
+    <h2>2. Complete Mathematical &amp; Protocol Symbol Glossary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol / Term</th>
+          <th>Formal Wire Representation</th>
+          <th>Protocol Function</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{H}$</td>
+          <td><strong>Host Process</strong></td>
+          <td>The user-facing orchestrator (e.g. IDE, Desktop agent runtime) that hosts the LLM.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{S}$</td>
+          <td><strong>MCP Server</strong></td>
+          <td>Lightweight process exposing Resources, Tools, and Prompts to the host.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{T}_{\text{stdio}}$</td>
+          <td>Standard I/O Transport</td>
+          <td>Bidirectional communication framed by newline delimiter (<code>\n</code>) over standard pipes.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{T}_{\text{sse}}$</td>
+          <td>HTTP + SSE Transport</td>
+          <td>Chunked streaming over HTTP with <code>text/event-stream</code>.</td>
+        </tr>
+        <tr>
+          <td>$\text{jsonrpc}$</td>
+          <td><code>"2.0"</code> strict string</td>
+          <td>Protocol version indicator. Mandatory on all requests and responses.</td>
+        </tr>
+        <tr>
+          <td>$\text{id}$</td>
+          <td>String, Integer, or <code>null</code></td>
+          <td>Correlation token pairing an asynchronous response with its originating request.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{N}$</td>
+          <td>Notification Object</td>
+          <td>Message without an <code>id</code>. Receiver must NEVER reply.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Client-Host-Server Topology</h2>
+    <pre>
+┌────────────────────────────────────────────────────────────────────────┐
+│                              HOST                                      │
+│  (e.g., IDE, Desktop Agent Environment, Custom Python Agent Runtime)   │
+│                                                                        │
+│   ┌──────────────────────────┐         ┌───────────────────────────┐   │
+│   │         LLM Core         │         │        MCP Client         │   │
+│   │  (Generates reasoning &  │◄───────►│  (Manages connections,    │   │
+│   │   tool call intents)     │         │   routes calls, security) │   │
+│   └──────────────────────────┘         └─────────────┬─────────────┘   │
+└──────────────────────────────────────────────────────┼─────────────────┘
+                                                       │
+                           Standardized JSON-RPC 2.0   │  (Bidirectional)
+                           over Stdio or HTTP/SSE      │
+                                                       │
+         ┌─────────────────────────────────────────────┴──────────────────┐
+         ▼                                                                ▼
+┌─────────────────────────────────┐              ┌─────────────────────────────────┐
+│        MCP Server: Local        │              │       MCP Server: Remote        │
+│  (Subprocess spawned via stdio) │              │   (External service via SSE)    │
+│  - Reads local git repo         │              │  - Queries enterprise database  │
+│  - Executes file edits          │              │  - Invokes CRM/ERP APIs         │
+└─────────────────────────────────┘              └─────────────────────────────────┘
+    </pre>
+
+    <h2>4. Standard JSON-RPC 2.0 Error Codes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Definition</th>
+          <th>Trigger Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>-32700</code></td>
+          <td>Parse Error</td>
+          <td>Malformed JSON string received by the parser.</td>
+        </tr>
+        <tr>
+          <td><code>-32600</code></td>
+          <td>Invalid Request</td>
+          <td>JSON is valid, but missing required structure or wrong <code>jsonrpc</code> version.</td>
+        </tr>
+        <tr>
+          <td><code>-32601</code></td>
+          <td>Method Not Found</td>
+          <td>The requested RPC method is not registered on the receiver.</td>
+        </tr>
+        <tr>
+          <td><code>-32602</code></td>
+          <td>Invalid Params</td>
+          <td>The method arguments violate schema types or missing fields.</td>
+        </tr>
+        <tr>
+          <td><code>-32603</code></td>
+          <td>Internal Error</td>
+          <td>Uncaught execution fault inside server logic.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Message Framing Examples</h2>
+    <h3>Stdio Framing (Newline Delimited)</h3>
+    <pre><code>{"jsonrpc":"2.0","method":"ping","id":1}\n</code></pre>
+
+    <h3>HTTP / Server-Sent Events (SSE) Framing</h3>
+    <pre><code>event: message
+data: {"jsonrpc":"2.0","method":"ping","id":1}
+
+</code></pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('theme', target);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  </script>
+</body>
+</html>

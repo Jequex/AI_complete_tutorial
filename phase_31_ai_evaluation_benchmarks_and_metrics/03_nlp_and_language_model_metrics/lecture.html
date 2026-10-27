@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 03: NLP &amp; Language Model Metrics</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --badge-bg: #ede9fe;
+      --badge-text: #6d28d9;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #a78bfa;
+        --primary-hover: #c4b5fd;
+        --badge-bg: #4c1d95;
+        --badge-text: #ddd6fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .alert {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 31 Hub</a><br>
+    <span class="badge">Topic 03 &bull; Module 31.3</span>
+    <h1>NLP &amp; Language Model Metrics</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Perplexity, BLEU-4 with Brevity Penalties, ROUGE via Dynamic Programming LCS, Exact Match, and Token F1.</p>
+  </header>
+
+  <section>
+    <h2>1. The 12-Year-Old Intuition: Grading a Student's Translation</h2>
+    <div class="card">
+      <p>Suppose a human teacher provides the reference translation: <em>"The black cat sleeps peacefully on the soft carpet."</em></p>
+      <p>A bilingual student writes: <em>"The dark cat is resting quietly on the soft rug."</em></p>
+      <p>How do we grade this automatically?
+        <ul>
+          <li><strong>Perplexity ($PPL$):</strong> Asks how surprised the model was to see these words. A perplexity of 10 means the AI had to guess between 10 equally probable words at every step. Lower is better.</li>
+          <li><strong>BLEU:</strong> Checks if the words produced by the student were in the teacher's sentence (Precision). Punishes repetitive spam like <em>"the the the"</em> and overly short answers.</li>
+          <li><strong>ROUGE:</strong> Checks how much of the teacher's key ideas were captured (Recall). Perfect for summarization.</li>
+          <li><strong>Exact Match &amp; Token F1:</strong> Normalizes text (stripping punctuation and articles) to grade factual question answering.</li>
+        </ul>
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Language Model Perplexity ($PPL$)</h2>
+    <p>Given sequence $X = (x_1, \dots, x_N)$, the average cross-entropy loss in natural nats is:</p>
+    $$\mathcal{L}_{\text{CE}} = -\frac{1}{N} \sum_{i=1}^N \log P(x_i \mid x_{<i})$$
+    $$\boxed{PPL = \exp\left(\mathcal{L}_{\text{CE}}\right) = 2^{H(p, q)}}$$
+    <div class="alert">
+      <strong>Tokenizer Warning:</strong> Perplexity is valid <em>only</em> when comparing models with identical tokenizers and vocabularies. Subword tokenizers with smaller vocabularies inherently produce lower per-token perplexity without being better models.
+    </div>
+  </section>
+
+  <section>
+    <h2>3. The BLEU Metric (Papineni et al., 2002)</h2>
+    <p>Modified clipped precision prevents repetitive phrase hacking by capping $n$-gram counts at their maximum frequency in any reference:</p>
+    $$p_n = \frac{\sum_{C} \sum_{\text{gram} \in C} \text{Count}_{\text{clip}}(\text{gram})}{\sum_{C} \sum_{\text{gram} \in C} \text{Count}_{\text{cand}}(\text{gram})}$$
+    <p>The <strong>Brevity Penalty ($BP$)</strong> penalizes candidates that are shorter than reference length $r$:</p>
+    $$BP = \begin{cases} 1 & \text{if } c > r \\ \exp\left(1 - \frac{r}{c}\right) & \text{if } c \le r \end{cases}$$
+    $$\boxed{\text{BLEU}-4 = BP \cdot \exp\left(\sum_{n=1}^4 \frac{1}{4} \log p_n\right)}$$
+  </section>
+
+  <section>
+    <h2>4. ROUGE &amp; Dynamic Programming LCS</h2>
+    <p><strong>ROUGE-L</strong> uses the Longest Common Subsequence (LCS) computed via 2D Dynamic Programming in $\mathcal{O}(N \cdot M)$ time:</p>
+    $$L[i, j] = \begin{cases} 0 & i=0 \text{ or } j=0 \\ L[i-1, j-1] + 1 & c_i = r_j \\ \max(L[i-1, j], L[i, j-1]) & c_i \ne r_j \end{cases}$$
+    $$R_{\text{LCS}} = \frac{\text{LCS}(C, R)}{|R|}, \qquad P_{\text{LCS}} = \frac{\text{LCS}(C, R)}{|C|}, \qquad \boxed{F_{\text{LCS}} = \frac{2 R_{\text{LCS}} P_{\text{LCS}}}{R_{\text{LCS}} + P_{\text{LCS}}}}$$
+  </section>
+
+  <section>
+    <h2>5. SQuAD Normalization &amp; Token F1</h2>
+    <p>Before exact matching, text is normalized by: (1) lowercasing, (2) stripping punctuation, (3) stripping articles (<code>a</code>, <code>an</code>, <code>the</code>), and (4) whitespace collapsing. Token F1 computes harmonic mean over matching token multisets:</p>
+    $$\boxed{F_1^{\text{token}} = \frac{2 \cdot \text{Precision}_{\text{token}} \cdot \text{Recall}_{\text{token}}}{\text{Precision}_{\text{token}} + \text{Recall}_{\text{token}}}}$$
+  </section>
+
+  <div class="actions">
+    <a href="exercises_and_solutions.html" class="btn">View Exercises &amp; Solutions &rarr;</a>
+    <a href="experiment.py" class="btn btn-secondary">Inspect Python Experiment</a>
+  </div>
+
+</body>
+</html>

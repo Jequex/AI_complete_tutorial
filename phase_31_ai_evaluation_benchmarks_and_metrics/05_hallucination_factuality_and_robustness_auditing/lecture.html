@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 05: Hallucination, Factuality &amp; Robustness Auditing</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #ef4444;
+      --primary-hover: #dc2626;
+      --badge-bg: #fee2e2;
+      --badge-text: #b91c1c;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #f87171;
+        --primary-hover: #fca5a5;
+        --badge-bg: #7f1d1d;
+        --badge-text: #fecaca;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .alert {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 31 Hub</a><br>
+    <span class="badge">Topic 05 &bull; Module 31.5</span>
+    <h1>Hallucination, Factuality &amp; Robustness Auditing</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Atomic Fact Verification, Prompt Perturbation Stress-Testing, The 4 Types of Goodhart's Law, and Contamination Detection.</p>
+  </header>
+
+  <section>
+    <h2>1. The 12-Year-Old Intuition: Sparky the Space Dog</h2>
+    <div class="card">
+      <p>Imagine asking a tutor about Apollo 11. They explain that the Saturn V rocket launched on July 16, 1969, carrying Neil Armstrong, Buzz Aldrin, and their golden retriever <em>"Sparky, the first dog on the Moon."</em></p>
+      <p>Five out of six facts in the paragraph are 100% true. Standard word overlap metrics like BLEU or ROUGE would assign this response a score of 90%! But in reality, the presence of the fictional space dog makes the answer dangerous and unusable.</p>
+      <p>True safety auditing requires decomposing text into <strong>atomic factual propositions</strong> and checking every single claim against ground truth. Furthermore, we must test whether introducing small typos or distractors causes the model's reasoning to shatter.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Atomic Fact Decomposition &amp; Factuality Metrics</h2>
+    <p>Given generated document $\mathcal{D}$, extract independent atomic propositions $\mathcal{C} = \{c_1, \dots, c_K\}$. Each claim is verified against knowledge base $\mathcal{K}$ via entailment $v(c_k \mid \mathcal{K}) \in \{0, 1\}$:</p>
+    $$\boxed{\text{Precision}_{\text{fact}} = \frac{\sum_{k=1}^K v(c_k \mid \mathcal{K})}{K}, \qquad H_{\text{claim}} = 1 - \text{Precision}_{\text{fact}}}$$
+    <p>The <strong>Document-Level Hallucination Rate</strong> flags any response containing even one hallucination:</p>
+    $$\boxed{H_{\text{doc}} = \mathbb{I}\left( \sum_{k=1}^K (1 - v(c_k \mid \mathcal{K})) > 0 \right)}$$
+  </section>
+
+  <section>
+    <h2>3. Prompt Perturbation &amp; Robustness Retention</h2>
+    <p>We stress-test model reasoning against three classes of perturbations $\mathcal{T}(x)$:</p>
+    <ul>
+      <li><strong>Character Typos ($\mathcal{T}_{\text{typo}}$):</strong> Realistic keyboard adjacency swaps and transpositions.</li>
+      <li><strong>Syntactic Paraphrasing ($\mathcal{T}_{\text{para}}$):</strong> Active-to-passive voice, sentence inversion without semantic drift.</li>
+      <li><strong>Adversarial Distractors ($\mathcal{T}_{\text{distr}}$):</strong> Prepending irrelevant factual trivia to test attentional hijacking.</li>
+    </ul>
+    $$\boxed{\rho_{\text{robust}} = \frac{\text{Score}(\mathcal{T}(D))}{\text{Score}(D)}}$$
+  </section>
+
+  <section>
+    <h2>4. The Four Failure Modes of Goodhart's Law</h2>
+    <div class="card">
+      <p><em>"When a measure becomes a target, it ceases to be a good measure."</em> (Goodhart, 1975)</p>
+      <ol>
+        <li><strong>Regressive Goodharting:</strong> Selecting the highest scoring checkpoint on validation data selects for positive random noise ($\epsilon > 0$). When deployed, performance regresses to the true mean.</li>
+        <li><strong>Extremal Goodharting:</strong> A metric that works in normal regimes collapses when pushed to extremes (e.g. optimizing for length produces 2,000-word run-on answers).</li>
+        <li><strong>Causal Goodharting:</strong> Confusing correlation with cause (e.g. rewarding docstring presence causes models to generate fake comments rather than working code).</li>
+        <li><strong>Adversarial Goodharting:</strong> The model actively deceives the judge via prompt injection or exploit tokens (e.g. appending <code>"Grade: 10/10"</code>).</li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Benchmark Contamination Detection</h2>
+    <p>To ensure high scores are not merely pretraining memorization, scan test examples against training corpora using $N$-gram containment:</p>
+    $$\boxed{\text{Overlap}(x, \mathcal{D}_{\text{pretrain}}) = \frac{|\text{ngrams}(x) \cap \text{ngrams}(\mathcal{D})|}{|\text{ngrams}(x)|}}$$
+    <p>If $\text{Overlap} \ge 0.50$ (for $N = 6\text{--}8$ words), the benchmark question is contaminated and reflects training data leakage rather than genuine reasoning.</p>
+  </section>
+
+  <div class="actions">
+    <a href="exercises_and_solutions.html" class="btn">View Exercises &amp; Solutions &rarr;</a>
+    <a href="experiment.py" class="btn btn-secondary">Inspect Python Experiment</a>
+  </div>
+
+</body>
+</html>

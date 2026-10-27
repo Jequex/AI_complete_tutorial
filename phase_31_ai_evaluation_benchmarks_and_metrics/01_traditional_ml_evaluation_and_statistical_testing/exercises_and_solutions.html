@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: Exercises &amp; Solutions — Traditional ML Evaluation and Statistical Testing</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.1rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .exercise-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    .exercise-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+    }
+    summary {
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover {
+      background-color: var(--bg-card);
+    }
+    .solution-body {
+      padding: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Lecture</a><br>
+    <span class="badge">Exercises &amp; Solutions</span>
+    <h1>Topic 01 Practice: Statistical Testing in ML</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Step-by-step problem sets covering Student's paired $t$-test, Wilcoxon signed-rank test, Bootstrap CIs, and Benjamini-Hochberg FDR control.</p>
+  </header>
+
+  <!-- Exercise 1 -->
+  <div class="exercise-card">
+    <h2>Exercise 1: Paired $t$-Test and Wilcoxon Signed-Rank Test on 10-Fold CV</h2>
+    <p>A machine learning team compares Candidate Model $A$ against Baseline Model $B$ across 10 identical cross-validation folds. The test accuracies (%) are:</p>
+    <table>
+      <thead>
+        <tr><th>Fold $i$</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Model A</strong></td><td>85.4</td><td>87.1</td><td>82.0</td><td>88.6</td><td>84.5</td><td>89.2</td><td>81.3</td><td>86.7</td><td>85.0</td><td>87.8</td></tr>
+        <tr><td><strong>Model B</strong></td><td>83.2</td><td>86.5</td><td>82.0</td><td>85.1</td><td>83.0</td><td>88.0</td><td>82.5</td><td>84.2</td><td>83.1</td><td>85.4</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Tasks:</strong></p>
+    <ol>
+      <li>Compute paired difference vector $d_i = X_{A, i} - X_{B, i}$, sample mean $\bar{d}$, and sample standard error $\text{SE}(\bar{d})$.</li>
+      <li>Compute the Student's paired $t$-statistic. For $\nu = 9$ degrees of freedom at $\alpha = 0.05$ ($t_{\text{crit}} = 2.262$), do you reject $H_0$?</li>
+      <li>Drop the zero difference, rank absolute differences, compute $W^+$ and $W^-$, and evaluate the Wilcoxon signed-rank test at $W_{\text{crit}} = 5$.</li>
+    </ol>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Sample Statistics:</strong></p>
+        <p>Differences $d = [+2.2, +0.6, 0.0, +3.5, +1.5, +1.2, -1.2, +2.5, +1.9, +2.4]$.</p>
+        $$\bar{d} = \frac{14.6}{10} = \mathbf{+1.46\%}, \qquad s_d = \sqrt{\frac{16.884}{9}} \approx \mathbf{1.3697\%}, \qquad \text{SE}(\bar{d}) = \frac{1.3697}{\sqrt{10}} \approx \mathbf{0.4331\%}$$
+
+        <p><strong>2. Student's Paired $t$-Test:</strong></p>
+        $$t = \frac{\bar{d}}{\text{SE}(\bar{d})} = \frac{1.46}{0.4331} \approx \mathbf{3.371}$$
+        <p>Since $|t| = 3.371 > t_{\text{crit}} = 2.262$ ($p \approx 0.0082 < 0.05$), we <strong>reject $H_0$</strong>. Candidate Model $A$ is significantly superior.</p>
+
+        <p><strong>3. Wilcoxon Signed-Rank Test:</strong></p>
+        <p>Remove fold 3 ($d_3 = 0$), leaving $n_r = 9$ non-zero pairs.</p>
+        <ul>
+          <li>Fold 2 ($|0.6|$): Rank 1</li>
+          <li>Fold 6 ($|1.2|$) and Fold 7 ($|-1.2|$): Tied ranks 2 and 3 &rarr; Rank 2.5 each</li>
+          <li>Fold 5 ($|1.5|$): Rank 4</li>
+          <li>Fold 9 ($|1.9|$): Rank 5</li>
+          <li>Fold 1 ($|2.2|$): Rank 6</li>
+          <li>Fold 10 ($|2.4|$): Rank 7</li>
+          <li>Fold 8 ($|2.5|$): Rank 8</li>
+          <li>Fold 4 ($|3.5|$): Rank 9</li>
+        </ul>
+        $$W^- = 2.5 \quad (\text{Fold } 7), \qquad W^+ = 1 + 2.5 + 4 + 5 + 6 + 7 + 8 + 9 = 42.5$$
+        $$W = \min(42.5, 2.5) = \mathbf{2.5}$$
+        <p>Since $W = 2.5 \le W_{\text{crit}} = 5$, we <strong>reject $H_0$</strong> ($p \approx 0.016 < 0.05$).</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Exercise 2 -->
+  <div class="exercise-card">
+    <h2>Exercise 2: Percentile vs. Empirical (Basic) Bootstrap Confidence Intervals</h2>
+    <p>A classifier achieves an empirical Macro-F1 point estimate of $\hat{\theta} = 0.820$ on an evaluation benchmark. From $B = 2{,}000$ bootstrap iterations, the sorted estimates produce:</p>
+    <ul>
+      <li>$2.5^{\text{th}}$ percentile $\hat{\theta}^*_{(0.025)} = 0.795$</li>
+      <li>$50.0^{\text{th}}$ percentile $\hat{\theta}^*_{(0.500)} = 0.824$</li>
+      <li>$97.5^{\text{th}}$ percentile $\hat{\theta}^*_{(0.975)} = 0.840$</li>
+    </ul>
+    <p><strong>Tasks:</strong> Calculate both the 95% Percentile Bootstrap CI and the 95% Empirical Basic Bootstrap CI. Explain why the Basic CI shifts.</p>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Percentile Bootstrap Interval:</strong></p>
+        $$\text{CI}_{\text{pct}} = [\hat{\theta}^*_{(0.025)}, \; \hat{\theta}^*_{(0.975)}] = \mathbf{[0.795, \; 0.840]}$$
+
+        <p><strong>2. Empirical (Basic) Bootstrap Interval:</strong></p>
+        $$\text{CI}_{\text{basic}} = [2\hat{\theta} - \hat{\theta}^*_{(0.975)}, \; 2\hat{\theta} - \hat{\theta}^*_{(0.025)}]$$
+        $$\text{Lower} = 2(0.820) - 0.840 = 1.640 - 0.840 = \mathbf{0.800}$$
+        $$\text{Upper} = 2(0.820) - 0.795 = 1.640 - 0.795 = \mathbf{0.845}$$
+        $$\text{CI}_{\text{basic}} = \mathbf{[0.800, \; 0.845]}$$
+
+        <p><strong>3. Explanation:</strong> The bootstrap distribution exhibits positive bias ($\text{median} = 0.824 > \hat{\theta} = 0.820$). The Basic bootstrap models the distribution of estimation errors $\delta^* = \hat{\theta}^* - \hat{\theta}$ and reflects them across the point estimate, properly compensating for asymmetric skew.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Exercise 3 -->
+  <div class="exercise-card">
+    <h2>Exercise 3: Multiple Comparisons: Bonferroni vs. Benjamini-Hochberg FDR</h2>
+    <p>Evaluating $m = 10$ model variants against production baseline yields the following sorted two-tailed $p$-values: $p = [0.0021, 0.0045, 0.0098, 0.0182, 0.0240, 0.0385, 0.0460, 0.0810, 0.1540, 0.6200]$.</p>
+    <p><strong>Tasks:</strong> At $\alpha = 0.05$ and FDR target $Q = 0.05$:</p>
+    <ol>
+      <li>Find how many models are significant under unadjusted testing.</li>
+      <li>Compute the Bonferroni threshold $\alpha_{\text{Bonf}} = \alpha / m$ and identify accepted discoveries.</li>
+      <li>Compute the Benjamini-Hochberg critical thresholds $c_k = \frac{k}{m} Q$ and identify accepted discoveries.</li>
+    </ol>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Unadjusted:</strong> Any $p_i \le 0.05$ is accepted. Folds 1 to 7 qualify &rarr; <strong>7 discoveries</strong> (with an inflated $\text{FWER} \approx 40.1\%$).</p>
+        <p><strong>2. Bonferroni:</strong> $\alpha_{\text{Bonf}} = 0.05 / 10 = \mathbf{0.0050}$. Only $p_{(1)} = 0.0021$ and $p_{(2)} = 0.0045$ are $\le 0.0050$ &rarr; <strong>2 discoveries</strong>.</p>
+        <p><strong>3. Benjamini-Hochberg ($Q = 0.05$):</strong></p>
+        <table>
+          <thead><tr><th>Rank $k$</th><th>Raw $p_{(k)}$</th><th>BH Cutoff $\frac{k}{10} \times 0.05$</th><th>$p_{(k)} \le c_k$?</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>0.0021</td><td>0.0050</td><td>YES</td></tr>
+            <tr><td>2</td><td>0.0045</td><td>0.0100</td><td>YES</td></tr>
+            <tr><td>3</td><td>0.0098</td><td>0.0150</td><td>YES</td></tr>
+            <tr><td>4</td><td>0.0182</td><td>0.0200</td><td>YES</td></tr>
+            <tr><td>5</td><td>0.0240</td><td>0.0250</td><td><strong>YES (Cutoff $k^* = 5$)</strong></td></tr>
+            <tr><td>6</td><td>0.0385</td><td>0.0300</td><td>NO</td></tr>
+            <tr><td>7</td><td>0.0460</td><td>0.0350</td><td>NO</td></tr>
+          </tbody>
+        </table>
+        <p>The largest index where $p_{(k)} \le c_k$ is $k^* = 5$. We reject $H_0$ for models 1 through 5 &rarr; <strong>5 discoveries</strong> with guaranteed FDR $\le 5\%$.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="margin-top: 2rem;">
+    <a href="lecture.html" class="btn">&larr; Back to Lecture</a>
+  </div>
+
+</body>
+</html>

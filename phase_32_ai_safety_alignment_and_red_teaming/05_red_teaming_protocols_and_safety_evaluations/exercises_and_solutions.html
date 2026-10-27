@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 32.5: Exercises &amp; Solutions — Red Teaming Protocols &amp; Safety Evaluations</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #dc2626;
+      --primary-hover: #b91c1c;
+      --badge-bg: #fee2e2;
+      --badge-text: #991b1b;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #f87171;
+        --primary-hover: #fca5a5;
+        --badge-bg: #7f1d1d;
+        --badge-text: #fecaca;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+    }
+    summary {
+      padding: 1rem 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    details[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+    .solution-content {
+      padding: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 32 Portal</a>
+    <br>
+    <h1>Topic 32.5: Exercises &amp; Solutions</h1>
+    <p class="lead">Mathematical and conceptual exercises analyzing Attack Success Rate (ASR), False Refusal Rate (FRR), and harmonic safety trade-offs.</p>
+  </header>
+
+  <main>
+    <div class="card">
+      <h3>Exercise 1: Evaluating the ASR vs. FRR Trade-off</h3>
+      <p>An AI safety team benchmarks three candidate guardrail pipelines ($M_1, M_2, M_3$) against $N_{\text{adv}} = 1000$ adversarial attack attempts and $N_{\text{benign}} = 2000$ standard user requests:</p>
+      <ul>
+        <li><strong>$M_1$ (Permissive)</strong>: Blocks 600 attacks; refuses 20 benign requests.</li>
+        <li><strong>$M_2$ (Balanced)</strong>: Blocks 920 attacks; refuses 100 benign requests.</li>
+        <li><strong>$M_3$ (Over-Defensive)</strong>: Blocks 990 attacks; refuses 900 benign requests.</li>
+      </ul>
+      <p>Calculate ASR, FRR, and Harmonic Safety Score $H_{\text{safety}} = 2 \frac{(1 - \text{ASR})(1 - \text{FRR})}{(1 - \text{ASR}) + (1 - \text{FRR})}$, and identify the optimal pipeline.</p>
+
+      <details>
+        <summary>View Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Calculate ASR and FRR:</h4>
+          <ul>
+            <li><strong>$M_1$</strong>: $\text{ASR} = \frac{400}{1000} = \mathbf{40.0\%}$; $\text{FRR} = \frac{20}{2000} = \mathbf{1.0\%}$.</li>
+            <li><strong>$M_2$</strong>: $\text{ASR} = \frac{80}{1000} = \mathbf{8.0\%}$; $\text{FRR} = \frac{100}{2000} = \mathbf{5.0\%}$.</li>
+            <li><strong>$M_3$</strong>: $\text{ASR} = \frac{10}{1000} = \mathbf{1.0\%}$; $\text{FRR} = \frac{900}{2000} = \mathbf{45.0\%}$.</li>
+          </ul>
+
+          <h4>2. Calculate Harmonic Safety Score:</h4>
+          <ul>
+            <li>$H_{\text{safety}}(M_1) = 2 \times \frac{0.60 \times 0.99}{0.60 + 0.99} \approx \mathbf{0.7472}$</li>
+            <li>$H_{\text{safety}}(M_2) = 2 \times \frac{0.92 \times 0.95}{0.92 + 0.95} \approx \mathbf{0.9348}$</li>
+            <li>$H_{\text{safety}}(M_3) = 2 \times \frac{0.99 \times 0.55}{0.99 + 0.55} \approx \mathbf{0.7071}$</li>
+          </ul>
+
+          <p><strong>Conclusion:</strong> <strong>$M_2$</strong> achieves the highest score ($0.9348$), effectively suppressing attacks while maintaining a $95\%$ acceptance rate for benign users.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>
+

@@ -58,11 +58,12 @@ phase_XX_name/
 | **Phase 28** | **AI Systems & Distributed Infrastructure** | HTML + Python | ✅ Complete | [Open Phase 28 Portal](./phase_28_ai_systems_and_distributed_infrastructure/index.html) |
 | **Phase 29** | **Model Compression & Quantization** | HTML + Python | ✅ Complete | [Open Phase 29 Portal](./phase_29_model_compression_and_quantization/index.html) |
 | **Phase 30** | **Efficient Inference & Serving** | HTML + Python | ✅ Complete | [Open Phase 30 Portal](./phase_30_efficient_inference_and_serving/index.html) |
-| **Phase 31** | **AI Evaluation, Benchmarks & Metrics** | HTML + Python | ⏳ Queued | Coming up |
-| **Phase 32** | **AI Safety, Alignment & Red Teaming** | HTML + Python | ⏳ Queued | Coming up |
-| **Phase 33** | **Mechanistic Interpretability** | HTML + Python | ⏳ Queued | Coming up |
-| **Phase 34** | **Advanced Mathematics for Research** | HTML + Python | ⏳ Queued | Coming up |
-| **Phase 35** | **Research-Level AI & Future Frontiers** | HTML + Python | ⏳ Queued | Coming up |
+| **Phase 31** | **AI Evaluation, Benchmarks & Metrics** | HTML + Python | ✅ Complete | [Open Phase 31 Portal](./phase_31_ai_evaluation_benchmarks_and_metrics/index.html) |
+| **Phase 32** | **AI Safety, Alignment & Red Teaming** | HTML + Python | ✅ Complete | [Open Phase 32 Portal](./phase_32_ai_safety_alignment_and_red_teaming/index.html) |
+| **Phase 33** | **Mechanistic Interpretability** | HTML + Python | ✅ Complete | [Open Phase 33 Portal](./phase_33_mechanistic_interpretability/index.html) |
+| **Phase 34** | **Advanced Mathematics for Research** | HTML + Python | ✅ Complete | [Open Phase 34 Portal](./phase_34_advanced_mathematics_for_research/index.html) |
+| **Phase 35** | **Research-Level AI & Future Frontiers** | HTML + Python | ✅ Complete | [Open Phase 35 Portal](./phase_35_research_level_ai_and_future_frontiers/index.html) |
+| **Phase 36** | **Model Context Protocol (MCP) & Extensible Agent Ecosystems** | HTML + Python | ✅ Complete | [Open Phase 36 Portal](./phase_36_model_context_protocol_mcp/index.html) |
 
 ---
 
@@ -272,5 +273,47 @@ python3 phase_30_efficient_inference_and_serving/02_pagedattention_and_continuou
 python3 phase_30_efficient_inference_and_serving/03_speculative_decoding/experiment.py
 python3 phase_30_efficient_inference_and_serving/04_kv_cache_compression_and_tensor_parallel_serving/experiment.py
 python3 phase_30_efficient_inference_and_serving/05_serving_benchmarks_and_metrics_ttft_itl_tps/experiment.py
+
+# Phase 31 Experiments (AI Evaluation, Benchmarks & Metrics):
+python3 phase_31_ai_evaluation_benchmarks_and_metrics/01_traditional_ml_evaluation_and_statistical_testing/experiment.py
+python3 phase_31_ai_evaluation_benchmarks_and_metrics/02_classification_calibration_and_thresholding/experiment.py
+python3 phase_31_ai_evaluation_benchmarks_and_metrics/03_nlp_and_language_model_metrics/experiment.py
+python3 phase_31_ai_evaluation_benchmarks_and_metrics/04_llm_as_a_judge_and_preference_benchmarks/experiment.py
+python3 phase_31_ai_evaluation_benchmarks_and_metrics/05_hallucination_factuality_and_robustness_auditing/experiment.py
+
+# Phase 32 Experiments (AI Safety, Alignment & Red Teaming):
+python3 phase_32_ai_safety_alignment_and_red_teaming/01_adversarial_attacks_and_robustness/experiment.py
+python3 phase_32_ai_safety_alignment_and_red_teaming/02_jailbreaks_prompt_injection_and_defense/experiment.py
+python3 phase_32_ai_safety_alignment_and_red_teaming/03_data_poisoning_backdoors_and_model_extraction/experiment.py
+python3 phase_32_ai_safety_alignment_and_red_teaming/04_alignment_hazards_reward_hacking_and_power_seeking/experiment.py
+python3 phase_32_ai_safety_alignment_and_red_teaming/05_red_teaming_protocols_and_safety_evaluations/experiment.py
+
+# Phase 33 Experiments (Mechanistic Interpretability):
+python3 phase_33_mechanistic_interpretability/01_linear_probing_and_representation_geometry/experiment.py
+python3 phase_33_mechanistic_interpretability/02_activation_patching_and_causal_tracing/experiment.py
+python3 phase_33_mechanistic_interpretability/03_attention_head_mechanisms_and_induction_heads/experiment.py
+python3 phase_33_mechanistic_interpretability/04_polysemanticity_and_sparse_autoencoders/experiment.py
+python3 phase_33_mechanistic_interpretability/05_model_steering_and_weight_editing/experiment.py
+
+# Phase 34 Experiments (Advanced Mathematics for Research):
+python3 phase_34_advanced_mathematics_for_research/01_spectral_theory_and_svd_geometry/experiment.py
+python3 phase_34_advanced_mathematics_for_research/02_matrix_calculus_and_hessian_vector_products/experiment.py
+python3 phase_34_advanced_mathematics_for_research/03_stochastic_calculus_and_differential_equations/experiment.py
+python3 phase_34_advanced_mathematics_for_research/04_constrained_optimization_and_duality/experiment.py
+python3 phase_34_advanced_mathematics_for_research/05_information_geometry_and_natural_gradients/experiment.py
+
+# Phase 35 Experiments (Research-Level AI & Future Frontiers):
+python3 phase_35_research_level_ai_and_future_frontiers/01_world_models_and_latent_dynamics/experiment.py
+python3 phase_35_research_level_ai_and_future_frontiers/02_test_time_compute_and_reasoning_search/experiment.py
+python3 phase_35_research_level_ai_and_future_frontiers/03_continual_learning_and_catastrophic_forgetting/experiment.py
+python3 phase_35_research_level_ai_and_future_frontiers/04_multimodal_alignment_and_representation_binding/experiment.py
+python3 phase_35_research_level_ai_and_future_frontiers/05_scientific_discovery_and_literature_synthesis/experiment.py
+
+# Phase 36 Experiments (Model Context Protocol & Extensible Agent Ecosystems):
+python3 phase_36_model_context_protocol_mcp/01_mcp_architecture_and_json_rpc_wire_format/experiment.py
+python3 phase_36_model_context_protocol_mcp/02_mcp_primitives_resources_and_dynamic_context/experiment.py
+python3 phase_36_model_context_protocol_mcp/03_mcp_primitives_tools_and_prompts/experiment.py
+python3 phase_36_model_context_protocol_mcp/04_mcp_transports_and_session_lifecycle/experiment.py
+python3 phase_36_model_context_protocol_mcp/05_building_mcp_servers_and_multi_server_clients/experiment.py
 ```
 

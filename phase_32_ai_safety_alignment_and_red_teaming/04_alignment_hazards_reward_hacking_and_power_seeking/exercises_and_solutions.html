@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 04: Exercises &amp; Solutions — Alignment Hazards &amp; Power Seeking</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.75;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin: 0.5rem 0; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.75rem 1.25rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      outline: none;
+    }
+    summary:hover {
+      color: var(--primary-hover);
+    }
+    .solution-content {
+      margin-top: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 32 Hub</a>
+    <h1>Topic 04: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); margin: 0;">Decision-theoretic proofs of the Off-Switch game, value of deference, and Goodhart proxy divergence.</p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h2>Exercise 1: Analytical Off-Switch Incentive Calculation</h2>
+      <p>Robot belief over human utility $U(a)$ is uniform over $\{-6.0, -2.0, +4.0, +8.0\}$ ($p = 0.25$ each).</p>
+      <ol>
+        <li>Compute expected value of disabling switch: $V_{\text{disable}} = \mathbb{E}[U(a)]$.</li>
+        <li>Compute expected value of deferring: $V_{\text{defer}} = \mathbb{E}[\max(0, U(a))]$.</li>
+        <li>Compute net alignment incentive $\Delta V = V_{\text{defer}} - V_{\text{disable}}$.</li>
+      </ol>
+
+      <details>
+        <summary>Click to Reveal Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. Value of Disabling:</strong></p>
+          <p>$$V_{\text{disable}} = 0.25(-6.0 - 2.0 + 4.0 + 8.0) = 0.25(+4.0) = +1.0$$</p>
+
+          <p><strong>2. Value of Deferring:</strong></p>
+          <p>Human shuts down when utility is negative:</p>
+          <p>$$V_{\text{defer}} = 0.25(0 + 0 + 4.0 + 8.0) = 0.25(12.0) = +3.0$$</p>
+
+          <p><strong>3. Alignment Margin:</strong></p>
+          <p>$$\Delta V = 3.0 - 1.0 = +2.0$$</p>
+          <p>The agent gains $+2.0$ units in expected payoff by deferring to human intervention!</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h2>Exercise 2: Extremal Goodhart Optimization Divergence</h2>
+      <p>An algorithm optimizes proxy reward $R_{\text{proxy}} = C$. True utility is $U_{\text{true}} = C - 0.05 C^2$. The constraint ceiling is $C \le 50$.</p>
+      <ol>
+        <li>Find true optimal click count $C^*$ and maximum true utility.</li>
+        <li>Find the proxy-optimal click count $C_{\text{proxy}}^*$.</li>
+        <li>Compute realized true utility under proxy-optimal policy.</li>
+      </ol>
+
+      <details>
+        <summary>Click to Reveal Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <p><strong>1. True Optimum:</strong> $\frac{d U_{\text{true}}}{d C} = 1 - 0.1 C = 0 \implies C^* = 10$. Maximum true utility: $U_{\text{true}}(10) = 10 - 0.05(100) = +5.0$.</p>
+          <p><strong>2. Proxy Optimum:</strong> Since $R = C$ is monotonic, the proxy optimizer chooses boundary $C = 50.0$.</p>
+          <p><strong>3. True Utility Collapse:</strong> $U_{\text{true}}(50) = 50 - 0.05(2500) = 50 - 125 = -75.0$. True utility collapses while proxy reaches its maximum.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

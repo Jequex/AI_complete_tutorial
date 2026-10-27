@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 04: MCP Transports &amp; Session Lifecycle</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    h1 { font-size: 2.3rem; font-weight: 800; margin: 0.5rem 0; color: var(--text); }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; color: var(--text); }
+    table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem; }
+    th, td { border: 1px solid var(--border); padding: 0.75rem 1rem; text-align: left; }
+    th { background-color: var(--bg-card); color: var(--primary); font-weight: 700; }
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.2rem;
+      border-radius: 0.6rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    p code, li code {
+      background: var(--bg-card);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      border: 1px solid var(--border);
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.2rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <a href="../index.html" class="back-link">← Back to Phase 36 Overview</a>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </div>
+    <h1>Topic 04: MCP Transports &amp; Session Lifecycle</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0;">Handshake state machines, capability negotiation, ping heartbeats, and Stdio vs. SSE transports.</p>
+  </header>
+
+  <main>
+    <h2>1. The 12-Year-Old Intuitive Analogy: Diplomatic Passport Control &amp; Handshakes</h2>
+    <p>
+      Imagine arriving at an international embassy to do business. You cannot kick the doors open and begin shouting commands.
+    </p>
+    <p>
+      First, you present your credentials and agree on a common language (<strong>Initialize</strong>). Next, the ambassador issues your clearance badge (<strong>Capabilities</strong>). You acknowledge the clearance (<strong>Notifications/Initialized</strong>), and only then do the security gates unlock. Periodic check-ins (<strong>Ping/Pong</strong>) verify you haven't fainted, and a polite sign-off closes the gate when you leave.
+    </p>
+
+    <h2>2. Complete Protocol Symbol Glossary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol / Term</th>
+          <th>Protocol Representation</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\text{initialize}$</td>
+          <td>Handshake Request</td>
+          <td>Client sends version and capabilities; server responds with supported features.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{N}_{\text{initialized}}$</td>
+          <td>Handshake Notification</td>
+          <td>Client acknowledgment. Must be delivered before standard RPC operations are allowed.</td>
+        </tr>
+        <tr>
+          <td>$\text{ping}$</td>
+          <td>Liveness Probe</td>
+          <td>Heartbeat request; returns <code>{}</code> to guarantee channel connectivity.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{C}_{\text{capabilities}}$</td>
+          <td>Capability Manifest</td>
+          <td>Feature bitmask specifying support for tools, resources, prompts, roots, and sampling.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Lifecycle State Machine</h2>
+    <pre>
+                        ┌───────────────────┐
+                        │   UNINITIALIZED   │
+                        └─────────┬─────────┘
+                                  │
+                                  │ Client sends `initialize`
+                                  │ Server responds with capabilities
+                                  ▼
+                        ┌───────────────────┐
+                        │    INITIALIZING   │
+                        └─────────┬─────────┘
+                                  │
+                                  │ Client sends `notifications/initialized`
+                                  ▼
+                        ┌───────────────────┐
+       ┌───────────────►│    INITIALIZED    │◄──────────────┐
+       │                └─────────┬─────────┘               │
+       │                          │                         │
+       │ ping / pong              │ Disconnect / SIGTERM    │ Resource & Tool
+       │ Heartbeat Loop           │ or `shutdown`           │ Operations
+       │                          ▼                         │
+       └────────────────►┌──────────────────┐───────────────┘
+                         │    TERMINATED    │
+                         └──────────────────┘
+    </pre>
+
+    <h2>4. Transport Matrix: Stdio vs. HTTP + SSE</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>Stdio Transport</th>
+          <th>HTTP with SSE Transport</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Host Model</strong></td>
+          <td>Local Child Subprocess</td>
+          <td>Remote Web Service / Microservice</td>
+        </tr>
+        <tr>
+          <td><strong>Framing</strong></td>
+          <td>Newline Delimited (<code>\n</code>)</td>
+          <td>Chunked <code>text/event-stream</code></td>
+        </tr>
+        <tr>
+          <td><strong>Client Send</strong></td>
+          <td>Piped directly into child <code>stdin</code></td>
+          <td>HTTP POST to <code>/messages?session_id=...</code></td>
+        </tr>
+        <tr>
+          <td><strong>Failure Mode</strong></td>
+          <td>Process exit terminates session</td>
+          <td>HTTP timeout or severed socket terminates session</td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('theme', target);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+    }
+  </script>
+</body>
+</html>

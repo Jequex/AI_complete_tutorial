@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.2: Test-Time Compute &amp; Reasoning Search — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="../index.html" class="back-link">&larr; Back to Phase 35 Index</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.2</span>
+    <h1>Test-Time Compute &amp; Reasoning Search</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Scaling inference compute with Monte Carlo Tree Search (MCTS), Process Reward Models (PRMs), back-verification rollbacks, and the o1/o3 reasoning paradigm.
+    </p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>
+        Imagine you are playing a championship game of chess.
+      </p>
+      <p>
+        A beginner looks at the board and instantly moves whatever piece catches their eye in 2 seconds. They grab a free pawn and walk right into checkmate 3 moves later.
+      </p>
+      <p>
+        A Grandmaster does something completely different: they look at 3 candidate moves, mentally simulate every opponent response, detect traps, backtrack from dangerous paths, and only make their move after searching deeply.
+      </p>
+      <p>
+        Traditional LLMs were like the beginner—generating tokens one after another with no chance to erase or rethink. <strong>Test-Time Compute</strong> (exemplified by OpenAI o1 and o3) equips AI with a pencil and eraser: it uses <strong>Monte Carlo Tree Search (MCTS)</strong> and a <strong>Process Reward Model (PRM)</strong> to verify each intermediate thought step, prune hallucinations, and search for guaranteed valid proofs.
+      </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Mathematical Entity</th>
+          <th>Domain</th>
+          <th>Operational Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$s_t$</td>
+          <td>Reasoning State</td>
+          <td>Token Sequence</td>
+          <td>Partial Chain-of-Thought trace accumulated up to step $t$.</td>
+        </tr>
+        <tr>
+          <td>$a_t$</td>
+          <td>Reasoning Step / Action</td>
+          <td>Step string</td>
+          <td>Next deduction or intermediate mathematical calculation.</td>
+        </tr>
+        <tr>
+          <td>$R_{\text{PRM}}(s, a)$</td>
+          <td>Process Reward Model (PRM)</td>
+          <td>$[0, 1]$</td>
+          <td>Step-level verifier assessing logical correctness and soundness.</td>
+        </tr>
+        <tr>
+          <td>$R_{\text{ORM}}(s_T)$</td>
+          <td>Outcome Reward Model (ORM)</td>
+          <td>$\{0, 1\}$</td>
+          <td>Terminal verifier scoring only the final answer at completion.</td>
+        </tr>
+        <tr>
+          <td>$N(s, a)$</td>
+          <td>Edge Visit Count</td>
+          <td>Integer $\ge 0$</td>
+          <td>Number of MCTS simulations that selected action $a$ from state $s$.</td>
+        </tr>
+        <tr>
+          <td>$Q(s, a)$</td>
+          <td>Mean Action Value</td>
+          <td>$[0, 1]$</td>
+          <td>Empirical probability estimate that step $(s, a)$ leads to correct proof.</td>
+        </tr>
+        <tr>
+          <td>$U(s, a)$</td>
+          <td>PUCT Exploration Bonus</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>$c_{\text{puct}} P(s, a) \frac{\sqrt{N(s)}}{1 + N(s, a)}$, encouraging exploration of promising unexplored steps.</td>
+        </tr>
+        <tr>
+          <td>$N_{\text{sim}}$</td>
+          <td>Inference Compute Budget</td>
+          <td>Integer $\ge 1$</td>
+          <td>Number of test-time search rollouts executed per query.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Test-Time Compute Scaling Law</h2>
+    <p>
+      Recent breakthroughs show that scaling test-time search compute obeys a power-law error reduction:
+    </p>
+    $$\text{Error}(N_{\text{sim}}) \approx \beta \cdot N_{\text{sim}}^{-\alpha_{\text{search}}}$$
+    <p>
+      Allocating compute at inference time allows smaller models to discover complex multi-step reasoning trajectories that larger autoregressive models miss completely during a single greedy forward pass.
+    </p>
+
+    <pre>
+                      [ Root Question ]
+                              │
+             ┌────────────────┴────────────────┐
+             ▼                                 ▼
+       Step 1 (Candidate A)              Step 1 (Candidate B)
+       PRM Score: 0.98                   PRM Score: 0.05 (Error)
+             │                                 ▼
+             ▼                          [ BACKTRACK / PRUNE ]
+       Step 2 (Candidate A1)
+       PRM Score: 0.95
+             │
+             ▼
+       Step 3 (Terminal Verification: ORM = 1.0)
+       [ Verified Chain of Thought ]
+    </pre>
+
+    <h2>4. PRMs vs. ORMs: Resolving the Credit Assignment Dilemma</h2>
+    <p>
+      An <strong>Outcome Reward Model (ORM)</strong> checks only the final answer. If an early step hallucinates a false identity, the ORM still evaluates the terminal output as 0, giving no feedback on where the error occurred. Worse, an ORM can reward <em>false positives</em>—reasoning traces containing erroneous logic that accidentally stumble upon the correct number.
+    </p>
+    <p>
+      A <strong>Process Reward Model (PRM)</strong> evaluates each individual deduction step:
+    </p>
+    $$r_{\text{PRM}}(s_t, a_t) = P(\text{Step } a_t \text{ is sound} \mid s_t)$$
+    <p>
+      This enables instantaneous branch pruning and back-verification rollbacks, preventing the search tree from exploding exponentially along invalid deduction paths.
+    </p>
+
+    <h2>5. PUCT Selection &amp; Backpropagation</h2>
+    <p>
+      During MCTS, tree traversal at state $s$ selects the branch maximizing:
+    </p>
+    $$a^* = \arg\max_{a \in \mathcal{A}(s)} \left[ Q(s, a) + c_{\text{puct}} \cdot P(s, a) \cdot \frac{\sqrt{N(s)}}{1 + N(s, a)} \right]$$
+    <p>
+      When a terminal node is evaluated by the ORM with reward $V \in \{0, 1\}$, values and visit counts are backpropagated up the ancestor chain:
+    </p>
+    $$N(s) \leftarrow N(s) + 1, \quad W(s, a) \leftarrow W(s, a) + V, \quad Q(s, a) \leftarrow \frac{W(s, a)}{N(s, a)}$$
+
+    <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" class="btn">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../03_continual_learning_and_catastrophic_forgetting/lecture.html" class="btn" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border);">Next Topic: Continual Learning &rarr;</a>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 33.5: Exercises &amp; Solutions — Model Steering &amp; Weight Editing</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 33.5 Lecture</a>
+    <h1>Topic 33.5: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering the ROME Lagrangian derivation, covariance protection against forgetting, and LayerNorm gain saturation.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Derivation of the Closed-Form ROME Rank-One Update</h3>
+      <p>
+        Derive the closed-form update $W' = W + \boldsymbol{\Lambda} (\mathbf{C}^{-1} \mathbf{k}_*)^\top$ by minimizing $\frac{1}{2}\text{Tr}(\Delta W \mathbf{C} \Delta W^\top)$ subject to $(W + \Delta W)\mathbf{k}_* = \mathbf{v}_*$.
+      </p>
+      <ol>
+        <li>Formulate the Lagrangian with vector multiplier $\boldsymbol{\nu}$.</li>
+        <li>Prove that $\Delta W = \boldsymbol{\nu} (\mathbf{C}^{-1} \mathbf{k}_*)^\top$ has rank at most 1.</li>
+        <li>Solve for $\boldsymbol{\nu}$ in terms of target residual $\mathbf{v}_* - W\mathbf{k}_*$ and scalar $\mathbf{k}_*^\top \mathbf{C}^{-1} \mathbf{k}_*$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Lagrangian Function</h4>
+          $$\mathcal{L} = \frac{1}{2}\text{Tr}(\Delta W \mathbf{C} \Delta W^\top) + \boldsymbol{\nu}^\top(\mathbf{v}_* - W \mathbf{k}_* - \Delta W \mathbf{k}_*)$$
+
+          <h4>2. Stationarity &amp; Rank-1 Structure</h4>
+          $$\frac{\partial \mathcal{L}}{\partial \Delta W} = \Delta W \mathbf{C} - \boldsymbol{\nu} \mathbf{k}_*^\top = 0 \implies \Delta W = \boldsymbol{\nu} (\mathbf{C}^{-1} \mathbf{k}_*)^\top$$
+          <p>Being an outer product of two vectors, $\Delta W$ is algebraically a rank-one matrix.</p>
+
+          <h4>3. Lagrange Multiplier Value</h4>
+          $$\Delta W \mathbf{k}_* = \boldsymbol{\nu}(\mathbf{k}_*^\top \mathbf{C}^{-1} \mathbf{k}_*) = \mathbf{v}_* - W \mathbf{k}_* \implies \boldsymbol{\nu} = \frac{\mathbf{v}_* - W \mathbf{k}_*}{\mathbf{k}_*^\top \mathbf{C}^{-1} \mathbf{k}_*}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Why $\mathbf{C}^{-1}$ Prevents Catastrophic Forgetting</h3>
+      <p>
+        Compare naive rank-one update $W_{\text{naive}}' = W + \frac{\mathbf{v}_* - W\mathbf{k}_*}{\|\mathbf{k}_*\|^2} \mathbf{k}_*^\top$ with ROME's covariance-weighted update.
+      </p>
+      <ol>
+        <li>Compute the drift on an existing memory $\mathbf{k}_j$ when $\mathbf{k}_*^\top \mathbf{k}_j = \rho > 0$ under naive updating.</li>
+        <li>Explain why pre-multiplying by $\mathbf{C}^{-1}$ shields existing memories from drift.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Naive Drift</h4>
+          $$\|W_{\text{naive}}' \mathbf{k}_j - W \mathbf{k}_j\|_2 = \frac{|\rho|}{\|\mathbf{k}_*\|_2^2} \|\mathbf{v}_* - W \mathbf{k}_*\|_2$$
+          <p>Any non-zero correlation directly perturbs key $\mathbf{k}_j$, destroying pre-existing knowledge.</p>
+
+          <h4>2. Covariance Projection Shield</h4>
+          <p>The inverse covariance $\mathbf{C}^{-1}$ penalizes directions that have high variance in existing data ($\frac{1}{\sigma_i^2} \ll 1$). The update is directed exclusively into orthogonal, unallocated null spaces where $\mathbf{k}_j^\top \mathbf{C}^{-1} \mathbf{k}_* \approx 0$.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Steering Gain $\alpha$ &amp; LayerNorm Saturation</h3>
+      <p>
+        Consider steering intervention $\mathbf{h}' = \mathbf{h} + \alpha \mathbf{v}_{\text{steer}}$ followed by LayerNorm $\text{LN}(\mathbf{h}') = \frac{\mathbf{h}'}{\sigma(\mathbf{h}')}$.
+      </p>
+      <ol>
+        <li>Show what happens to prompt information $\mathbf{h}$ when $\alpha \to \infty$.</li>
+        <li>Why does extreme gain collapse generation into degenerate repetition?</li>
+        <li>What is the recommended empirical gain range?</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. LayerNorm Scaling Collapse</h4>
+          <p>For large $\alpha$, $\sigma(\mathbf{h}') \approx \alpha \sigma(\mathbf{v})$. Thus $\text{LN}(\mathbf{h}') \approx \frac{1}{\alpha}\frac{\mathbf{h}}{\sigma(\mathbf{v})} + \frac{\mathbf{v}}{\sigma(\mathbf{v})}$. As $\alpha \to \infty$, the original prompt representation is extinguished ($\frac{1}{\alpha} \to 0$).</p>
+
+          <h4>2. Degeneracy</h4>
+          <p>The model loses awareness of context, grammar, and prompt instructions, outputting single-token loops.</p>
+
+          <h4>3. Recommended Range</h4>
+          <p>$\alpha$ should scale the steering injection to $10\% \text{--} 40\%$ of the residual stream norm ($\alpha \in [1.0, 3.5]$ for unit vectors).</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

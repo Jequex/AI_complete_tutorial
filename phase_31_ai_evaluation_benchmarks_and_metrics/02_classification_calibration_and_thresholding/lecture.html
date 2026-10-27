@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 02: Classification, Calibration &amp; Thresholding</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    .alert {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 31 Hub</a><br>
+    <span class="badge">Topic 02 &bull; Module 31.2</span>
+    <h1>Classification, Calibration &amp; Thresholding</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">ROC-AUC, Precision-Recall Curves, Murphy's Brier Score Decomposition, Expected Calibration Error, and Temperature Scaling.</p>
+  </header>
+
+  <section>
+    <h2>1. The 12-Year-Old Intuition: The Overconfident Weatherman</h2>
+    <div class="card">
+      <p>Imagine your friend Charlie claims to be a master weather forecaster. Every morning, Charlie declares: <em>"There is a 90% chance of rain today!"</em></p>
+      <p>You pack your heavy umbrella to school every day. At the end of the year, you inspect the 100 days when Charlie predicted a 90% rain chance. It actually rained on only <strong>55 of those days</strong>!</p>
+      <p>Charlie is <strong>uncalibrated and wildly overconfident</strong>. When an AI model predicts a confidence of 90%, the event must happen 90% of the time. In self-driving cars, medical diagnostic imaging, and automated loan underwriting, an overconfident model that turns out to be wrong can cost lives and millions of dollars. Calibration is the science of making model confidence match reality.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Discrimination vs. Calibration: Two Orthogonal Pillars</h2>
+    <ul>
+      <li><strong>Discrimination (Ranking):</strong> Can the model distinguish positives from negatives? If we sort instances by score, do positives appear at the top? Measured by <strong>ROC-AUC</strong> and <strong>PR-AUC</strong>.</li>
+      <li><strong>Calibration (Reliability):</strong> Do the numerical probabilities reflect true empirical odds? Measured by <strong>Expected Calibration Error (ECE)</strong> and <strong>Brier Score</strong>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>3. ROC-AUC and the Mann-Whitney $U$ Equivalence</h2>
+    <p>By sweeping threshold $\theta \in [0, 1]$, we plot $\text{TPR}(\theta)$ vs $\text{FPR}(\theta)$. Integrating via the trapezoidal rule yields:</p>
+    $$\boxed{\text{AUC}_{\text{ROC}} = \sum_{k=1}^K \frac{\text{TPR}_k + \text{TPR}_{k-1}}{2} (\text{FPR}_k - \text{FPR}_{k-1})}$$
+    <p>Moreover, ROC-AUC is mathematically identical to the probability that a random positive sample scores higher than a random negative sample:</p>
+    $$\boxed{\text{AUC}_{\text{ROC}} = \frac{U}{N_+ N_-} = \frac{1}{N_+ N_-} \sum_{i \in S_+} \sum_{j \in S_-} \left( \mathbb{I}(\hat{p}_i > \hat{p}_j) + \frac{1}{2}\mathbb{I}(\hat{p}_i = \hat{p}_j) \right)}$$
+  </section>
+
+  <section>
+    <h2>4. The Brier Score &amp; Murphy's 3-Component Decomposition</h2>
+    <p>The Brier score measures mean squared probability error $\text{BS} = \frac{1}{N}\sum (\hat{p}_i - y_i)^2$. Allan Murphy (1973) proved that partitioning predictions into $M$ bins decomposes the Brier score into three orthogonal terms:</p>
+    $$\boxed{\text{BS} = \text{Reliability} - \text{Resolution} + \text{Uncertainty}}$$
+    <div class="card">
+      <p><strong>1. Reliability (REL):</strong> Calibration error. Measures gap between average confidence $\bar{p}_m$ and empirical rate $\bar{y}_m$ in bin $m$ (lower is better; $0$ for perfect calibration):</p>
+      $$\text{REL} = \sum_{m=1}^M \frac{n_m}{N} (\bar{p}_m - \bar{y}_m)^2$$
+      <p><strong>2. Resolution (RES):</strong> Discrimination power. Measures how far bin positive rates diverge from base rate $\bar{y}$ (higher is better):</p>
+      $$\text{RES} = \sum_{m=1}^M \frac{n_m}{N} (\bar{y}_m - \bar{y})^2$$
+      <p><strong>3. Uncertainty (UNC):</strong> Irreducible dataset entropy (constant for any given dataset):</p>
+      $$\text{UNC} = \bar{y}(1 - \bar{y})$$
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Expected Calibration Error (ECE) &amp; Temperature Scaling</h2>
+    <p>Partitioning $[0, 1]$ into $M$ equal-width bins $B_1, \dots, B_M$, the <strong>Expected Calibration Error</strong> is:</p>
+    $$\boxed{\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left|\text{acc}(B_m) - \text{conf}(B_m)\right|}$$
+    <p><strong>Temperature Scaling (Guo et al., 2017):</strong> Given logit $z_i$, introduce temperature $T > 0$:</p>
+    $$\boxed{\hat{p}_i(T) = \sigma\left(\frac{z_i}{T}\right) = \frac{1}{1 + e^{-z_i / T}}}$$
+    <div class="alert">
+      <strong>Core Invariance Property:</strong> Because $z / T$ is strictly monotonic in $z$, temperature scaling preserves the rank-order of every prediction. Consequently, <strong>ROC-AUC and classification accuracy at threshold 0.5 remain 100% mathematically invariant</strong>, while ECE and Brier reliability are drastically minimized!
+    </div>
+  </section>
+
+  <div class="actions">
+    <a href="exercises_and_solutions.html" class="btn">View Exercises &amp; Solutions &rarr;</a>
+    <a href="experiment.py" class="btn btn-secondary">Inspect Python Experiment</a>
+  </div>
+
+</body>
+</html>

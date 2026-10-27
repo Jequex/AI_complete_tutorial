@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.1: Exercises &amp; Solutions — Spectral Theory &amp; SVD Geometry</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 34.1 Lecture</a>
+      <h1>Topic 34.1: Exercises &amp; Solutions</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Low-Rank Approximation and LoRA Energy Budget</h3>
+      <p>In fine-tuning an LLM with $d_{\text{model}} = 4096$, the weight update matrix $\Delta \mathbf{W} \in \mathbb{R}^{4096 \times 4096}$ has empirical singular values decaying as $\sigma_i = 10 \cdot 2^{-(i-1)/8}$.</p>
+      <ol>
+        <li>Formulate the total Frobenius norm $\|\Delta \mathbf{W}\|_F^2$ as a geometric series and compute its value.</li>
+        <li>Under the Eckart-Young Theorem, what is the exact relative Frobenius approximation error $\frac{\|\Delta \mathbf{W} - \Delta \mathbf{W}_r\|_F^2}{\|\Delta \mathbf{W}\|_F^2}$ achieved by a LoRA rank of $r = 16$?</li>
+        <li>What percentage of total Frobenius energy is retained with $r = 16$?</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Frobenius Energy Calculation</h4>
+          $$\|\Delta \mathbf{W}\|_F^2 = \sum_{i=1}^{4096} \sigma_i^2 = 100 \sum_{i=1}^{4096} 2^{-(i-1)/4} \approx \frac{100}{1 - 2^{-1/4}} \approx \mathbf{628.52}$$
+
+          <h4>2. Relative Error for Rank 16</h4>
+          <p>By the Eckart-Young Theorem:</p>
+          $$\|\Delta \mathbf{W} - \Delta \mathbf{W}_{16}\|_F^2 = \sum_{i=17}^{4096} \sigma_i^2 = 2^{-4} \sum_{k=1}^{4080} 100 \cdot 2^{-(k-1)/4} = \frac{1}{16} \|\Delta \mathbf{W}\|_F^2$$
+          $$\frac{\|\Delta \mathbf{W} - \Delta \mathbf{W}_{16}\|_F^2}{\|\Delta \mathbf{W}\|_F^2} = \frac{1}{16} = \mathbf{6.25\%}$$
+
+          <h4>3. Retained Energy</h4>
+          $$\text{Retained Energy} = 1 - 0.0625 = \mathbf{93.75\%}$$
+          <p>LoRA rank 16 captures 93.75% of full rank adaptation while saving over 99.2% of parameter storage.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Rayleigh Quotient and Variational Eigenvalues</h3>
+      <p>Let $\mathbf{S} \in \mathbb{R}^{n \times n}$ be symmetric with eigenvalues $\lambda_1 \ge \lambda_2 \ge \dots \ge \lambda_n$. The Rayleigh quotient is $R_{\mathbf{S}}(\mathbf{x}) = \frac{\mathbf{x}^\top \mathbf{S} \mathbf{x}}{\mathbf{x}^\top \mathbf{x}}$ for $\mathbf{x} \neq \mathbf{0}$.</p>
+      <ol>
+        <li>Prove that $\max_{\mathbf{x} \neq \mathbf{0}} R_{\mathbf{S}}(\mathbf{x}) = \lambda_1$.</li>
+        <li>Prove that if $\mathbf{x} \perp \mathbf{q}_1$, then $\max_{\mathbf{x} \perp \mathbf{q}_1} R_{\mathbf{S}}(\mathbf{x}) = \lambda_2$.</li>
+        <li>Explain how this justifies Hotelling deflation in Power Iteration.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Rayleigh Quotient Bound</h4>
+          <p>Expanding $\mathbf{x} = \sum c_i \mathbf{q}_i$ in the orthonormal eigenbasis:</p>
+          $$\mathbf{x}^\top \mathbf{S} \mathbf{x} = \sum \lambda_i c_i^2 \le \lambda_1 \sum c_i^2 = \lambda_1 (\mathbf{x}^\top \mathbf{x})$$
+          <p>Equality holds when $\mathbf{x} = \mathbf{q}_1$, so $\max R_{\mathbf{S}}(\mathbf{x}) = \lambda_1$.</p>
+
+          <h4>2. Subspace Constraint</h4>
+          <p>When $\mathbf{x} \perp \mathbf{q}_1$, $c_1 = 0$, so $\mathbf{x}^\top \mathbf{S} \mathbf{x} = \sum_{i=2}^n \lambda_i c_i^2 \le \lambda_2 \sum_{i=2}^n c_i^2 = \lambda_2 (\mathbf{x}^\top \mathbf{x})$. Equality holds at $\mathbf{x} = \mathbf{q}_2$.</p>
+
+          <h4>3. Hotelling Deflation</h4>
+          <p>Subtracting $\lambda_1 \mathbf{q}_1 \mathbf{q}_1^\top$ zeroes out the first eigenvalue while leaving all other eigenpairs unchanged, enabling sequential extraction of subdominant singular triplets.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Condition Number and Gradient Oscillation</h3>
+      <p>Consider $f(x_1, x_2) = \frac{1}{2}(100 x_1^2 + x_2^2)$ where $\kappa = 100$.</p>
+      <ol>
+        <li>Find the maximum stable learning rate $\eta_{\max}$ for standard Gradient Descent.</li>
+        <li>At $\eta^* = \frac{2}{\lambda_1 + \lambda_2}$, compute the contraction factor $\rho = \frac{\kappa - 1}{\kappa + 1}$.</li>
+        <li>Compute the iterations needed to reduce the initial error by $10^{-6}$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Stability Limit</h4>
+          $$|1 - \eta \lambda_1| < 1 \implies \eta < \frac{2}{\lambda_{\max}} = \frac{2}{100} = \mathbf{0.02}$$
+
+          <h4>2. Contraction Rate</h4>
+          $$\rho = \frac{100 - 1}{100 + 1} = \frac{99}{101} \approx \mathbf{0.9802}$$
+
+          <h4>3. Iteration Count</h4>
+          $$T \ge \frac{-6 \ln(10)}{\ln(99/101)} \approx \frac{-13.8155}{-0.020001} \approx \mathbf{691 \text{ iterations}}$$
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

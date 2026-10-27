@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.5: Scientific Discovery &amp; Literature Synthesis — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #9333ea;
+      --primary-hover: #7e22ce;
+      --badge-bg: #f3e8ff;
+      --badge-text: #6b21a8;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #c084fc;
+      --primary-hover: #e9d5ff;
+      --badge-bg: #581c87;
+      --badge-text: #f3e8ff;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #c084fc;
+        --primary-hover: #e9d5ff;
+        --badge-bg: #581c87;
+        --badge-text: #f3e8ff;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="../index.html" class="back-link">&larr; Back to Phase 35 Index</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.5</span>
+    <h1>Scientific Discovery &amp; Literature Synthesis</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Methodologies of the frontier research scientist: 9-stage paper decomposition, factorial ablation matrices, non-parametric bootstrap intervals, and permutation significance tests.
+    </p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>
+        Imagine you are a detective investigating a puzzling mystery. A witness claims: <em>"A magic fuel made my car run twice as fast!"</em>
+      </p>
+      <p>
+        A novice might believe them immediately. But a true scientist runs controlled experiments:
+      </p>
+      <ul>
+        <li><strong>Control Group:</strong> Run the exact same car on the same track with standard gasoline.</li>
+        <li><strong>Ablations:</strong> Remove one chemical at a time to prove which ingredient actually creates the effect.</li>
+        <li><strong>Statistical Testing:</strong> Prove that a 0.5-second speedup wasn't just a random tailwind.</li>
+      </ul>
+      <p>
+        With thousands of papers submitted to arXiv monthly, research-level AI engineers must know how to deconstruct claims, design <strong>factorial ablations</strong>, and perform <strong>non-parametric statistical tests</strong> to prove real scientific breakthroughs.
+      </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Mathematical Entity</th>
+          <th>Domain</th>
+          <th>Operational Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$H_0, H_1$</td>
+          <td>Hypotheses</td>
+          <td>Statements</td>
+          <td>Null hypothesis (zero genuine gain) vs. alternative scientific claim.</td>
+        </tr>
+        <tr>
+          <td>$d$</td>
+          <td>Cohen's $d$ Effect Size</td>
+          <td>$\mathbb{R}$</td>
+          <td>$d = \frac{\bar{X}_B - \bar{X}_A}{s_{\text{pooled}}}$; standardized magnitude of experimental improvement.</td>
+        </tr>
+        <tr>
+          <td>$[\text{CI}_{\text{low}}, \text{CI}_{\text{high}}]$</td>
+          <td>Bootstrap Confidence Interval</td>
+          <td>Interval in $\mathbb{R}$</td>
+          <td>Non-parametric empirical 95% confidence interval across 2,000 resamples.</td>
+        </tr>
+        <tr>
+          <td>$p$</td>
+          <td>Permutation $p$-value</td>
+          <td>$[0, 1]$</td>
+          <td>Exact probability of observing an effect of magnitude $\ge \Delta \mu$ under random group reassignment.</td>
+        </tr>
+        <tr>
+          <td>$2^k$</td>
+          <td>Factorial Matrix Runs</td>
+          <td>Integer</td>
+          <td>Full combinatorial configuration space testing $k$ binary architectural factors.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The 9-Stage Paper Decomposition Anatomy</h2>
+    <p>
+      When analyzing and synthesizing scientific research, follow this rigorous deconstruction pipeline:
+    </p>
+    <pre>
+1. Problem           ──► What exact bottleneck or failure mode is addressed?
+2. Prior Work        ──► What existing approaches exist, and why do they fail?
+3. Hypothesis        ──► What specific, falsifiable scientific claim is made?
+4. Method            ──► What is the proposed algorithmic mechanism?
+5. Math Formulation  ──► What are the equations, objectives, and loss functions?
+6. Experiments       ──► What benchmarks, baselines, and metrics are used?
+7. Ablations         ──► Are components isolated one-by-one to prove efficacy?
+8. Results           ──► Do empirical gains exceed statistical significance thresholds?
+9. Limitations       ──► Under what scenarios or distribution shifts does it break?
+    </pre>
+
+    <h2>4. Factorial Ablation Design ($2^k$ Matrix)</h2>
+    <p>
+      When an architecture introduces multiple components (e.g., Gated Attention, RoPE, RMSNorm), a $2^3 = 8$ full factorial design evaluates all combinations:
+    </p>
+    <ul>
+      <li><strong>Main Effect:</strong> Isolates the marginal contribution of an individual factor averaged across all conditions.</li>
+      <li><strong>Interaction Effect:</strong> Detects non-linear synergy between factors ($\text{Interaction}_{AB} > 0$).</li>
+    </ul>
+
+    <h2>5. Non-Parametric Statistical Testing</h2>
+    <p>
+      Rather than relying on fragile Student's $t$-tests that assume Gaussian error distributions, modern empirical AI uses non-parametric tests:
+    </p>
+    <ol>
+      <li><strong>Percentile Bootstrap:</strong> Resamples $B = 2,000$ iterations with replacement to establish empirical 95% confidence intervals $[\text{CI}_{\text{low}}, \text{CI}_{\text{high}}]$.</li>
+      <li><strong>Permutation Testing:</strong> Randomly shuffles group labels to construct the exact empirical null distribution, computing $p$-values with zero parametric assumptions.</li>
+      <li><strong>Cohen's $d$:</strong> Quantifies standardized effect size ($d \ge 0.8$ denotes a large scientific effect).</li>
+    </ol>
+
+    <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" class="btn">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../index.html" class="btn" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border);">&larr; Return to Phase 35 Portal</a>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

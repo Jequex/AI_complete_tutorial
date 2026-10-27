@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 33.3: Exercises &amp; Solutions — Attention Circuits</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 33.3 Lecture</a>
+    <h1>Topic 33.3: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering low-rank QK/OV circuit bottlenecks, composite induction tensors, and direct logit attribution.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Low-Rank Structure of Attention Head Projections</h3>
+      <p>
+        In a model with $d = 4096$ and $d_{\text{head}} = 64$, analyze the circuit matrices $W_{QK} = W_Q^\top W_K$ and $W_{OV} = W_O W_V$.
+      </p>
+      <ol>
+        <li>Compute the maximum algebraic rank of $W_{QK}$ and $W_{OV}$.</li>
+        <li>What percentage of the full $d \times d$ ambient matrix space can a single head write to?</li>
+        <li>How does this bottleneck prevent multi-head destructive interference in the residual stream?</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Rank Bound</h4>
+          <p>$\text{rank}(W_O W_V) \le \min(\text{rank}(W_O), \text{rank}(W_V)) \le d_{\text{head}} = \mathbf{64}$.</p>
+
+          <h4>2. Ambient Dimension Percentage</h4>
+          $$\frac{64}{4096} = \frac{1}{64} \approx \mathbf{1.56\%}$$
+
+          <h4>3. Communication Bus Isolation</h4>
+          <p>Because each head only occupies $\approx 1.56\%$ of the available representation space, multiple heads write into mutually orthogonal subspaces without overwriting each other's data.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Deriving the Composite Induction Form</h3>
+      <p>
+        Given Layer 0 output $\Delta \mathbf{h}_0^{(j)} = W_{OV}^{(0)} W_E \mathbf{t}_{j-1}$, analyze Layer 1 attention logits $\alpha_{i, j}^{(1)}$.
+      </p>
+      <ol>
+        <li>Expand $\alpha_{i, j}^{(1)}$ into constituent bilinear terms.</li>
+        <li>Identify the cross-term responsible for in-context $[A][B] \dots [A] \to [B]$ pattern matching.</li>
+        <li>Specify the algebraic condition on the matrix $\mathbf{M}_{\text{ind}} = W_E^\top W_{QK}^{(1)} W_{OV}^{(0)} W_E$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Bilinear Expansion</h4>
+          $$\alpha_{i, j}^{(1)} \propto \mathbf{t}_i^\top W_E^\top W_{QK}^{(1)} W_E \mathbf{t}_j + \mathbf{t}_i^\top \left( W_E^\top W_{QK}^{(1)} W_{OV}^{(0)} W_E \right) \mathbf{t}_{j-1}$$
+
+          <h4>2. Induction Cross-Term</h4>
+          <p>The second term connects current token $\mathbf{t}_i$ directly to the token preceding position $j$ ($\mathbf{t}_{j-1}$).</p>
+
+          <h4>3. Positive Diagonal Condition</h4>
+          <p>The matrix $\mathbf{M}_{\text{ind}}$ must have large positive diagonal entries $(\mathbf{M}_{\text{ind}})_{A, A} \gg (\mathbf{M}_{\text{ind}})_{A, B}$, ensuring an attention peak whenever $\mathbf{t}_i = \mathbf{t}_{j-1}$.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Direct Logit Attribution and Copy Head Eigenvalues</h3>
+      <p>
+        Let $\mathbf{T} = W_U W_{OV} W_E \in \mathbb{R}^{V \times V}$ be the direct token-to-token map through an attention head.
+      </p>
+      <ol>
+        <li>What does a large positive eigenvalue $\lambda > 0$ signify?</li>
+        <li>What role do negative eigenvalues play in text generation?</li>
+        <li>Calculate the logit boost if diagonal element $\mathbf{T}_{B, B} = +7.0$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Direct Copying</h4>
+          <p>Positive eigenvalues mean the head directly boosts the logit of whichever token it attends to (Copy Head behavior).</p>
+
+          <h4>2. Negative Name Movers / Anti-Repetition</h4>
+          <p>Negative eigenvalues suppress attended tokens, preventing repetitive stuttering and degenerate loops.</p>
+
+          <h4>3. Quantitative Logit Impact</h4>
+          $$\Delta \text{logit}(B) = \mathbf{e}_B^\top \mathbf{T} \mathbf{e}_B = \mathbf{+7.0}$$
+          <p>This $+7.0$ advantage pushes $P(B)$ to near $100\%$, as demonstrated in our experiment.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

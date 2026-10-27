@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.2: Exercises &amp; Solutions — Reasoning Search</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 35.2 Lecture</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.2</span>
+    <h1>Exercises &amp; Solutions: Reasoning Search</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering combinatorial search pruning, PUCT exploration dynamics, and STaR rationale distillation.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Combinatorial Pruning: PRM vs. ORM Best-of-$N$ Search</h3>
+      <p>
+        Consider a mathematical deduction problem of depth $T = 5$, branching factor $b = 4$, and step validity probability $p = 0.7$.
+      </p>
+      <ol>
+        <li>Calculate the total leaves $N_{\text{leaves}}$ and the probability $P_{\text{correct}}$ that a random full trajectory is sound.</li>
+        <li>Find the minimum sample count $N$ for an ORM Best-of-$N$ search to achieve $99\%$ success probability.</li>
+        <li>Compute the expected candidate nodes evaluated under a step-level Process Reward Model (PRM).</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Full Tree Statistics</h4>
+          <p>Total leaves: $4^5 = 1,024$. Probability of complete validity: $P_{\text{correct}} = 0.7^5 = 0.16807 \approx 16.8\%$.</p>
+
+          <h4>2. ORM Best-of-$N$ Sample Requirement</h4>
+          $$1 - (1 - 0.16807)^N \ge 0.99 \implies N \ge \frac{\ln(0.01)}{\ln(0.83193)} \approx 25.03$$
+          <p>The ORM requires $N = 26$ full rollouts ($130$ total generated steps).</p>
+
+          <h4>3. PRM Step-Level Pruning</h4>
+          <p>At each level $k$, $b \cdot p = 2.8$ survivors branch forward. The total nodes evaluated across levels 1 through 5 is:</p>
+          $$\text{Nodes}_{\text{PRM}} = \sum_{k=1}^5 4 \times (2.8)^{k-1} = 4 \times \frac{2.8^5 - 1}{1.8} \approx 380 \text{ candidates}$$
+          <p>Unlike ORM sampling which often samples failed variants of the same faulty first step, 100% of surviving PRM paths at depth 5 yield valid proofs.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: PUCT Upper Confidence Bound &amp; Asymptotic Exploration</h3>
+      <p>
+        In PUCT selection:
+        $$a^* = \arg\max_{a \in \mathcal{A}} \left[ Q(s, a) + c_{\text{puct}} \cdot P(s, a) \cdot \frac{\sqrt{N(s)}}{1 + N(s, a)} \right]$$
+        Prove that an unvisited step $a_u$ ($N(s, a_u) = 0$) will eventually be selected even if another action $a_b$ has $Q(s, a_b) = 1.0$.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Threshold Derivation</h4>
+          <p>For $a_u$, $\text{Score}(a_u) = c_{\text{puct}} P(s, a_u) \sqrt{N(s)}$. For $a_b$, $\text{Score}(a_b) \le 1.0 + c_{\text{puct}} P(s, a_b) \frac{\sqrt{N(s)}}{1 + N(s, a_b)}$.</p>
+          <p>As $N(s) \to \infty$ with $a_b$ repeatedly chosen, $N(s, a_b) \approx N(s)$, so its exploration term decays as $1/\sqrt{N(s)} \to 0$. Thus:</p>
+          $$c_{\text{puct}} P(s, a_u) \sqrt{N(s)} > 1.0 \implies N(s) > \left( \frac{1}{c_{\text{puct}} P(s, a_u)} \right)^2$$
+
+          <h4>2. Significance</h4>
+          <p>Guarantees that deceptive local traps cannot permanently starve alternative reasoning paths from being evaluated, ensuring counter-intuitive valid proofs are discovered.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: STaR Rationale Distillation into Model Weights</h3>
+      <p>
+        Derive the policy gradient $\nabla_\theta J(\theta)$ with rationale filtering and explain how offline MCTS search data can be distilled to train inference-free reasoning models.
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Policy Gradient with Filtering</h4>
+          $$\nabla_\theta J(\theta) = \mathbb{E}_{\mathbf{x} \sim \mathcal{D}} \left[ \left( \sum_{t=1}^{T+1} \nabla_\theta \ln P_\theta(z_t \mid \mathbf{x}, z_{<t}) \right) \cdot \mathbb{I}(\hat{y} = y^*) \right]$$
+          <p>Because invalid trajectories evaluate to 0 reward, the gradient reduces to supervised cross-entropy fine-tuning on the verified rationales $\mathcal{D}_{\text{verified}}$ generated by search.</p>
+
+          <h4>2. Distillation Process</h4>
+          <p>An offline teacher runs 2,000 MCTS rollouts per problem with PRM verification. The base model is fine-tuned on the winning trajectories, internalizing the search heuristics and avoiding traps during standard single-pass inference.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

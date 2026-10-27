@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.5: Information Geometry &amp; Natural Gradients — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.25rem; font-weight: 800; margin: 0 0 0.5rem; letter-spacing: -0.025em; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 1.25rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="../index.html" class="back-link">&larr; Back to Phase 34 Portal</a>
+      <span class="badge">Topic 34.5 &bull; Information Geometry &amp; Optimization</span>
+      <h1>Information Geometry &amp; Natural Gradients</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <div class="callout">
+      <strong>Core Research Question:</strong> Why is Euclidean gradient descent sensitive to arbitrary parameter coordinate choices, how is the Fisher Information Matrix the Riemannian metric tensor of KL divergence, and why is Natural Gradient Descent strictly parameterization-invariant?
+    </div>
+
+    <h2>1. 12-Year-Old Intuition: The Distorted World Map</h2>
+    <p>Imagine looking at a flat Mercator world map. Greenland appears as large as all of Africa! If you measure distances with a standard wooden desk ruler, moving 1 inch across Greenland seems identical to moving 1 inch across Africa.</p>
+    <p>In reality, the Earth is curved. A straight line on the flat paper is a distorted path on the globe.</p>
+    <p>Probability distributions also live on a curved space called a <strong>statistical manifold</strong>:</p>
+    <ul>
+      <li>If two Gaussian distributions have large spread ($\sigma = 100$), shifting the mean by $\Delta \mu = 1.0$ makes virtually no difference (they overlap $99.9\%$).</li>
+      <li>If two Gaussians are extremely sharp ($\sigma = 0.01$), shifting the mean by $\Delta \mu = 1.0$ separates them completely into non-overlapping worlds!</li>
+    </ul>
+    <p>Yet in both cases, Euclidean gradient descent sees the exact same coordinate shift $\Delta \mu = 1.0$. It is blind to the curvature of probability space. <strong>Natural Gradient Descent</strong> (Amari 1998) replaces the flat ruler with the <strong>Fisher Information Metric</strong>, steering optimization along the true shortest geodesic on the manifold.</p>
+
+    <h2>2. Complete Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Entity</th>
+          <th>Domain</th>
+          <th>Operational Role in Research</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathcal{M}$</td>
+          <td>Statistical Manifold</td>
+          <td>Riemannian Manifold</td>
+          <td>Space of probability distributions $\{p_{\boldsymbol{\theta}} : \boldsymbol{\theta} \in \Theta\}$.</td>
+        </tr>
+        <tr>
+          <td>$\boldsymbol{\theta}$</td>
+          <td>Coordinate System</td>
+          <td>$\mathbb{R}^d$</td>
+          <td>Model parameters (weights, canonical parameters).</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{s}_{\boldsymbol{\theta}}(x)$</td>
+          <td>Score Function</td>
+          <td>$\mathbb{R}^d$</td>
+          <td>Tangent vector field $\nabla_{\boldsymbol{\theta}} \log p_{\boldsymbol{\theta}}(x)$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{F}(\boldsymbol{\theta})$</td>
+          <td>Fisher Information Matrix</td>
+          <td>$\mathbb{R}^{d \times d}$, PSD</td>
+          <td>Riemannian metric tensor $g_{ij}(\boldsymbol{\theta}) = \mathbb{E}[\nabla \log p \nabla \log p^\top]$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbb{D}_{\text{KL}}(p \| q)$</td>
+          <td>Kullback-Leibler Divergence</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Relative entropy measuring information loss between distributions.</td>
+        </tr>
+        <tr>
+          <td>$d s^2$</td>
+          <td>Riemannian Metric Form</td>
+          <td>Differential 2-form</td>
+          <td>$d s^2 = d\boldsymbol{\theta}^\top \mathbf{F}(\boldsymbol{\theta}) d\boldsymbol{\theta} \approx 2 \mathbb{D}_{\text{KL}}(p_{\boldsymbol{\theta}} \| p_{\boldsymbol{\theta} + d\boldsymbol{\theta}})$.</td>
+        </tr>
+        <tr>
+          <td>$\tilde{\nabla} L$</td>
+          <td>Natural Gradient</td>
+          <td>$\mathbb{R}^d$</td>
+          <td>$\mathbf{F}(\boldsymbol{\theta})^{-1}\nabla L(\boldsymbol{\theta})$; steepest descent in KL metric.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Riemannian Metric of Kullback-Leibler Divergence</h2>
+    <p>Expanding the KL divergence $\mathbb{D}_{\text{KL}}(p_{\boldsymbol{\theta}} \| p_{\boldsymbol{\theta} + d\boldsymbol{\theta}})$ in a Taylor series around $d\boldsymbol{\theta} = \mathbf{0}$:</p>
+    $$\mathbb{D}_{\text{KL}}(p_{\boldsymbol{\theta}} \| p_{\boldsymbol{\theta} + d\boldsymbol{\theta}}) = \frac{1}{2} d\boldsymbol{\theta}^\top \mathbf{F}(\boldsymbol{\theta}) d\boldsymbol{\theta} + \mathcal{O}(\|d\boldsymbol{\theta}\|^3)$$
+    
+    <div class="callout">
+      <strong>Theorem:</strong> The Fisher Information Matrix $\mathbf{F}(\boldsymbol{\theta})$ is the exact second-order Taylor expansion (Hessian) of KL divergence at zero displacement. It acts as the canonical Riemannian metric tensor for the manifold of probability distributions.
+    </div>
+
+    <h2>4. Natural Gradient Descent &amp; Reparameterization Invariance</h2>
+    <p>Natural Gradient defines steepest descent subject to a fixed budget in KL divergence:</p>
+    $$\Delta \boldsymbol{\theta} = \arg\min_{\Delta \boldsymbol{\theta}} \nabla L^\top \Delta \boldsymbol{\theta} \quad \text{s.t.} \quad \frac{1}{2}\Delta \boldsymbol{\theta}^\top \mathbf{F}(\boldsymbol{\theta})\Delta \boldsymbol{\theta} \le \epsilon$$
+    $$\implies \boldsymbol{\theta}_{t+1} = \boldsymbol{\theta}_t - \eta \mathbf{F}(\boldsymbol{\theta}_t)^{-1} \nabla L(\boldsymbol{\theta}_t)$$
+
+    <p>Under any smooth change of coordinates $\boldsymbol{\phi} = \mathbf{g}(\boldsymbol{\theta})$ with Jacobian $\mathbf{J} = \partial \boldsymbol{\phi}/\partial \boldsymbol{\theta}$:</p>
+    $$\mathbf{J} \Delta \boldsymbol{\theta}_{\text{NGD}} = \Delta \boldsymbol{\phi}_{\text{NGD}}$$
+    <p>The resulting trajectory on the probability manifold is <strong>strictly identical</strong> regardless of parameterization choice, completely resolving the pathological ill-conditioning of Euclidean gradients.</p>
+
+    <h2>5. Verified Pure Python Implementation</h2>
+    <p>Run the accompanying zero-dependency script to verify the empirical Fisher metric, confirm second-order KL equivalence, and benchmark Natural vs. Euclidean gradient descent:</p>
+    <pre class="code-block">python3 phase_34_advanced_mathematics_for_research/05_information_geometry_and_natural_gradients/experiment.py</pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

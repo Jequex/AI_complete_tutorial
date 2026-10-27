@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.1: Exercises &amp; Solutions — World Models</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --badge-bg: #e0e7ff;
+      --badge-text: #3730a3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #818cf8;
+      --primary-hover: #a5b4fc;
+      --badge-bg: #312e81;
+      --badge-text: #c7d2fe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #818cf8;
+        --primary-hover: #a5b4fc;
+        --badge-bg: #312e81;
+        --badge-text: #c7d2fe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 35.1 Lecture</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.1</span>
+    <h1>Exercises &amp; Solutions: World Models</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering the information bottleneck ELBO derivation, open-loop error compounding stability, and latent MPC FLOP complexity.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: KL Divergence &amp; Latent Information Bottleneck</h3>
+      <p>
+        Consider a diagonal Gaussian latent posterior $q_\phi(\mathbf{z} \mid \mathbf{x}) = \mathcal{N}(\boldsymbol{\mu}(\mathbf{x}), \text{diag}(\boldsymbol{\sigma}^2(\mathbf{x})))$ and standard Gaussian prior $p(\mathbf{z}) = \mathcal{N}(\mathbf{0}, \mathbf{I})$ for $\mathbf{z} \in \mathbb{R}^d$.
+      </p>
+      <ol>
+        <li>Derive the closed-form analytical expression for $D_{\text{KL}}(q_\phi(\mathbf{z} \mid \mathbf{x}) \parallel p(\mathbf{z}))$.</li>
+        <li>Explain the behavior when the KL regularization coefficient $\beta$ is set excessively large ($\beta \gg 1$) versus near zero ($\beta \to 0$).</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Analytical Derivation</h4>
+          <p>The general formula for two multivariate Gaussians in $\mathbb{R}^d$ is:</p>
+          $$D_{\text{KL}}(q \parallel p) = \frac{1}{2} \left[ \text{tr}(\boldsymbol{\Sigma}_p^{-1} \boldsymbol{\Sigma}_q) + (\boldsymbol{\mu}_p - \boldsymbol{\mu}_q)^\top \boldsymbol{\Sigma}_p^{-1} (\boldsymbol{\mu}_p - \boldsymbol{\mu}_q) - d + \ln\left(\frac{\det \boldsymbol{\Sigma}_p}{\det \boldsymbol{\Sigma}_q}\right) \right]$$
+          <p>Substituting $\boldsymbol{\mu}_p = \mathbf{0}$, $\boldsymbol{\Sigma}_p = \mathbf{I}$, and $\boldsymbol{\Sigma}_q = \text{diag}(\sigma_1^2, \dots, \sigma_d^2)$:</p>
+          $$D_{\text{KL}}(q_\phi(\mathbf{z} \mid \mathbf{x}) \parallel p(\mathbf{z})) = -\frac{1}{2} \sum_{j=1}^d \left( 1 + \ln(\sigma_j^2) - \mu_j^2 - \sigma_j^2 \right)$$
+
+          <h4>2. Bottleneck Dynamics</h4>
+          <p>
+            When $\beta \gg 1$, <strong>posterior collapse</strong> occurs: the encoder outputs $\boldsymbol{\mu} \approx \mathbf{0}, \boldsymbol{\sigma} \approx \mathbf{1}$ regardless of $\mathbf{x}$, yielding zero mutual information $I(X; Z)$ and blurry unconditional outputs. When $\beta \to 0$, the latent manifold fractures without continuity, causing imagination rollouts to quickly derail into out-of-distribution hallucinations.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Open-Loop Error Propagation in Latent Dynamics</h3>
+      <p>
+        Let $\mathbf{s}_{t+1} = \mathbf{W}\mathbf{s}_t + \mathbf{B}\mathbf{a}_t + \boldsymbol{\epsilon}_t$, with independent noise $\boldsymbol{\epsilon}_t \sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I})$.
+      </p>
+      <ol>
+        <li>Derive the closed form of $\mathbf{s}_H$ as a function of initial state $\mathbf{s}_0$ and actions.</li>
+        <li>Find the covariance matrix $\boldsymbol{\Sigma}_H = \text{Cov}(\mathbf{s}_H)$.</li>
+        <li>State the spectral radius condition on $\mathbf{W}$ required for stable long-horizon imagination.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Unrolled State Formula</h4>
+          $$\mathbf{s}_H = \mathbf{W}^H \mathbf{s}_0 + \sum_{\tau=0}^{H-1} \mathbf{W}^{H-1-\tau} \mathbf{B} \mathbf{a}_\tau + \sum_{\tau=0}^{H-1} \mathbf{W}^{H-1-\tau} \boldsymbol{\epsilon}_\tau$$
+
+          <h4>2. Covariance Matrix</h4>
+          <p>Since noise terms are uncorrelated across time:</p>
+          $$\boldsymbol{\Sigma}_H = \sigma^2 \sum_{k=0}^{H-1} \mathbf{W}^k (\mathbf{W}^k)^\top$$
+
+          <h4>3. Spectral Radius Condition</h4>
+          <p>
+            For $\boldsymbol{\Sigma}_H$ to remain bounded as $H \to \infty$, the spectral radius must satisfy $\rho(\mathbf{W}) = \max_i |\lambda_i(\mathbf{W})| < 1$. If $\rho(\mathbf{W}) \ge 1$, errors compound exponentially at rate $\rho(\mathbf{W})^{2H}$.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Latent MPC vs. Pixel-Space Simulation Complexity</h3>
+      <p>
+        An agent evaluates $K = 100$ candidate trajectories over horizon $H = 12$ across $I = 3$ iterations. Compare the computational FLOP cost between pixel-space generation ($10^7$ FLOPs/step) and latent dynamics ($5 \times 10^3$ FLOPs/step).
+      </p>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Total Transitions</h4>
+          $$N_{\text{steps}} = I \times K \times H = 3 \times 100 \times 12 = 3,600 \text{ transitions}$$
+
+          <h4>2. FLOP Calculations</h4>
+          <ul>
+            <li><strong>Pixel-Space Simulation:</strong> $3,600 \times 10^7 = 3.6 \times 10^{10} \text{ FLOPs } (36 \text{ GFLOPs})$</li>
+            <li><strong>Latent-Space Simulation:</strong> $3,600 \times (5 \times 10^3) = 1.8 \times 10^7 \text{ FLOPs } (0.018 \text{ GFLOPs})$</li>
+          </ul>
+
+          <h4>3. Speedup Advantage</h4>
+          $$\text{Speedup} = \frac{3.6 \times 10^{10}}{1.8 \times 10^7} = 2,000\times$$
+          <p>Latent planning is 2,000 times faster, allowing high-frequency real-time execution on resource-constrained robotics hardware.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

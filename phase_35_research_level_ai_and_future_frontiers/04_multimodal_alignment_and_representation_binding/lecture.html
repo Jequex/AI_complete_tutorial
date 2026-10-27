@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 35.4: Multimodal Alignment &amp; Representation Binding — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --badge-bg: #fef3c7;
+      --badge-text: #92400e;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #fbbf24;
+      --primary-hover: #fde68a;
+      --badge-bg: #78350f;
+      --badge-text: #fef3c7;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #fbbf24;
+        --primary-hover: #fde68a;
+        --badge-bg: #78350f;
+        --badge-text: #fef3c7;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    h2 { font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-size: 0.88em;
+    }
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: background-color 0.2s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-links">
+      <a href="../index.html" class="back-link">&larr; Back to Phase 35 Index</a>
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+    </div>
+    <span class="badge" style="background: var(--badge-bg); color: var(--badge-text); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 9999px;">TOPIC 35.4</span>
+    <h1>Multimodal Alignment &amp; Representation Binding</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Binding sensory pixels and textual semantics onto shared manifolds: CLIP dual-encoders, InfoNCE mutual information maximization, SigLIP, and zero-shot transfer.
+    </p>
+  </header>
+
+  <main>
+    <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+    <div class="card">
+      <p>
+        Imagine you have two friends: one friend speaks only in photographs, while the other is a radio announcer who has never seen an image and communicates purely through words.
+      </p>
+      <p>
+        To let them converse, you build a <strong>Universal Rosetta Stone Map</strong>: when the photographer shows a picture of a golden retriever, you place a pin at coordinate $(X=14, Y=42)$. When the announcer says <em>"A cheerful puppy chasing a ball"</em>, you guide them to place their pin at the exact same point $(X=14, Y=42)$.
+      </p>
+      <p>
+        Even though pixels and text tokens are fundamentally different signals, they point to the exact same concept in reality. Models like <strong>CLIP</strong> and <strong>SigLIP</strong> project vision and language onto a <strong>shared unit sphere</strong>, enabling instant Zero-Shot image classification and cross-modal retrieval without supervised labels.
+      </p>
+    </div>
+
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Mathematical Entity</th>
+          <th>Domain</th>
+          <th>Operational Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\mathbf{v}_i, \mathbf{t}_j$</td>
+          <td>Sensory Inputs</td>
+          <td>$\mathbb{R}^{D_v}, \mathbb{R}^{D_t}$</td>
+          <td>Raw image patch embeddings and tokenized text prompt embeddings.</td>
+        </tr>
+        <tr>
+          <td>$\hat{\mathbf{z}}_{v}, \hat{\mathbf{z}}_{t}$</td>
+          <td>Normalized Embeddings</td>
+          <td>$\mathbb{S}^{d-1}$</td>
+          <td>Unit-norm vectors projected onto the shared $d$-dimensional hypersphere.</td>
+        </tr>
+        <tr>
+          <td>$S_{ij}$</td>
+          <td>Similarity Logit Matrix</td>
+          <td>$\mathbb{R}^{B \times B}$</td>
+          <td>$\frac{\hat{\mathbf{z}}_{v, i}^\top \hat{\mathbf{z}}_{t, j}}{\tau}$; temperature-scaled pairwise cosine similarities.</td>
+        </tr>
+        <tr>
+          <td>$\tau$</td>
+          <td>Temperature Parameter</td>
+          <td>Scalar $> 0$</td>
+          <td>Learned scale controlling the sharpness and entropy of contrastive matching.</td>
+        </tr>
+        <tr>
+          <td>$B$</td>
+          <td>Batch Size</td>
+          <td>Integer $\ge 1$</td>
+          <td>Number of paired image-text instances per contrastive mini-batch.</td>
+        </tr>
+        <tr>
+          <td>$I(V; T)$</td>
+          <td>Mutual Information</td>
+          <td>$\mathbb{R}_{\ge 0}$</td>
+          <td>Statistical information shared across visual and textual modalities.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. The Symmetric InfoNCE Loss</h2>
+    <p>
+      The CLIP dual-encoder optimizes the symmetric cross-entropy loss across all pairs in a batch:
+    </p>
+    $$\mathcal{L}_{\text{CLIP}} = -\frac{1}{2B} \sum_{i=1}^B \left[ \ln \left( \frac{\exp(S_{ii})}{\sum_{j=1}^B \exp(S_{ij})} \right) + \ln \left( \frac{\exp(S_{ii})}{\sum_{j=1}^B \exp(S_{ji})} \right) \right]$$
+
+    <pre>
+                    Text Captions (1 ... B)
+                   t_1      t_2      t_3 ...  t_B
+               ┌────────┬────────┬────────┬────────┐
+         v_1   │  +1.0  │  -0.3  │  -0.5  │  -0.4  │  ──► Softmax across rows (I2T)
+               ├────────┼────────┼────────┼────────┤
+Image    v_2   │  -0.2  │  +0.9  │  -0.1  │  -0.6  │
+Frames   v_3   │  -0.4  │  -0.2  │  +1.0  │  -0.3  │
+ (1...B) ...   ├────────┼────────┼────────┼────────┤
+         v_B   │  -0.5  │  -0.4  │  -0.2  │  +0.9  │
+               └────────┴────────┴────────┴────────┘
+                   ▲
+                   │ Softmax down columns (T2I)
+    </pre>
+
+    <h2>4. Theoretical Foundation: Mutual Information Lower Bound</h2>
+    <p>
+      InfoNCE optimization directly maximizes a lower bound on the mutual information between images and text:
+    </p>
+    $$I(V; T) \ge \ln(B) - \mathcal{L}_{\text{InfoNCE}}$$
+    <p>
+      As the batch size $B$ grows, the mathematical bound becomes tighter, explaining why large batch scaling ($B = 32,768$) is essential for high-quality representation binding.
+    </p>
+
+    <h2>5. SigLIP: Decoupled Pairwise Logistic Loss</h2>
+    <p>
+      While standard CLIP requires calculating a global denominator sum across all GPUs, <strong>SigLIP</strong> decomposes the task into independent binary logistic classifications:
+    </p>
+    $$\mathcal{L}_{\text{SigLIP}} = -\sum_{i=1}^B \sum_{j=1}^B \left[ y_{ij} \ln \sigma(t \cdot \hat{\mathbf{z}}_{v, i}^\top \hat{\mathbf{z}}_{t, j} + b) + (1 - y_{ij}) \ln(1 - \sigma(t \cdot \hat{\mathbf{z}}_{v, i}^\top \hat{\mathbf{z}}_{t, j} + b)) \right]$$
+    <p>
+      This eliminates the cross-device all-gather communication barrier, enabling massive scaling to arbitrarily large distributed clusters.
+    </p>
+
+    <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+      <a href="exercises_and_solutions.html" class="btn">Go to Exercises &amp; Solutions &rarr;</a>
+      <a href="../05_scientific_discovery_and_literature_synthesis/lecture.html" class="btn" style="background: var(--bg-card); color: var(--text); border: 1px solid var(--border);">Next Topic: Scientific Discovery &rarr;</a>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>

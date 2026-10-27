@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.3: Exercises &amp; Solutions — Stochastic Calculus &amp; SDEs</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem; }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="lecture.html" class="back-link">&larr; Back to Topic 34.3 Lecture</a>
+      <h1>Topic 34.3: Exercises &amp; Solutions</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Exact Moments of Geometric Brownian Motion</h3>
+      <p>For the GBM SDE $dX_t = \mu X_t dt + \sigma X_t dW_t$ with $X_0 > 0$:</p>
+      <ol>
+        <li>Apply Ito's Lemma to $f(X_t) = X_t^p$ to find $d(X_t^p)$.</li>
+        <li>Derive the ODE for the $p$-th moment $m_p(t) = \mathbb{E}[X_t^p]$.</li>
+        <li>Solve for $\mathbb{E}[X_t]$ and $\text{Var}(X_t)$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Differential via Ito's Lemma</h4>
+          $$d(X_t^p) = \left(p\mu + \frac{1}{2}p(p-1)\sigma^2\right) X_t^p dt + p\sigma X_t^p dW_t$$
+
+          <h4>2. Moment ODE</h4>
+          $$\frac{d m_p(t)}{dt} = \left(p\mu + \frac{1}{2}p(p-1)\sigma^2\right) m_p(t)$$
+
+          <h4>3. Analytical Moments</h4>
+          $$\mathbb{E}[X_t] = X_0 e^{\mu t}, \quad \mathbb{E}[X_t^2] = X_0^2 e^{(2\mu + \sigma^2)t}$$
+          $$\text{Var}(X_t) = \mathbf{X_0^2 e^{2\mu t} (e^{\sigma^2 t} - 1)}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: VP-SDE Transition Kernel &amp; Score Function</h3>
+      <p>For the continuous diffusion VP-SDE: $d\mathbf{x} = -\frac{1}{2}\beta(t)\mathbf{x} dt + \sqrt{\beta(t)} d\mathbf{w}$.</p>
+      <ol>
+        <li>Compute conditional mean $\mathbb{E}[\mathbf{x}_t \mid \mathbf{x}_0]$ using integrating factors.</li>
+        <li>Prove that total variance is conserved: $\alpha_t^2 + \sigma_t^2 = 1$.</li>
+        <li>Derive the exact conditional score $\nabla_{\mathbf{x}_t} \log p_{0t}(\mathbf{x}_t \mid \mathbf{x}_0)$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Conditional Mean</h4>
+          $$\mathbb{E}[\mathbf{x}_t \mid \mathbf{x}_0] = \mathbf{x}_0 e^{-\frac{1}{2}\int_0^t \beta(s)ds} \triangleq \alpha_t \mathbf{x}_0$$
+
+          <h4>2. Variance Conservation</h4>
+          $$\text{Var}(\mathbf{x}_t \mid \mathbf{x}_0) = 1 - e^{-\int_0^t \beta(s)ds} \triangleq \sigma_t^2 \implies \alpha_t^2 + \sigma_t^2 = 1$$
+
+          <h4>3. Conditional Score</h4>
+          $$\nabla_{\mathbf{x}_t} \log p_{0t}(\mathbf{x}_t \mid \mathbf{x}_0) = -\frac{\mathbf{x}_t - \alpha_t \mathbf{x}_0}{\sigma_t^2} = -\frac{\mathbf{\epsilon}}{\sigma_t}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Fokker-Planck Continuity &amp; Detailed Balance</h3>
+      <p>The Fokker-Planck equation can be written as $\frac{\partial p}{\partial t} + \frac{\partial J}{\partial x} = 0$.</p>
+      <ol>
+        <li>Express the probability current $J(x, t)$.</li>
+        <li>Prove that $J(x) = 0$ in equilibrium (detailed balance).</li>
+        <li>Derive the Boltzmann-Gibbs stationary density $p_\infty(x) \propto e^{-2V(x)/\sigma^2}$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Probability Current</h4>
+          $$J(x, t) = \mu(x, t) p(x, t) - \frac{1}{2}\frac{\partial}{\partial x}[\sigma^2(x, t) p(x, t)]$$
+
+          <h4>2. Vanishing Boundary Conditions</h4>
+          <p>Since $\partial J / \partial x = 0$ in equilibrium, $J(x) = C$. Because normalizable densities vanish at infinity ($p \to 0, p' \to 0$ as $x \to \pm \infty$), $C = 0$.</p>
+
+          <h4>3. Boltzmann Equilibrium</h4>
+          $$\mu(x) p(x) = \frac{\sigma^2}{2} \frac{dp}{dx} \implies p_\infty(x) = \frac{1}{Z} \exp\left(-\frac{2 V(x)}{\sigma^2}\right)$$
+        </div>
+      </details>
+    </div>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

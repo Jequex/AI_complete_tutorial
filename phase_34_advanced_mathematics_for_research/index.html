@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 34: Advanced Mathematics for Research — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --badge-bg: #e0f2fe;
+      --badge-text: #0369a1;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --badge-bg: #0c4a6e;
+      --badge-text: #bae6fd;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #38bdf8;
+        --primary-hover: #7dd3fc;
+        --badge-bg: #0c4a6e;
+        --badge-text: #bae6fd;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    header {
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin: 0 0 0.75rem;
+      letter-spacing: -0.025em;
+    }
+
+    p.lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin: 0;
+      max-width: 720px;
+    }
+
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 1.1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow);
+      white-space: nowrap;
+    }
+
+    .topic-grid {
+      display: grid;
+      gap: 1.75rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .topic-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .topic-card h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+    }
+
+    .topic-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin: 0 0 1.25rem;
+    }
+
+    .topic-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      color: var(--text);
+      background: var(--bg);
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff !important;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .callout {
+      background: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin-bottom: 2.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <span class="badge">Phase 34 &bull; Advanced Research Mathematics</span>
+      <h1>Advanced Mathematics for Research</h1>
+      <p class="lead">From spectral geometry and matrix calculus to stochastic differential equations, convex duality, and Riemannian information geometry. The fundamental mathematical bedrock underpinning state-of-the-art AI research.</p>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+      <span>🌓</span> <span id="themeText">Dark Mode</span>
+    </button>
+  </header>
+
+  <div class="callout">
+    <strong>Zero-Dependency Engineering Standard:</strong> Every algorithm in this phase is implemented from first principles in pure Python 3 standard library with zero external dependencies (no PyTorch, no NumPy, no SciPy). Every experiment runs deterministically with exit code 0.
+  </div>
+
+  <main class="topic-grid">
+    <!-- Topic 01 -->
+    <div class="topic-card">
+      <h2>01. Spectral Theory &amp; SVD Geometry</h2>
+      <p>Spectral Theorem for symmetric matrices; Singular Value Decomposition ($\mathbf{A} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^\top$); Eckart-Young-Mirsky Theorem proving low-rank approximation optimality in Frobenius and Spectral norms; Condition numbers $\kappa(\mathbf{A}) = \sigma_{\max}/\sigma_{\min}$ and hypersphere deformation into hyperellipsoids; Foundations of LoRA weight adaptation.</p>
+      <div class="topic-links">
+        <a href="01_spectral_theory_and_svd_geometry/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="01_spectral_theory_and_svd_geometry/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="01_spectral_theory_and_svd_geometry/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="01_spectral_theory_and_svd_geometry/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="01_spectral_theory_and_svd_geometry/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 02 -->
+    <div class="topic-card">
+      <h2>02. Matrix Calculus &amp; Hessian-Vector Products</h2>
+      <p>Numerator vs. denominator layout conventions; Jacobian tensors and second-order Hessian operators; Pearlmutter's trick ($\mathcal{R}$-operator) computing exact Hessian-Vector Products $\mathbf{H}\mathbf{v}$ in $\mathcal{O}(n)$ time and zero matrix memory using forward-over-reverse dual algorithmic differentiation; Loss curvature analysis, power iteration on Hessians, and saddle point escaping.</p>
+      <div class="topic-links">
+        <a href="02_matrix_calculus_and_hessian_vector_products/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="02_matrix_calculus_and_hessian_vector_products/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="02_matrix_calculus_and_hessian_vector_products/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="02_matrix_calculus_and_hessian_vector_products/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="02_matrix_calculus_and_hessian_vector_products/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 03 -->
+    <div class="topic-card">
+      <h2>03. Stochastic Calculus &amp; Differential Equations</h2>
+      <p>Continuous Brownian motion / Wiener processes; Ito's Lemma with the non-vanishing $(dX_t)^2 = \sigma^2 dt$ correction term; Euler-Maruyama numerical integration; Fokker-Planck partial differential equations for probability flux; Anderson's reverse-time SDE theorem; Continuous score-based diffusion models (Song et al. 2020) synthesizing realistic data from Gaussian noise.</p>
+      <div class="topic-links">
+        <a href="03_stochastic_calculus_and_differential_equations/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="03_stochastic_calculus_and_differential_equations/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="03_stochastic_calculus_and_differential_equations/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="03_stochastic_calculus_and_differential_equations/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="03_stochastic_calculus_and_differential_equations/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 04 -->
+    <div class="topic-card">
+      <h2>04. Constrained Optimization &amp; Duality</h2>
+      <p>Primal and dual optimization mechanics; The Lagrangian function $\mathcal{L}(\mathbf{x}, \boldsymbol{\lambda}, \boldsymbol{\nu})$; The four Karush-Kuhn-Tucker (KKT) conditions (Stationarity, Primal Feasibility, Dual Feasibility, Complementary Slackness); Slater's condition and Strong Duality ($p^* = d^*$); Exact Primal Active Set Quadratic Programming solver achieving machine precision ($10^{-16}$) residuals.</p>
+      <div class="topic-links">
+        <a href="04_constrained_optimization_and_duality/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="04_constrained_optimization_and_duality/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="04_constrained_optimization_and_duality/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="04_constrained_optimization_and_duality/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="04_constrained_optimization_and_duality/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+
+    <!-- Topic 05 -->
+    <div class="topic-card">
+      <h2>05. Information Geometry &amp; Natural Gradients</h2>
+      <p>Statistical manifolds of probability distributions; The Fisher Information Matrix (FIM) as the canonical Riemannian metric tensor of Kullback-Leibler divergence ($d s^2 = \frac{1}{2} d\boldsymbol{\theta}^\top \mathbf{F} d\boldsymbol{\theta}$); Amari's Natural Gradient Descent ($\tilde{\nabla} L = \mathbf{F}^{-1} \nabla L$); Invariance under arbitrary coordinate reparameterizations; Geodesic convergence on ill-conditioned loss surfaces.</p>
+      <div class="topic-links">
+        <a href="05_information_geometry_and_natural_gradients/lecture.html" class="btn btn-primary">Lecture (HTML)</a>
+        <a href="05_information_geometry_and_natural_gradients/lecture.md" class="btn">Lecture (MD)</a>
+        <a href="05_information_geometry_and_natural_gradients/exercises_and_solutions.html" class="btn">Exercises (HTML)</a>
+        <a href="05_information_geometry_and_natural_gradients/exercises_and_solutions.md" class="btn">Exercises (MD)</a>
+        <a href="05_information_geometry_and_natural_gradients/experiment.py" class="btn">Experiment (Python)</a>
+      </div>
+    </div>
+  </main>
+
+  <section>
+    <h2>Run All Phase 34 Experiments</h2>
+    <p>Execute all 5 experiments directly in your terminal using pure Python 3 standard library:</p>
+    <pre class="code-block">python3 phase_34_advanced_mathematics_for_research/01_spectral_theory_and_svd_geometry/experiment.py
+python3 phase_34_advanced_mathematics_for_research/02_matrix_calculus_and_hessian_vector_products/experiment.py
+python3 phase_34_advanced_mathematics_for_research/03_stochastic_calculus_and_differential_equations/experiment.py
+python3 phase_34_advanced_mathematics_for_research/04_constrained_optimization_and_duality/experiment.py
+python3 phase_34_advanced_mathematics_for_research/05_information_geometry_and_natural_gradients/experiment.py</pre>
+  </section>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      document.getElementById('themeText').textContent = newTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+
+    (function() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('themeText').textContent = savedTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      }
+    })();
+  </script>
+
+</body>
+</html>

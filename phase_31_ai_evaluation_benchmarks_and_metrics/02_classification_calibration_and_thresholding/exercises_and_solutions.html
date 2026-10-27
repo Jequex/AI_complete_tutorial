@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 02: Exercises &amp; Solutions — Classification, Calibration &amp; Thresholding</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --badge-bg: #d1fae5;
+      --badge-text: #065f46;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #34d399;
+        --primary-hover: #6ee7b7;
+        --badge-bg: #064e3b;
+        --badge-text: #a7f3d0;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.1rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .exercise-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 2rem 0;
+      box-shadow: var(--shadow);
+    }
+    .exercise-card h2 {
+      font-size: 1.35rem;
+      margin-top: 0;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+    }
+    summary {
+      padding: 0.85rem 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover {
+      background-color: var(--bg-card);
+    }
+    .solution-body {
+      padding: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Lecture</a><br>
+    <span class="badge">Exercises &amp; Solutions</span>
+    <h1>Topic 02 Practice: Calibration &amp; Discrimination</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Step-by-step problem sets covering ROC-AUC, Mann-Whitney U, PR-AUC, Brier score decomposition, ECE, and Temperature Scaling.</p>
+  </header>
+
+  <!-- Exercise 1 -->
+  <div class="exercise-card">
+    <h2>Exercise 1: Exact ROC-AUC, PR-AUC, and the Mann-Whitney $U$ Equivalence</h2>
+    <p>A benchmark of 10 samples has ground-truth labels and model scores: $y = [1, 1, 0, 1, 1, 0, 0, 1, 0, 0]$ with sorted scores $\hat{p} = [0.95, 0.90, 0.85, 0.70, 0.60, 0.55, 0.45, 0.35, 0.25, 0.10]$.</p>
+    <p><strong>Tasks:</strong></p>
+    <ol>
+      <li>Compute $\text{AUC}_{\text{ROC}}$ via trapezoidal integration.</li>
+      <li>Count positive-negative pairwise comparisons to compute Mann-Whitney $U / (N_+ N_-)$ and verify equivalence.</li>
+      <li>Compute Precision-Recall curve operating points and calculate Average Precision ($\text{PR-AUC}$).</li>
+    </ol>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Trapezoidal ROC-AUC:</strong> Summing trapezoid slices across unique thresholds gives $\text{AUC}_{\text{ROC}} = 0.08 + 0.16 + 0.16 + 0.20 + 0.20 = \mathbf{0.80}$.</p>
+        <p><strong>2. Mann-Whitney $U$ Count:</strong></p>
+        <ul>
+          <li>Positive 0.95 beats 5 negatives &rarr; 5</li>
+          <li>Positive 0.90 beats 5 negatives &rarr; 5</li>
+          <li>Positive 0.70 beats 4 negatives &rarr; 4</li>
+          <li>Positive 0.60 beats 4 negatives &rarr; 4</li>
+          <li>Positive 0.35 beats 2 negatives &rarr; 2</li>
+        </ul>
+        $$U = 5 + 5 + 4 + 4 + 2 = 20 \implies \frac{U}{N_+ N_-} = \frac{20}{5 \times 5} = \mathbf{0.80} \quad (\text{Exact Match})$$
+        <p><strong>3. PR-AUC:</strong> $\text{PR-AUC} = \sum \Delta R_k \cdot P_k = 0.2(1.0 + 1.0 + 0.75 + 0.80 + 0.625) = \mathbf{0.835}$.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Exercise 2 -->
+  <div class="exercise-card">
+    <h2>Exercise 2: Murphy's Brier Score Decomposition</h2>
+    <p>Given 4 bins covering $N=20$ instances with overall base rate $\bar{y} = 0.45$:</p>
+    <table>
+      <thead><tr><th>Bin</th><th>Count $n_m$</th><th>$\bar{p}_m$</th><th>$\bar{y}_m$</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>6</td><td>0.10</td><td>0.1667</td></tr>
+        <tr><td>2</td><td>4</td><td>0.35</td><td>0.2500</td></tr>
+        <tr><td>3</td><td>5</td><td>0.65</td><td>0.6000</td></tr>
+        <tr><td>4</td><td>5</td><td>0.89</td><td>0.8000</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Tasks:</strong> Compute Reliability ($\text{REL}$), Resolution ($\text{RES}$), Uncertainty ($\text{UNC}$), and total Brier Score.</p>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Reliability:</strong> $\text{REL} = \sum \frac{n_m}{N}(\bar{p}_m - \bar{y}_m)^2 \approx \mathbf{0.005985}$.</p>
+        <p><strong>2. Resolution:</strong> $\text{RES} = \sum \frac{n_m}{N}(\bar{y}_m - \bar{y})^2 \approx \mathbf{0.068334}$.</p>
+        <p><strong>3. Uncertainty:</strong> $\text{UNC} = \bar{y}(1 - \bar{y}) = 0.45 \times 0.55 = \mathbf{0.247500}$.</p>
+        <p><strong>4. Total Brier Score:</strong> $\text{BS} = \text{REL} - \text{RES} + \text{UNC} = 0.005985 - 0.068334 + 0.247500 = \mathbf{0.185151}$.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- Exercise 3 -->
+  <div class="exercise-card">
+    <h2>Exercise 3: ECE and Temperature Scaling Invariance</h2>
+    <p>An overconfident model outputs raw probabilities $\hat{p} = [0.90, 0.85, 0.80, 0.20, 0.15, 0.10]$ for labels $y = [1, 1, 0, 1, 0, 0]$ with raw logits $z = [+2.20, +1.73, +1.39, -1.39, -1.73, -2.20]$.</p>
+    <p><strong>Tasks:</strong></p>
+    <ol>
+      <li>Compute raw ECE across 2 equal bins ($[0.0, 0.5]$ and $(0.5, 1.0]$).</li>
+      <li>Apply temperature scaling $T = 2.0$ to compute new probabilities and the calibrated ECE.</li>
+      <li>Prove why ROC-AUC and 0.5-threshold accuracy do not change.</li>
+    </ol>
+
+    <details>
+      <summary>View Complete Solution</summary>
+      <div class="solution-body">
+        <p><strong>1. Raw ECE:</strong> Bin 1 gap = $|0.3333 - 0.150| = 0.1833$; Bin 2 gap = $|0.6667 - 0.850| = 0.1833$ &rarr; $\text{ECE}_{\text{raw}} = \mathbf{18.33\%}$.</p>
+        <p><strong>2. Calibrated with $T = 2.0$:</strong></p>
+        <p>Calibrated probabilities become $\hat{p}' \approx [0.7503, 0.7037, 0.6671, 0.3329, 0.2963, 0.2497]$.</p>
+        <p>Bin 1 gap = $|0.3333 - 0.2930| = 0.0403$; Bin 2 gap = $|0.6667 - 0.7070| = 0.0403$ &rarr; $\text{ECE}_{\text{cal}} = \mathbf{4.03\%}$ ($4.5\times$ improvement!).</p>
+        <p><strong>3. Invariance:</strong> Because dividing by $T > 0$ preserves the sign ($z/T > 0 \iff z > 0$) and the strict ranking of logits ($z_a > z_b \iff z_a/T > z_b/T$), the 0.5-threshold binary predictions and the rank order of pairs are mathematically identical.</p>
+      </div>
+    </details>
+  </div>
+
+  <div style="margin-top: 2rem;">
+    <a href="lecture.html" class="btn">&larr; Back to Lecture</a>
+  </div>
+
+</body>
+</html>

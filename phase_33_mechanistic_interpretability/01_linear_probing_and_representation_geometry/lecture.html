@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: Linear Probing &amp; Representation Geometry — Phase 33</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+      color: var(--primary);
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 33 Overview</a>
+    <div><span class="badge">Topic 33.1</span></div>
+    <h1>Linear Probing &amp; Representation Geometry</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Understanding the residual stream as a communication bus, the Linear Representation Hypothesis, probing mathematics, and selectivity controls.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+      <p>
+        Imagine you are looking at a bustling train station during morning rush hour. Thousands of passengers are moving through the central concourse, carrying briefcases, backpacks, cups of coffee, and tickets.
+      </p>
+      <p>
+        To an outside observer staring through the glass ceiling, the crowd looks like an incomprehensible, swirling cloud of chaos. But suppose you hold up a special pair of tinted red glasses: suddenly, you notice that every commuter heading toward Platform 4 is walking along an exact diagonal line across the floor. If you hold up blue glasses, everyone heading toward the exit is walking along a perpendicular line.
+      </p>
+      <div class="callout">
+        <strong>The Key Insight:</strong> The crowd was not disorganized—it was organized along <em>geometric directions</em> in space.
+      </div>
+      <p>
+        In a deep Transformer network, the sequence of hidden activations passing from input to output is called the <strong>residual stream</strong>. Think of the residual stream as a shared highway or communication bus. The <strong>Linear Representation Hypothesis</strong> states that deep networks represent human-understandable concepts as <strong>linear directions (1D vectors)</strong> in high-dimensional hidden spaces. A <strong>linear probe</strong> is a mathematical detector that tests whether a straight hyperplane can separate activations based on a semantic property.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Mathematical Symbol Decoder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Mathematical Entity</th>
+            <th>Domain</th>
+            <th>Interpretability Significance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$\mathbf{h}_l$</td>
+            <td>Residual Stream Activation</td>
+            <td>$\mathbb{R}^d$</td>
+            <td>State vector at layer $l$ containing the accumulated semantic features.</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{v}_c$</td>
+            <td>Concept Direction Vector</td>
+            <td>$\mathbb{R}^d, \|\mathbf{v}_c\|=1$</td>
+            <td>True latent unit direction encoding concept $c$ in representation space.</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{w}, b$</td>
+            <td>Linear Probe Parameters</td>
+            <td>$\mathbf{w} \in \mathbb{R}^d, b \in \mathbb{R}$</td>
+            <td>Normal vector and bias defining the separating hyperplane.</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{L}_{\text{BCE}}$</td>
+            <td>Binary Cross-Entropy Loss</td>
+            <td>Scalar $\ge 0$</td>
+            <td>Logistic regression loss minimized to optimize probe weights.</td>
+          </tr>
+          <tr>
+            <td>$\text{Sel}$</td>
+            <td>Probe Selectivity</td>
+            <td>$[-1, 1]$</td>
+            <td>$\text{Acc}_{\text{task}} - \text{Acc}_{\text{control}}$, verifying representation vs probe memorization.</td>
+          </tr>
+          <tr>
+            <td>$\cos(\theta)$</td>
+            <td>Cosine Similarity</td>
+            <td>$[-1, 1]$</td>
+            <td>Spatial alignment $\frac{\mathbf{w}^\top \mathbf{v}_c}{\|\mathbf{w}\|_2 \|\mathbf{v}_c\|_2}$ between probe and true concept vector.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Residual Stream as a Shared Communication Bus</h2>
+      <p>
+        In modern Transformers, layer outputs are added into the residual stream:
+      </p>
+      $$\mathbf{h}_L = \mathbf{h}_0 + \sum_{l=0}^{L-1} \Delta \mathbf{h}_l^{\text{attn}} + \sum_{l=0}^{L-1} \Delta \mathbf{h}_l^{\text{mlp}}$$
+      <p>
+        Every attention head and MLP reads from $\mathbf{h}_l$, computes an update vector, and adds it back into the stream. Because matrix multiplication reads linear projections $\mathbf{w}_j^\top \mathbf{h}$, features that align linearly with directions $\mathbf{v}_c$ can be retrieved instantly without multi-layer non-linear decoding.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Linear Probe Optimization &amp; Gradients</h2>
+      <p>
+        Given activations $\{\mathbf{h}^{(i)}\}_{i=1}^N$ and binary concept labels $y^{(i)} \in \{0, 1\}$, a logistic probe models:
+      </p>
+      $$P(y=1 \mid \mathbf{h}) = \sigma(\mathbf{w}^\top \mathbf{h} + b) = \frac{1}{1 + e^{-(\mathbf{w}^\top \mathbf{h} + b)}}$$
+      <p>The objective function with $L_2$ weight regularization is:</p>
+      $$\mathcal{L}(\mathbf{w}, b) = -\frac{1}{N} \sum_{i=1}^N \left[ y^{(i)} \ln p^{(i)} + (1 - y^{(i)}) \ln(1 - p^{(i)}) \right] + \frac{\lambda}{2} \|\mathbf{w}\|_2^2$$
+      <p>Analytical gradient for gradient descent updates:</p>
+      $$\frac{\partial \mathcal{L}}{\partial \mathbf{w}} = \frac{1}{N} \sum_{i=1}^N (p^{(i)} - y^{(i)})\mathbf{h}^{(i)} + \lambda \mathbf{w}$$
+    </section>
+
+    <section>
+      <h2>5. Ruling Out Memorization: The Hewitt &amp; Liang Selectivity Test</h2>
+      <div class="card">
+        <h3>Why Accuracy Alone Is Insufficient</h3>
+        <p>
+          A high-capacity linear probe trained on high-dimensional vectors ($d = 4096$) can achieve high training accuracy simply by memorizing random associations.
+        </p>
+        <p>
+          To prove genuine linear encoding, we train a twin probe on <strong>randomized labels</strong> ($y_{\text{rand}} \sim \text{Bernoulli}(0.5)$). We compute:
+        </p>
+        $$\boxed{\text{Selectivity} = \text{Accuracy}_{\text{Real Task}} - \text{Accuracy}_{\text{Random Control}}}$$
+        <p>
+          A genuinely encoded concept exhibits <strong>High Selectivity ($\ge 0.35$)</strong>, whereas memorization yields near-zero selectivity.
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>6. Python Experiment Quickstart</h2>
+      <pre class="code-block">python3 phase_33_mechanistic_interpretability/01_linear_probing_and_representation_geometry/experiment.py</pre>
+      <div style="margin-top: 1.5rem;">
+        <a href="exercises_and_solutions.html" class="back-link" style="font-size: 1.05rem;">Go to Topic 01 Exercises &amp; Solutions &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

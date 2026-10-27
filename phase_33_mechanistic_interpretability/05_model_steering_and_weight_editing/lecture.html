@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 05: Model Steering &amp; Weight Editing — Phase 33</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+      color: var(--primary);
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 33 Overview</a>
+    <div><span class="badge">Topic 33.5</span></div>
+    <h1>Model Steering &amp; Weight Editing</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Modulating model behavior at inference with representation engineering and surgical rank-one factual weight updates (ROME).
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+      <p>
+        Imagine you have a robot assistant. Sometimes you want a simple mood dial: turn it to $+3$ for optimism, or $-3$ for skepticism. That is <strong>Activation Steering</strong>: adding a concept vector $\mathbf{v}_{\text{steer}}$ directly to its intermediate thoughts.
+      </p>
+      <p>
+        Other times, the robot has one specific mistaken fact: it thinks Seattle is the capital of the Moon. Retraining the robot costs millions of dollars. But with <strong>Rank-One Model Editing (ROME)</strong>, you calculate an exact, closed-form rank-1 matrix update that rewires that single memory chip while leaving all other knowledge completely intact!
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Mathematical Symbol Decoder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Entity</th>
+            <th>Domain</th>
+            <th>Interpretability Significance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$\mathbf{v}_{\text{steer}}$</td>
+            <td>Steering Vector</td>
+            <td>$\mathbb{R}^d, \|\mathbf{v}\|=1$</td>
+            <td>Concept direction derived from contrastive mean differences: $\frac{1}{N}\sum \mathbf{h}_+ - \frac{1}{M}\sum \mathbf{h}_-$.</td>
+          </tr>
+          <tr>
+            <td>$\alpha$</td>
+            <td>Steering Multiplier</td>
+            <td>Real scalar</td>
+            <td>Gain coefficient controlling intervention magnitude: $\mathbf{h}' = \mathbf{h} + \alpha \mathbf{v}_{\text{steer}}$.</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{k}_*, \mathbf{v}_*$</td>
+            <td>Target Key-Value Pair</td>
+            <td>$\mathbf{k}_* \in \mathbb{R}^{d_{\text{in}}}, \mathbf{v}_* \in \mathbb{R}^{d_{\text{out}}}$</td>
+            <td>Subject representation to edit and the new desired factual target vector.</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{C}$</td>
+            <td>Knowledge Covariance</td>
+            <td>$\mathbb{R}^{d_{\text{in}} \times d_{\text{in}}}$</td>
+            <td>$\mathbf{C} = \mathbb{E}[\mathbf{k}\mathbf{k}^\top]$, capturing the distribution of all unedited memories.</td>
+          </tr>
+          <tr>
+            <td>$\boldsymbol{\Lambda}$</td>
+            <td>ROME Update Vector</td>
+            <td>$\mathbb{R}^{d_{\text{out}}}$</td>
+            <td>Closed-form rank-1 gain vector: $\boldsymbol{\Lambda} = (\mathbf{v}_* - W\mathbf{k}_*) / (\mathbf{k}_*^\top \mathbf{C}^{-1} \mathbf{k}_*)$.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. The Closed-Form ROME Update (Meng et al. 2022)</h2>
+      <p>
+        To insert target fact $W' \mathbf{k}_* = \mathbf{v}_*$ while minimizing drift on prior factual covariance $\mathbf{C} = \mathbb{E}[\mathbf{k}\mathbf{k}^\top]$:
+      </p>
+      $$\min_{W'} \text{Tr}\left( (W' - W) \mathbf{C} (W' - W)^\top \right) \quad \text{subject to} \quad W' \mathbf{k}_* = \mathbf{v}_*$$
+      <div class="card">
+        <h3>The Optimal Rank-One Solution</h3>
+        $$\boxed{W' = W + \boldsymbol{\Lambda} \left( \mathbf{C}^{-1} \mathbf{k}_* \right)^\top}$$
+        $$\boxed{\boldsymbol{\Lambda} = \frac{\mathbf{v}_* - W \mathbf{k}_*}{\mathbf{k}_*^\top \mathbf{C}^{-1} \mathbf{k}_*}}$$
+        <p>
+          This formulation guarantees <strong>$100\%$ Efficacy</strong> on the new target key ($W' \mathbf{k}_* = \mathbf{v}_*$) and <strong>Near-Zero Specificity Drift</strong> on all orthogonal memories ($\mathbf{k}_j^\top \mathbf{C}^{-1} \mathbf{k}_* = 0 \implies W' \mathbf{k}_j = W \mathbf{k}_j$).
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2>4. Python Experiment Quickstart</h2>
+      <pre class="code-block">python3 phase_33_mechanistic_interpretability/05_model_steering_and_weight_editing/experiment.py</pre>
+      <div style="margin-top: 1.5rem;">
+        <a href="exercises_and_solutions.html" class="back-link" style="font-size: 1.05rem;">Go to Topic 05 Exercises &amp; Solutions &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

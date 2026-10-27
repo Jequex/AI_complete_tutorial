@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 33.2: Exercises &amp; Solutions — Activation Patching</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.75rem 0;
+      box-shadow: var(--shadow);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+    details {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--bg);
+      padding: 0.85rem 1.2rem;
+    }
+    summary {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      user-select: none;
+    }
+    summary:hover { text-decoration: underline; }
+    .solution-content {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="lecture.html" class="back-link">&larr; Back to Topic 33.2 Lecture</a>
+    <h1>Topic 33.2: Exercises &amp; Solutions</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem;">
+      Quantitative problem sets covering logit restoration metrics, Pearl's Natural Indirect Effect (NIE), and cross-token attention routing.
+    </p>
+  </header>
+
+  <main>
+    <!-- Exercise 1 -->
+    <div class="card">
+      <h3>Exercise 1: Logit Difference vs. Probability Restoration</h3>
+      <p>
+        In activation patching experiments, researchers measure $\Delta L = \text{logit}(y_*) - \text{logit}(y_{\text{alt}})$.
+      </p>
+      <ol>
+        <li>Explain why softmax probability $P(y_*)$ is vulnerable to saturation and vanishing sensitivity.</li>
+        <li>Show that $\Delta L = \ln \left(\frac{P(y_*)}{P(y_{\text{alt}})}\right)$ (the log-odds ratio).</li>
+        <li>Calculate normalized restoration $\mathcal{R}$ given clean logits $(28.0, 18.0)$, corrupted logits $(12.0, 22.0)$, and patched logits $(24.0, 19.0)$.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Softmax Saturation</h4>
+          <p>Softmax squashes logits into $[0, 1]$. Large logit margins saturate near $1.0$, hiding significant internal model shifts, whereas logits remain linear and unbounded.</p>
+
+          <h4>2. Log-Odds Equivalence</h4>
+          $$\frac{P(y_*)}{P(y_{\text{alt}})} = \frac{e^{\text{logit}(y_*)}}{e^{\text{logit}(y_{\text{alt}})}} = e^{\text{logit}(y_*) - \text{logit}(y_{\text{alt}})} \implies \ln\left(\frac{P(y_*)}{P(y_{\text{alt}})}\right) = \Delta L$$
+
+          <h4>3. Numerical Calculation</h4>
+          <p>$\Delta L_{\text{clean}} = 28 - 18 = 10$, $\Delta L_{\text{corrupt}} = 12 - 22 = -10$, $\Delta L_{\text{patched}} = 24 - 19 = 5$.</p>
+          $$\mathcal{R} = \frac{5 - (-10)}{10 - (-10)} = \frac{15}{20} = \mathbf{75.0\%}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 2 -->
+    <div class="card">
+      <h3>Exercise 2: Natural Indirect Effect (NIE) and Causal Mediation</h3>
+      <p>
+        In a causal graph $X \to M \to Y$ with direct path $X \to Y$, let $M$ be the Layer 1 MLP at the subject token.
+      </p>
+      <ol>
+        <li>Formulate the Natural Indirect Effect (NIE) in Pearl's structural causal notation.</li>
+        <li>Relate the NIE formula to activation patching.</li>
+        <li>Compute the mediation fraction when Total Effect is 40.0 and patched effect is 34.0.</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Pearl's NIE Formulation</h4>
+          $$\text{NIE} = \mathbb{E}[Y(X = x_{\text{corrupt}}, M(x_{\text{clean}}))] - \mathbb{E}[Y(X = x_{\text{corrupt}}, M(x_{\text{corrupt}}))]$$
+
+          <h4>2. Equivalence to Activation Patching</h4>
+          <p>This is identical to evaluating the corrupted prompt with $M$ overwritten with the clean activation. Thus, activation patching is an exact realization of causal mediation analysis.</p>
+
+          <h4>3. Mediation Ratio</h4>
+          $$\frac{\text{NIE}}{\text{TE}} = \frac{34.0}{40.0} = \mathbf{85.0\%}$$
+        </div>
+      </details>
+    </div>
+
+    <!-- Exercise 3 -->
+    <div class="card">
+      <h3>Exercise 3: Information Flow from Subject to Output</h3>
+      <p>
+        Why does patching the MLP at the subject token restore the fact, but patching the MLP at the last token fails?
+      </p>
+      <ol>
+        <li>Analyze the computational independence across positions in Transformer MLP blocks.</li>
+        <li>Identify the mechanism responsible for transferring information to the output token.</li>
+        <li>Design a two-stage intervention to prove an attention head is the causal "information mover".</li>
+      </ol>
+
+      <details>
+        <summary>View Complete Step-by-Step Solution</summary>
+        <div class="solution-content">
+          <h4>1. Position-Wise Independence</h4>
+          <p>MLP layers operate independently on each token vector $\mathbf{h}_t$. An MLP at the last token cannot access subject information unless it was already transported there.</p>
+
+          <h4>2. Attention Mechanism</h4>
+          <p>Multi-Head Attention is the only cross-token operation. It reads the subject residual stream and writes into the last token position.</p>
+
+          <h4>3. Two-Stage Proof</h4>
+          <p><strong>Sufficiency:</strong> Patching only the candidate attention head restores $\approx 100\%$ performance. <strong>Necessity:</strong> Knocking out (zeroing) only that attention head's weight from last to subject collapses accuracy to random chance.</p>
+        </div>
+      </details>
+    </div>
+  </main>
+
+</body>
+</html>

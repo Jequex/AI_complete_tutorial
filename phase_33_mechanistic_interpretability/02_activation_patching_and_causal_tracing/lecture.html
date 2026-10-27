@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 02: Activation Patching &amp; Causal Tracing — Phase 33</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+      color: var(--primary);
+    }
+    pre.code-block {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    .callout {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 33 Overview</a>
+    <div><span class="badge">Topic 33.2</span></div>
+    <h1>Activation Patching &amp; Causal Tracing</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 0.5rem;">
+      Isolating the precise layers and attention heads storing and routing factual knowledge through causal mediation analysis.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Introduction &amp; 12-Year-Old Intuition</h2>
+      <p>
+        Imagine a bank vault is unlocked in a 12-story building with 40 employees. Who typed the passcode? Looking at who was sitting at their desk only reveals correlations. Everyone looks busy.
+      </p>
+      <p>
+        To prove causal responsibility:
+      </p>
+      <ol>
+        <li><strong>Clean Day:</strong> Alice is on Floor 4, and the vault opens with code "PARIS".</li>
+        <li><strong>Corrupted Day:</strong> Bob replaces Alice, and the vault fails to open ("ROME").</li>
+        <li><strong>The Patch:</strong> While Bob is working, you secretly swap Alice's notebook onto the desk of Floor 4. If the vault unlocks, Floor 4 was the exact causal driver of the passcode!</li>
+      </ol>
+      <div class="callout">
+        <strong>The Scientific Principle:</strong> <em>Causal Intervention</em> replaces observational correlations with controlled surgical state swaps to isolate neural circuits.
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Mathematical Symbol Decoder</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Entity</th>
+            <th>Domain</th>
+            <th>Interpretability Significance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>$x_{\text{clean}}, x_{\text{corrupt}}$</td>
+            <td>Input Prompts</td>
+            <td>Tokens</td>
+            <td>Clean prompt (e.g., "Eiffel Tower in") vs corrupted prompt ("Colosseum in").</td>
+          </tr>
+          <tr>
+            <td>$\mathbf{a}_{\text{clean}}(l, t)$</td>
+            <td>Intermediate Activation</td>
+            <td>$\mathbb{R}^d$</td>
+            <td>Activation state at layer $l$, token position $t$ captured during clean pass.</td>
+          </tr>
+          <tr>
+            <td>$\Delta L$</td>
+            <td>Logit Difference</td>
+            <td>Real scalar</td>
+            <td>$\text{logit}(y_{\text{clean}}) - \text{logit}(y_{\text{corrupt}})$, measuring preference for ground truth.</td>
+          </tr>
+          <tr>
+            <td>$\mathcal{R}(l, t)$</td>
+            <td>Normalized Restoration</td>
+            <td>$[0, 1]$</td>
+            <td>Ratio of logit difference recovered when patching $(l, t)$.</td>
+          </tr>
+          <tr>
+            <td>$\text{ATE}$</td>
+            <td>Average Treatment Effect</td>
+            <td>Real scalar</td>
+            <td>Expected causal impact of activation replacement on the output distribution.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Normalized Logit Restoration Formula</h2>
+      <p>
+        When patching an individual component at layer $l$ and token position $t$, the recovery percentage is:
+      </p>
+      $$\boxed{\mathcal{R}(l, t) = \frac{\Delta L_{\text{patched}}(l, t) - \Delta L_{\text{corrupt}}}{\Delta L_{\text{clean}} - \Delta L_{\text{corrupt}}}}$$
+      <p>
+        where $\Delta L = \text{logit}(y_*) - \text{logit}(y_{\text{alt}})$. A value $\mathcal{R}(l, t) \approx 100\%$ indicates that the patched node acts as an indispensable causal bottleneck for retrieving the factual association.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. The ROME Causal Tracing Architecture (Meng et al. 2022)</h2>
+      <div class="card">
+        <h3>Two Distinct Functional Circuits</h3>
+        <ol>
+          <li>
+            <strong>Early/Mid-Layer MLPs at the Subject Token:</strong>
+            Factual associations are retrieved from intermediate feed-forward weights acting as associative memories (key-value dictionaries).
+          </li>
+          <li>
+            <strong>Late-Layer Attention Heads at the Final Token:</strong>
+            Information movers read the retrieved factual concept from the subject residual stream and transport it to the final token for output projection.
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>5. Python Experiment Quickstart</h2>
+      <pre class="code-block">python3 phase_33_mechanistic_interpretability/02_activation_patching_and_causal_tracing/experiment.py</pre>
+      <div style="margin-top: 1.5rem;">
+        <a href="exercises_and_solutions.html" class="back-link" style="font-size: 1.05rem;">Go to Topic 02 Exercises &amp; Solutions &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 34.2: Matrix Calculus &amp; Hessian-Vector Products — AI Complete Tutorial</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-hover: #93c5fd;
+      --badge-bg: #1e3a8a;
+      --badge-text: #bfdbfe;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --code-bg: #0b0f19;
+      --code-text: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.25rem; font-weight: 800; margin: 0 0 0.5rem; letter-spacing: -0.025em; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 1.25rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .theme-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 600;
+    }
+    pre.code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .callout {
+      background-color: var(--bg-card);
+      border-left: 4px solid var(--primary);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <a href="../index.html" class="back-link">&larr; Back to Phase 34 Portal</a>
+      <span class="badge">Topic 34.2 &bull; Optimization &amp; Calculus</span>
+      <h1>Matrix Calculus &amp; Hessian-Vector Products</h1>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+  </header>
+
+  <main>
+    <div class="callout">
+      <strong>Core Research Question:</strong> In deep neural networks with billions of parameters, storing the $n \times n$ Hessian matrix $\mathbf{H}$ requires petabytes of RAM. How does Pearlmutter's $\mathcal{R}$-operator compute exact Hessian-Vector Products $\mathbf{H}\mathbf{v}$ in $O(n)$ time and zero matrix memory?
+    </div>
+
+    <h2>1. 12-Year-Old Intuition: The Foggy Mountain Ridge</h2>
+    <p>Imagine standing on a foggy mountain slope with zero visibility. You want to understand two things about your position:</p>
+    <ul>
+      <li><strong>Which way is downhill?</strong> This is the <strong>gradient</strong> (first derivative). A compass pointing in this direction shows where elevation drops fastest.</li>
+      <li><strong>Is the terrain a bowl, a knife-edge ridge, or a saddle?</strong> This is the <strong>curvature</strong> (second derivative or <strong>Hessian</strong>). If you kick a stone in direction $\mathbf{v}$, does the ground cup upward like a bowl, or fall away like a cliff?</li>
+    </ul>
+    <p>For a small 10-parameter model, writing down the curvature between every pair of directions takes a tiny $10 \times 10$ table. But for a 70-billion parameter LLM, a $70\text{B} \times 70\text{B}$ table requires 9.8 billion Terabytes of memory—more than all the computers on Earth combined.</p>
+    <p><strong>Pearlmutter's insight:</strong> You do not need to map the entire universe of curvature. If you only want to know how the slope curves along <em>one test direction $\mathbf{v}$</em>, you can compute $\mathbf{H}\mathbf{v}$ directly using dual-number algorithmic differentiation in $O(n)$ time, using no extra memory!</p>
+
+    <h2>2. Complete Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Entity</th>
+          <th>Domain</th>
+          <th>Operational Role in Research</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$\boldsymbol{\theta}$</td>
+          <td>Parameters</td>
+          <td>$\mathbb{R}^n$</td>
+          <td>Neural network weights and biases.</td>
+        </tr>
+        <tr>
+          <td>$f(\boldsymbol{\theta})$</td>
+          <td>Loss Function</td>
+          <td>$\mathbb{R}^n \to \mathbb{R}$</td>
+          <td>Empirical risk or cross-entropy objective.</td>
+        </tr>
+        <tr>
+          <td>$\nabla f(\boldsymbol{\theta})$</td>
+          <td>Gradient Vector</td>
+          <td>$\mathbb{R}^n$</td>
+          <td>Vector of first-order partial derivatives $\partial f / \partial \theta_i$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{H}(\boldsymbol{\theta})$</td>
+          <td>Hessian Matrix</td>
+          <td>$\mathbb{R}^{n \times n}$</td>
+          <td>Symmetric matrix of second derivatives $\partial^2 f / \partial \theta_i \partial \theta_j$.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{v}$</td>
+          <td>Probe Vector</td>
+          <td>$\mathbb{R}^n$</td>
+          <td>Direction along which curvature is evaluated.</td>
+        </tr>
+        <tr>
+          <td>$\mathbf{H}\mathbf{v}$</td>
+          <td>Hessian-Vector Product</td>
+          <td>$\mathbb{R}^n$</td>
+          <td>Directional derivative of the gradient along $\mathbf{v}$.</td>
+        </tr>
+        <tr>
+          <td>$\mathcal{R}_{\mathbf{v}}\{\cdot\}$</td>
+          <td>Pearlmutter Operator</td>
+          <td>Operator</td>
+          <td>$\left. \frac{d}{dr} g(\boldsymbol{\theta} + r \mathbf{v}) \right|_{r=0}$; exact forward tangent propagation.</td>
+        </tr>
+        <tr>
+          <td>$\varepsilon$</td>
+          <td>Dual Infinitesimal</td>
+          <td>$\mathbb{R}[\varepsilon]/(\varepsilon^2)$</td>
+          <td>Nilpotent algebraic quantity: $\varepsilon \neq 0$ but $\varepsilon^2 = 0$.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Mathematical Derivation of Pearlmutter's Trick</h2>
+    <p>Consider evaluating the gradient at dual points $\boldsymbol{\theta} + \varepsilon \mathbf{v}$ where $\varepsilon^2 = 0$.</p>
+    <p>By first-order Taylor expansion of the gradient vector $\nabla f$:</p>
+    $$\nabla f(\boldsymbol{\theta} + \varepsilon \mathbf{v}) = \nabla f(\boldsymbol{\theta}) + \mathbf{H}(\boldsymbol{\theta})(\varepsilon \mathbf{v}) + \mathcal{O}(\varepsilon^2)$$
+    <p>Since $\varepsilon^2 = 0$, all quadratic and higher terms vanish exactly:</p>
+    $$\nabla f(\boldsymbol{\theta} + \varepsilon \mathbf{v}) = \nabla f(\boldsymbol{\theta}) + \varepsilon (\mathbf{H} \mathbf{v})$$
+    
+    <div class="callout">
+      <strong>Theorem:</strong> The dual part of the gradient evaluated at $\boldsymbol{\theta} + \varepsilon \mathbf{v}$ is identically equal to the exact Hessian-Vector Product $\mathbf{H}\mathbf{v}$.
+    </div>
+
+    <pre class="code-block">
+Forward-over-Reverse Autodiff Pipeline:
+1. Input: theta_dual = theta + eps * v
+2. Forward Pass: compute activations as dual numbers (value + eps * tangent)
+3. Reverse Pass: backpropagate adjoints using dual arithmetic
+   Output Real Part:  nabla f(theta)  [O(n) time, O(n) space]
+   Output Dual Part:  H * v           [O(n) time, O(n) space]
+   Memory for H:      0 bytes!
+    </pre>
+
+    <h2>4. Applications in Deep Learning Research</h2>
+    <ul>
+      <li><strong>Matrix-Free Power Iteration:</strong> Estimate dominant Hessian eigenvalue $\lambda_{\max}$ to detect the Edge of Stability without ever storing $\mathbf{H}$.</li>
+      <li><strong>Trust-Region Policy Optimization (TRPO):</strong> Solve $\mathbf{F}\mathbf{d} = \mathbf{g}$ using iterative Conjugate Gradient with Fisher-Vector Products.</li>
+      <li><strong>Influence Functions:</strong> Compute inverse Hessian products $\mathbf{H}^{-1} \mathbf{v}$ to trace training data influence on model predictions.</li>
+    </ul>
+
+    <h2>5. Verified Pure Python Implementation</h2>
+    <p>Run the accompanying zero-dependency script to verify that Pearlmutter's $O(n)$ HVP matches the exact analytical $H\mathbf{v}$ to $10^{-14}$ precision:</p>
+    <pre class="code-block">python3 phase_34_advanced_mathematics_for_research/02_matrix_calculus_and_hessian_vector_products/experiment.py</pre>
+  </main>
+
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    (function() {
+      const saved = localStorage.getItem('theme');
+      if (saved) document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

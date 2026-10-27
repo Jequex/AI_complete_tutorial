@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topic 01: Traditional ML Evaluation and Statistical Testing</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-card: #f8fafc;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --badge-bg: #dbeafe;
+      --badge-text: #1e40af;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --bg-card: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --primary: #60a5fa;
+        --primary-hover: #93c5fd;
+        --badge-bg: #1e3a8a;
+        --badge-text: #bfdbfe;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        --code-bg: #0b0f19;
+        --code-text: #e2e8f0;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.7;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 6rem;
+    }
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .back-link:hover { text-decoration: underline; }
+    h1 { font-size: 2.3rem; font-weight: 800; color: var(--text); margin-top: 0.5rem; line-height: 1.25; }
+    h2 { font-size: 1.6rem; font-weight: 700; margin-top: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--text); }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; color: var(--primary); }
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.3rem 0.75rem;
+      border-radius: 9999px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      margin-bottom: 0.75rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.75rem;
+      margin: 1.5rem 0;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-card);
+      font-weight: 700;
+    }
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.9em;
+      background-color: var(--bg-card);
+      padding: 0.2em 0.4em;
+      border-radius: 0.25rem;
+      border: 1px solid var(--border);
+    }
+    pre code {
+      background: none;
+      padding: 0;
+      border: none;
+      color: inherit;
+    }
+    .alert {
+      border-left: 4px solid var(--primary);
+      background-color: var(--bg-card);
+      padding: 1rem 1.25rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 1.5rem 0;
+    }
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.15s ease;
+    }
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+    .btn-secondary {
+      background-color: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background-color: var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="back-link">&larr; Back to Phase 31 Hub</a><br>
+    <span class="badge">Topic 01 &bull; Module 31.1</span>
+    <h1>Traditional ML Evaluation &amp; Statistical Testing</h1>
+    <p style="color: var(--text-muted); margin-bottom: 0;">Parametric &amp; Non-Parametric Hypothesis Testing, Resampling Permutation Tests, Bootstrap Confidence Intervals, and False Discovery Rate Corrections.</p>
+  </header>
+
+  <section>
+    <h2>1. The 12-Year-Old Intuition: Running in the Mud</h2>
+    <div class="card">
+      <p>Imagine two athletes, Alice and Bob, running across 10 distinct tracks. Track 1 is a rocky mountain trail covered in thick mud; Track 2 is a smooth Olympic rubber track; Track 3 is an uphill sand dune in heavy wind.</p>
+      <p>At the end of the day, Alice's average time is <strong>50.2 seconds</strong>, while Bob's average time is <strong>50.8 seconds</strong>. A casual spectator screams: <em>"Alice is faster by 0.6 seconds! She is clearly superior!"</em></p>
+      <p>A statistician steps forward and asks: <em>"Did Alice run on the muddy mountain trail at the exact same moment Bob did? Or was Bob stuck in a rainstorm while Alice ran on dry stadium asphalt?"</em></p>
+      <p>When you measure their <strong>paired differences on identical tracks</strong>, you discover Alice beat Bob on 9 out of 10 tracks by a consistent 0.5s margin. That consistency proves genuine superiority. In AI benchmarking, reporting that Model A scored 84.7% versus Model B's 84.1% without paired statistical testing is meaningless: the 0.6% gap could easily be random data noise.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Mathematical Symbol Decoder</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Name</th>
+          <th>Domain</th>
+          <th>Description &amp; Engineering Significance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>$H_0$</td>
+          <td>Null Hypothesis</td>
+          <td>Proposition</td>
+          <td>Baseline claim that no true performance delta exists ($\mu_d = 0$).</td>
+        </tr>
+        <tr>
+          <td>$H_1$</td>
+          <td>Alternative Hypothesis</td>
+          <td>Proposition</td>
+          <td>Research claim that Candidate genuinely differs from Baseline ($\mu_d \ne 0$).</td>
+        </tr>
+        <tr>
+          <td>$\alpha$</td>
+          <td>Significance Level</td>
+          <td>$\in (0, 1)$</td>
+          <td>Maximum tolerated probability of false alarm (Type I error). Typically $0.05$.</td>
+        </tr>
+        <tr>
+          <td>$p$-value</td>
+          <td>Probability Value</td>
+          <td>$\in [0, 1]$</td>
+          <td>$\mathbb{P}(\text{observing difference as extreme or more extreme} \mid H_0)$.</td>
+        </tr>
+        <tr>
+          <td>$d_i$</td>
+          <td>Paired Difference</td>
+          <td>$\mathbb{R}$</td>
+          <td>$d_i = X_{A, i} - X_{B, i}$ on evaluation fold/slice $i$.</td>
+        </tr>
+        <tr>
+          <td>$t$</td>
+          <td>Student's $t$ Statistic</td>
+          <td>$\mathbb{R}$</td>
+          <td>$t = \bar{d} / (s_d / \sqrt{n})$, signal-to-noise ratio of observed performance delta.</td>
+        </tr>
+        <tr>
+          <td>$W$</td>
+          <td>Wilcoxon Test Statistic</td>
+          <td>$\mathbb{N}$</td>
+          <td>$\min(W^+, W^-)$, non-parametric signed rank sum resistant to extreme outliers.</td>
+        </tr>
+        <tr>
+          <td>$\text{CI}_{1-\alpha}$</td>
+          <td>Confidence Interval</td>
+          <td>$[L, U]$</td>
+          <td>Bounds estimated to contain true metric parameter with $1-\alpha$ probability.</td>
+        </tr>
+        <tr>
+          <td>$\text{FDR}$</td>
+          <td>False Discovery Rate</td>
+          <td>$\in [0, 1]$</td>
+          <td>Expected proportion of false positives among rejected hypotheses $\mathbb{E}[V / R]$.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>3. Student's Paired $t$-Test</h2>
+    <p>Given $n$ paired evaluation splits (e.g. cross-validation folds), define the difference vector $d_i = X_{A, i} - X_{B, i}$. Under $H_0: \mu_d = 0$:</p>
+    $$\bar{d} = \frac{1}{n}\sum_{i=1}^n d_i, \qquad s_d = \sqrt{\frac{1}{n-1}\sum_{i=1}^n (d_i - \bar{d})^2}$$
+    $$\boxed{t = \frac{\bar{d}}{s_d / \sqrt{n}} \sim \text{Student-}t(\nu = n - 1)}$$
+    <div class="alert">
+      <strong>Engineering Caveat:</strong> Standard $k$-fold cross-validation folds violate sample independence because folds overlap in their training sets. Dietterich (1998) showed that standard $k$-fold $t$-tests have an elevated Type I error rate of $\approx 10\%\text{--}15\%$. Use $5 \times 2$-fold cross-validation or exact non-parametric permutation testing for production gating.
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Non-Parametric Wilcoxon Signed-Rank Test</h2>
+    <p>When metric distributions are non-normal, skewed, or bounded, rank the absolute differences $|d_i|$ from $1$ to $n_r$ (discarding zeros). Sum positive and negative ranks:</p>
+    $$W^+ = \sum_{d_i > 0} \text{Rank}(|d_i|), \qquad W^- = \sum_{d_i < 0} \text{Rank}(|d_i|)$$
+    $$\boxed{W = \min(W^+, W^-)}$$
+    <p>For $n_r \ge 20$, the continuity-corrected asymptotic normal approximation applies:</p>
+    $$\mu_W = \frac{n_r(n_r + 1)}{4}, \qquad \sigma_W = \sqrt{\frac{n_r(n_r + 1)(2n_r + 1)}{24}}, \qquad z = \frac{W - \mu_W + 0.5}{\sigma_W}$$
+  </section>
+
+  <section>
+    <h2>5. Resampling Permutation Tests &amp; Bootstrap Confidence Intervals</h2>
+    <p><strong>Permutation Testing:</strong> Under $H_0$, the labels $(A, B)$ are arbitrary. We flip the signs of $d_i$ at random $B$ times ($B \ge 10{,}000$):</p>
+    $$\boxed{p_{\text{perm}} = \frac{1 + \sum_{b=1}^B \mathbb{I}(|T^{(b)}| \ge |T_{\text{obs}}|)}{B + 1}}$$
+    <p><strong>Bootstrap Confidence Intervals:</strong> Sample $N$ items with replacement $B$ times ($B \ge 2{,}000$) to yield bootstrap estimates $\hat{\theta}^{*(1)} \le \dots \le \hat{\theta}^{*(B)}$:</p>
+    <ul>
+      <li><strong>Percentile Bootstrap:</strong> $\text{CI}_{\text{pct}} = [\hat{\theta}^*_{(\alpha/2)}, \; \hat{\theta}^*_{(1 - \alpha/2)}]$</li>
+      <li><strong>Empirical Basic Bootstrap:</strong> $\text{CI}_{\text{basic}} = [2\hat{\theta} - \hat{\theta}^*_{(1 - \alpha/2)}, \; 2\hat{\theta} - \hat{\theta}^*_{(\alpha/2)}]$</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. Multiple Comparisons: Bonferroni vs. Benjamini-Hochberg FDR</h2>
+    <p>When comparing against $m$ baseline models, the probability of at least one false alarm is $\text{FWER} = 1 - (1-\alpha)^m$. For $m = 20$, $\text{FWER} \approx 64.2\%$.</p>
+    <ul>
+      <li><strong>Bonferroni (FWER control):</strong> Reject if $p_i \le \frac{\alpha}{m}$. Strongly conservative.</li>
+      <li><strong>Benjamini-Hochberg (FDR control):</strong> Sort $p_{(1)} \le \dots \le p_{(m)}$. Find largest $k^*$ such that:
+        $$\boxed{p_{(k^*)} \le \frac{k^*}{m} \cdot Q}$$
+        Reject all $H_{0, (1)}, \dots, H_{0, (k^*)}$. Maximizes statistical power while strictly bounding expected false discovery proportion to $Q$.
+      </li>
+    </ul>
+  </section>
+
+  <div class="actions">
+    <a href="exercises_and_solutions.html" class="btn">View Exercises &amp; Solutions &rarr;</a>
+    <a href="experiment.py" class="btn btn-secondary">Inspect Python Experiment</a>
+  </div>
+
+</body>
+</html>
